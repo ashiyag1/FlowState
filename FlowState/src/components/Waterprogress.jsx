@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 
 export default function WaterProgress({ pct = 0, ml = 0, goal = 2500 }) {
-  const fillH = Math.min(100, pct)
+  const fillH = Math.min(100, Math.max(0, pct)) || 0
 
   return (
     <div className="flex flex-col items-center gap-4">

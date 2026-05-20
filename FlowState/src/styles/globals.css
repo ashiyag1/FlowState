@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Cinzel:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  --saffron:   #E87722;
+  --gold:      #c9a84c;
+  --gold-lt:   #e8c97a;
+  --gold-dim:  #8b6914;
+  --cream:     #FDF6E3;
+  --cream2:    #F5EDD8;
+  --bark:      #5C3D1E;
+  --bark-lt:   #8B5E2F;
+  --bark-xlt:  #b08968;
+  --lotus:     #D4607A;
+  --forest:    #1B4332;
+  --forest-lt: #2D6A4F;
+  --parchment: #EFD9A8;
+  --sage:      #6b8f6b;
+  --bg-surface: #fdf6e3;
+  --border:    #d4c5a0;
+  --muted:     #8b7355;
+  --card-bg:   rgba(255,255,255,0.7);
+  --overlay:   rgba(30,20,5,0.07);
+  --shadow:    0 4px 20px rgba(92,61,30,0.09);
+}
+
+.dark {
+  --saffron:   #d48a3a;
+  --gold:      #d4a84c;
+  --gold-lt:   #c9a060;
+  --gold-dim:  #b8924a;
+  --cream:     #1a1208;
+  --cream2:    #221a0e;
+  --bark:      #e8d9b5;
+  --bark-lt:   #c9b080;
+  --bark-xlt:  #a08860;
+  --lotus:     #d0607a;
+  --forest:    #4a9a6a;
+  --forest-lt: #5aaa7a;
+  --parchment: #3a2a10;
+  --sage:      #8aaa7a;
+  --bg-surface: #1a1208;
+  --border:    #4a3a20;
+  --muted:     #9a8a70;
+  --card-bg:   rgba(40,30,15,0.7);
+  --overlay:   rgba(0,0,0,0.3);
+  --shadow:    0 4px 20px rgba(0,0,0,0.3);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--cream);
+  color: var(--bark);
+}

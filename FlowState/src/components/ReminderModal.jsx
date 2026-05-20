@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
+import { useNotif } from './NotificationPopup';
 
 // ─── Format helpers ───────────────────────────────────────────────────────────
 function to12h(hour, minute) {
@@ -118,8 +119,23 @@ function ReminderRow({ id, reminder, onUpdate, onTest, isInterval }) {
 export default function ReminderModal({ onClose }) {
   const { permission, supported, schedule, requestPermission, updateSchedule, testReminder } =
     usePushNotifications();
+  const notif = useNotif();
 
   const keys = Object.keys(schedule);
+
+  const handleAllow = async () => {
+    const result = await requestPermission();
+    if (result === 'granted') notif("Reminders are all set! You'll get gentle pings throughout the day.", 'success');
+  };
+
+  const handleToggle = (id, changes) => {
+    updateSchedule(id, changes);
+    if (changes.enabled !== undefined) {
+      const label = schedule[id]?.label || 'Reminder';
+      const emoji = schedule[id]?.emoji || '🔔';
+      notif(changes.enabled ? `${emoji} ${label} turned on` : `${emoji} ${label} turned off`, 'default');
+    }
+  };
 
   return (
     <>
@@ -133,7 +149,7 @@ export default function ReminderModal({ onClose }) {
         {/* Header */}
         <div style={s.header}>
           <div>
-            <p style={s.headerEyebrow}>FlowState</p>
+            <p style={s.headerEyebrow}>Tarang‑FlowState</p>
             <h2 style={s.headerTitle}>Wellness Reminders</h2>
           </div>
           <button onClick={onClose} style={s.closeBtn} aria-label="Close">✕</button>
@@ -156,7 +172,7 @@ export default function ReminderModal({ onClose }) {
                     Get reminders even when this tab is in the background.
                   </div>
                 </div>
-                <button onClick={requestPermission} style={s.allowBtn}>Allow</button>
+                <button onClick={handleAllow} style={s.allowBtn}>Allow</button>
               </>
             )}
           </div>
@@ -169,7 +185,7 @@ export default function ReminderModal({ onClose }) {
               key={key}
               id={key}
               reminder={schedule[key]}
-              onUpdate={updateSchedule}
+              onUpdate={handleToggle}
               onTest={testReminder}
               isInterval={!!schedule[key].intervalMins}
             />

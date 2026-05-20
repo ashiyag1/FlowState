@@ -1,16 +1,21 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { ThemeProvider }   from './context/ThemeContext'
-import { ToastProvider }   from './context/ToastContext'
 import { WellnessProvider } from './context/WellnessContext'
+import { SoundEffectsProvider } from './context/SoundEffectsContext'
+import { NotificationProvider } from './components/NotificationPopup'
 import Navbar  from './components/Navbar'
 import Home    from './pages/Home'
 import Water   from './pages/Water'
 import Habits  from './pages/Habits'
 import Journal from './pages/Journal'
-import Quotes  from './pages/Quotes'
+import WisdomPage from './pages/WisdomPage'
 import Login   from './pages/Login'
-
+import './styles/globals.css'
+import './styles/animations.css'
+import './styles/dashboard.css'
+import './styles/cards.css'
+import './styles/wisdom.css'
 
 function ScrollReset() {
   const { pathname } = useLocation()
@@ -21,23 +26,25 @@ function ScrollReset() {
 export default function App() {
   return (
     <ThemeProvider>
-      <ToastProvider>
+      <NotificationProvider>
         <WellnessProvider>
-          <BrowserRouter>
-            <ScrollReset />
-            <Navbar />
-            <Routes>
-              <Route path="/"        element={<Home />} />
-              <Route path="/water"   element={<Water />} />
-              <Route path="/habits"  element={<Habits />} />
-              <Route path="/journal" element={<Journal />} />
-              <Route path="/quotes"  element={<Quotes />} />
-              <Route path="/login"   element={<Login />} />
-              <Route path="*"        element={<Home />} />
-            </Routes>
-          </BrowserRouter>
+          <SoundEffectsProvider>
+            <BrowserRouter>
+              <ScrollReset />
+              <Navbar />
+              <Routes>
+                <Route path="/"        element={<Home />} />
+                <Route path="/water"   element={<Water />} />
+                <Route path="/habits"  element={<Habits />} />
+                <Route path="/journal" element={<Journal />} />
+                <Route path="/quotes"  element={<WisdomPage />} />
+                <Route path="/login"   element={<Login />} />
+                <Route path="*"        element={<Home />} />
+              </Routes>
+            </BrowserRouter>
+          </SoundEffectsProvider>
         </WellnessProvider>
-      </ToastProvider>
+      </NotificationProvider>
     </ThemeProvider>
   )
 }

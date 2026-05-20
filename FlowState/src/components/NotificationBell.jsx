@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePushNotifications } from '../hooks/usePushNotifications';
-import ReminderModal from './ReminderModal';
+import ReminderSettings from './ReminderSettings';
 
 export default function NotificationBell() {
   const { permission, supported } = usePushNotifications();
@@ -13,12 +13,10 @@ export default function NotificationBell() {
   return (
     <>
       <style>{bellStyles}</style>
-
-      {/* The button always opens the modal now */}
       <button
         className={`fs-bell-btn ${permission === 'granted' ? 'fs-bell-on' : ''}`}
         onClick={() => setOpen(true)}
-        title="Manage wellness reminders"
+        title={permission === 'granted' ? 'Manage reminders' : 'Enable reminders'}
       >
         <span className="fs-bell-icon">🔔</span>
         <span className="fs-bell-text">
@@ -26,8 +24,7 @@ export default function NotificationBell() {
         </span>
         {permission === 'granted' && <span className="fs-bell-dot" />}
       </button>
-
-      {open && <ReminderModal onClose={() => setOpen(false)} />}
+      {open && <ReminderSettings onClose={() => setOpen(false)} />}
     </>
   );
 }

@@ -6,7 +6,7 @@ export default function PageLayout({ children, className = '' }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className={`min-h-screen pt-16 pb-24 md:pb-12 wave-bg dark:bg-ink ${className}`}
+      className={`min-h-screen pb-24 md:pb-12 dark:bg-ink ${className}`}
     >
       {children}
     </motion.main>

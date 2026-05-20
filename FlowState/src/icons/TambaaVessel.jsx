@@ -5,7 +5,7 @@ import copperVesselImg from '../assets/dashboard/copper-vessel.png';
 import { fadeUp } from '../animations';
 
 
-const TambaaVessel = ({ todayTotal, waterGoal, waterPct }) => {
+const TambaaVessel = ({ todayTotal, waterGoal, waterPct, onClick }) => {
   return (
     <motion.div variants={fadeUp(0.06)} initial="hidden" whileInView="show" viewport={{ once: true }}>
       <StatCard
@@ -20,6 +20,7 @@ const TambaaVessel = ({ todayTotal, waterGoal, waterPct }) => {
         label="Water consumed"
         sub={`Goal: ${waterGoal} ml`}
         to="/water"
+        onClick={onClick}
         pct={waterPct}
       />
     </motion.div>

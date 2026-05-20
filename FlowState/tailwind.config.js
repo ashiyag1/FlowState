@@ -9,17 +9,10 @@ export default {
         devanagari: ['"Noto Serif Devanagari"', 'serif'],
       },
       backgroundImage: {
-        'royal-gradient':
-          'linear-gradient(135deg,#1B4FA8 0%,#2E69D6 50%,#6FA3F0 100%)',
-
-        'sunrise-gradient':
-          'linear-gradient(135deg,#E8622A 0%,#F4925A 45%,#C9933A 100%)',
-
-        'ivory-glow':
-          'radial-gradient(circle at top left,#fff8ef,#FBF6EE,#F2E9D8)',
-
-        'heritage-pattern':
-          "url('/patterns/mandala.svg')",
+        'royal-gradient': 'linear-gradient(135deg,#1B4FA8 0%,#2E69D6 50%,#6FA3F0 100%)',
+        'sunrise-gradient': 'linear-gradient(135deg,#E8622A 0%,#F4925A 45%,#C9933A 100%)',
+        'ivory-glow': 'radial-gradient(circle at top left,#fff8ef,#FBF6EE,#F2E9D8)',
+        'heritage-pattern': "url('/patterns/mandala.svg')",
       },      
       colors: {
         saffron: { DEFAULT: '#E8622A', lt: '#F4925A', pale: '#FDF0E8', dark: '#B84A18' },
@@ -28,6 +21,9 @@ export default {
         emerald: { DEFAULT: '#1A7A4E', mid: '#2DA06A', lt: '#6DC49A', pale: '#E8F7EF' },
         ivory:   { DEFAULT: '#FBF6EE', dark: '#F2E9D8', darker: '#E5D9C0' },
         ink:     { DEFAULT: '#1C1208', soft: '#3D2E1A' },
+        ocean:   { DEFAULT: '#0C447C', lt: '#3a8ab5', pale: '#c8e0f0', dark: '#082a4a' },
+        sand:    { DEFAULT: '#c9a87c', lt: '#e0c9a0', pale: '#f0e0c8', dark: '#8a6a40' },
+        mist:    { DEFAULT: '#b8c8d8', dark: '#708090' },
       },
       animation: {
         'bob':       'bob 3s ease-in-out infinite',

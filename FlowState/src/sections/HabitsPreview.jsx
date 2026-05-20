@@ -1,19 +1,13 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useTheme } from '../context/ThemeContext'
 import { useWellness } from '../context/WellnessContext'
 import SectionHeading from '../components/SectionHeading'
 import OrnateDivider from '../components/OrnateDivider'
 
-/* ─────────────────────────────────────────────────────────────
-   HABIT ROW
-   Single habit item — extracted as its own component so it
-   can be reused on the /habits page too if needed.
-───────────────────────────────────────────────────────────── */
-function HabitRow({ habit, done }) {
+function HabitRow({ habit, done, dark }) {
   return (
     <div className="fs-habit-row">
-
-      {/* Checkbox */}
       <div style={{
         width: 22,
         height: 22,
@@ -24,35 +18,27 @@ function HabitRow({ habit, done }) {
         justifyContent: 'center',
         fontSize: 12,
         fontWeight: 700,
-        background: done
-          ? 'linear-gradient(135deg, #2D6A4F, #1B4332)'
-          : 'transparent',
-        border: done
-          ? 'none'
-          : '2px solid rgba(201,168,76,0.32)',
+        background: done ? 'linear-gradient(135deg, #2D6A4F, #1B4332)' : 'transparent',
+        border: done ? 'none' : '2px solid rgba(201,168,76,0.32)',
         color: 'white',
         transition: 'all 0.3s',
         transform: done ? 'scale(1.1)' : 'scale(1)',
       }}>
         {done && '✓'}
       </div>
-
-      {/* Habit name */}
       <span style={{
         flex: 1,
         fontSize: 14,
         fontFamily: "'Lora', serif",
-        color: done ? 'rgba(92,61,30,0.38)' : 'var(--bark)',
+        color: done ? (dark ? 'rgba(200,180,140,0.3)' : 'rgba(92,61,30,0.38)') : (dark ? '#c9b080' : '#5C3D1E'),
         textDecoration: done ? 'line-through' : 'none',
       }}>
         {habit.icon} {habit.name}
       </span>
-
-      {/* Done badge */}
       {done && (
         <span style={{
           fontSize: 10,
-          color: 'var(--forest-lt)',
+          color: dark ? '#4a9a6a' : '#2D6A4F',
           fontWeight: 700,
           fontFamily: "'Cinzel', serif",
           letterSpacing: '0.1em',
@@ -60,26 +46,14 @@ function HabitRow({ habit, done }) {
           done ✦
         </span>
       )}
-
     </div>
   )
 }
 
-/* ─────────────────────────────────────────────────────────────
-   HABITS PREVIEW  (default export)
-
-   Shows the first 5 habits for today with completion state.
-   Only renders if the user has at least one habit set up.
-
-   Usage in Home.jsx:
-     import HabitsPreview from '../sections/HabitsPreview'
-     ...
-     <HabitsPreview />
-───────────────────────────────────────────────────────────── */
 export default function HabitsPreview() {
+  const { dark } = useTheme()
   const { habits, todayHabitDone } = useWellness()
 
-  // Nothing to show if the user hasn't created habits yet
   if (!habits.length) return null
 
   const doneCount   = habits.filter(h => todayHabitDone[h.id]).length
@@ -94,25 +68,21 @@ export default function HabitsPreview() {
       transition={{ duration: 0.7, delay: 0.1 }}
       style={{ marginBottom: '3.5rem' }}
     >
-
       <SectionHeading
         eyebrow="Habits & Streaks"
         title="Today's"
         accent="practice."
-        accentColor="var(--forest-lt)"
+        accentColor={dark ? '#4a9a6a' : '#2D6A4F'}
       />
       <OrnateDivider symbol="🌸" />
 
-      {/* Card */}
       <div style={{
-        background: 'rgba(253,246,227,0.72)',
+        background: dark ? 'rgba(40,30,15,0.5)' : 'rgba(253,246,227,0.72)',
         borderRadius: 20,
-        border: '1px solid rgba(201,168,76,0.28)',
+        border: dark ? '1px solid rgba(201,168,76,0.1)' : '1px solid rgba(201,168,76,0.28)',
         padding: '1.5rem',
-        boxShadow: '0 4px 20px rgba(92,61,30,0.09)',
+        boxShadow: dark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(92,61,30,0.09)',
       }}>
-
-        {/* Card header */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -123,7 +93,7 @@ export default function HabitsPreview() {
             <h3 style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize: '1.3rem',
-              color: 'var(--bark)',
+              color: dark ? '#e8d9b5' : '#5C3D1E',
               fontWeight: 600,
               margin: 0,
             }}>
@@ -131,50 +101,42 @@ export default function HabitsPreview() {
             </h3>
             <p style={{
               fontSize: 11,
-              color: 'var(--bark-lt)',
+              color: dark ? '#c9b080' : '#8B5E2F',
               fontFamily: "'Lora', serif",
               margin: '2px 0 0',
             }}>
               {doneCount} of {habits.length} completed
             </p>
           </div>
-
           <Link
             to="/habits"
             style={{
               fontFamily: "'Cinzel', serif",
               fontSize: 10,
-              color: 'var(--bark-lt)',
+              color: dark ? '#c9b080' : '#8B5E2F',
               letterSpacing: '0.1em',
               textDecoration: 'none',
               padding: '5px 12px',
               borderRadius: 999,
-              border: '1px solid rgba(201,168,76,0.38)',
-              background: 'rgba(201,168,76,0.09)',
+              border: dark ? '1px solid rgba(201,168,76,0.2)' : '1px solid rgba(201,168,76,0.38)',
+              background: dark ? 'rgba(40,30,15,0.5)' : 'rgba(201,168,76,0.09)',
             }}
           >
             View All →
           </Link>
         </div>
 
-        {/* Habit list */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {visibleList.map(habit => (
-            <HabitRow
-              key={habit.id}
-              habit={habit}
-              done={!!todayHabitDone[habit.id]}
-            />
+            <HabitRow key={habit.id} habit={habit} done={!!todayHabitDone[habit.id]} dark={dark} />
           ))}
-
-          {/* "X more" overflow link */}
           {remaining > 0 && (
             <Link
               to="/habits"
               style={{
                 textAlign: 'center',
                 fontSize: 12,
-                color: 'var(--bark-lt)',
+                color: dark ? '#c9b080' : '#8B5E2F',
                 fontFamily: "'Lora', serif",
                 fontStyle: 'italic',
                 textDecoration: 'none',
@@ -185,7 +147,6 @@ export default function HabitsPreview() {
             </Link>
           )}
         </div>
-
       </div>
     </motion.section>
   )

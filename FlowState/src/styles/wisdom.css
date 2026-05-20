@@ -1,0 +1,275 @@
+/* PAGE */
+.wisdom-page {
+  min-height: 100vh;
+  background: linear-gradient(170deg, #FDF6E3 0%, #F0E6CC 60%, #E8D9B5 100%);
+  color: #5C3D1E;
+}
+.dark .wisdom-page {
+  background: linear-gradient(170deg, #1a1208 0%, #221a0e 60%, #2a1e10 100%);
+  color: #e8d9b5;
+}
+
+/* LAYOUT */
+.wisdom-body {
+  display: flex;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+  align-items: flex-start;
+}
+.dark .wisdom-body {
+  color: #e8d9b5;
+}
+
+.wisdom-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.wisdom-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* SECTION */
+.wisdom-section { margin-top: 2rem; }
+
+.wisdom-section-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.wisdom-section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  color: #5C3D1E;
+}
+.dark .wisdom-section-title { color: #e8d9b5; }
+
+.wisdom-view-all {
+  background: none;
+  border: none;
+  color: #7A6030;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.dark .wisdom-view-all { color: #c9b080; }
+
+/* ISSUE GRID */
+.wisdom-issue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+/* SIDEBAR CARDS */
+.wisdom-side-card {
+  background: white;
+  border-radius: 14px;
+  border: 1px solid #D4C5A0;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 2px 8px rgba(92,61,30,0.07);
+}
+.dark .wisdom-side-card {
+  background: rgba(40,30,15,0.7);
+  border-color: #4a3a20;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.wisdom-side-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  color: #5C3D1E;
+}
+.dark .wisdom-side-title { color: #e8d9b5; }
+
+/* TODAY'S WISDOM */
+.wisdom-quote-box {
+  background: #FDF6E3;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  border: 1px solid #D4C5A0;
+  margin-bottom: 0.7rem;
+}
+.dark .wisdom-quote-box {
+  background: rgba(30,22,10,0.5);
+  border-color: #4a3a20;
+}
+
+.wisdom-quote-icon { font-size: 1.5rem; color: #C9A75A; }
+
+.wisdom-sanskrit {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin: 0.4rem 0;
+  color: #5c3d1e;
+}
+.dark .wisdom-sanskrit { color: #e8d9b5; }
+
+.wisdom-english {
+  font-size: 0.8rem;
+  color: #7A6030;
+  font-style: italic;
+}
+.dark .wisdom-english { color: #c9b080; }
+
+.wisdom-source {
+  font-size: 0.75rem;
+  color: #9A8060;
+}
+.dark .wisdom-source { color: #a08860; }
+
+.wisdom-actions { display: flex; gap: 0.5rem; }
+
+.wisdom-action-btn {
+  flex: 1;
+  padding: 0.45rem;
+  border-radius: 8px;
+  border: 1px solid #D4C5A0;
+  background: #FDF6E3;
+  cursor: pointer;
+}
+.dark .wisdom-action-btn {
+  border-color: #4a3a20;
+  background: rgba(30,22,10,0.5);
+  color: #e8d9b5;
+}
+
+/* STREAK */
+.wisdom-streak-row {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.wisdom-fire { font-size: 1.8rem; }
+
+.wisdom-streak-count {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #5c3d1e;
+}
+.dark .wisdom-streak-count { color: #e8d9b5; }
+
+.wisdom-streak-sub {
+  font-size: 0.75rem;
+  color: #7A6030;
+}
+.dark .wisdom-streak-sub { color: #c9b080; }
+
+.wisdom-streak-dots {
+  display: flex;
+  justify-content: space-between;
+}
+
+.wisdom-streak-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.wisdom-streak-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #E0D5B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark .wisdom-streak-dot {
+  background: #3a2a10;
+}
+
+.wisdom-streak-dot.active {
+  background: #7A6B3E;
+  color: white;
+}
+.dark .wisdom-streak-dot.active {
+  background: #8a7a4a;
+}
+
+.wisdom-streak-day {
+  font-size: 0.7rem;
+  color: #5c3d1e;
+}
+.dark .wisdom-streak-day { color: #c9b080; }
+
+/* CONTINUE */
+.wisdom-continue-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #D4C5A0;
+}
+.dark .wisdom-continue-item { border-color: #4a3a20; }
+
+.wisdom-thumbnail {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #E8D9B5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dark .wisdom-thumbnail { background: #3a2a10; }
+
+.wisdom-continue-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #5c3d1e;
+}
+.dark .wisdom-continue-title { color: #e8d9b5; }
+
+.wisdom-continue-sub {
+  font-size: 0.72rem;
+  color: #7A6030;
+}
+.dark .wisdom-continue-sub { color: #c9b080; }
+
+.wisdom-continue-arrow {
+  font-size: 1.1rem;
+  color: #7A6030;
+}
+.dark .wisdom-continue-arrow { color: #c9b080; }
+
+/* QUOTE BANNER */
+.wisdom-quote-banner {
+  margin-top: 2rem;
+  background: linear-gradient(135deg, #3A2A0A, #5C3D1E);
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+.dark .wisdom-quote-banner {
+  background: linear-gradient(135deg, #1a1008, #2a1e10);
+}
+
+.wisdom-quote-mark {
+  font-size: 5rem;
+  color: rgba(255,255,255,0.1);
+}
+
+.wisdom-quote-text {
+  flex: 1;
+  color: #F0E6C8;
+  line-height: 1.7;
+  font-size: 1.1rem;
+}
+
+.wisdom-quote-diya { font-size: 3rem; }

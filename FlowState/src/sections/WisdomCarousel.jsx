@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
 import { useWisdomCarousel } from '../hooks/useWisdomCarousel'
+import { useSoundEffects } from '../hooks/useSoundEffects'
 import SectionHeading from '../components/SectionHeading'
 import { fetchAIQuote, getDailyQuote, Store, today } from '../utils'
-import chaiImage from '../assets/chai.jpg'
-import sitarImage from '../assets/sitar.jpg'
-import flute from '../assets/sukoon.jpg'
-import jaipurImage from '../assets/jaipur1.jpg'
-import jasmineImage from '../assets/Disney Princess Aesthetic _ Jasmine.jpg'
+import chaiImage from '../assets/wiscarousel/chai.jpg'
+import sitarImage from '../assets/wiscarousel/sitar.jpg'
+import flute from '../assets/wiscarousel/sukoon.jpg'
+import jaipurImage from '../assets/wiscarousel/jaipur1.jpg'
+import jasmineImage from '../assets/wiscarousel/Disney Princess Aesthetic _ Jasmine.jpg'
 
 const SLIDES = [
   {
@@ -70,6 +71,7 @@ function QuoteScroll() {
   const [quote, setQuote] = useState(null)
   const [loading, setLoading] = useState(true)
   const [spinning, setSpinning] = useState(false)
+  const { playWisdomSound } = useSoundEffects()
 
   const load = async (force = false) => {
     setLoading(true)
@@ -90,6 +92,7 @@ function QuoteScroll() {
     setSpinning(true)
     Store.del('quote_' + today())
     await load(true)
+    playWisdomSound()
     setSpinning(false)
   }
 
@@ -393,12 +396,12 @@ function WisdomStyles() {
         position: relative;
         overflow: hidden;
         border-radius: 24px;
-        border: 1px solid rgba(255,255,255,0.55);
+        border: 1px solid rgba(255,255,255,0.25);
         padding: 26px 30px;
         color: white;
-        background: linear-gradient(135deg, rgba(66, 42, 19, 0.55), rgba(32, 22, 13, 0.38));
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), 0 18px 40px rgba(22, 12, 6, 0.26);
-        backdrop-filter: blur(9px);
+        background: linear-gradient(135deg, rgba(66, 42, 19, 0.15), rgba(32, 22, 13, 0.08));
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), 0 18px 40px rgba(22, 12, 6, 0.12);
+        backdrop-filter: blur(2px);
         margin-bottom: 0;
       }
 
@@ -501,7 +504,7 @@ function WisdomStyles() {
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(2px);
         transition: background 0.2s ease, transform 0.2s ease;
       }
 
@@ -601,8 +604,7 @@ export default function WisdomCarousel() {
       >
         <SectionHeading
           eyebrow="Today's Wisdom"
-          title="Ancient wisdom,"
-          accent="modern life."
+          title="Ancient wisdom, modern life."
         />
       </motion.div>
 
