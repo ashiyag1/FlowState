@@ -1,95 +1,59 @@
-# 💧 FlowState — React + Tailwind
+# Tarang‑FlowState — Wellness Dashboard
 
-A calm, premium wellness app for hydration tracking, habit building, journaling, and daily wisdom quotes.
+A mindful wellness app built with React + Vite to help you track hydration, build habits, journal your journey, and explore wisdom — all wrapped in a warm, Indian-spiritual aesthetic.
 
-**Brand:** FlowState / Hydrate With Ashiya  
-**Stack:** React 18 · React Router v6 · Framer Motion · Tailwind CSS · Vite  
-**Deploy:** Vercel 
+## Features
 
----
+- **Water Tracker** — Log daily water intake with quick-add bottle sizes (100ml–2000ml), custom amounts, animated progress ring, 7-day history, and ambient water drop particles.
+- **Habits / Rituals** — Create daily rituals with custom icons and accent colors. Monthly calendar view to track consistency, streak tracking, and daily check-in with completion stats.
+- **Journal** — Write entries with mood tagging (Grateful, Calm, Energized, etc.), word count, expandable entry history with delete, and journal streak tracking.
+- **Wisdom Page** — Daily wisdom quotes, explore books by topic, life issues grid, reading progress tracking, and ambient sound.
+- **Login / Signup** — Client-side auth UI with email/password and social buttons (Google, Apple). No backend.
+- **Dark Mode** — Full dark theme with adjusted glass-morphism and color palettes.
+- **Notifications & Reminders** — In-app toast notifications and reminder settings.
+- **Sound Effects** — Ambient sound effects and hydration/habit completion feedback sounds.
 
-## 🚀 Getting Started
+## Tech Stack
+
+| Tool | Purpose |
+|------|---------|
+| React 18 | UI framework |
+| Vite 5 | Build tool & dev server |
+| React Router v6 | Client-side routing |
+| Tailwind CSS 3 | Utility-first styling |
+| Framer Motion | Page & component animations |
+| Lucide React | Icon library |
+| date-fns | Date utilities |
+| clsx | Conditional classnames |
+
+## Routes
+
+| Path | Page |
+|------|------|
+| `/` | Home — dashboard with daily flow, wisdom carousel, India sections |
+| `/water` | Water intake tracker |
+| `/habits` | Habit/ritual tracker with monthly calendar |
+| `/journal` | Journal with mood & entry history |
+| `/quotes` | Wisdom & books explorer |
+| `/login` | Login / signup |
+
+## Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Run dev server
 npm run dev
+```
 
-# Build for production
+Build for production:
+
+```bash
 npm run build
-
-# Preview production build
 npm run preview
 ```
 
----
+## Design
 
-## 📁 Project Structure
-
-```
-src/
-├── components/
-│   ├── Navbar.jsx          # Fixed navbar + mobile bottom nav
-│   ├── PageLayout.jsx      # Shared page wrapper, Container, PageHeader
-│   ├── QuoteBanner.jsx     # AI-powered daily quote (with fallback)
-│   ├── StatCard.jsx        # Dashboard stat cards with progress bars
-│   └── WaterProgress.jsx   # Animated water drop SVG
-├── context/
-│   ├── ThemeContext.jsx     # Dark/light mode toggle
-│   └── ToastContext.jsx     # Global toast notifications
-├── pages/
-│   ├── Home.jsx            # Dashboard landing
-│   ├── Water.jsx           # Hydration tracker
-│   ├── Habits.jsx          # Habit tracker with streak calendar
-│   ├── Journal.jsx         # Daily journal with mood tagging
-│   ├── Quotes.jsx          # Wisdom quotes browser + save
-│   └── Login.jsx           # Login / Signup UI
-├── utils/
-│   └── index.js            # Storage helpers, date utils, quotes bank
-├── App.jsx                 # Router setup
-├── main.jsx                # Entry point
-└── index.css               # Tailwind + custom design tokens
-```
-
----
-
-## 🌐 Deploying to Vercel
-
-
-
----
-
-## ✨ Features
-
-| Page | Features |
-|------|----------|
-| **Home** | Hero, dashboard stats, habits preview, feature cards |
-| **Water** | Preset/custom logging, animated drop, weekly bar chart, daily log |
-| **Habits** | Create/delete habits, daily toggle, streak tracking, week strip |
-| **Journal** | Daily prompts, mood tagging, entry history with expand/collapse |
-| **Quotes** | AI daily quote, category browse, save favourites |
-| **Login** | Sign in / Sign up UI (frontend only, no backend yet) |
-
----
-
-## 🎨 Design Tokens
-
-| Token | Value |
-|-------|-------|
-| Font Display | Cormorant Garamond |
-| Font Body | DM Sans |
-| Primary | Ocean Blue `#2E86AB` |
-| Secondary | Sage Green `#6B9E78` |
-| Background | Sand `#FBF8F4` |
-| Dark bg | Ink `#0D1F2D` |
-
----
-
-## 📌 Notes
-
-- All data stored in `localStorage` (no backend)
-- AI quotes use Anthropic API (`claude-sonnet-4-20250514`) with local fallback
-- Dark mode persisted across sessions
-- Fully responsive: desktop nav + mobile bottom tab bar
+- Color palette: saffron, gold, sand, ocean blue, ink, ivory
+- Fonts: Cormorant Garamond (serif headings), Cinzel (display), DM Sans (body)
+- Indian spiritual motifs: Om, lotus, diya lamps, mandala patterns
+- Glass-morphism cards with warm gradients and subtle borders
