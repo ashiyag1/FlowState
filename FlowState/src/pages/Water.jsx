@@ -8,6 +8,11 @@ import PageLayout, { Container } from '../components/PageLayout'
 import WaterProgress from '../components/Waterprogress'
 import waterBg from '../assets/pages/water_bg.png'
 
+const IS_DEBUG = typeof window !== 'undefined' && (
+  window.location.search.includes('debug=particles') ||
+  localStorage.getItem('debug-particles')
+)
+
 const BOTTLES = [
   { label: 'Sip',     ml: 100,  emoji: '🥛' },
   { label: 'Glass',   ml: 200,  emoji: '🥃' },
@@ -20,14 +25,18 @@ const BOTTLES = [
 ]
 
 function WaterDrop({ style }) {
+  if (IS_DEBUG) console.log('[DEBUG] WaterDrop rendered', style)
+
   return (
     <motion.div
       className="absolute pointer-events-none select-none"
-      style={style}
+      style={{ ...style, willChange: 'transform' }}
       initial={{ y: '110vh', opacity: 0, scale: 0.6 }}
       animate={{
         y: '-10vh',
-        opacity: [0, 0.45, 0.45, 0],
+        /* PRODUCTION-SAFE OPACITY: raised max from 0.45→0.75
+           so drops remain visible through dark overlays */
+        opacity: [0, 0.75, 0.65, 0],
         scale:   [0.6, 1, 1, 0.8],
         rotate:  [0, 15, -10, 0],
       }}
@@ -38,21 +47,25 @@ function WaterDrop({ style }) {
         ease:     'easeInOut',
       }}
     >
-      <svg width={style.size} height={style.size * 1.3} viewBox="0 0 40 52" fill="none">
+      <svg width={style.size} height={style.size * 1.3} viewBox="0 0 40 52" fill="none"
+        style={{ filter: 'drop-shadow(0 0 6px rgba(87,184,214,0.35))' }}>
         <path d="M20 2 C20 2 4 22 4 34 C4 43.9 11.2 50 20 50 C28.8 50 36 43.9 36 34 C36 22 20 2 20 2Z"
-          fill={style.color} opacity="0.7" />
-        <path d="M14 32 C12 28 14 22 18 20" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" />
+          fill={style.color} opacity="0.85" />
+        <path d="M14 32 C12 28 14 22 18 20" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
     </motion.div>
   )
 }
 
+/* PRODUCTION-BRIGHTENED DROPS:
+   - Colors are more saturated / lighter so they POP against dark overlays
+   - Random seeds are stable within a session (module-level) */
 const DROPS = Array.from({ length: 12 }, (_, i) => ({
   left:     `${Math.random() * 100}%`,
   size:     16 + Math.random() * 20,
   duration: 8 + Math.random() * 12,
   delay:    Math.random() * 14,
-  color:    ['#57B8D6', '#2E86AB', '#9FE1CB', '#378ADD', '#B5D4F4'][Math.floor(Math.random() * 5)],
+  color:    ['#57B8D6', '#68D8F0', '#7FE0C0', '#5AA9E6', '#B5E4F7'][Math.floor(Math.random() * 5)],
 }))
 
 const sv = (d = 0) => ({
@@ -109,9 +122,21 @@ export default function Water() {
         <div className="dark:hidden absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/30 pointer-events-none" />
         <div className="hidden dark:block absolute inset-0"
           style={{ background: 'linear-gradient(180deg, rgba(10,22,40,0.92) 0%, rgba(13,36,64,0.88) 40%, rgba(10,22,40,0.92) 100%)' }} />
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* Drops container — bumped from z-0 to z-10 to guarantee
+            stacking above dark overlays in all browser engines */}
+        <div className="fixed inset-0 z-10 overflow-hidden pointer-events-none"
+          style={{ outline: IS_DEBUG ? '2px dashed cyan' : undefined }}>
           {DROPS.map((d, i) => <WaterDrop key={i} style={d} />)}
-
+          {IS_DEBUG && (
+            <div style={{
+              position: 'absolute', top: 8, left: 8,
+              background: 'rgba(0,0,0,0.7)', color: 'cyan',
+              fontSize: 10, padding: '3px 8px', borderRadius: 4,
+              fontFamily: 'monospace', zIndex: 9999,
+            }}>
+              DEBUG: {DROPS.length} water drops active
+            </div>
+          )}
         </div>
 
         <Container className="pt-12 pb-20 relative z-10">

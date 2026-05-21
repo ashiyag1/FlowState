@@ -12,6 +12,8 @@ export default function Home() {
     <>
       <HeroSection />
 
+      <TopBorder />
+
       <PageLayout>
       <main
         style={{
@@ -55,8 +57,6 @@ export default function Home() {
             ॐ
           </span>
         </div>
-
-        <TopBorder />
 
         <div
           style={{

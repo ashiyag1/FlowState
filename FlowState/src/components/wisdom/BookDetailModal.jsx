@@ -11,7 +11,8 @@ const easeBack = (t) => {
 
 export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const { dark } = useTheme()
-  const { updateBookProgress } = useWisdom()
+  const { updateBookProgress, savePage, removeSavedPage, isPageSaved } = useWisdom()
+  const [liked, setLiked] = useState(false)
   const pages = book.pages || []
 
   const [idx, setIdx] = useState(initialPage)
@@ -25,6 +26,7 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const dragDir = useRef(1) // 1 forward, -1 backward
   const rafId = useRef(null)
   const bookEl = useRef(null)
+  const hadVertical = useRef(false)
 
   // clean up raf
   useEffect(() => () => { if (rafId.current) cancelAnimationFrame(rafId.current) }, [])
@@ -87,6 +89,7 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
     startY.current = e.clientY
     stateRef.current.flip = 'ready'
     dragDir.current = 1
+    hadVertical.current = false
     document.body.style.userSelect = 'none'
     document.body.style.cursor = 'grabbing'
     ;(e.target).setPointerCapture(e.pointerId)
@@ -100,7 +103,8 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
     const dy = Math.abs(e.clientY - startY.current)
 
     if (s === 'ready') {
-      if (Math.abs(dx) < 8 || dy > Math.abs(dx) * 0.5) return
+      if (dy > Math.abs(dx) * 0.5) { hadVertical.current = true; return }
+      if (Math.abs(dx) < 8) return
       dragDir.current = dx < 0 ? 1 : -1 // left drag = forward, right drag = backward
       if (dragDir.current === 1 && idx >= pages.length - 1) return
       if (dragDir.current === -1 && idx <= 0) return
@@ -121,6 +125,12 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
     setAngle(a)
   }, [idx, pages.length])
 
+  const resetGesture = useCallback(() => {
+    document.body.style.userSelect = ''
+    document.body.style.cursor = ''
+    stateRef.current.flip = 'idle'
+  }, [])
+
   const onUp = useCallback((e) => {
     document.body.style.userSelect = ''
     document.body.style.cursor = ''
@@ -128,6 +138,7 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
 
     if (stateRef.current.flip === 'ready') {
       stateRef.current.flip = 'idle'
+      if (hadVertical.current) return // was a scroll, not a tap
       // tap — detect which side
       const rect = bookEl.current?.getBoundingClientRect()
       if (!rect) return
@@ -139,16 +150,16 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
 
     if (stateRef.current.flip !== 'dragging') return
     const progress = Math.abs(angle) / 180
-    if (progress > 0.3 && idx > 0 && idx < pages.length - 1) {
-      // prevent rapid re-entry
-      // rely on flipForward / flipBackward to set state
-    }
     if (progress > 0.35) {
       if (dragDir.current === 1 && idx < pages.length - 1) { flipForward(); return }
       if (dragDir.current === -1 && idx > 0) { flipBackward(); return }
     }
     snapBack()
   }, [angle, idx, pages.length, flipForward, flipBackward, snapBack])
+
+  const onCancel = useCallback(() => {
+    resetGesture()
+  }, [resetGesture])
 
   // keyboard
   useEffect(() => {
@@ -190,11 +201,67 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
           <span style={s.progressLabel}>{idx + 1} / {pages.length}</span>
         </div>
 
+        {/* Page actions — outside book area so they never trigger page flips */}
+        {cur && (
+          <div style={s.actionsBar}>
+            <span style={s.actionsLabel}>{cur.heading}</span>
+            <div style={s.actionsGroup}>
+              <button
+                style={s.actionBtn}
+                onClick={() => setLiked(v => !v)}
+                title={liked ? 'Unlike' : 'Like'}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill={liked ? '#e74c3c' : 'none'} stroke={liked ? '#e74c3c' : '#c9a84c'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </button>
+              <button
+                style={s.actionBtn}
+                onClick={() => {
+                  if (isPageSaved(book.id, idx)) {
+                    removeSavedPage(book.id, idx)
+                  } else {
+                    savePage({
+                      bookId: book.id, pageIdx: idx,
+                      heading: cur.heading, text: cur.text,
+                      bookTitle: book.title, bookScripture: book.scripture,
+                      bookEmoji: book.emoji,
+                    })
+                  }
+                }}
+                title={isPageSaved(book.id, idx) ? 'Unsave page' : 'Save page'}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill={isPageSaved(book.id, idx) ? '#c9a84c' : 'none'} stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+              </button>
+              <button
+                style={s.actionBtn}
+                onClick={async () => {
+                  const text = `${cur.heading}\n\n${cur.text}\n\n— ${book.title}, ${book.scripture}`
+                  if (navigator.share) {
+                    await navigator.share({ title: cur.heading, text })
+                  } else {
+                    await navigator.clipboard.writeText(text)
+                    alert('Page copied to clipboard!')
+                  }
+                }}
+                title="Share page"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         <div ref={bookEl} style={s.bookArea}
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
-          onPointerCancel={onUp}
+          onPointerCancel={onCancel}
         >
           {/* Page thickness stack on right edge */}
           {pages.length - idx > 1 && !isTurning && (
@@ -362,9 +429,9 @@ const styles = (dark) => ({
 
   // ── BOOK ──
   bookArea: {
-    position: 'relative', flex: 1, minHeight: '160px', margin: '0 1.25rem',
+    position: 'relative', flex: 1, minHeight: '320px', margin: '0 1.25rem',
     borderRadius: '4px', overflow: 'hidden', cursor: 'grab',
-    touchAction: 'none', userSelect: 'none',
+    touchAction: 'pan-y', userSelect: 'none',
     WebkitUserSelect: 'none',
   },
   page: {
@@ -412,15 +479,37 @@ const styles = (dark) => ({
     letterSpacing: '0.02em',
   },
   pageText: {
-    fontSize: '0.78rem', fontFamily: '"Lora", serif',
+    fontSize: '0.82rem', fontFamily: '"Lora", serif',
     color: dark ? '#d4c9a0' : '#4a3a20',
     lineHeight: 1.7, margin: 0, whiteSpace: 'pre-line', flex: 1,
-    overflowY: 'auto',
   },
   pageNum: {
     textAlign: 'center', fontSize: '0.58rem',
     color: dark ? '#8a7a60' : '#a09070', marginTop: '0.5rem',
     fontFamily: 'serif', fontStyle: 'italic', flexShrink: 0,
+  },
+  actionsBar: {
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    margin: '0.3rem 1.25rem 0.2rem', padding: '0.35rem 0.6rem',
+    background: dark ? 'rgba(40,30,15,0.25)' : 'rgba(255,252,240,0.5)',
+    border: dark ? '1px solid rgba(201,168,76,0.06)' : '1px solid rgba(201,168,76,0.1)',
+    borderRadius: '10px', flexShrink: 0,
+  },
+  actionsLabel: {
+    fontSize: '0.65rem', fontStyle: 'italic',
+    color: '#c9a84c', opacity: 0.7,
+    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+    marginRight: '0.5rem',
+  },
+  actionsGroup: {
+    display: 'flex', gap: '0.25rem', flexShrink: 0,
+  },
+  actionBtn: {
+    background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+    border: 'none', borderRadius: '8px',
+    cursor: 'pointer', padding: '6px 7px 4px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    lineHeight: 1, transition: 'background 0.15s',
   },
 
   // ── DEPTH EFFECTS ──

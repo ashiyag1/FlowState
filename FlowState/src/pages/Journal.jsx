@@ -3,21 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   PenLine, Trash2, ChevronDown, ChevronUp,
   Heart, Waves, Sun, Moon, Flower2, Cloud,
-  Sparkles, X, BookOpen, CalendarDays
+  X, BookOpen, CalendarDays, Flame
 } from 'lucide-react'
 import { Store, today, fmtDate, uid } from '../utils'
 import { useNotif } from '../components/NotificationPopup'
+import { useTheme } from '../context/ThemeContext'
 import LotusFlower from '../icons/LotusFlower'
 import DiyaLamp from '../icons/DiyaLamp'
 import journalBg from '../assets/pages/journal_bg.png'
 
 const MOODS = [
-  { label: 'Grateful',  moodIcon: Heart,   pastel: 'from-rose-100/70 to-pink-100/70',   active: 'from-rose-300 to-pink-400',   shadow: 'shadow-rose-200/40' },
-  { label: 'Calm',      moodIcon: Waves,   pastel: 'from-sky-100/70 to-blue-100/70',    active: 'from-sky-300 to-blue-400',    shadow: 'shadow-sky-200/40' },
-  { label: 'Energized', moodIcon: Sun,     pastel: 'from-amber-100/70 to-yellow-100/70', active: 'from-amber-300 to-yellow-400', shadow: 'shadow-amber-200/40' },
-  { label: 'Reflective',moodIcon: Moon,    pastel: 'from-violet-100/70 to-purple-100/70',active: 'from-violet-300 to-purple-400',shadow: 'shadow-violet-200/40' },
-  { label: 'Happy',     moodIcon: Flower2, pastel: 'from-emerald-100/70 to-green-100/70',active: 'from-emerald-300 to-green-400',shadow: 'shadow-emerald-200/40' },
-  { label: 'Tired',     moodIcon: Cloud,   pastel: 'from-slate-100/70 to-gray-100/70',   active: 'from-slate-300 to-gray-400',  shadow: 'shadow-slate-200/40' },
+  { label: 'Grateful',  moodIcon: Heart,   pastel: 'from-rose-100/70 to-pink-100/70',   active: 'from-rose-300 to-pink-400',   shadow: 'shadow-rose-200/40',  glow: 'rgba(244,114,182,0.18)',  tint: '#f472b6' },
+  { label: 'Calm',      moodIcon: Waves,   pastel: 'from-sky-100/70 to-blue-100/70',    active: 'from-sky-300 to-blue-400',    shadow: 'shadow-sky-200/40',   glow: 'rgba(96,165,250,0.14)',  tint: '#60a5fa' },
+  { label: 'Energized', moodIcon: Sun,     pastel: 'from-amber-100/70 to-yellow-100/70', active: 'from-amber-300 to-yellow-400', shadow: 'shadow-amber-200/40', glow: 'rgba(251,191,36,0.16)',  tint: '#fbbf24' },
+  { label: 'Reflective',moodIcon: Moon,    pastel: 'from-violet-100/70 to-purple-100/70',active: 'from-violet-300 to-purple-400',shadow: 'shadow-violet-200/40',glow: 'rgba(167,139,250,0.14)', tint: '#a78bfa' },
+  { label: 'Happy',     moodIcon: Flower2, pastel: 'from-emerald-100/70 to-green-100/70',active: 'from-emerald-300 to-green-400',shadow: 'shadow-emerald-200/40',glow: 'rgba(52,211,153,0.14)', tint: '#34d399' },
+  { label: 'Tired',     moodIcon: Cloud,   pastel: 'from-slate-100/70 to-gray-100/70',   active: 'from-slate-300 to-gray-400',  shadow: 'shadow-slate-200/40', glow: 'rgba(156,163,175,0.12)', tint: '#9ca3af' },
 ]
 
 const PROMPTS = [
@@ -32,7 +33,16 @@ const PROMPTS = [
   "What does your inner voice long to express?",
 ]
 
+const GREETING = (() => {
+  const h = new Date().getHours()
+  if (h < 12) return { word: 'Morning',   icon: '🌅', sub: 'A fresh page for your thoughts to bloom' }
+  if (h < 17) return { word: 'Afternoon', icon: '☀️', sub: 'The sunlit hours whisper stories untold' }
+  if (h < 21) return { word: 'Evening',   icon: '🌆', sub: 'Twilight deepens — let your reflections surface' }
+  return { word: 'Night',    icon: '🌙', sub: 'The quiet hours cradle your innermost truths' }
+})()
+
 export default function Journal() {
+  const { dark } = useTheme()
   const notif = useNotif()
   const td = today()
 
@@ -41,6 +51,7 @@ export default function Journal() {
   const [mood, setMood] = useState('')
   const [expanded, setExpanded] = useState(null)
   const [prompt] = useState(PROMPTS[Math.floor(Date.now() / 86400000) % PROMPTS.length])
+  const [inkSplash, setInkSplash] = useState(false)
   const textareaRef = useRef(null)
 
   const autoResize = () => {
@@ -64,6 +75,8 @@ export default function Journal() {
     save([entry, ...entries])
     setText(''); setMood('')
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
+    setInkSplash(true)
+    setTimeout(() => setInkSplash(false), 800)
     notif('Entry saved ✦', 'success')
   }
 
@@ -76,16 +89,35 @@ export default function Journal() {
     return acc
   }, {})
 
+  const streak = useMemo(() => {
+    const dates = [...new Set(entries.map(e => e.date))].sort().reverse()
+    let count = 0
+    const todayDate = new Date()
+    for (let i = 0; i < dates.length; i++) {
+      const d = new Date(todayDate)
+      d.setDate(d.getDate() - i)
+      const expected = d.toISOString().slice(0, 10)
+      if (dates[i] === expected) count++
+      else break
+    }
+    return count
+  }, [entries])
+
   const totalEntries = entries.length
   const uniqueDays = Object.keys(grouped).length
   const hasEntries = totalEntries > 0
 
-  const sparkles = useMemo(() =>
-    Array.from({ length: 6 }, (_, i) => ({
-      x: 10 + (i * 17) % 80,
-      y: 15 + (i * 13 + 7) % 70,
-      delay: i * 1.2,
-      duration: 3 + (i % 3) * 1.5,
+  const currentMood = MOODS.find(m => m.label === mood)
+  const moodGlow = currentMood?.glow || 'transparent'
+  const moodTint = currentMood?.tint || 'transparent'
+
+  const particles = useMemo(() =>
+    Array.from({ length: 10 }, (_, i) => ({
+      x: 5 + (i * 9.3) % 90,
+      y: 5 + (i * 13.7 + 3) % 90,
+      delay: i * 0.6,
+      duration: 4 + (i % 4) * 2,
+      char: i % 3 === 0 ? '✦' : i % 3 === 1 ? '·' : '◈',
     })), []
   )
 
@@ -94,52 +126,49 @@ export default function Journal() {
       className="journal-page relative"
       style={{ backgroundImage: `url(${journalBg})` }}
     >
-      {/* Vignette overlay for atmospheric depth and readability */}
       <div className="fixed inset-0 bg-gradient-to-b from-ink/35 via-ink/5 to-ink/45 dark:from-black/55 dark:via-ink/8 dark:to-black/65 backdrop-blur-[0.5px] pointer-events-none" />
 
-      {/* Floating sacred motifs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden hidden lg:block">
+      {/* Floating sacred motifs — visible on all screens */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <motion.div
-          className="absolute top-[12%] left-[6%] opacity-15 dark:opacity-10"
-          animate={{ y: [0, -12, 0], rotate: [0, 6, 0] }}
+          className="absolute top-[8%] left-[4%] opacity-30 dark:opacity-25"
+          animate={{ y: [0, -14, 0], rotate: [0, 8, 0] }}
           transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <LotusFlower size={52} />
+          <LotusFlower size={48} />
         </motion.div>
 
         <motion.div
-          className="absolute bottom-[15%] right-[5%] opacity-[0.18] dark:opacity-10"
-          animate={{ y: [0, -8, 0], opacity: [0.12, 0.22, 0.12] }}
+          className="absolute bottom-[10%] right-[3%] opacity-30 dark:opacity-20"
+          animate={{ y: [0, -10, 0], opacity: [0.18, 0.35, 0.18] }}
           transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <DiyaLamp size={48} />
+          <DiyaLamp size={40} />
         </motion.div>
 
-        {sparkles.map((s, i) => (
+        {particles.map((s, i) => (
           <motion.div
             key={i}
-            className="absolute text-gold/20 dark:text-gold/10"
-            style={{ top: `${s.y}%`, left: `${s.x}%` }}
-            animate={{ opacity: [0, 0.5, 0], scale: [0.4, 1.2, 0.4] }}
+            className="absolute text-gold/40 dark:text-gold/30"
+            style={{ top: `${s.y}%`, left: `${s.x}%`, fontSize: i % 3 === 0 ? '12px' : i % 3 === 1 ? '7px' : '9px' }}
+            animate={{ opacity: [0, 0.75, 0], y: [0, -24, 0], rotate: [0, 180, 360] }}
             transition={{ duration: s.duration, repeat: Infinity, delay: s.delay, ease: 'easeInOut' }}
           >
-            <Sparkles size={12} />
+            {s.char}
           </motion.div>
         ))}
 
         <motion.div
-          className="absolute top-[40%] right-[8%] opacity-10 dark:opacity-[0.06]"
+          className="absolute top-[35%] right-[6%] opacity-20 dark:opacity-[0.12]"
           animate={{ rotate: 360 }}
           transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
         >
-          <svg width="60" height="60" viewBox="0 0 60 60">
+          <svg width="52" height="52" viewBox="0 0 60 60">
             <circle cx="30" cy="30" r="28" fill="none" stroke="#C9933A" strokeWidth="0.5" />
             <circle cx="30" cy="30" r="20" fill="none" stroke="#C9933A" strokeWidth="0.4" />
             <circle cx="30" cy="30" r="12" fill="none" stroke="#C9933A" strokeWidth="0.3" />
             <line x1="30" y1="2" x2="30" y2="58" stroke="#C9933A" strokeWidth="0.3" opacity="0.5" />
             <line x1="2" y1="30" x2="58" y2="30" stroke="#C9933A" strokeWidth="0.3" opacity="0.5" />
-            <line x1="10" y1="10" x2="50" y2="50" stroke="#C9933A" strokeWidth="0.2" opacity="0.3" />
-            <line x1="50" y1="10" x2="10" y2="50" stroke="#C9933A" strokeWidth="0.2" opacity="0.3" />
           </svg>
         </motion.div>
       </div>
@@ -158,20 +187,29 @@ export default function Journal() {
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             className="mb-4 inline-block"
           >
-            <LotusFlower size={22} faded />
+            <LotusFlower size={26} />
           </motion.div>
 
-          <h1 className="font-display text-3xl md:text-4xl lg:text-[2.8rem] text-ivory dark:text-ivory leading-tight tracking-tight drop-shadow-sm">
-            Daily Journal
-          </h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="font-display text-2xl md:text-3xl text-ivory dark:text-ivory leading-tight tracking-tight drop-shadow-sm"
+          >
+            Good {GREETING.word} <span className="inline-block">{GREETING.icon}</span>
+          </motion.p>
 
           <p className="mt-2 text-sm md:text-base text-ivory/70 dark:text-ivory/70 font-light italic max-w-xl mx-auto leading-relaxed">
-            A peaceful inner sanctuary for your thoughts to bloom.
+            {GREETING.sub}
           </p>
 
           <div className="mt-5 flex items-center justify-center gap-4">
             <span className="h-px w-12 bg-gradient-to-l from-gold/40 to-transparent" />
-            <span className="text-gold/50 text-base">✦</span>
+            <motion.span
+              className="text-gold/50 text-base"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+            >✦</motion.span>
             <span className="h-px w-12 bg-gradient-to-r from-gold/40 to-transparent" />
           </div>
         </motion.div>
@@ -187,9 +225,18 @@ export default function Journal() {
           <div className="absolute -top-24 -left-24 w-64 h-64 bg-gold/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-ocean/5 rounded-full blur-3xl pointer-events-none" />
 
+          {/* Paper grain texture overlay */}
+          <div className="absolute inset-0 opacity-[0.07] dark:opacity-[0.09] pointer-events-none"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+              backgroundSize: '200px 200px',
+            }}
+          />
+
           {/* Prompt Section */}
           <div className="relative mb-6 p-5 md:p-6 rounded-2xl bg-gradient-to-br from-amber-50/60 to-gold-50/60 dark:from-amber-900/15 dark:to-gold-900/15 border border-gold/15 overflow-hidden">
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-gold/10 rounded-full blur-3xl journal-shimmer pointer-events-none" />
+            <div className="absolute -bottom-6 -left-6 w-20 h-20 bg-gold/8 rounded-full blur-2xl journal-shimmer pointer-events-none" style={{ animationDelay: '1.5s' }} />
             <p className="relative text-[9px] font-semibold text-gold dark:text-gold-lt tracking-[0.25em] uppercase mb-1.5">
               ✦ Today's Reflection
             </p>
@@ -228,20 +275,36 @@ export default function Journal() {
             </div>
           </div>
 
-          {/* Writing Area */}
+          {/* Writing Area with mood aura */}
           <div className="relative">
+            {/* Mood aura glow behind textarea */}
+            <motion.div
+              className="absolute -inset-4 rounded-3xl pointer-events-none"
+              animate={{ opacity: mood ? 1 : 0 }}
+              transition={{ duration: 0.6 }}
+              style={{
+                background: mood
+                  ? `radial-gradient(ellipse at 50% 60%, ${moodGlow} 0%, transparent 70%)`
+                  : 'transparent',
+              }}
+            />
+
             <textarea
               ref={textareaRef}
               value={text}
               onChange={e => { setText(e.target.value); autoResize() }}
               placeholder="Let your thoughts flow gently onto these pages…"
               rows={4}
-              className="w-full rounded-2xl md:rounded-3xl border border-gold/15 bg-white/10 dark:bg-white/[0.03] backdrop-blur-sm px-5 py-4 md:px-7 md:py-5 text-ink dark:text-ivory text-sm md:text-base font-body leading-relaxed placeholder:text-gold/40 placeholder:italic placeholder:font-display placeholder:tracking-wide resize-none transition-all duration-300 focus:outline-none focus:border-gold/40 focus:ring-2 focus:ring-gold/20 focus:bg-white/20 dark:focus:bg-white/[0.06] min-h-[100px]"
+              className="relative w-full rounded-2xl md:rounded-3xl border border-gold/15 bg-white/10 dark:bg-white/[0.03] backdrop-blur-sm px-5 py-4 md:px-7 md:py-5 text-ink dark:text-ivory text-sm md:text-base font-body leading-relaxed placeholder:text-gold/40 placeholder:italic placeholder:font-display placeholder:tracking-wide resize-none transition-all duration-300 focus:outline-none focus:border-gold/40 focus:ring-2 focus:ring-gold/20 focus:bg-white/20 dark:focus:bg-white/[0.06] min-h-[100px]"
+              style={{
+                boxShadow: mood ? `0 0 40px ${moodTint}22, inset 0 0 30px ${moodTint}11` : 'none',
+                transition: 'box-shadow 0.6s ease',
+              }}
             />
             {text && (
               <button
                 onClick={() => { setText(''); if (textareaRef.current) textareaRef.current.style.height = 'auto' }}
-                className="absolute top-3 right-3 p-1 rounded-full bg-white/40 dark:bg-white/10 text-ink/40 dark:text-ivory/40 hover:text-ink hover:bg-white/70 dark:hover:bg-white/20 transition-all"
+                className="absolute top-5 right-5 p-1.5 rounded-full bg-white/40 dark:bg-white/10 text-ink/40 dark:text-ivory/40 hover:text-ink hover:bg-white/70 dark:hover:bg-white/20 transition-all z-10"
               >
                 <X size={14} />
               </button>
@@ -249,20 +312,36 @@ export default function Journal() {
           </div>
 
           {/* Word count + Save Button */}
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between mt-5">
             <span className="text-[10px] text-ivory/45 dark:text-ivory/40 italic">
               {text.trim() ? `${wordCount} ${wordCount === 1 ? 'word' : 'words'}` : ''}
             </span>
-            <motion.button
-              onClick={addEntry}
-              disabled={!text.trim()}
-              whileHover={text.trim() ? { scale: 1.03, y: -2 } : {}}
-              whileTap={text.trim() ? { scale: 0.97 } : {}}
-              className="relative px-8 py-3 rounded-full bg-gradient-to-r from-saffron to-gold text-white font-semibold shadow-lg shadow-gold/20 hover:shadow-xl hover:shadow-gold/30 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
-            >
-              <PenLine size={15} />
-              Save Entry
-            </motion.button>
+            <div className="relative">
+              {/* Ink splash effect */}
+              <AnimatePresence>
+                {inkSplash && (
+                  <motion.div
+                    key="ink-splash"
+                    initial={{ scale: 0.2, opacity: 0.7 }}
+                    animate={{ scale: 3.5, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className="absolute inset-0 rounded-full bg-gold/40 pointer-events-none"
+                    style={{ filter: 'blur(6px)' }}
+                  />
+                )}
+              </AnimatePresence>
+              <motion.button
+                onClick={addEntry}
+                disabled={!text.trim()}
+                whileHover={text.trim() ? { scale: 1.03, y: -2 } : {}}
+                whileTap={text.trim() ? { scale: 0.97 } : {}}
+                className="relative px-8 py-3 rounded-full bg-gradient-to-r from-saffron to-gold text-white font-semibold shadow-lg shadow-gold/20 hover:shadow-xl hover:shadow-gold/30 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
+              >
+                <PenLine size={15} />
+                Save Entry
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 
@@ -287,6 +366,17 @@ export default function Journal() {
                 <CalendarDays size={13} />
                 <span className="text-[11px]">{uniqueDays} {uniqueDays === 1 ? 'day' : 'days'}</span>
               </div>
+              {streak > 0 && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 12 }}
+                  className="flex items-center gap-1.5 text-gold dark:text-gold-lt"
+                >
+                  <Flame size={13} fill="#C9933A" />
+                  <span className="text-[11px] font-semibold">{streak}-day streak</span>
+                </motion.div>
+              )}
               <div className="flex-1 h-px bg-gradient-to-r from-gold/20 to-transparent" />
             </motion.div>
           )}
@@ -317,10 +407,21 @@ export default function Journal() {
             Object.entries(grouped).map(([date, dayEntries]) => (
               <div key={date} className="mb-8">
                 <div className="flex items-center gap-4 mb-4">
-                  <span className="text-[10px] font-semibold text-gold dark:text-gold-lt tracking-[0.2em] uppercase">
+                  <motion.span
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-[10px] font-semibold text-gold dark:text-gold-lt tracking-[0.2em] uppercase"
+                  >
                     {date === td ? 'Today' : fmtDate(date)}
-                  </span>
+                  </motion.span>
                   <div className="flex-1 h-px bg-gradient-to-r from-gold/25 to-transparent" />
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="text-[8px] text-gold/30 dark:text-gold/20"
+                  >
+                    ◈
+                  </motion.span>
                 </div>
                 <div className="flex flex-col gap-4">
                   <AnimatePresence>
@@ -337,12 +438,27 @@ export default function Journal() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, x: -12 }}
                           layout
-                          className="group journal-glass-card p-4 md:p-5"
+                          className="group journal-glass-card p-4 md:p-5 relative overflow-hidden"
+                          style={{
+                            borderLeft: moodObj
+                              ? `3px solid ${moodObj.tint}`
+                              : '3px solid rgba(201,168,76,0.35)',
+                          }}
                         >
+                          {/* Mood color accent dot */}
+                          {moodObj && (
+                            <div
+                              className="absolute top-3 right-3 w-7 h-7 rounded-full opacity-60"
+                              style={{
+                                background: `radial-gradient(circle, ${moodObj.tint}88, transparent 70%)`,
+                                filter: 'blur(3px)',
+                              }}
+                            />
+                          )}
                           <div className="flex items-start justify-between gap-3 mb-2">
                             <div className="flex items-center gap-2.5">
                               {Icon && (
-                                <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${moodObj.pastel} flex items-center justify-center shrink-0`}>
+                                <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${moodObj?.pastel || 'from-gold-100/50 to-amber-100/50'} flex items-center justify-center shrink-0`}>
                                   <Icon size={12} className="text-ink/50 dark:text-ivory/60" />
                                 </div>
                               )}

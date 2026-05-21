@@ -217,6 +217,9 @@ export default function Habits() {
   const { habits, addHabit, deleteHabit, habitDone, toggleHabit, getStreak } = useWellness()
   const { playHabitSound } = useSoundEffects()
   const { dark } = useTheme()
+  const tPri = dark ? '#f0e6d0' : '#2D1F0E'
+  const tSec = dark ? '#c9b080' : '#8A6E4E'
+  const tDim = dark ? '#b8a080' : '#7A5F30'
   const [name, setName] = useState('')
   const [icon, setIcon] = useState(ICONS[0])
   const [selColor, setSelColor] = useState(HABIT_COLORS[0])
@@ -363,7 +366,7 @@ export default function Habits() {
           <motion.h1 variants={fadeIn(0.15)} style={{
             fontFamily: "'Playfair Display', serif",
             fontSize: 'clamp(2.6rem, 6vw, 3.8rem)',
-            fontWeight: 400, color: '#2D1F0E', lineHeight: 1.08,
+            fontWeight: 400, color: tPri, lineHeight: 1.08,
             margin: '0 auto 0.35rem', maxWidth: 600,
             letterSpacing: '-0.02em',
           }}>
@@ -371,7 +374,7 @@ export default function Habits() {
           </motion.h1>
           <motion.p variants={fadeIn(0.2)} style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: '0.85rem', color: '#8A6E4E', fontWeight: 400,
+            fontSize: '0.85rem', color: tSec, fontWeight: 400,
             margin: '0 auto', maxWidth: 440, lineHeight: 1.5,
           }}>
             "Small daily disciplines, sustained with devotion, create the extraordinary life."
@@ -423,7 +426,7 @@ export default function Habits() {
                   fontFamily: "'Playfair Display', serif",
                   fontSize: 'clamp(1.1rem, 2.3vw, 1.3rem)',
                   fontWeight: 400, fontStyle: 'italic',
-                  color: '#2D1F0E',
+                  color: tPri,
                   lineHeight: 1.65,
                   margin: '0 auto 0.35rem',
                   maxWidth: 480,
@@ -435,7 +438,7 @@ export default function Habits() {
                   background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.25), transparent)',
                 }} />
                 <p style={{
-                  fontSize: '0.62rem', color: '#8A6E4E',
+                  fontSize: '0.62rem', color: tSec,
                   fontFamily: "'Lora', serif", fontStyle: 'italic',
                   margin: 0,
                 }}>
@@ -490,7 +493,7 @@ export default function Habits() {
                     style={{
                       width: 24, height: 24, borderRadius: '6px', border: 'none',
                       background: showAddForm ? 'rgba(201,168,76,0.15)' : 'transparent',
-                      color: '#7A5F30', cursor: 'pointer',
+                      color: tDim, cursor: 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                     <Plus size={13} style={{ transform: showAddForm ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
@@ -518,7 +521,7 @@ export default function Habits() {
                     <p style={{
                       fontFamily: "'Cormorant Garamond', serif",
                       fontSize: '0.75rem', fontWeight: 500,
-                      color: name ? '#2D1F0E' : '#8A6E4E',
+                      color: name ? tPri : tSec,
                       margin: 0, fontStyle: name ? 'normal' : 'italic',
                       opacity: name ? 1 : 0.6,
                     }}>
@@ -526,7 +529,7 @@ export default function Habits() {
                     </p>
                     <span style={{
                       fontFamily: "'Lora', serif",
-                      fontSize: '0.52rem', color: '#8A6E4E',
+                      fontSize: '0.52rem', color: tSec,
                       opacity: 0.55,
                     }}>
                       {showAddForm ? 'Fill in the details' : 'Tap + to customize'}
@@ -541,7 +544,7 @@ export default function Habits() {
                         padding: '0.25rem 0.7rem', borderRadius: '7px',
                         border: '1px solid rgba(201,168,76,0.2)',
                         background: 'rgba(201,168,76,0.06)',
-                        color: '#7A5F30',
+                        color: tDim,
                         fontSize: '0.52rem', fontFamily: "'Cinzel', serif",
                         cursor: 'pointer', letterSpacing: '0.05em',
                       }}>
@@ -568,7 +571,7 @@ export default function Habits() {
                           border: dark ? '1px solid rgba(201,168,76,0.12)' : '1px solid rgba(201,168,76,0.2)',
                           background: dark ? 'rgba(20,14,6,0.6)' : 'rgba(255,248,234,0.6)',
                           fontFamily: "'Lora', serif", fontSize: '0.7rem',
-                          color: '#2D1F0E', outline: 'none',
+                          color: tPri, outline: 'none',
                           boxSizing: 'border-box',
                         }}
                           type="text" value={name} placeholder="e.g. Morning walk by the river"
@@ -599,7 +602,7 @@ export default function Habits() {
                               }}>
                               {selColor === c && (
                                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <Check size={11} color={dark ? '#1a1208' : '#2D1F0E'} strokeWidth={2.5} />
+                                  <Check size={11} color={dark ? '#1a1208' : tPri} strokeWidth={2.5} />
                                 </span>
                               )}
                             </motion.button>
@@ -639,7 +642,7 @@ export default function Habits() {
                         style={{
                           width: '100%', padding: '0.52rem 0', borderRadius: '8px', border: 'none',
                           background: `linear-gradient(135deg, ${selColor}, ${selColor}bb)`,
-                          color: dark ? '#1a1208' : '#2D1F0E',
+                          color: dark ? '#1a1208' : tPri,
                           fontSize: '0.6rem', fontWeight: 700, cursor: 'pointer',
                           fontFamily: "'Cinzel', serif",
                           letterSpacing: '0.06em',
@@ -664,7 +667,7 @@ export default function Habits() {
                     <h2 style={{
                       fontFamily: "'Cormorant Garamond', serif",
                       fontSize: '1.05rem', fontWeight: 500,
-                      color: '#2D1F0E', margin: 0,
+                      color: tPri, margin: 0,
                     }}>
                       {calDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
                     </h2>
@@ -674,7 +677,7 @@ export default function Habits() {
                         style={{
                           width: 26, height: 26, borderRadius: '6px',
                           border: '1px solid rgba(168,140,80,0.18)',
-                          background: 'transparent', color: '#7A5F30', cursor: 'pointer',
+                          background: 'transparent', color: tDim, cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}><ChevronLeft size={13} /></motion.button>
                       <motion.button whileTap={{ scale: 0.85 }} whileHover={{ scale: 1.1 }}
@@ -682,7 +685,7 @@ export default function Habits() {
                         style={{
                           width: 26, height: 26, borderRadius: '6px',
                           border: '1px solid rgba(168,140,80,0.18)',
-                          background: 'transparent', color: '#7A5F30', cursor: 'pointer',
+                          background: 'transparent', color: tDim, cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}><ChevronRight size={13} /></motion.button>
                     </div>
@@ -704,7 +707,7 @@ export default function Habits() {
                               <th key={d} style={{
                                 textAlign: 'center', padding: '0.2rem 0.06rem',
                                 fontWeight: isToday ? 700 : 500,
-                                color: isToday ? '#E8622A' : '#8A6E4E',
+                                color: isToday ? '#E8622A' : tSec,
                                 fontSize: '0.5rem', minWidth: 20,
                                 borderBottom: isToday
                                   ? '2px solid #E8622A'
@@ -756,7 +759,7 @@ export default function Habits() {
                                   <span style={{
                                     fontFamily: "'Cormorant Garamond', serif",
                                     fontSize: '0.75rem', fontWeight: 500,
-                                    color: '#2D1F0E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                    color: tPri, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                                   }}>{h.name}</span>
                                 </div>
                               </td>
@@ -806,14 +809,14 @@ export default function Habits() {
                                   </td>
                                 )
                               })}
-                              <td style={{ textAlign: 'center', padding: '0.2rem', fontSize: '0.55rem', fontWeight: 600, color: '#8A6E4E' }}>{goal}</td>
+                              <td style={{ textAlign: 'center', padding: '0.2rem', fontSize: '0.55rem', fontWeight: 600, color: tSec }}>{goal}</td>
                               <td style={{ textAlign: 'center', padding: '0.2rem' }}>
                                 <motion.span layout style={{
                                   display: 'inline-flex', alignItems: 'center', gap: 2,
                                   padding: '0.1rem 0.4rem',
                                   borderRadius: '3px', fontSize: '0.55rem', fontWeight: 700,
                                   background: isGreen ? 'rgba(58,140,76,0.12)' : isYellow ? 'rgba(201,168,76,0.15)' : 'rgba(201,168,76,0.08)',
-                                  color: isGreen ? '#2d6a4f' : isYellow ? '#7A5F30' : '#8A6E4E',
+                                  color: isGreen ? '#2d6a4f' : isYellow ? tDim : tSec,
                                   lineHeight: '1.2',
                                 }}>
                                   {achieved}
@@ -834,10 +837,10 @@ export default function Habits() {
                   }}>
                     {[
                       { color: '#2d6a4f', bg: 'rgba(58,140,76,0.12)', label: '100%' },
-                      { color: '#7A5F30', bg: 'rgba(201,168,76,0.15)', label: '60%+' },
-                      { color: '#8A6E4E', bg: 'rgba(201,168,76,0.08)', label: 'Ongoing' },
+                      { color: tDim, bg: 'rgba(201,168,76,0.15)', label: '60%+' },
+                      { color: tSec, bg: 'rgba(201,168,76,0.08)', label: 'Ongoing' },
                     ].map((item, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.5rem', color: '#8A6E4E' }}>
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.5rem', color: tSec }}>
                         <span style={{ width: 7, height: 7, borderRadius: 2, background: item.bg, border: `1px solid ${item.color}22` }} />
                         {item.label}
                       </div>
@@ -858,13 +861,13 @@ export default function Habits() {
                       </motion.div>
                       <p style={{
                         fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: '0.95rem', color: '#7A5F30',
+                        fontSize: '0.95rem', color: tDim,
                         margin: '0 0 0.25rem',
                       }}>
                         No rituals yet
                       </p>
                       <p style={{
-                        fontSize: '0.65rem', color: '#8A6E4E',
+                        fontSize: '0.65rem', color: tSec,
                         fontFamily: "'Lora', serif", fontStyle: 'italic',
                         margin: 0,
                       }}>
@@ -892,13 +895,13 @@ export default function Habits() {
                   <span style={{
                     fontFamily: "'Cormorant Garamond', serif",
                     fontSize: '1.7rem', fontWeight: 500,
-                    color: '#2D1F0E', lineHeight: 1,
+                    color: tPri, lineHeight: 1,
                   }}>
                     <AnimatedNumber value={doneCount} />
                   </span>
                   <span style={{
                     fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: '0.95rem', color: '#8A6E4E', marginLeft: 2,
+                    fontSize: '0.95rem', color: tSec, marginLeft: 2,
                   }}>/{habits.length}</span>
                 </div>
                 <motion.div
@@ -932,7 +935,7 @@ export default function Habits() {
 
               {habits.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '0.8rem 0' }}>
-                  <p style={{ fontSize: '0.65rem', color: '#8A6E4E', fontFamily: "'Lora', serif", fontStyle: 'italic', margin: 0 }}>
+                  <p style={{ fontSize: '0.65rem', color: tSec, fontFamily: "'Lora', serif", fontStyle: 'italic', margin: 0 }}>
                     No rituals yet.
                   </p>
                 </div>
@@ -965,7 +968,7 @@ export default function Habits() {
                         <span style={{
                           flex: 1, fontSize: '0.7rem', fontWeight: 500,
                           fontFamily: "'Cormorant Garamond', serif",
-                          color: done ? '#8A6E4E' : '#2D1F0E',
+                          color: done ? tSec : tPri,
                           textDecoration: done ? 'line-through' : 'none',
                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                           opacity: done ? 0.55 : 1,
@@ -1089,14 +1092,14 @@ export default function Habits() {
                   borderTop: '1px solid rgba(168,140,80,0.08)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 }}>
-                  <span style={{ fontSize: '0.48rem', color: '#8A6E4E' }}>
+                  <span style={{ fontSize: '0.48rem', color: tSec }}>
                     {dayNums.filter(d => {
                       const dayDone = habitDone[isoForDay(d)] || {}
                       return habits.filter(h => dayDone[h.id]).length > 0
                     }).length} active
                   </span>
                   <span style={{
-                    fontSize: '0.45rem', color: '#7A5F30', opacity: 0.4,
+                    fontSize: '0.45rem', color: tDim, opacity: 0.4,
                     fontFamily: "'Cinzel', serif",
                   }}>
                     {calDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}

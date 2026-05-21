@@ -68,43 +68,7 @@ export const getDailyQuote = () => {
   return QUOTES_BANK[day % QUOTES_BANK.length]
 }
 
-export const fetchAIQuote = async (forceRefresh = false) => {
-  const cacheKey = 'quote_' + today()
-  if (!forceRefresh) {
-    const cached = Store.get(cacheKey)
-    if (cached) return cached
-  }
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 350,
-        messages: [{
-          role: 'user',
-          content: `Give me one inspiring wisdom quote from Indian tradition — Bhagavad Gita, Upanishads, Vedas, Swami Vivekananda, Chanakya, Kabir Das, Premanand Ji Maharaj, Bhaskaracharya, Patanjali, or Ayurveda. The quote should relate to health, water, habits, mindfulness, or personal growth. Return ONLY a JSON object with no markdown: {"text":"Sanskrit or original quote if available","translation":"English translation","author":"Author Name","category":"dharma|yoga|wisdom|health|ayurveda|mindfulness|habits|cosmos","source":"Book/Tradition"}. If the quote is already in English, omit the translation field.`
-        }]
-      })
-    })
-    if (resp.ok) {
-      const data = await resp.json()
-      const raw = data.content.map(b => b.text || '').join('')
-      const clean = raw.replace(/```json|```/g, '').trim()
-      const parsed = JSON.parse(clean)
-      if (parsed.text && parsed.author) {
-        Store.set(cacheKey, parsed)
-        const recent = Store.get('recent_quotes') || []
-        recent.unshift(parsed.text.slice(0, 50))
-        Store.set('recent_quotes', recent.slice(0, 30))
-        return parsed
-      }
-    }
-  } catch { /* fallback to local */ }
-  const fallback = getDailyQuote()
-  Store.set(cacheKey, fallback)
-  return fallback
-}
+export const fetchAIQuote = async () => getDailyQuote()
 
 // ── HELPERS ───────────────────────────────────
 export const clamp = (val, min, max) => Math.min(max, Math.max(min, val))

@@ -9,7 +9,7 @@ import eveningBg from '../assets/hero/eveningBg.png'
 import nightBg from '../assets/hero/nightBg.png'
 
 /* ─────────────────────────────────────────────────────────────
-   TIME OF DAY DETECTION
+   TIME OF DAY DETECTION  (safe — used inside useEffect only)
 ───────────────────────────────────────────────────────────── */
 function getTimeOfDay() {
   const h = new Date().getHours()
@@ -18,6 +18,11 @@ function getTimeOfDay() {
   if (h >= 17 && h < 20) return 'evening'
   return 'night'
 }
+
+const IS_DEBUG = typeof window !== 'undefined' && (
+  window.location.search.includes('debug=particles') ||
+  localStorage.getItem('debug-particles')
+)
 
 /* ─────────────────────────────────────────────────────────────
    TIME-BASED CONFIG
@@ -87,7 +92,9 @@ const PETAL_BASE = Array.from({ length: 14 }, (_, i) => ({
   dur: 8 + (i % 4) * 2.5,
   delay: (i * 1.3) % 10,
   colorIdx: i % 3,
-  opacity: 0.45 + (i % 3) * 0.18,
+  /* PRODUCTION-SAFE OPACITY: raised from 0.45→0.7 so particles
+     remain visible through dark overlays & GPU compositing */
+  opacity: 0.7 + (i % 3) * 0.15,
 }))
 
 /* ─────────────────────────────────────────────────────────────
@@ -154,12 +161,29 @@ function Birds() {
   )
 }
 
-/* ─────────────────────────────────────────────────────────────
+/* ═════════════════════════════════════════════════════════
    FLOATING PETALS — colors shift per time-of-day
-───────────────────────────────────────────────────────────── */
+   
+   FIXES applied:
+   - Removed `filter: blur(0.4px)` — sub-pixel CSS blur is dropped
+     by GPU compositor on Webkit/Blink in production builds
+   - Raised opacity baseline (see PETAL_BASE)
+   - Wrapped in a positioned container with explicit z-index
+     to guarantee stacking above overlay layers
+   - Added `will-change: transform` for GPU layer promotion
+═════════════════════════════════════════════════════════ */
 function FloatingPetals({ colors }) {
+  if (IS_DEBUG) console.log('[DEBUG] FloatingPetals mounted | colors:', colors)
+
   return (
-    <>
+    <div style={{
+      position: 'absolute',
+      inset: 0,
+      zIndex: 5,
+      pointerEvents: 'none',
+      overflow: 'hidden',
+      outline: IS_DEBUG ? '2px dashed red' : undefined,
+    }}>
       {PETAL_BASE.map(p => (
         <div
           key={p.id}
@@ -173,11 +197,11 @@ function FloatingPetals({ colors }) {
             opacity: p.opacity,
             animationDuration: `${p.dur}s`,
             animationDelay: `${p.delay}s`,
-            filter: 'blur(0.4px)',
+            willChange: 'transform',
           }}
         />
       ))}
-    </>
+    </div>
   )
 }
 
@@ -330,11 +354,16 @@ function HeroText({ tod, config }) {
    No changes needed in Home.jsx.
 ───────────────────────────────────────────────────────────── */
 export default function HeroSection() {
-  const [tod, setTod] = useState(getTimeOfDay)
+  /* ── Hydration-safe time-of-day ──
+     Start with a safe default, then set real time in useEffect.
+     Prevents server/client render mismatch and avoids calling
+     new Date() during the initial render pass. */
+  const [tod, setTod] = useState('morning')
 
-  // Re-check time every minute (handles leaving tab open overnight)
   useEffect(() => {
+    setTod(getTimeOfDay())
     const id = setInterval(() => setTod(getTimeOfDay()), 60_000)
+    if (IS_DEBUG) console.log('[DEBUG] HeroSection mounted | timeOfDay:', getTimeOfDay())
     return () => clearInterval(id)
   }, [])
 
@@ -424,6 +453,18 @@ export default function HeroSection() {
       {/* ── Floating petals — color-shifted per time of day ── */}
       <FloatingPetals colors={config.petalColors} />
 
+      {IS_DEBUG && (
+        <div style={{
+          position: 'absolute', top: 60, left: 8,
+          background: 'rgba(0,0,0,0.7)', color: 'red',
+          fontSize: 10, padding: '3px 8px', borderRadius: 4,
+          fontFamily: 'monospace', zIndex: 9999,
+          pointerEvents: 'none',
+        }}>
+          DEBUG: {PETAL_BASE.length} petals | {config.stars ? 50 : 0} stars | tod={tod}
+        </div>
+      )}
+
       {/* ── Spinning mandala watermark ── */}
       <div
         className="fs-mandala-spin"
@@ -438,7 +479,8 @@ export default function HeroSection() {
 
       {/* ── Hero content ── */}
       <div style={{
-        position: 'relative', zIndex: 10,
+        position: 'relative',
+        zIndex: 10,
         width: '100%', maxWidth: 1180,
         margin: '0 auto', padding: '5rem 1.5rem 3.5rem',
       }}>
@@ -460,6 +502,7 @@ export default function HeroSection() {
           </motion.div>
         </div>
       </div>
+
     </section>
   )
 }

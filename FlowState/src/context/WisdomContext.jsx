@@ -19,6 +19,7 @@ export function WisdomProvider({ children }) {
   const [userName, setUserName] = useLocalState('user_name', 'Ashiya')
   const [userSub, setUserSub] = useLocalState('user_sub', 'Keep growing')
   const [savedWisdom, setSavedWisdom] = useLocalState('saved', [])
+  const [savedPages, setSavedPages] = useLocalState('saved_pages', [])
   const [streakLog, setStreakLog] = useLocalState('streak_log', {})
   const [openedBooks, setOpenedBooks] = useLocalState('opened_books', [])
   const [bookProgress, setBookProgress] = useLocalState('book_progress', {})
@@ -28,6 +29,22 @@ export function WisdomProvider({ children }) {
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     )
   }, [setSavedWisdom])
+
+  const savePage = useCallback((pageInfo) => {
+    setSavedPages(prev => {
+      const exists = prev.find(p => p.bookId === pageInfo.bookId && p.pageIdx === pageInfo.pageIdx)
+      if (exists) return prev
+      return [{ ...pageInfo, savedAt: Date.now() }, ...prev].slice(0, 50)
+    })
+  }, [setSavedPages])
+
+  const removeSavedPage = useCallback((bookId, pageIdx) => {
+    setSavedPages(prev => prev.filter(p => !(p.bookId === bookId && p.pageIdx === pageIdx)))
+  }, [setSavedPages])
+
+  const isPageSaved = useCallback((bookId, pageIdx) => {
+    return savedPages.some(p => p.bookId === bookId && p.pageIdx === pageIdx)
+  }, [savedPages])
 
   const markStreakToday = useCallback(() => {
     const td = getToday()
@@ -91,6 +108,7 @@ export function WisdomProvider({ children }) {
       userName, setUserName,
       userSub, setUserSub,
       savedWisdom, toggleSavedWisdom,
+      savedPages, savePage, removeSavedPage, isPageSaved,
       streakLog, markStreakToday,
       getStreakDays, getStreakCount,
       openedBooks, openBook, removeOpenedBook,
