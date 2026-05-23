@@ -1,4 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import sitarTanpuraBgm from '../assets/wisdom_music/sitar_tanpura_bgm.mp3'
+import omSoundMp3 from '../assets/wisdom_music/om_sound.mp3'
+import rainMp3 from '../assets/wisdom_music/rain.mp3'
+import fluteMp3 from '../assets/wisdom_music/flute.mp3'
+import tibetanBowlMp3 from '../assets/wisdom_music/tibetan_bowl.mp3'
+import windChimesMp3 from '../assets/wisdom_music/wind_chimes.mp3'
 
 const SoundEffectsContext = createContext(null)
 
@@ -8,33 +14,35 @@ function createAudioContext() {
 }
 
 export const AMBIENCE_PRESETS = {
-  tanpura: {
-    label: 'Tanpura Drone',
-    strings: [
-      { freq: 110.0, strokeDelay: 0.0 },
-      { freq: 146.8, strokeDelay: 2.1 },
-      { freq: 165.0, strokeDelay: 4.2 },
-      { freq: 220.0, strokeDelay: 6.3 },
-    ],
-    cycleLength: 8.4,
-    strokeLength: 3.5,
-    filterFreq: 900,
-    masterVolume: 0.12,
-    description: 'Warm meditative tanpura',
+  sitarBgm: {
+    label: 'Sitar BGM',
+    description: 'Sitar & tanpura background music',
+    volume: 0.15,
   },
-  deepOm: {
-    label: 'Deep Ōm',
-    strings: [
-      { freq: 98.0, strokeDelay: 0.0 },
-      { freq: 130.81, strokeDelay: 2.5 },
-      { freq: 165.0, strokeDelay: 5.0 },
-      { freq: 196.0, strokeDelay: 7.5 },
-    ],
-    cycleLength: 10.0,
-    strokeLength: 5.0,
-    filterFreq: 600,
-    masterVolume: 0.28,
-    description: 'Deep resonant grounding',
+  omSound: {
+    label: 'Om Sound',
+    description: 'Soothing om chant',
+    volume: 0.30,
+  },
+  rain: {
+    label: 'Rain',
+    description: 'Calming rain sounds',
+    volume: 0.40,
+  },
+  flute: {
+    label: 'Flute',
+    description: 'Peaceful flute melody',
+    volume: 0.15,
+  },
+  tibetanBowl: {
+    label: 'Tibetan Bowl',
+    description: 'Resonant singing bowl tones',
+    volume: 0.25,
+  },
+  windChimes: {
+    label: 'Wind Chimes',
+    description: 'Gentle wind chimes',
+    volume: 0.15,
   },
   meditation: {
     label: 'Temple Bells',
@@ -50,20 +58,6 @@ export const AMBIENCE_PRESETS = {
     masterVolume: 0.16,
     description: 'Reverberant temple bell tones',
   },
-  sitar: {
-    label: 'Modern Sitar',
-    strings: [
-      { freq: 110.0, strokeDelay: 0.0 },
-      { freq: 146.83, strokeDelay: 2.0 },
-      { freq: 165.0, strokeDelay: 4.0 },
-      { freq: 220.0, strokeDelay: 6.0 },
-    ],
-    cycleLength: 8.0,
-    strokeLength: 4.5,
-    filterFreq: 2600,
-    masterVolume: 0.14,
-    description: 'Sitar with jawari resonance',
-  },
 }
 
 export function SoundEffectsProvider({ children }) {
@@ -74,6 +68,7 @@ export function SoundEffectsProvider({ children }) {
 
   // Holds the ambient drone nodes so we can fade them in/out independently
   const droneRef = useRef(null)
+  const mp3Ref = useRef(null)
 
   const getAudioContext = useCallback(() => {
     if (!audioCtxRef.current) audioCtxRef.current = createAudioContext()
@@ -251,34 +246,51 @@ export function SoundEffectsProvider({ children }) {
      stopWisdomAmbience()  → fades out gently then disconnects
    ───────────────────────────────────────────────────────── */
 
-  const startWisdomAmbience = useCallback((presetName = 'tanpura') => {
+  const startWisdomAmbience = useCallback((presetName = 'sitarBgm') => {
     if (isMuted) return
     if (droneRef.current) stopWisdomAmbience()
 
-    const preset = AMBIENCE_PRESETS[presetName] || AMBIENCE_PRESETS.tanpura
-    const isSitar = presetName === 'sitar'
-    const isBell = presetName === 'meditation'
+    const preset = AMBIENCE_PRESETS[presetName] || AMBIENCE_PRESETS.meditation
 
+    // Handle MP3-based presets
+    if (!preset.strings) {
+      const mp3Sources = {
+        sitarBgm: sitarTanpuraBgm,
+        omSound: omSoundMp3,
+        rain: rainMp3,
+        flute: fluteMp3,
+        tibetanBowl: tibetanBowlMp3,
+        windChimes: windChimesMp3,
+      }
+      const audio = new Audio(mp3Sources[presetName])
+      audio.loop = true
+      audio.volume = preset.volume
+      audio.play()
+      mp3Ref.current = audio
+      droneRef.current = { isMp3: true }
+      return
+    }
+
+    // Temple Bells (meditation) — synthesized
     const ctx = getAudioContext()
     if (!ctx) return
 
     const now = ctx.currentTime
 
-    // — reverb — generate decaying noise impulse response
     const sr = ctx.sampleRate
     const irLen = sr * 3.5
     const irBuf = ctx.createBuffer(2, irLen, sr)
     for (let ch = 0; ch < 2; ch++) {
       const d = irBuf.getChannelData(ch)
       for (let i = 0; i < irLen; i++) {
-        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / irLen, isBell ? 6 : 4)
+        d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / irLen, 6)
       }
     }
     const reverb = ctx.createConvolver()
     reverb.buffer = irBuf
 
     const reverbWet = ctx.createGain()
-    reverbWet.gain.value = isSitar ? 0.40 : isBell ? 0.55 : 0.30
+    reverbWet.gain.value = 0.55
     const reverbDry = ctx.createGain()
     reverbDry.gain.value = 1.0
 
@@ -290,123 +302,38 @@ export function SoundEffectsProvider({ children }) {
     const warmth = ctx.createBiquadFilter()
     warmth.type = 'lowpass'
     warmth.frequency.value = preset.filterFreq
-    warmth.Q.value = isSitar ? 0.35 : isBell ? 0.8 : 0.6
+    warmth.Q.value = 0.8
 
-    // signal: warmth → reverb split → master
     warmth.connect(reverbDry)
     warmth.connect(reverb)
     reverb.connect(reverbWet)
     reverbDry.connect(master)
     reverbWet.connect(master)
 
-    // — sitar feedback delay (sympathetic resonance) —
-    let sitarDelay
-    if (isSitar) {
-      sitarDelay = ctx.createDelay(1.0)
-      sitarDelay.delayTime.value = 0.35
-      const fb = ctx.createGain()
-      fb.gain.value = 0.22
-      sitarDelay.connect(fb)
-      fb.connect(sitarDelay)
-      fb.connect(reverbDry)
-      fb.connect(reverb)
-    }
-
     const CYCLE = preset.cycleLength
     const STROKE = preset.strokeLength
     const NUM_CYCLES = 48
     const oscillators = []
     const gainNodes = [warmth, reverb, reverbWet, reverbDry, master]
+    const bellRatios = [1, 2.0, 3.01, 4.02]
+    const bellVols = [1, 0.5, 0.25, 0.12]
+    const bellDecays = [8.0, 5.5, 3.5, 2.0]
 
     preset.strings.forEach(({ freq, strokeDelay }) => {
-      const numPartials = isSitar ? 5 : isBell ? 4 : 2
-
-      for (let p = 0; p < numPartials; p++) {
-        let partialFreq, partialVol, oscType, osc
-
-        if (isSitar) {
-          // FM pair: carrier + modulator per partial
-          const ratio = p === 0 ? 1 : p === 1 ? 1.5 : p === 2 ? 2 : p === 3 ? 3 : 4
-          const cf = freq * ratio
-          const mf = cf * (p === 0 ? 2.8 : p === 1 ? 3.6 : p === 2 ? 2.4 : p === 3 ? 4.2 : 3.0)
-
-          // FM carrier
-          const carrier = ctx.createOscillator()
-          carrier.type = 'sine'
-          carrier.frequency.value = cf
-          const modGain = ctx.createGain()
-          modGain.gain.value = p === 0 ? 0.35 : 0.18
-          const modulator = ctx.createOscillator()
-          modulator.type = 'sine'
-          modulator.frequency.value = mf
-          modulator.connect(modGain)
-          modGain.connect(carrier.frequency)
-
-          const cg = ctx.createGain()
-          cg.gain.setValueAtTime(0, now)
-          for (let cycle = 0; cycle < NUM_CYCLES; cycle++) {
-            const t = now + strokeDelay + cycle * CYCLE
-            const peak = 0.14 / (p + 1)
-            cg.gain.setValueAtTime(0, t)
-            cg.gain.linearRampToValueAtTime(peak, t + 0.30)
-            cg.gain.linearRampToValueAtTime(peak * 0.6, t + STROKE * 0.5)
-            cg.gain.linearRampToValueAtTime(0, t + STROKE)
-          }
-          carrier.connect(cg)
-          cg.connect(warmth)
-          carrier.start(now)
-          modulator.start(now)
-          oscillators.push(carrier, modulator)
-          gainNodes.push(modGain, cg)
-          continue
-        }
-
-        if (isBell) {
-          // Inharmonic bell partials
-          const bellRatios = [1, 2.0, 3.01, 4.02]
-          const bellVols = [1, 0.5, 0.25, 0.12]
-          const bellDecays = [8.0, 5.5, 3.5, 2.0]
-          partialFreq = freq * bellRatios[p]
-          partialVol = bellVols[p]
-          oscType = 'sine'
-          osc = ctx.createOscillator()
-          osc.type = oscType
-          osc.frequency.value = partialFreq
-
-          const g = ctx.createGain()
-          g.gain.setValueAtTime(0, now)
-          for (let cycle = 0; cycle < NUM_CYCLES; cycle++) {
-            const t = now + strokeDelay + cycle * CYCLE
-            g.gain.setValueAtTime(0, t)
-            g.gain.linearRampToValueAtTime(0.14 * partialVol, t + 0.04)
-            g.gain.exponentialRampToValueAtTime(0.001, t + bellDecays[p])
-          }
-          osc.connect(g)
-          g.connect(warmth)
-          osc.start(now)
-          oscillators.push(osc)
-          gainNodes.push(g)
-          continue
-        }
-
-        // Tanpura / Deep Om
-        const ratio = p === 0 ? 1 : 1.0015
-        const vol = p === 0 ? 1 : 0.45
-        const freqVal = p === 0 ? freq : freq * ratio
-
-        osc = ctx.createOscillator()
+      for (let p = 0; p < 4; p++) {
+        const partialFreq = freq * bellRatios[p]
+        const partialVol = bellVols[p]
+        const osc = ctx.createOscillator()
         osc.type = 'sine'
-        osc.frequency.value = freqVal
+        osc.frequency.value = partialFreq
 
         const g = ctx.createGain()
         g.gain.setValueAtTime(0, now)
         for (let cycle = 0; cycle < NUM_CYCLES; cycle++) {
           const t = now + strokeDelay + cycle * CYCLE
-          const peak = 0.18 * vol
           g.gain.setValueAtTime(0, t)
-          g.gain.linearRampToValueAtTime(peak, t + 0.35)
-          g.gain.linearRampToValueAtTime(peak * 0.6, t + STROKE * 0.5)
-          g.gain.linearRampToValueAtTime(0, t + STROKE)
+          g.gain.linearRampToValueAtTime(0.14 * partialVol, t + 0.04)
+          g.gain.exponentialRampToValueAtTime(0.001, t + bellDecays[p])
         }
         osc.connect(g)
         g.connect(warmth)
@@ -414,44 +341,7 @@ export function SoundEffectsProvider({ children }) {
         oscillators.push(osc)
         gainNodes.push(g)
       }
-
-      // Sitar jawari buzz (noise-based) — subdued for purer tone
-      if (isSitar) {
-        const bufSize = Math.floor(sr * 0.06)
-        const noiseBuf = ctx.createBuffer(1, bufSize, sr)
-        const nd = noiseBuf.getChannelData(0)
-        for (let i = 0; i < bufSize; i++) nd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 3)
-        for (let h = 1; h <= 2; h++) {
-          const nb = ctx.createBufferSource()
-          nb.buffer = noiseBuf
-          nb.loop = true
-          const bp = ctx.createBiquadFilter()
-          bp.type = 'bandpass'
-          bp.frequency.value = freq * h
-          bp.Q.value = 12
-          const ng = ctx.createGain()
-          ng.gain.setValueAtTime(0, now)
-          for (let cycle = 0; cycle < NUM_CYCLES; cycle++) {
-            const t = now + strokeDelay + cycle * CYCLE
-            ng.gain.setValueAtTime(0, t)
-            ng.gain.linearRampToValueAtTime(0.012 / h, t + 0.02)
-            ng.gain.linearRampToValueAtTime(0, t + 0.10)
-          }
-          nb.connect(bp)
-          bp.connect(ng)
-          ng.connect(warmth)
-          nb.start(now)
-          oscillators.push(nb)
-          gainNodes.push(bp, ng)
-        }
-      }
     })
-
-    // If sitar, connect delay after warmth
-    if (isSitar && sitarDelay) {
-      warmth.connect(sitarDelay)
-      gainNodes.push(sitarDelay)
-    }
 
     droneRef.current = { master, oscillators, gainNodes, warmth, ctx }
     ;[master, warmth, reverb, reverbWet, reverbDry, ...oscillators, ...gainNodes].forEach((n) =>
@@ -460,7 +350,20 @@ export function SoundEffectsProvider({ children }) {
   }, [getAudioContext, isMuted])
 
   const stopWisdomAmbience = useCallback(() => {
+    // Stop MP3 if playing
+    if (mp3Ref.current) {
+      mp3Ref.current.pause()
+      mp3Ref.current = null
+    }
+
     if (!droneRef.current) return
+
+    // MP3 preset — no oscillator cleanup needed
+    if (droneRef.current.isMp3) {
+      droneRef.current = null
+      return
+    }
+
     const { master, oscillators, gainNodes, warmth, ctx } = droneRef.current
     droneRef.current = null
 

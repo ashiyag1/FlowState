@@ -5,7 +5,7 @@ export default function WisdomAmbientSound() {
   const {
     isMuted, startWisdomAmbience, stopWisdomAmbience,
   } = useSoundEffects()
-  const [preset, setPreset] = useState('tanpura')
+  const [preset, setPreset] = useState('sitarBgm')
   const [isPlaying, setIsPlaying] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const mountedRef = useRef(true)

@@ -1,10 +1,14 @@
+import { useState } from 'react'
 import { useWisdom } from '../../context/WisdomContext'
 import { useTheme } from '../../context/ThemeContext'
 import { TOPIC_BOOKS } from '../../data/wisdomData'
 
+const STICKY_ROTATIONS = ['-2deg', '1deg', '-1deg', '2deg', '-1.5deg', '1.5deg']
+
 export default function SavedPages({ onBookOpen }) {
-  const { savedPages, removeSavedPage } = useWisdom()
+  const { savedPages, removeSavedPage, getPageNotes } = useWisdom()
   const { dark } = useTheme()
+  const [showNotes, setShowNotes] = useState({})
 
   if (!savedPages.length) {
     return (
@@ -22,27 +26,64 @@ export default function SavedPages({ onBookOpen }) {
     }
   }
 
+  const toggleNotes = (key, e) => {
+    e.stopPropagation()
+    setShowNotes(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const keyFor = (item) => `${item.bookId}-${item.pageIdx}`
+
   return (
     <div style={styles.card(dark)}>
       <h3 style={styles.title(dark)}>Saved Pages</h3>
       <div style={styles.list}>
-        {savedPages.slice(0, 10).map((item, i) => (
-          <div key={`${item.bookId}-${item.pageIdx}`} style={styles.item(dark)} onClick={() => handleOpen(item)}>
-            <div style={styles.thumb}>{item.bookEmoji || '📖'}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={styles.pageTitle(dark)}>{item.heading}</div>
-              <div style={styles.bookSub(dark)}>
-                {item.bookTitle}
-                <span style={styles.progress}> · p.{item.pageIdx + 1}</span>
+        {savedPages.slice(0, 10).map((item) => {
+          const key = keyFor(item)
+          const notes = getPageNotes(item.bookId, item.pageIdx)
+          const isOpen = showNotes[key]
+          return (
+            <div key={key}>
+              <div style={styles.item(dark)} onClick={() => handleOpen(item)}>
+                <div style={styles.thumb}>{item.bookEmoji || '📖'}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={styles.pageTitle(dark)}>{item.heading}</div>
+                  <div style={styles.bookSub(dark)}>
+                    {item.bookTitle}
+                    <span style={styles.progress}> · p.{item.pageIdx + 1}</span>
+                  </div>
+                </div>
+                {notes.length > 0 && (
+                  <button
+                    style={styles.showNotesBtn(dark, isOpen)}
+                    onClick={(e) => toggleNotes(key, e)}
+                    title={isOpen ? 'Hide notes' : `Show ${notes.length} note${notes.length > 1 ? 's' : ''}`}
+                  >{notes.length}</button>
+                )}
+                <button
+                  style={styles.removeBtn(dark)}
+                  onClick={(e) => { e.stopPropagation(); removeSavedPage(item.bookId, item.pageIdx) }}
+                  title="Remove"
+                >✕</button>
               </div>
+              {isOpen && notes.length > 0 && (
+                <div style={styles.stickyRow}>
+                  {notes.map((n, ni) => (
+                    <div
+                      key={n.id}
+                      style={{
+                        ...styles.stickyNote,
+                        background: n.color + 'E0',
+                        transform: `rotate(${STICKY_ROTATIONS[ni % STICKY_ROTATIONS.length]})`,
+                      }}
+                    >
+                      <span style={styles.stickyNoteText}>{n.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <button
-              style={styles.removeBtn(dark)}
-              onClick={(e) => { e.stopPropagation(); removeSavedPage(item.bookId, item.pageIdx) }}
-              title="Remove"
-            >✕</button>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -76,7 +117,7 @@ const styles = {
   },
   item: (dark) => ({
     display: 'flex',
-    gap: '0.4rem',
+    gap: '0.3rem',
     padding: '0.35rem 0',
     alignItems: 'center',
     borderBottom: dark ? '1px solid rgba(201,168,76,0.04)' : '1px solid rgba(201,168,76,0.06)',
@@ -112,6 +153,20 @@ const styles = {
     color: '#c9a84c',
     opacity: 0.7,
   },
+  showNotesBtn: (dark, isOpen) => ({
+    background: isOpen ? '#c9a84c' : (dark ? '#3a2a10' : '#f0e8d0'),
+    border: isOpen ? 'none' : (dark ? '1px solid #4a3a20' : '1px solid #d4c5a0'),
+    borderRadius: '8px',
+    fontSize: '0.5rem',
+    fontWeight: 700,
+    color: isOpen ? '#fff' : (dark ? '#c9b080' : '#8b6914'),
+    padding: '1px 4px',
+    cursor: 'pointer',
+    lineHeight: 1.3,
+    minWidth: '16px',
+    textAlign: 'center',
+    flexShrink: 0,
+  }),
   removeBtn: (dark) => ({
     background: 'none',
     border: 'none',
@@ -121,4 +176,27 @@ const styles = {
     padding: '0.15rem',
     flexShrink: 0,
   }),
+  stickyRow: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    padding: '4px 2px 4px 28px',
+  },
+  stickyNote: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    padding: '4px 7px',
+    borderRadius: '2px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+    fontSize: '0.6rem',
+    lineHeight: 1.4,
+    fontStyle: 'italic',
+    fontFamily: '"Caveat", "Segoe Script", cursive',
+    maxWidth: '95%',
+  },
+  stickyNoteText: {
+    flex: 1,
+    color: '#2a1e10',
+    wordBreak: 'break-word',
+  },
 }

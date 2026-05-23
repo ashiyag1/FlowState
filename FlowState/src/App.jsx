@@ -11,6 +11,7 @@ import Habits  from './pages/Habits'
 import Journal from './pages/Journal'
 import WisdomPage from './pages/WisdomPage'
 import Login   from './pages/Login'
+import AIAssistant from './components/AIAssistant'
 import './styles/globals.css'
 import './styles/animations.css'
 import './styles/dashboard.css'
@@ -41,6 +42,7 @@ export default function App() {
                 <Route path="/login"   element={<Login />} />
                 <Route path="*"        element={<Home />} />
               </Routes>
+              <AIAssistant />
             </BrowserRouter>
           </SoundEffectsProvider>
         </WellnessProvider>

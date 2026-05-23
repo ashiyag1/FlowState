@@ -20,6 +20,7 @@ export function WisdomProvider({ children }) {
   const [userSub, setUserSub] = useLocalState('user_sub', 'Keep growing')
   const [savedWisdom, setSavedWisdom] = useLocalState('saved', [])
   const [savedPages, setSavedPages] = useLocalState('saved_pages', [])
+  const [pageNotes, setPageNotes] = useLocalState('page_notes', {})
   const [streakLog, setStreakLog] = useLocalState('streak_log', {})
   const [openedBooks, setOpenedBooks] = useLocalState('opened_books', [])
   const [bookProgress, setBookProgress] = useLocalState('book_progress', {})
@@ -45,6 +46,27 @@ export function WisdomProvider({ children }) {
   const isPageSaved = useCallback((bookId, pageIdx) => {
     return savedPages.some(p => p.bookId === bookId && p.pageIdx === pageIdx)
   }, [savedPages])
+
+  const addNote = useCallback((bookId, pageIdx, text, color) => {
+    const key = `${bookId}-${pageIdx}`
+    setPageNotes(prev => ({
+      ...prev,
+      [key]: [...(prev[key] || []), { id: Date.now(), text, color }],
+    }))
+  }, [setPageNotes])
+
+  const removeNote = useCallback((bookId, pageIdx, noteId) => {
+    const key = `${bookId}-${pageIdx}`
+    setPageNotes(prev => ({
+      ...prev,
+      [key]: (prev[key] || []).filter(n => n.id !== noteId),
+    }))
+  }, [setPageNotes])
+
+  const getPageNotes = useCallback((bookId, pageIdx) => {
+    const key = `${bookId}-${pageIdx}`
+    return pageNotes[key] || []
+  }, [pageNotes])
 
   const markStreakToday = useCallback(() => {
     const td = getToday()
@@ -109,6 +131,7 @@ export function WisdomProvider({ children }) {
       userSub, setUserSub,
       savedWisdom, toggleSavedWisdom,
       savedPages, savePage, removeSavedPage, isPageSaved,
+      addNote, removeNote, getPageNotes,
       streakLog, markStreakToday,
       getStreakDays, getStreakCount,
       openedBooks, openBook, removeOpenedBook,

@@ -372,7 +372,7 @@ export default function HeroSection() {
   return (
     <section style={{
       position: 'relative',
-      minHeight: '100vh',
+      minHeight: '100dvh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -384,17 +384,27 @@ export default function HeroSection() {
       <AnimatePresence mode="wait">
         <motion.div
           key={`photo-${tod}`}
-          style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `url(${config.bgImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center top',
-          }}
+          style={{ position: 'absolute', inset: 0 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 2.4, ease: 'easeInOut' }}
-        />
+        >
+          <img
+            src={config.bgImage}
+            alt=""
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              height: 'auto',
+              minHeight: '100%',
+              display: 'block',
+            }}
+          />
+        </motion.div>
       </AnimatePresence>
 
       {/* ── Layer 2: Sky gradient blended over the photo ── */}
@@ -482,7 +492,7 @@ export default function HeroSection() {
         position: 'relative',
         zIndex: 10,
         width: '100%', maxWidth: 1180,
-        margin: '0 auto', padding: '5rem 1.5rem 3.5rem',
+        margin: '0 auto', padding: '7rem 1.5rem 2rem',
       }}>
         <div style={{
           display: 'flex', flexWrap: 'wrap',

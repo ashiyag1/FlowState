@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { useTheme } from '../../context/ThemeContext'
 import { useWisdom } from '../../context/WisdomContext'
+import html2canvas from 'html2canvas'
 import pageBg from '../../assets/page.png'
 
 const easeBack = (t) => {
@@ -11,8 +12,16 @@ const easeBack = (t) => {
 
 export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const { dark } = useTheme()
-  const { updateBookProgress, savePage, removeSavedPage, isPageSaved } = useWisdom()
+  const { updateBookProgress, savePage, removeSavedPage, isPageSaved, addNote, removeNote, getPageNotes } = useWisdom()
   const [liked, setLiked] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isFemale, setIsFemale] = useState(true)
+  const [showShare, setShowShare] = useState(false)
+  const [stickyOpen, setStickyOpen] = useState(false)
+  const [stickyText, setStickyText] = useState('')
+  const [stickyColor, setStickyColor] = useState('#FFD43B')
+  const shareRef = useRef(null)
+  const cardRef = useRef(null)
   const pages = book.pages || []
 
   const [idx, setIdx] = useState(initialPage)
@@ -27,6 +36,53 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const rafId = useRef(null)
   const bookEl = useRef(null)
   const hadVertical = useRef(false)
+
+  // ── SPEECH SYNTHESIS ──
+  const speak = useCallback((text, female) => {
+    if (!text) return
+    window.speechSynthesis.cancel()
+
+    const u = new SpeechSynthesisUtterance(text)
+    u.rate = 0.95
+    u.pitch = female ? 0.93 : 0.82
+
+    const voices = window.speechSynthesis.getVoices()
+    const isIndia = v => /india/i.test(v.name)
+    const isKnownFemale = v => /female|heera|priya|neerja|zira|samantha|aria/i.test(v.name)
+    const isKnownMale = v => /male|david|guy|mark|prabhat/i.test(v.name)
+
+    const v = female
+      ? voices.find(v => isIndia(v) && isKnownFemale(v))
+        || voices.find(v => isKnownFemale(v))
+        || voices.find(v => v.name.includes('Google UK English Female'))
+        || voices.find(v => v.name.includes('Google US English Female'))
+        || voices[0]
+      : voices.find(v => isIndia(v) && !isKnownFemale(v))
+        || voices.find(v => isKnownMale(v))
+        || voices.find(v => v.name.includes('Google UK English Male'))
+        || voices.find(v => v.name.includes('Google US English Male'))
+        || voices[0]
+    if (v) u.voice = v
+
+    window.speechSynthesis.speak(u)
+  }, [])
+
+  // load voices
+  useEffect(() => {
+    const h = () => { window.speechSynthesis.getVoices() }
+    window.speechSynthesis.addEventListener('voiceschanged', h)
+    h()
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', h)
+  }, [])
+
+  // cancel speech on unmount
+  useEffect(() => () => window.speechSynthesis.cancel(), [])
+
+  // refs for auto-read on page turn
+  const isPlayingRef = useRef(isPlaying)
+  isPlayingRef.current = isPlaying
+  const isFemaleRef = useRef(isFemale)
+  isFemaleRef.current = isFemale
 
   // clean up raf
   useEffect(() => () => { if (rafId.current) cancelAnimationFrame(rafId.current) }, [])
@@ -161,6 +217,17 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
     resetGesture()
   }, [resetGesture])
 
+  // close share dropdown on outside click
+  useEffect(() => {
+    const h = (e) => {
+      if (shareRef.current && !shareRef.current.contains(e.target)) setShowShare(false)
+    }
+    if (showShare) {
+      setTimeout(() => document.addEventListener('click', h), 0)
+      return () => document.removeEventListener('click', h)
+    }
+  }, [showShare])
+
   // keyboard
   useEffect(() => {
     const h = (e) => {
@@ -178,6 +245,29 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const isTurning = stateRef.current.flip !== 'idle' || isAnimating
   const flipPct = Math.abs(angle) / 180
   const showBack = dragDir.current === 1 && angle < -90
+
+  // ── SPEECH: auto-read on page turn, play/pause, voice toggle ──
+  useEffect(() => {
+    if (isPlayingRef.current && cur) {
+      speak(`${cur.heading}. ${cur.text}`, isFemaleRef.current)
+    }
+  }, [idx]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const togglePlay = useCallback(() => {
+    if (isPlaying) {
+      window.speechSynthesis.cancel()
+      setIsPlaying(false)
+    } else {
+      setIsPlaying(true)
+      if (cur) speak(`${cur.heading}. ${cur.text}`, isFemale)
+    }
+  }, [isPlaying, cur, isFemale, speak])
+
+  const toggleVoice = useCallback(() => {
+    const next = !isFemale
+    setIsFemale(next)
+    if (isPlaying && cur) speak(`${cur.heading}. ${cur.text}`, next)
+  }, [isPlaying, cur, isFemale, speak])
 
   const s = styles(dark)
 
@@ -204,7 +294,33 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
         {/* Page actions — outside book area so they never trigger page flips */}
         {cur && (
           <div style={s.actionsBar}>
-            <span style={s.actionsLabel}>{cur.heading}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', minWidth: 0, flex: 1 }}>
+              <button
+                style={s.actionBtn}
+                onClick={togglePlay}
+                title={isPlaying ? 'Pause reading' : 'Read aloud'}
+              >
+                {isPlaying ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#c9a84c"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#c9a84c"><polygon points="5,3 19,12 5,21"/></svg>
+                )}
+              </button>
+              <button
+                style={s.actionBtn}
+                onClick={toggleVoice}
+                title={isFemale ? 'Switch to male voice' : 'Switch to female voice'}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 5a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V8a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+                <span style={{ fontSize: '0.5rem', fontWeight: 700, marginLeft: '1px', color: '#c9a84c' }}>{isFemale ? 'F' : 'M'}</span>
+              </button>
+              <span style={s.actionsLabel}>{cur.heading}</span>
+            </div>
             <div style={s.actionsGroup}>
               <button
                 style={s.actionBtn}
@@ -236,26 +352,109 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
                 </svg>
               </button>
               <button
-                style={s.actionBtn}
-                onClick={async () => {
-                  const text = `${cur.heading}\n\n${cur.text}\n\n— ${book.title}, ${book.scripture}`
-                  if (navigator.share) {
-                    await navigator.share({ title: cur.heading, text })
-                  } else {
-                    await navigator.clipboard.writeText(text)
-                    alert('Page copied to clipboard!')
-                  }
+                style={{
+                  ...s.actionBtn,
+                  background: stickyOpen ? '#c9a84c22' : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)'),
                 }}
-                title="Share page"
+                onClick={() => { setStickyOpen(v => !v); setStickyText('') }}
+                title="Sticky note"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                <svg width="14" height="14" viewBox="0 0 24 24" fill={stickyOpen ? '#c9a84c' : 'none'} stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="18" x2="12" y2="12" />
+                  <line x1="9" y1="15" x2="15" y2="15" />
                 </svg>
               </button>
+              <div style={{ position: 'relative' }} ref={shareRef}>
+                <button
+                  style={s.actionBtn}
+                  onClick={() => setShowShare(v => !v)}
+                  title="Share page"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                  </svg>
+                </button>
+                {showShare && (
+                  <div style={s.shareDropdown(dark)}>
+                    <button style={s.shareOption(dark)} onClick={async () => {
+                      setShowShare(false)
+                      const text = `${cur.heading}\n\n${cur.text}\n\n— ${book.title}, ${book.scripture}`
+                      if (navigator.share) {
+                        await navigator.share({ title: cur.heading, text })
+                      } else {
+                        await navigator.clipboard.writeText(text)
+                        alert('Page copied to clipboard!')
+                      }
+                    }}>
+                      Share Text
+                    </button>
+                    <button style={s.shareOption(dark)} onClick={async () => {
+                      setShowShare(false)
+                      try {
+                        const el = cardRef.current
+                        if (!el) return
+                        el.style.display = 'block'
+                        const canvas = await html2canvas(el, {
+                          scale: 2,
+                          useCORS: true,
+                          background: '#fcf6e8',
+                        })
+                        el.style.display = 'none'
+                        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'))
+                        if (!blob) return
+                        const file = new File([blob], 'wisdom-card.png', { type: 'image/png' })
+                        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                          await navigator.share({
+                            title: cur.heading,
+                            text: `hey checkout this wisdom card on tarang-flowstate`,
+                            files: [file],
+                          })
+                        } else {
+                          await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob }),
+                          ])
+                          alert('Wisdom card image copied to clipboard!')
+                        }
+                      } catch (err) {
+                        console.error('Share image failed:', err)
+                        alert('Could not share image. Try using Share Text instead.')
+                      }
+                    }}>
+                      Share as Image
+                    </button>
+                    <button style={s.shareOption(dark)} onClick={async () => {
+                      setShowShare(false)
+                      try {
+                        await navigator.clipboard.writeText(
+                          `hey checkout this wisdom card on tarang-flowstate\n\n${cur.heading}\n\n${cur.text}\n\n— ${book.title}, ${book.scripture}`
+                        )
+                        alert('Link copied to clipboard!')
+                      } catch { /* ignore */ }
+                    }}>
+                      Copy Link
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
+
+        {/* Hidden wisdom card for image sharing */}
+        <div ref={cardRef} style={s.shareCard}>
+          <div style={s.shareCardInner}>
+            <div style={s.shareCardEmoji}>{book.emoji || '📖'}</div>
+            <h3 style={s.shareCardHeading}>{cur?.heading}</h3>
+            <p style={s.shareCardText}>{cur?.text}</p>
+            <div style={s.shareCardFooter}>
+              <div style={s.shareCardSource}>— {book.title}, {book.scripture}</div>
+              <div style={s.shareCardTag}>tarang-flowstate</div>
+            </div>
+          </div>
+        </div>
 
         <div ref={bookEl} style={s.bookArea}
           onPointerDown={onDown}
@@ -362,6 +561,39 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
           {!isTurning && idx < pages.length - 1 && <div style={{ ...s.touch, ...s.touchR }} />}
         </div>
 
+        {stickyOpen && (
+          <div style={s.stickyPanel(dark)}>
+            {getPageNotes(book.id, idx).length > 0 && (
+              <div style={s.stickyPanelNotes}>
+                {getPageNotes(book.id, idx).map((n, ni) => (
+                  <div key={n.id} style={{ ...s.stickyPanelNote, background: n.color + 'E0', transform: `rotate(${['-1deg','1deg','-0.5deg','0.5deg'][ni % 4]})` }}>
+                    <span style={s.stickyPanelNoteText}>{n.text}</span>
+                    <button style={s.stickyPanelNoteDel} onClick={() => removeNote(book.id, idx, n.id)}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              style={s.stickyPanelInput(dark)}
+              placeholder="Write a sticky note..."
+              value={stickyText}
+              onChange={e => setStickyText(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && stickyText.trim()) {
+                  addNote(book.id, idx, stickyText.trim(), stickyColor)
+                  setStickyText('')
+                }
+              }}
+              autoFocus
+            />
+            <div style={s.stickyPanelRow}>
+              {['#FF6B6B','#FFA94D','#FFD43B','#69DB7C','#4DABF7','#9775FA','#F783AC','#63E6BE'].map(c => (
+                <button key={c} style={{ ...s.stickyPanelColor, background: c, border: stickyColor === c ? '2px solid #333' : '2px solid transparent' }} onClick={() => setStickyColor(c)} />
+              ))}
+              <button style={s.stickyPanelBtn} onClick={() => { if (stickyText.trim()) { addNote(book.id, idx, stickyText.trim(), stickyColor); setStickyText('') } }}>Stick</button>
+            </div>
+          </div>
+        )}
         <div style={s.footer}>
           <p style={s.verse}>{book.sampleVerse}</p>
         </div>
@@ -485,8 +717,58 @@ const styles = (dark) => ({
   },
   pageNum: {
     textAlign: 'center', fontSize: '0.58rem',
-    color: dark ? '#8a7a60' : '#a09070', marginTop: '0.5rem',
+    color: dark ? '#8a7a60' : '#a09070', marginTop: '0.3rem',
     fontFamily: 'serif', fontStyle: 'italic', flexShrink: 0,
+  },
+  stickyPanelNotes: {
+    display: 'flex', flexDirection: 'column', gap: '4px',
+    marginBottom: '0.4rem',
+  },
+  stickyPanelNote: {
+    display: 'flex', alignItems: 'flex-start', gap: '0.3rem',
+    padding: '4px 8px', borderRadius: '3px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+    fontSize: '0.65rem', lineHeight: 1.4,
+    fontStyle: 'italic',
+    fontFamily: '"Caveat", "Segoe Script", cursive',
+  },
+  stickyPanelNoteText: {
+    flex: 1, color: '#2a1e10', wordBreak: 'break-word',
+  },
+  stickyPanelNoteDel: {
+    background: 'rgba(0,0,0,0.1)', border: 'none', borderRadius: '50%',
+    width: '14px', height: '14px', display: 'flex',
+    alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer', fontSize: '0.45rem', color: '#2a1e10',
+    padding: 0, flexShrink: 0, lineHeight: 1, opacity: 0.7,
+  },
+  stickyPanel: (dark) => ({
+    margin: '0.3rem 1.25rem 0', padding: '0.5rem 0.6rem',
+    background: dark ? 'rgba(40,30,15,0.3)' : 'rgba(255,252,240,0.6)',
+    border: dark ? '1px solid rgba(201,168,76,0.08)' : '1px solid rgba(201,168,76,0.1)',
+    borderRadius: '10px', flexShrink: 0,
+  }),
+  stickyPanelInput: (dark) => ({
+    background: dark ? '#2a1e10' : '#fff',
+    border: dark ? '1px solid #4a3a20' : '1px solid #d4c5a0',
+    borderRadius: '6px', padding: '0.35rem 0.5rem',
+    fontSize: '0.75rem', width: '100%', boxSizing: 'border-box',
+    color: dark ? '#c9b080' : '#5c3d1e', outline: 'none',
+    fontFamily: '"Caveat", "Segoe Script", cursive',
+  }),
+  stickyPanelRow: {
+    display: 'flex', gap: '4px', alignItems: 'center',
+    marginTop: '5px', flexWrap: 'wrap',
+  },
+  stickyPanelColor: {
+    width: '16px', height: '16px', borderRadius: '50%',
+    border: '2px solid transparent', cursor: 'pointer', padding: 0,
+  },
+  stickyPanelBtn: {
+    background: '#c9a84c', border: 'none', borderRadius: '6px',
+    padding: '0.25rem 0.7rem', fontSize: '0.65rem',
+    color: '#fff', cursor: 'pointer', fontWeight: 700,
+    marginLeft: 'auto', letterSpacing: '0.03em',
   },
   actionsBar: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -541,6 +823,80 @@ const styles = (dark) => ({
     position: 'absolute', left: '50%', top: 0, bottom: 0, width: '1px',
     background: dark ? 'rgba(201,168,76,0.07)' : 'rgba(201,168,76,0.1)',
     zIndex: 3, pointerEvents: 'none',
+  },
+
+  // ── SHARE ──
+  shareDropdown: (dark) => ({
+    position: 'absolute', bottom: '100%', right: 0, marginBottom: '4px',
+    background: dark ? '#2a1e10' : '#fff',
+    border: dark ? '1px solid #4a3a20' : '1px solid #d4c5a0',
+    borderRadius: '8px', overflow: 'hidden',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+    zIndex: 50, minWidth: '120px',
+  }),
+  shareOption: (dark) => ({
+    display: 'block', width: '100%', textAlign: 'left',
+    background: 'none', border: 'none',
+    padding: '0.4rem 0.7rem', fontSize: '0.7rem',
+    color: dark ? '#c9b080' : '#5c3d1e',
+    cursor: 'pointer', fontFamily: 'inherit',
+    borderBottom: dark ? '1px solid rgba(201,168,76,0.06)' : '1px solid rgba(201,168,76,0.08)',
+    transition: 'background 0.1s',
+  }),
+  shareCard: {
+    display: 'none',
+    position: 'absolute',
+    left: '-9999px',
+    width: '400px',
+    padding: '2rem',
+    background: '#fcf6e8',
+    borderRadius: '16px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+    border: '1px solid #d4c5a0',
+    fontFamily: '"Lora", "Georgia", serif',
+  },
+  shareCardInner: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem',
+    textAlign: 'center',
+  },
+  shareCardEmoji: {
+    fontSize: '3rem',
+    lineHeight: 1,
+  },
+  shareCardHeading: {
+    fontSize: '1.1rem',
+    fontFamily: '"Cinzel", serif',
+    color: '#5c3d1e',
+    margin: 0,
+  },
+  shareCardText: {
+    fontSize: '0.9rem',
+    color: '#4a3a20',
+    lineHeight: 1.7,
+    margin: 0,
+    whiteSpace: 'pre-line',
+  },
+  shareCardFooter: {
+    marginTop: '0.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.25rem',
+  },
+  shareCardSource: {
+    fontSize: '0.75rem',
+    color: '#8b6914',
+    fontStyle: 'italic',
+  },
+  shareCardTag: {
+    fontSize: '0.6rem',
+    color: '#c9a84c',
+    fontWeight: 600,
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
   },
 
   // ── TOUCH ──
