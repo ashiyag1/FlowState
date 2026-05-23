@@ -1,0 +1,360 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;700&family=Playfair+Display:wght@400;700&family=Noto+Serif+Devanagari:wght@400;600&family=Lora:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ivory: #fbf6ee;
+  --ivory-soft: #f2e9d8;
+  --saffron: #e8622a;
+  --gold: #c9933a;
+  --sandalwood: #8a5a2b;
+  --ink: #1c1208;
+  --ink-soft: #3d2e1a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Lexend', sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(232, 98, 42, 0.11), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(201, 147, 58, 0.1), transparent 36%),
+    linear-gradient(145deg, #fffaf3 0%, var(--ivory) 52%, #f3e7d3 100%);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── HIGH VISIBILITY DARK MODE OVERRIDES ── */
+.dark body {
+  background:
+    radial-gradient(circle at top left, rgba(232, 98, 42, 0.15), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(201, 147, 58, 0.12), transparent 40%),
+    linear-gradient(160deg, #0f0a05 0%, #170f0a 55%, #1f120a 100%) !important;
+  color: #f7eed7;
+}
+
+.card {
+  @apply rounded-3xl p-5 border border-gold/20 bg-white/85 backdrop-blur-md shadow-card;
+}
+
+/* Premium Opaque Dark Mode Cards to ensure 100% visibility over complex backgrounds */
+.dark .card {
+  background: rgba(22, 14, 6, 0.96) !important;
+  border-color: rgba(201, 168, 76, 0.28) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6) !important;
+  color: #f7eed7 !important;
+}
+
+.card-hover {
+  @apply card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl-soft hover:border-gold/30;
+}
+
+.btn-primary {
+  @apply px-6 py-3 rounded-full text-white font-semibold transition-all duration-300;
+  background: linear-gradient(135deg, var(--saffron), #f4925a);
+  box-shadow: 0 8px 28px rgba(232, 98, 42, 0.28);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-ghost {
+  @apply px-4 py-2 rounded-full border border-gold/25 text-sm font-semibold
+         text-ink/75 dark:text-ivory/75 bg-white/55 dark:bg-white/[0.03]
+         hover:bg-gold/10 dark:hover:bg-gold/15 hover:border-gold/40 transition-all duration-200;
+}
+
+.eyebrow {
+  @apply text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em];
+  color: var(--sandalwood);
+}
+
+.dark .eyebrow {
+  color: #e8c985;
+}
+
+.input {
+  @apply w-full rounded-2xl px-4 py-3 border border-gold/25 bg-white/70
+         focus:outline-none focus:ring-2 focus:ring-gold/30 transition-all duration-200;
+}
+
+.dark .input, .dark textarea {
+  background: rgba(14, 9, 4, 0.8) !important;
+  color: #fcf6e8 !important;
+  border-color: rgba(201, 168, 76, 0.35) !important;
+}
+
+.divider {
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  border-radius: 999px;
+}
+
+.heading {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.dark .heading, .dark h1, .dark h2, .dark h3, .dark h4 {
+  color: #f7eed7 !important;
+}
+
+.lotus-glow {
+  position: relative;
+}
+
+.lotus-glow::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle, rgba(232, 98, 42, 0.12), transparent 60%);
+  z-index: -1;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.floaty {
+  animation: floaty 4s ease-in-out infinite;
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.ripple {
+  animation: ripple 2.5s infinite;
+}
+
+/* Compatibility utility aliases used across pages */
+.glass {
+  @apply border border-gold/20 bg-white/65 dark:bg-white/[0.04] backdrop-blur-xl;
+}
+
+.dark .glass {
+  background: rgba(22, 14, 6, 0.94) !important;
+  border-color: rgba(201, 168, 76, 0.25) !important;
+}
+
+.arch-navbar,
+.arch-shell {
+  @apply border border-gold/20 bg-white/70 dark:bg-white/[0.04] backdrop-blur-xl;
+}
+
+.nav-royal {
+  @apply text-ink/80 dark:text-ivory/75;
+}
+
+.nav-active {
+  @apply text-ink dark:text-ivory;
+}
+
+/* ── Journal page ───────────────────────────── */
+.journal-page {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #120904;
+  min-height: 100vh;
+}
+
+@media (min-width: 641px) {
+  .journal-page {
+    background-position: center 72%;
+  }
+}
+
+@media (max-width: 640px) {
+  .journal-page {
+    background-position: center 35%;
+  }
+}
+
+.journal-glass {
+  border: 1px solid rgba(201, 168, 76, 0.3) !important;
+  background: rgba(45, 30, 15, 0.75) !important;
+  box-shadow: 0 16px 48px rgba(45, 30, 15, 0.15) !important;
+  @apply rounded-3xl backdrop-blur-xl;
+}
+
+.dark .journal-glass {
+  background: rgba(22, 14, 6, 0.95) !important;
+  border-color: rgba(201, 168, 76, 0.28) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+}
+
+.journal-glass-card {
+  background: rgba(45, 30, 15, 0.65) !important;
+  border: 1px solid rgba(201, 168, 76, 0.2) !important;
+  @apply rounded-3xl backdrop-blur-md shadow-soft transition-all duration-300;
+}
+
+.dark .journal-glass-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(201, 168, 76, 0.15) !important;
+}
+
+.journal-glass-card:hover {
+  background: rgba(60, 40, 20, 0.8) !important;
+  border-color: rgba(201, 168, 76, 0.35) !important;
+}
+
+.dark .journal-glass-card:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(201, 168, 76, 0.25) !important;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.journal-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* ── DIARY MOCKUP STYLING ── */
+.book-tassel-cord {
+  position: absolute;
+  top: 0;
+  left: -20px;
+  width: 3px;
+  height: 220px;
+  background: linear-gradient(180deg, #8a5a2b, #c9933a, #5a1962);
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+.book-tassel-pendant {
+  position: absolute;
+  bottom: -32px;
+  left: -33px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f9e297 0%, #c9933a 80%, #906211 100%);
+  border: 1.5px solid #dfb965;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4c2f06;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.book-tassel-fringe {
+  position: absolute;
+  bottom: -68px;
+  left: -22px;
+  width: 7px;
+  height: 38px;
+  background: linear-gradient(180deg, #5a1962, #9a20a8, #300c35);
+  border-radius: 2px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+.book-bookmark-flap {
+  position: absolute;
+  top: 60px;
+  right: -24px;
+  width: 25px;
+  height: 65px;
+  background: linear-gradient(90deg, #4f1956, #6b2474);
+  box-shadow: 2px 4px 6px rgba(0,0,0,0.3);
+  border-radius: 0 6px 6px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd700;
+  z-index: 10;
+}
+
+.parchment-lines {
+  background-image: linear-gradient(rgba(201, 168, 76, 0.16) 1px, transparent 1px) !important;
+  background-size: 100% 32px !important;
+  line-height: 32px !important;
+}
+
+/* Purple Wax Seal Save Button */
+.wax-seal-wood-container {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(180deg, #d2a76f, #b3854d);
+  border: 1px solid #735028;
+  border-radius: 8px;
+  padding: 4px 18px 4px 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.wax-seal-wood-container:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+}
+
+.wax-seal-wood-container:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.wax-seal-purple-seal {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #8f2d9c 0%, #5b1a64 90%);
+  border: 2px solid #4a0d53;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f7eed7;
+  font-size: 20px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.wax-seal-wood-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.wax-seal-wood-text-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #382006;
+  line-height: 1.1;
+}
+
+.wax-seal-wood-text-subtitle {
+  font-family: 'Lora', serif;
+  font-size: 0.62rem;
+  font-style: italic;
+  color: #5c3b17;
+  margin-top: 1px;
+}
+
+/* Sound Wave Bars Animation */
+@keyframes soundBar {
+  0%, 100% { height: 3px; }
+  50% { height: 12px; }
+}
+
+/* Floating particle particles */
+@keyframes soundWave {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.4); opacity: 0; }
+}

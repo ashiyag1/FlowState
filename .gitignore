@@ -1,3 +1,22 @@
+# Dependency directories
 node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Local databases
+db.json
+backend/db.json
+
+# Local env files
 .env
+backend/.env
+frontend/.env
 .env.local
+
+# Production builds
+dist/
+frontend/dist/
+
+# OS files
+.DS_Store
+Thumbs.db

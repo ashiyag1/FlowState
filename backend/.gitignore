@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+
+# Local env file containing sensitive MongoDB URI and API keys
+.env
+
+# Local JSON database file
+db.json
+
+# Production builds
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
