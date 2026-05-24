@@ -12,6 +12,7 @@ import communityRoutes from './routes/community.js'
 
 // Load environment variables
 dotenv.config()
+dotenv.config({ path: './backend/.env' })
 
 const app = express()
 
