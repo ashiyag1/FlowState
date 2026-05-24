@@ -5,6 +5,7 @@ import { useWellness } from '../context/WellnessContext'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { useAchievements } from '../context/AchievementsContext'
 import { pct as calcPct } from '../utils'
 import PageLayout, { Container } from '../components/PageLayout'
 import WaterProgress from '../components/Waterprogress'
@@ -79,6 +80,7 @@ export default function Water() {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const { waterGoal, setWaterGoal, todayEntries, todayTotal, addWater, removeWater, clearWaterToday, waterLog } = useWellness()
+  const { trackEvent } = useAchievements()
   const { playHydrationSound } = useSoundEffects()
   const [custom, setCustom] = useState('')
   const [goalInput, setGoalInput] = useState(waterGoal)
@@ -104,6 +106,7 @@ export default function Water() {
     }
     const wasBelowGoal = total < waterGoal
     addWater(ml, label)
+    trackEvent('water_logged')
     if (wasBelowGoal && total + ml >= waterGoal) playHydrationSound()
   }
 

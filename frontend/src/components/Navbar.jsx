@@ -1,11 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
-import { Sun, Moon, LogIn, LogOut, Volume2, VolumeX, Menu, X, User } from 'lucide-react'
+import { Sun, Moon, LogIn, LogOut, Volume2, VolumeX, Menu, X, User, Award } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import NotificationsButton from './NotificationsButton'
+import { useAchievements } from '../context/AchievementsContext'
 
 const NAV = [
   { to: '/',        label: 'Home',      sub: 'Sanctuary' },
@@ -168,6 +169,7 @@ export default function Navbar() {
   const { dark, toggle } = useTheme()
   const { isMuted, toggleMute } = useSoundEffects()
   const { user, isAuthenticated, logout } = useAuth()
+  const { setGalleryOpen } = useAchievements()
   const navigate = useNavigate()
   const [visible,    setVisible]  = useState(true)
   const [scrolled,   setScrolled] = useState(false)
@@ -314,6 +316,19 @@ export default function Navbar() {
             </motion.button>
 
             <NotificationsButton />
+
+            <motion.button type="button" whileTap={{ scale:0.88 }} onClick={() => setGalleryOpen(true)}
+              style={{
+                width:30, height:30, borderRadius:'50%',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                border:'1px solid rgba(212,168,42,0.22)',
+                background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
+                boxShadow:'0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
+                color: dark ? '#d9b96a' : '#6b4c12',
+                cursor:'pointer', transition:'all 0.25s ease',
+              }} aria-label="Open achievements">
+              <Award size={13}/>
+            </motion.button>
 
             <motion.button type="button" whileTap={{ scale:0.88 }} onClick={toggleMute}
               style={{
@@ -485,6 +500,17 @@ export default function Navbar() {
           </NavLink>
           <div style={{ display:'flex', alignItems:'center', gap:6 }}>
             <NotificationsButton />
+            <motion.button type="button" whileTap={{ scale:0.88 }} onClick={() => setGalleryOpen(true)}
+              style={{
+                width:30, height:30, borderRadius:'50%',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                border:'1px solid rgba(212,168,42,0.22)',
+                background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
+                color: dark ? '#d9b96a' : '#6b4c12',
+                cursor:'pointer',
+              }} aria-label="Open achievements">
+              <Award size={13}/>
+            </motion.button>
             <motion.button type="button" whileTap={{ scale:0.88 }}
               onClick={() => setMobileOpen(true)}
               style={{
@@ -600,6 +626,17 @@ export default function Navbar() {
                     }}>
                     {dark ? <Sun size={12}/> : <Moon size={12}/>}
                     {dark ? 'Light Mode' : 'Dark Mode'}
+                  </motion.button>
+                  <motion.button type="button" whileTap={{ scale:0.88 }} onClick={() => { setMobileOpen(false); setGalleryOpen(true); }}
+                    style={{
+                      width:38, height:38, borderRadius:'50%',
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      border:'1px solid rgba(212,168,42,0.22)',
+                      background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.35)',
+                      color: dark ? '#d9b96a' : '#6b4c12',
+                      cursor:'pointer',
+                    }} aria-label="Open achievements">
+                    <Award size={13}/>
                   </motion.button>
                   <motion.button type="button" whileTap={{ scale:0.88 }} onClick={toggleMute}
                     style={{

@@ -8,6 +8,7 @@ import journalRoutes from './routes/journal.js'
 import chatRoutes from './routes/chat.js'
 import communityRoutes from './routes/community.js'
 import profileRoutes from './routes/profile.js'
+import badgesRoutes from './routes/badges.js'
 
 // Load environment variables
 dotenv.config()
@@ -27,6 +28,7 @@ app.use('/api/journal', journalRoutes)
 app.use('/api/chat', chatRoutes)
 app.use('/api/community', communityRoutes)
 app.use('/api/profile', profileRoutes)
+app.use('/api/badges', badgesRoutes)
 
 // Fallback Route for API
 app.use('/api/*', (req, res) => {

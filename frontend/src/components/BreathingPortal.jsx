@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Wind, Play, Square, Volume2, VolumeX } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
+import { useAchievements } from '../context/AchievementsContext'
 
 export default function BreathingPortal() {
   const { dark } = useTheme()
+  const { trackEvent } = useAchievements()
   const [isActive, setIsActive] = useState(false)
   const [cycleStep, setCycleStep] = useState(0) // 0: inhale, 1: hold, 2: exhale, 3: hold
   const [timeLeft, setTimeLeft] = useState(4)
@@ -24,6 +26,9 @@ export default function BreathingPortal() {
           if (prev <= 1) {
             // Move to next step
             setCycleStep((currentStep) => {
+              if (currentStep === 3) {
+                trackEvent('breathing_completed')
+              }
               const nextStep = (currentStep + 1) % steps.length
               setTimeLeft(steps[nextStep].duration)
               return nextStep

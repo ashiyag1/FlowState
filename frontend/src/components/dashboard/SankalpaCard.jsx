@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSoundEffects } from '../../hooks/useSoundEffects'
 import { useTheme } from '../../context/ThemeContext'
+import { useAchievements } from '../../context/AchievementsContext'
 
 /* ─────────────────────────────────────────────────────────────
    DHOOP BURNER (INCENSE BURNER) SVG COMPONENT
@@ -216,6 +217,7 @@ function DhoopBurner({ state, dark }) {
 export default function SankalpaCard() {
   const { playHabitSound } = useSoundEffects()
   const { dark } = useTheme()
+  const { trackEvent } = useAchievements()
 
   const getTodayDate = () =>
     new Date().toISOString().split('T')[0]
@@ -277,6 +279,7 @@ export default function SankalpaCard() {
   const handleCommit = () => {
     if (!inputVal.trim()) return
     setSankalpa(inputVal.trim())
+    trackEvent('sankalpa_set')
     setInputVal('')
     setShowSmoke(true)
   }
@@ -284,6 +287,7 @@ export default function SankalpaCard() {
   const handleFulfill = () => {
     playHabitSound()
     setCompleted(true)
+    trackEvent('sankalpa_completed')
   }
 
   const handleEdit = () => {

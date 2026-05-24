@@ -535,6 +535,9 @@ function Heritage() {
         /* Basic Styles with background image texture blending */
         .heritage-page-container {
           min-height: 100vh;
+          background: 
+            linear-gradient(rgba(var(--heritage-bg-rgb), 0.94), rgba(var(--heritage-bg-rgb), 0.94)),
+            url(${heritageBg}) repeat;
           background-color: var(--heritage-bg);
           color: var(--heritage-text);
           font-family: 'Outfit', sans-serif;
@@ -544,10 +547,6 @@ function Heritage() {
         }
 
         .heritage-body-content {
-          background: 
-            linear-gradient(rgba(var(--heritage-bg-rgb), 0.82), rgba(var(--heritage-bg-rgb), 0.82)),
-            url(${heritageBg}) repeat;
-          background-attachment: fixed;
           position: relative;
           z-index: 10;
         }
@@ -575,61 +574,66 @@ function Heritage() {
         }
 
         /* Hero Section fixed to spread full bleed */
+        /* Hero Section full bleed below navbar */
         .hero-section {
-          padding: 70px 0 0;
           position: relative;
           z-index: 10;
-          min-height: 85vh;
-          min-height: 85dvh;
+          min-height: 95vh;
+          min-height: 95dvh;
           display: flex;
           align-items: center;
           justify-content: center;
           width: 100%;
           box-sizing: border-box;
+          padding-top: 110px; /* Leave space for the floating navbar */
+          padding-bottom: 60px;
+          --hero-bg-shift: 90px;
         }
 
         .hero-bg {
           position: absolute;
-          inset: 0;
+          top: 0; /* Start backdrop container at the top of the viewport */
+          bottom: 0;
+          left: 0;
+          right: 0;
           z-index: 0;
-          width: 100%;
-          height: 100%;
-          background: var(--heritage-bg);
+          overflow: hidden;
         }
 
         .hero-bg-img {
+          position: absolute;
+          top: var(--hero-bg-shift);
+          left: 0;
           width: 100%;
-          height: 100%;
+          height: calc(100% - var(--hero-bg-shift));
           object-fit: cover;
           display: block;
-          object-position: 50% 40%;
+          object-position: center top; /* Align top of image with top of its shifted box */
         }
 
         .hero-bg-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(
-            180deg,
-            var(--heritage-bg) 0%,
-            var(--heritage-bg) 60px,
-            rgba(var(--heritage-bg-rgb), 0.85) 80px,
-            rgba(var(--heritage-bg-rgb), 0.3) 130px,
-            rgba(var(--heritage-bg-rgb), 0.1) 180px,
-            transparent 250px
-          );
+          background: 
+            radial-gradient(circle at 50% 50%, rgba(var(--heritage-bg-rgb), 0.25) 0%, rgba(var(--heritage-bg-rgb), 0.1) 50%, rgba(var(--heritage-bg-rgb), 0) 85%),
+            linear-gradient(
+              360deg,
+              var(--heritage-bg) 0%,
+              rgba(var(--heritage-bg-rgb), 0.85) 15%,
+              transparent 45%
+            );
           pointer-events: none;
         }
 
         .dark-theme .hero-bg-overlay {
-          background: linear-gradient(
-            180deg,
-            var(--heritage-bg) 0%,
-            var(--heritage-bg) 60px,
-            rgba(var(--heritage-bg-rgb), 0.85) 80px,
-            rgba(var(--heritage-bg-rgb), 0.3) 130px,
-            rgba(var(--heritage-bg-rgb), 0.1) 180px,
-            transparent 250px
-          );
+          background: 
+            radial-gradient(circle at 50% 50%, rgba(var(--heritage-bg-rgb), 0.3) 0%, rgba(var(--heritage-bg-rgb), 0.15) 50%, rgba(var(--heritage-bg-rgb), 0) 85%),
+            linear-gradient(
+              360deg,
+              var(--heritage-bg) 0%,
+              rgba(var(--heritage-bg-rgb), 0.85) 15%,
+              transparent 45%
+            );
         }
 
         .hero-container {
@@ -643,6 +647,34 @@ function Heritage() {
           align-items: center;
           text-align: center;
           padding: 0 48px;
+          box-sizing: border-box;
+        }
+
+        .hero-content {
+          background: rgba(255, 252, 245, 0.4);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          border: 1px solid rgba(var(--heritage-gold-rgb), 0.14);
+          border-radius: 28px;
+          padding: 36px 40px;
+          max-width: 480px; /* Constrain card to sit perfectly between Buddha and Lilavati */
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          box-shadow: 
+            0 16px 40px rgba(var(--heritage-gold-rgb), 0.04),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+          transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+          box-sizing: border-box;
+        }
+
+        .dark-theme .hero-content {
+          background: rgba(3, 14, 20, 0.45);
+          border-color: rgba(201, 168, 76, 0.12);
+          box-shadow: 
+            0 20px 50px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04);
         }
 
         .hero-eyebrow {
@@ -653,24 +685,24 @@ function Heritage() {
           font-weight: 700;
           letter-spacing: 3px;
           color: var(--heritage-gold);
-          margin-bottom: 24px;
+          margin-bottom: 18px;
           text-transform: uppercase;
         }
 
         .hero-title {
           font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(3rem, 6vw, 4.8rem);
+          font-size: clamp(2.4rem, 5.2vw, 4rem);
           font-weight: 300;
-          line-height: 1.1;
-          margin: 0 0 24px;
+          line-height: 1.15;
+          margin: 0 0 18px;
           letter-spacing: -0.01em;
           color: var(--heritage-text);
-          text-shadow: 0 2px 10px rgba(var(--heritage-gold-rgb), 0.15);
+          text-shadow: 0 2px 10px rgba(var(--heritage-gold-rgb), 0.12);
         }
 
         .dark-theme .hero-title {
           color: #FDF6E3;
-          text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+          text-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
         .hero-title .italic-gold {
@@ -680,24 +712,24 @@ function Heritage() {
         }
 
         .hero-subtext {
-          font-size: 1.15rem;
-          line-height: 1.65;
+          font-size: 1.1rem;
+          line-height: 1.6;
           color: var(--heritage-muted);
-          margin: 0 0 32px;
+          margin: 0 0 24px;
           font-weight: 300;
-          max-width: 600px;
+          max-width: 520px;
         }
 
         .dark-theme .hero-subtext {
-          color: rgba(253, 246, 227, 0.8);
-          text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+          color: rgba(253, 246, 227, 0.85);
+          text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .hero-hindi-badge {
           display: flex;
           align-items: center;
           gap: 12px;
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.4);
+          border: 1px solid rgba(var(--heritage-gold-rgb), 0.35);
           background-color: rgba(var(--heritage-gold-rgb), 0.08);
           padding: 8px 20px;
           border-radius: 99px;
@@ -705,12 +737,12 @@ function Heritage() {
           color: var(--heritage-gold-hover);
           font-style: italic;
           font-family: 'Cormorant Garamond', serif;
-          margin-bottom: 36px;
+          margin-bottom: 28px;
           backdrop-filter: blur(10px);
         }
 
         .dark-theme .hero-hindi-badge {
-          background-color: rgba(18, 10, 4, 0.6);
+          background-color: rgba(18, 10, 4, 0.5);
           color: #ffe8a0;
         }
 
@@ -1646,14 +1678,21 @@ function Heritage() {
 
         @media (max-width: 768px) {
           .hero-section {
-            padding: 70px 0 0;
-            min-height: auto;
+            margin-top: 60px; /* Offset for smaller floating navbar on mobile */
+            padding: 40px 0;
+            min-height: 70vh;
+            min-height: 70dvh;
             display: flex;
             align-items: center;
             justify-content: center;
+            --hero-bg-shift: 0px;
           }
           .hero-container {
-            padding: 0 24px;
+            padding: 0 20px;
+          }
+          .hero-content {
+            padding: 32px 24px;
+            border-radius: 20px;
           }
           .categories-section {
             padding: 0 24px 30px;

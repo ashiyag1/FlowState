@@ -12,6 +12,7 @@ import { useWellness } from '../context/WellnessContext'
 import { useAuth } from '../context/AuthContext'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useNavigate } from 'react-router-dom'
+import { useAchievements } from '../context/AchievementsContext'
 import { getHinduDetails, getScientificInsights } from '../utils/hinduCalendar'
 import LotusFlower from '../icons/LotusFlower'
 import DiyaLamp from '../icons/DiyaLamp'
@@ -103,6 +104,7 @@ export default function Journal() {
   const notif = useNotif()
   const td = today()
   const { journal: entries, addEntry: addWellnessEntry, deleteEntry: deleteWellnessEntry } = useWellness()
+  const { trackEvent } = useAchievements()
   const { startWisdomAmbience, stopWisdomAmbience, isMuted } = useSoundEffects()
 
   const [text, setText] = useState('')
@@ -191,6 +193,7 @@ export default function Journal() {
       mood,
     }
     addWellnessEntry(entry)
+    trackEvent('journal_added')
     setText(''); setMood('')
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
     setInkSplash(true)

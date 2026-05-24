@@ -50,6 +50,14 @@ const UserSchema = new mongoose.Schema({
     theme: { type: String, default: 'light' },
     soundEnabled: { type: Boolean, default: true },
     notificationsEnabled: { type: Boolean, default: true }
+  },
+  stats: {
+    sankalpaCount: { type: Number, default: 0 },
+    breathingCount: { type: Number, default: 0 },
+    wisdomCount: { type: Number, default: 0 },
+    booksOpened: { type: [String], default: [] },
+    sunriseActivities: { type: Number, default: 0 },
+    midnightJournals: { type: Number, default: 0 }
   }
 })
 
@@ -82,7 +90,26 @@ const JournalEntrySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 })
 
-let User, WaterLog, Habit, HabitDone, JournalEntry
+const BadgeSchema = new mongoose.Schema({
+  badgeId: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  imageFilename: { type: String, required: true },
+  category: { type: String, required: true }, // streaks, wisdom, journaling, rituals, wellness, legendary
+  rarity: { type: String, required: true }, // Common, Uncommon, Rare, Legendary
+  targetProgress: { type: Number, required: true }
+})
+
+const UserBadgeSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  badgeId: { type: String, required: true },
+  progress: { type: Number, default: 0 },
+  isUnlocked: { type: Boolean, default: false },
+  unlockedAt: { type: Date }
+})
+UserBadgeSchema.index({ userId: 1, badgeId: 1 }, { unique: true })
+
+let User, WaterLog, Habit, HabitDone, JournalEntry, Badge, UserBadge
 
 if (IS_MONGO) {
   User = mongoose.models.User || mongoose.model('User', UserSchema)
@@ -90,9 +117,142 @@ if (IS_MONGO) {
   Habit = mongoose.models.Habit || mongoose.model('Habit', HabitSchema)
   HabitDone = mongoose.models.HabitDone || mongoose.model('HabitDone', HabitDoneSchema)
   JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry', JournalEntrySchema)
+  Badge = mongoose.models.Badge || mongoose.model('Badge', BadgeSchema)
+  UserBadge = mongoose.models.UserBadge || mongoose.model('UserBadge', UserBadgeSchema)
 }
 
-export { User, WaterLog, Habit, HabitDone, JournalEntry }
+export { User, WaterLog, Habit, HabitDone, JournalEntry, Badge, UserBadge }
+
+// ── DEFAULT BADGES SEED ──────────────────────────────────
+const DEFAULT_BADGES = [
+  {
+    badgeId: "3_day_streak",
+    title: "3 Day Streak",
+    description: "Maintain a habit streak of 3 days.",
+    imageFilename: "3_day_streak.png",
+    category: "streaks",
+    rarity: "Common",
+    targetProgress: 3
+  },
+  {
+    badgeId: "journalled_10_times",
+    title: "Journalled 10 Times",
+    description: "Write 10 journal entries.",
+    imageFilename: "journalled_10_times.png",
+    category: "journaling",
+    rarity: "Common",
+    targetProgress: 10
+  },
+  {
+    badgeId: "hydration_sage",
+    title: "Hydration Sage",
+    description: "Meet your water goals on 5 different days.",
+    imageFilename: "hydration_sage.png",
+    category: "wellness",
+    rarity: "Common",
+    targetProgress: 5
+  },
+  {
+    badgeId: "wisdom_seeker",
+    title: "Wisdom Seeker",
+    description: "Read daily wisdom quotes 5 times.",
+    imageFilename: "wisdom_seeker.png",
+    category: "wisdom",
+    rarity: "Common",
+    targetProgress: 5
+  },
+  {
+    badgeId: "cosmic_rhythm",
+    title: "Cosmic Rhythm",
+    description: "Log wellness activity for 7 consecutive days.",
+    imageFilename: "cosmic_rhythm.png",
+    category: "wellness",
+    rarity: "Uncommon",
+    targetProgress: 7
+  },
+  {
+    badgeId: "sunrise_consistency",
+    title: "Sunrise Consistency",
+    description: "Complete habit or breathing before 8 AM on 3 days.",
+    imageFilename: "sunrise_consistency.png",
+    category: "rituals",
+    rarity: "Uncommon",
+    targetProgress: 3
+  },
+  {
+    badgeId: "third_eye_open",
+    title: "Third Eye Open",
+    description: "Open and read from 3 different books in Wisdom Library.",
+    imageFilename: "third_eye_open.png",
+    category: "wisdom",
+    rarity: "Rare",
+    targetProgress: 3
+  },
+  {
+    badgeId: "the_unshaken",
+    title: "The Unshaken",
+    description: "Maintain a habit streak of 10 days.",
+    imageFilename: "the_unshaken.png",
+    category: "legendary",
+    rarity: "Legendary",
+    targetProgress: 10
+  },
+  {
+    badgeId: "Sankalpa_keeper",
+    title: "Sankalpa Keeper",
+    description: "Commit to and fulfill Daily Sankalpa on 5 days.",
+    imageFilename: "Sankalpa_keeper.png",
+    category: "rituals",
+    rarity: "Uncommon",
+    targetProgress: 5
+  },
+  {
+    badgeId: "calm_mind",
+    title: "Calm Mind",
+    description: "Practice breathing exercises or meditation 5 times.",
+    imageFilename: "calm_mind.png",
+    category: "wellness",
+    rarity: "Common",
+    targetProgress: 5
+  },
+  {
+    badgeId: "daily_journaling_30_times",
+    title: "Daily Reflection Sage",
+    description: "Write 30 daily journal entries.",
+    imageFilename: "daily_journaling_30_times.png",
+    category: "journaling",
+    rarity: "Rare",
+    targetProgress: 30
+  },
+  {
+    badgeId: "discipline_builder",
+    title: "Discipline Builder",
+    description: "Complete at least 5 habits in a single day.",
+    imageFilename: "discipline_builder.png",
+    category: "streaks",
+    rarity: "Uncommon",
+    targetProgress: 5
+  },
+  {
+    badgeId: "focus_monk",
+    title: "Focus Monk",
+    description: "Complete breathing portal sessions 10 times.",
+    imageFilename: "focus_monk.png",
+    category: "wellness",
+    rarity: "Uncommon",
+    targetProgress: 10
+  },
+  {
+    badgeId: "midnight_reflector",
+    title: "Midnight Reflector",
+    description: "Log a night reflection journal entry (after 9 PM) on 3 days.",
+    imageFilename: "midnight_reflector.png",
+    category: "journaling",
+    rarity: "Uncommon",
+    targetProgress: 3
+  }
+]
+export { DEFAULT_BADGES }
 
 // ── CONNECT FUNCTION ────────────────────────────────────
 export async function connectDB() {
@@ -101,6 +261,13 @@ export async function connectDB() {
     try {
       await mongoose.connect(MONGODB_URI)
       console.log('MongoDB connected successfully')
+      
+      // Seed default badges
+      const count = await Badge.countDocuments()
+      if (count === 0) {
+        await Badge.insertMany(DEFAULT_BADGES)
+        console.log('Default badges seeded in MongoDB')
+      }
     } catch (err) {
       console.error('MongoDB connection error:', err)
       throw err
@@ -108,14 +275,31 @@ export async function connectDB() {
   } else {
     try {
       await fs.access(JSON_DB_PATH)
+      const data = await fs.readFile(JSON_DB_PATH, 'utf-8')
+      const db = JSON.parse(data)
+      let updated = false
+      if (!db.badges || db.badges.length === 0) {
+        db.badges = DEFAULT_BADGES
+        updated = true
+      }
+      if (!db.userBadges) {
+        db.userBadges = []
+        updated = true
+      }
+      if (updated) {
+        await fs.writeFile(JSON_DB_PATH, JSON.stringify(db, null, 2))
+        console.log('Local JSON database badges initialized')
+      }
     } catch {
       const initialDb = {
         users: [],
-        waterLogs: {}, // userId -> { waterGoal, logs: { date: [entries] } }
-        habits: [], // Array of { id, userId, name, icon, color, createdAt }
-        habitDone: {}, // userId -> { date: { habitId: time } }
-        journalEntries: [], // Array of { id, userId, date, time, text, mood }
-        intentions: [] // Array of { id, author, text, time, createdAt }
+        waterLogs: {},
+        habits: [],
+        habitDone: {},
+        journalEntries: [],
+        intentions: [],
+        badges: DEFAULT_BADGES,
+        userBadges: []
       }
       await fs.writeFile(JSON_DB_PATH, JSON.stringify(initialDb, null, 2))
       console.log('Local JSON database initialized at:', JSON_DB_PATH)
@@ -154,7 +338,8 @@ export async function dbCreateUser(name, email, passwordHash) {
       bio: '',
       location: '',
       joinedAt: new Date().toISOString(),
-      preferences: { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+      preferences: { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      stats: { sankalpaCount: 0, breathingCount: 0, wisdomCount: 0, booksOpened: [], sunriseActivities: 0, midnightJournals: 0 }
     }
     db.users.push(newUser)
     await writeJsonDB(db)
@@ -189,7 +374,8 @@ export async function dbFindUserById(id) {
       bio: user.bio || '',
       location: user.location || '',
       joinedAt: user.joinedAt || new Date().toISOString(),
-      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      stats: user.stats || { sankalpaCount: 0, breathingCount: 0, wisdomCount: 0, booksOpened: [], sunriseActivities: 0, midnightJournals: 0 }
     } : null
   }
 }
@@ -688,6 +874,7 @@ export async function dbDeleteUser(userId) {
     await Habit.deleteMany({ userId })
     await HabitDone.deleteMany({ userId })
     await JournalEntry.deleteMany({ userId })
+    await UserBadge.deleteMany({ userId })
   } else {
     const db = await readJsonDB()
     db.users = db.users.filter(u => u.id !== userId)
@@ -695,6 +882,71 @@ export async function dbDeleteUser(userId) {
     db.habits = db.habits.filter(h => h.userId !== userId)
     delete db.habitDone[userId]
     db.journalEntries = db.journalEntries.filter(e => e.userId !== userId)
+    if (db.userBadges) {
+      db.userBadges = db.userBadges.filter(ub => ub.userId !== userId)
+    }
     await writeJsonDB(db)
+  }
+}
+
+// ── BADGES & STATS DB HELPERS ──────────────────────────
+export async function dbGetBadges() {
+  await connectDB()
+  if (IS_MONGO) {
+    return await Badge.find().lean()
+  } else {
+    const db = await readJsonDB()
+    return db.badges || DEFAULT_BADGES
+  }
+}
+
+export async function dbGetUserBadges(userId) {
+  await connectDB()
+  if (IS_MONGO) {
+    return await UserBadge.find({ userId }).lean()
+  } else {
+    const db = await readJsonDB()
+    return (db.userBadges || []).filter(ub => ub.userId === userId)
+  }
+}
+
+export async function dbSaveUserBadge(userId, badgeId, updates) {
+  await connectDB()
+  if (IS_MONGO) {
+    return await UserBadge.findOneAndUpdate(
+      { userId, badgeId },
+      { $set: updates },
+      { upsert: true, new: true }
+    ).lean()
+  } else {
+    const db = await readJsonDB()
+    if (!db.userBadges) db.userBadges = []
+    let ub = db.userBadges.find(x => x.userId === userId && x.badgeId === badgeId)
+    if (!ub) {
+      ub = { id: Math.random().toString(36).slice(2, 9), userId, badgeId, progress: 0, isUnlocked: false }
+      db.userBadges.push(ub)
+    }
+    Object.assign(ub, updates)
+    await writeJsonDB(db)
+    return ub
+  }
+}
+
+export async function dbUpdateUserStats(userId, statsUpdates) {
+  await connectDB()
+  if (IS_MONGO) {
+    const setQuery = {}
+    for (const [k, v] of Object.entries(statsUpdates)) {
+      setQuery[`stats.${k}`] = v
+    }
+    return await User.findByIdAndUpdate(userId, { $set: setQuery }, { new: true }).lean()
+  } else {
+    const db = await readJsonDB()
+    const user = db.users.find(u => u.id === userId)
+    if (!user) throw new Error('User not found')
+    user.stats = user.stats || { sankalpaCount: 0, breathingCount: 0, wisdomCount: 0, booksOpened: [], sunriseActivities: 0, midnightJournals: 0 }
+    Object.assign(user.stats, statsUpdates)
+    await writeJsonDB(db)
+    return user
   }
 }

@@ -3,10 +3,14 @@ import { lazy, Suspense, useEffect } from 'react'
 import { ThemeProvider }   from './context/ThemeContext'
 import { AuthProvider }    from './context/AuthContext'
 import { WellnessProvider } from './context/WellnessContext'
+import { AchievementsProvider } from './context/AchievementsContext'
 import { SoundEffectsProvider } from './context/SoundEffectsContext'
 import { NotificationProvider } from './components/NotificationPopup'
 import Navbar  from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
+import BadgeModal from './components/achievements/BadgeModal'
+import BadgeGallery from './components/achievements/BadgeGallery'
+import BadgeToast from './components/achievements/BadgeToast'
 import './styles/globals.css'
 import './styles/animations.css'
 import './styles/dashboard.css'
@@ -36,27 +40,32 @@ export default function App() {
       <NotificationProvider>
         <AuthProvider>
           <WellnessProvider>
-            <SoundEffectsProvider>
-              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                <ScrollReset />
-                <Navbar />
-                <Suspense fallback={null}>
-                  <Routes>
-                    <Route path="/"        element={<Home />} />
-                    <Route path="/water"   element={<Water />} />
-                    <Route path="/habits"  element={<Habits />} />
-                    <Route path="/journal" element={<Journal />} />
-                    <Route path="/quotes"  element={<WisdomPage />} />
-                    <Route path="/heritage" element={<Heritage />} />
-                    <Route path="/community" element={<Community />} />
-                    <Route path="/login"   element={<Login />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="*"        element={<Home />} />
-                  </Routes>
-                </Suspense>
-                <Suspense fallback={null}><AIAssistant /></Suspense>
-              </BrowserRouter>
-            </SoundEffectsProvider>
+            <AchievementsProvider>
+              <SoundEffectsProvider>
+                <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                  <ScrollReset />
+                  <Navbar />
+                  <Suspense fallback={null}>
+                    <Routes>
+                      <Route path="/"        element={<Home />} />
+                      <Route path="/water"   element={<Water />} />
+                      <Route path="/habits"  element={<Habits />} />
+                      <Route path="/journal" element={<Journal />} />
+                      <Route path="/quotes"  element={<WisdomPage />} />
+                      <Route path="/heritage" element={<Heritage />} />
+                      <Route path="/community" element={<Community />} />
+                      <Route path="/login"   element={<Login />} />
+                      <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="*"        element={<Home />} />
+                    </Routes>
+                  </Suspense>
+                  <Suspense fallback={null}><AIAssistant /></Suspense>
+                  <BadgeModal />
+                  <BadgeGallery />
+                  <BadgeToast />
+                </BrowserRouter>
+              </SoundEffectsProvider>
+            </AchievementsProvider>
           </WellnessProvider>
         </AuthProvider>
       </NotificationProvider>

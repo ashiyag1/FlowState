@@ -6,6 +6,7 @@ import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useTheme } from '../context/ThemeContext'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { useAchievements } from '../context/AchievementsContext'
 import PageLayout from '../components/PageLayout'
 import HabitCheckbox from '../components/HabitCheckbox'
 import StreakFlame from '../components/StreakFlame'
@@ -28,6 +29,7 @@ export default function Habits() {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const { habits, addHabit, deleteHabit, habitDone, toggleHabit, getStreak } = useWellness()
+  const { trackEvent } = useAchievements()
   const { playHabitSound } = useSoundEffects()
   const { dark } = useTheme()
 
@@ -65,7 +67,10 @@ export default function Habits() {
     }
     const alreadyDone = !!(habitDone[dateKey] || {})[id]
     toggleHabit(id, dateKey)
-    if (!alreadyDone) playHabitSound()
+    if (!alreadyDone) {
+      playHabitSound()
+      trackEvent('habit_toggled')
+    }
   }
 
   const handleDeleteHabit = (e, id) => {

@@ -3,6 +3,7 @@ import { useTheme } from '../context/ThemeContext'
 import { WisdomProvider, useWisdom } from '../context/WisdomContext'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { useAchievements } from '../context/AchievementsContext'
 import wisdomBg from '../assets/pages/wisdom_bg.webp'
 import HeroHeader from '../sections/wisdom/HeroHeader'
 import TopicFilterBar from '../sections/wisdom/TopicFilterBar'
@@ -29,9 +30,13 @@ function WisdomContent() {
   const [mandalaOpen, setMandalaOpen] = useState(false)
   const { dark } = useTheme()
   const { markStreakToday, openBook, getBookProgress } = useWisdom()
+  const { trackEvent } = useAchievements()
   const [bookInitialPage, setBookInitialPage] = useState(0)
 
-  useEffect(() => { markStreakToday() }, [markStreakToday])
+  useEffect(() => { 
+    markStreakToday()
+    trackEvent('wisdom_read')
+  }, [markStreakToday, trackEvent])
 
   // Filter books by active topic and search query
   const filteredBooks = TOPIC_BOOKS.filter(book => {

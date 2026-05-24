@@ -53,7 +53,7 @@ const inputBase =
 export default function Login() {
   const notif = useNotif()
   const navigate = useNavigate()
-  const { login, signup } = useAuth()
+  const { login, signup, onSocialLogin } = useAuth()
   const [mode, setMode] = useState('login')
   const [show, setShow] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', password: '' })
@@ -101,7 +101,7 @@ export default function Login() {
               })
               const data = await res.json()
               if (res.ok) {
-                localStorage.setItem('fwa_auth_token', data.token)
+                onSocialLogin(data)
                 notif('Signed in with Google ✦', 'success')
                 navigate('/')
               } else {

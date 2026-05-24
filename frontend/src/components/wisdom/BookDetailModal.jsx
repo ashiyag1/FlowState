@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { useTheme } from '../../context/ThemeContext'
 import { useWisdom } from '../../context/WisdomContext'
+import { useAchievements } from '../../context/AchievementsContext'
 import html2canvas from 'html2canvas'
 import pageBg from '../../assets/page.webp'
 
@@ -13,6 +14,7 @@ const easeBack = (t) => {
 export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const { dark } = useTheme()
   const { updateBookProgress, savePage, removeSavedPage, isPageSaved, addNote, removeNote, getPageNotes } = useWisdom()
+  const { trackEvent } = useAchievements()
   const [liked, setLiked] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFemale, setIsFemale] = useState(true)
@@ -78,6 +80,10 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
 
   // cancel speech on unmount
   useEffect(() => () => window.speechSynthesis.cancel(), [])
+
+  useEffect(() => {
+    trackEvent('book_opened', { bookId: book.id })
+  }, [book.id, trackEvent])
 
   // refs for auto-read on page turn
   const isPlayingRef = useRef(isPlaying)

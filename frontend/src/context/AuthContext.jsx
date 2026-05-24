@@ -106,6 +106,14 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
+  // Social login (Google/Apple) — sets auth state from external token
+  const onSocialLogin = useCallback((data) => {
+    localStorage.setItem('fwa_auth_token', data.token)
+    setToken(data.token)
+    setUser(data.user)
+    setIsAuthenticated(true)
+  }, [])
+
   // Logout handler
   const logout = useCallback(() => {
     localStorage.removeItem('fwa_auth_token')
@@ -203,6 +211,7 @@ export function AuthProvider({ children }) {
       login,
       signup,
       logout,
+      onSocialLogin,
       updateProfile,
       updateAvatar,
       changePassword,
