@@ -53,110 +53,168 @@ function FlowSymbol({ size = 32, dark }) {
 
 const CONCEPT_STORIES = [
   {
-    title: "The Magic of Shunya: How Zero Unlocked the Universe",
-    source: "Brahmasphuta Siddhanta, 628 CE",
-    tag: "mathematical breakthrough",
+    title: "2,000 Years Before Computers, a Poet Invented Binary Code",
+    source: "Pingala's Chandah Sutra, ~200 BCE",
+    tag: "binary code",
     paragraphs: [
-      "In ancient Greece and Rome, people had no symbol for nothing. They used blank spaces, but their mathematical systems made complex multiplication and division incredibly hard. Everything changed when Indian mathematicians, led by Brahmagupta, treated Shunya (Zero) as a number in its own right.",
-      "Brahmagupta wrote down the algebraic rules of Zero: a number minus itself is zero, zero multiplied by any number is zero, and zero added to a number leaves it unchanged. He even defined negative numbers to represent debts, creating a complete mathematical system.",
-      "This simple concept unlocked the decimal place-value system. Without Zero, we would not have algebra, trigonometry, or calculus. And because computers run on binary code (ones and zeros), modern digital technology is directly built on this ancient Indian breakthrough."
+      "Pingala wasn't an engineer. He was a poet studying Sanskrit rhythm — how short and long syllables combine to create meter. To map every possible pattern, he invented a system of 0s and 1s, assigning light syllables as laghu (0) and heavy ones as guru (1). Binary, in verse, 2,000 years before the first computer.",
+      "He also discovered what we now call the Fibonacci sequence — a pattern where each number is the sum of the two before it — long before Fibonacci was born. The rhythm of poetry led him to the mathematics that powers modern computing."
     ]
   },
   {
-    title: "Aryabhata's Spherical Earth: Science Without Borders",
-    source: "Aryabhatiya, 499 CE",
-    tag: "astronomical discovery",
+    title: "Chess Wasn't Invented for Kings. It Was Invented to Simulate War.",
+    source: "Chaturanga, 6th Century CE",
+    tag: "chess origins",
     paragraphs: [
-      "Long before Galileo or Copernicus, the 23-year-old mathematician Aryabhata was studying the heavens from his observatory in Kusumapura. He realized that the Earth is not flat; it is a sphere floating in space, which he called Bhugola (earth-ball).",
-      "Aryabhata wrote that the apparent rotation of the stars is an illusion, caused by the actual rotation of the Earth on its axis. He compared it to a person in a moving boat who sees the trees on the banks moving backward.",
-      "He also calculated the Earth's circumference to be 24,835 miles (off by only 0.2% from the actual 24,901 miles) and explained that eclipses are caused by the shadows of the Earth and the Moon, discarding the old mythological stories of demons swallowing the sun."
+      "1,500 years ago in India, a game called Chaturanga appeared — meaning 'four limbs of the army.' It had infantry, cavalry, elephants, and chariots: exactly what a real battlefield looked like. The goal wasn't to win. It was to out-think your enemy.",
+      "Chaturanga spread to Persia (where it became Shatranj), then to Europe, where it evolved into modern chess. The queen — the most powerful piece on the board — was added later. But the DNA of every chess match ever played was written in ancient India."
     ]
   },
   {
-    title: "The Seeds of Calculus: Finding Speed in the 12th Century",
-    source: "Siddhanta Shiromani, 1150 CE",
-    tag: "calculus seeds",
+    title: "The World's First Campus Had 10,000 Students. And a Library That Burned for Months.",
+    source: "Nalanda University, 5th–12th Century CE",
+    tag: "ancient university",
     paragraphs: [
-      "We are taught that calculus was invented in Europe in the 17th century by Newton and Leibniz. But the seeds of calculus were planted in India five centuries earlier. Bhaskaracharya was trying to calculate the instantaneous speed of planets.",
-      "He realized that to find a planet's speed at a single moment, he had to divide its motion into infinite, tiny intervals of time. He wrote formulas that are equivalent to the modern derivative of sine and cosine functions.",
-      "Later, in the 14th century, Madhava of the Kerala School discovered infinite series for trigonometric values, which is the core of advanced calculus. They were thinking about limits, derivatives, and integration long before Europe began its scientific revolution."
+      "Before Oxford, before Cambridge, before any European university existed, there was Nalanda — a residential campus with 10,000 students and 2,000 teachers. Students came from Tibet, China, Korea, Japan, Persia. They studied astronomy, medicine, logic, philosophy, and mathematics.",
+      "The library, called Dharmaganja, had hundreds of thousands of manuscripts across nine stories. When it was burned by invaders in 1193, the fire reportedly raged for months. The knowledge lost would have filled centuries. Nalanda wasn't just a university. It was humanity's first global brain."
     ]
   },
   {
-    title: "Mapping the Stars with Mathematics",
-    source: "Surya Siddhanta, 4th–6th Century CE",
-    tag: "cosmology and math",
+    title: "India Was Making Pure Zinc 500 Years Before Europe Cracked the Formula",
+    source: "Zawar Mines, Rajasthan, 12th Century CE",
+    tag: "lost metallurgy",
     paragraphs: [
-      "How do you map the stars without a telescope? Ancient Indian astronomers used Khagola (spherical astronomy) and pure mathematics. The Surya Siddhanta, written in the 4th century CE, contains calculations of planetary cycles with shocking accuracy.",
-      "They calculated the length of the solar year as 365.258 days, and the distance to the moon. They used sine and cosine tables (which they invented) to calculate the angles of planets and stars in the night sky.",
-      "Indian astronomers built metal and stone devices to observe stars, but their main tool was geometry. Their mathematical models of the solar system were heliocentric (sun-centered) and elliptic, centuries ahead of global astronomy."
+      "Zinc is tricky to produce. It boils at 907°C — right when it's being smelted — so it vaporizes before it can be collected. Europe couldn't figure this out until the 18th century. India had it figured in the 12th century — at the Zawar mines in Rajasthan.",
+      "They built vertical retort furnaces that condensed zinc vapor into liquid metal. The process was so efficient and so complex that when the site was rediscovered, modern engineers were baffled by its sophistication. Ancient metallurgists were running industrial chemistry 800 years ahead of the curve."
     ]
   },
   {
-    title: "Panini's Grammar: The World's First Programming Language",
-    source: "Ashtadhyayi, ~400 BCE",
-    tag: "algorithmic language",
+    title: "The Way You Write Numbers Changed the World — and It Came From Here",
+    source: "Ancient Indian Mathematics, 5th Century CE",
+    tag: "decimal system",
     paragraphs: [
-      "In the 4th century BCE, the scholar Panini set out to standardize the Sanskrit language. He created the Ashtadhyayi, a system of 3,996 rules that can generate every grammatically correct Sanskrit word from basic roots.",
-      "What makes this brilliant is that the Ashtadhyayi is a formal, rule-based system. It uses variables, condition statements, and context-free grammar structures. It is, in essence, the world's first programming language compiler.",
-      "Modern computer scientists, including John Backus, discovered that Panini's rules map directly to the Backus-Naur Form (BNF) used to define computer programming languages like Fortran and Algol. Panini built the logic of computer code, thousands of years ago."
+      "The number 365 means three hundreds, six tens, and five ones. This feels so natural you probably never think about it. But someone had to invent the idea that a digit's value depends on where it sits. That breakthrough — the decimal place-value system — was developed in India.",
+      "Without it, there is no accounting, no engineering, no modern science, no computers. The Romans had number systems so clunky they needed specialists just to do multiplication. India's system was so elegant it spread across the world and became universal. You use it every second of every day."
     ]
   },
   {
-    title: "Sushruta Samhita: The World's First Surgical Manual",
-    source: "Sushruta Samhita, 600 BCE",
-    tag: "ancient surgical art",
+    title: "Ancient Indians Had Names for Numbers Up to 10^53. Why? Because They Could.",
+    source: "Vedic Mathematics, Circa 1000 BCE",
+    tag: "cosmic numbers",
     paragraphs: [
-      "Ancient India was the birthplace of surgery. In 600 BCE, in Varanasi, a wise physician named Sushruta was teaching his students how to operate. He had them practice incisions on gourds, cucumbers, and watermelons before operating on humans.",
-      "Sushruta designed over 120 surgical instruments, including scalpels, needles, forceps, and probes, many styled after the shapes of birds and animals to fit the human hand. He is most famous for inventing rhinoplasty (rebuilding a severed nose using a flap of skin from the cheek).",
-      "His book, the Sushruta Samhita, details how to sterilize wounds, use wine as an anesthetic, set complex bone fractures, and remove cataracts using curved needles. He was a master of reconstructive surgery, laying down principles that surgeons follow today."
+      "Most ancient cultures stopped naming numbers at a few thousand. Rome had 'mille' (thousand) and 'deciens' (ten thousand) — then they ran out of words. Ancient India had names for numbers up to 10^53 — a 1 followed by 53 zeros. They called it asankhyeya: 'the countless.'",
+      "They needed these numbers for cosmology — they measured time in cycles of 4.32 billion years called Kalpas. They calculated the speed of light. The age of the universe. They thought in cosmic scales because they understood that the universe itself thinks in cosmic scales."
     ]
   }
 ]
 
 const CURIOSITY_STORIES = [
   {
-    title: "Delhi's Rust-Free Iron Pillar: A 1600-Year-Old Chemistry Miracle",
-    source: "Ancient Metallurgical Treatise",
-    tag: "metallurgical wonder",
+    title: "Why Do Indian Kids Learn More About British Kings Than Their Own Emperors?",
+    source: "Macaulay's Education System, 1835",
+    tag: "the education question",
     paragraphs: [
-      "Imagine a massive iron pillar, weighing over six tons, standing completely open to the elements for over sixteen hundred years. In any other part of the world, such iron would have crumbled into rust centuries ago. But in Delhi, India, the famous Iron Pillar of Chandragupta II remains pristine, clean, and completely rust-free.",
-      "For centuries, modern scientists and metallurgists were baffled by this phenomenon. How could ancient Indian blacksmiths achieve what modern factories still struggle with? The answer lies in their advanced knowledge of chemistry. Ancient Indian metallurgists intentionally used a high amount of phosphorus while smelting the iron.",
-      "This phosphorus reacted with the air to create a thin, protective layer called 'misawite' on the surface of the pillar. This self-healing micro-layer shields the iron from moisture and oxygen, keeping it rust-free. Instead of corroding, the pillar actually becomes stronger with time!",
-      "This is a shining testament to India's ancient mastery over metallurgy. Long before the Industrial Revolution, Indian blacksmiths were producing ultra-pure, high-phosphorus iron that defies time. When you look at it, you can't help but say, 'Wow, this is my India!'"
+      "Most Indian schoolchildren can name all six wives of Henry VIII. Ask them about the Gupta Empire or the Chola dynasty — silence. This isn't an accident. Macaulay's 1835 education system was designed to create Indians who admired British rule. Clerks who would serve the empire, not citizens who would question it.",
+      "The curriculum prioritized English literature and British history. Indian mathematics, astronomy, medicine — barely mentioned. The system wasn't designed to make us proud. It was designed to make us grateful. Two centuries later, we're still using the same blueprint. When do we rewrite it?"
     ]
   },
   {
-    title: "4500 Years Ago, Harappa Had Flushing Toilets and Under-Grid Sanitation",
-    source: "Archaeological Survey of India",
-    tag: "civil engineering marvel",
+    title: "4,500 Years Ago, Someone Invented the Flush Toilet. Then the World Forgot How.",
+    source: "Harappa & Mohenjo-Daro, Indus Valley",
+    tag: "reset button",
     paragraphs: [
-      "Over four thousand five hundred years ago, in the cities of Harappa and Mohenjo-Daro, people lived in planned cities that would rival many modern towns today. Streets were laid out in a perfect grid system, matching a compass, and houses were built with uniform, kiln-baked clay bricks.",
-      "But the most astonishing feature was their sanitation. Almost every household had a private bathing area and a flushing toilet that drained into a main street sewage line. These sewage lines were not open trenches; they were covered underground brick channels with regular manholes for inspection!",
-      "They also engineered the world's first urban water systems, including reservoirs and public baths like the Great Bath of Mohenjo-Daro, lined with natural bitumen to make it waterproof. The cities had separate residential and commercial zones, public granaries, and specialized dockyards for sea trade.",
-      "At a time when most civilizations were in their infancy, ancient India was executing master-class civil engineering and hygiene. It shows a society that valued cleanliness, civic order, and scientific layout above all. Truly, a heritage to be proud of!"
+      "Every single house in Mohenjo-Daro had a private bathroom with a flushing toilet connected to an underground sewer system. Covered brick channels. Manholes for cleaning. This was 4,500 years ago. Then the civilization declined, and the world forgot. London didn't get proper sewers until the 19th century.",
+      "Think about that. Humans once had something, lost it, and took 4,000 years to get it back. That's not a story about plumbing. That's a story about how fragile knowledge really is. One generation builds. The next forgets. The one after that has to rediscover everything from scratch. What else have we forgotten?"
     ]
   },
   {
-    title: "Wootz Steel: The Ancient Indian Metallurgy That Made Global History",
-    source: "Metallurgical History Archives",
-    tag: "ancient wootz steel",
+    title: "The 'Fairness' Obsession: How Colonialism Changed What Beauty Means in India",
+    source: "The Skin Deep Wound",
+    tag: "internalized hierarchy",
     paragraphs: [
-      "In the ancient world, there was one steel that every empire coveted above all else. Roman emperors paid fortunes for it, and Crusaders in the Middle Ages told stories of legendary swords that could cut a shield in two or slice a falling silk scarf in mid-air. This was Damascus steel—but it was born in South India as Wootz steel.",
-      "Starting from 300 BCE, Indian metallurgists in Tamil Nadu, Karnataka, and Andhra Pradesh developed a high-carbon steel-making process. They placed high-purity iron, wood, and carbon-rich leaves inside sealed clay crucibles and heated them in high-temperature furnaces using bellows.",
-      "This crucible smelting method gave the steel a unique carbon structure containing microscopic carbon nanotubes and carbide bands. When forged, these swords showed a beautiful, wavy water-like pattern. They were incredibly flexible, yet sharp enough to maintain their edge through fierce battles.",
-      "Wootz steel was one of India's greatest exports, traded across Persia, Rome, and China. It represents the pinnacle of ancient material science, proving that Indian blacksmiths were the premier steel-makers of the world for over a thousand years. Wow!"
+      "Walk into any Indian pharmacy and you'll see shelves of fairness creams. Billboards promise lighter skin as the shortcut to success. This didn't come from nowhere. British colonialism created a hierarchy where lighter skin meant power, access, respect. The darker you were, the further you were from the rulers. A hundred and fifty years later, that hierarchy still runs in our heads.",
+      "We've turned the color of colonization into a multi-billion rupee industry. We lighten our skin for job interviews, for weddings, for confidence. We absorb the idea that lighter is better without asking where that idea came from. Decolonizing isn't just about politics. It's about looking in the mirror and unlearning what we were taught to see."
     ]
   },
   {
-    title: "Jantar Mantar: Massive Stone Calculators That Tracked the Heavens",
-    source: "Maharaja Jai Singh II Archives",
-    tag: "astronomical computer",
+    title: "The Exam That Decides Everything: A System Designed to Produce Clerks",
+    source: "British-Era Education Architecture",
+    tag: "the education trap",
     paragraphs: [
-      "In an era before computers and digital telescopes, how did astronomers track the movement of planets, measure the exact altitude of the sun, and predict eclipses with absolute precision? They built Jantar Mantar—a collection of nineteen architectural astronomical instruments made of stone and marble.",
-      "Built by Maharaja Sawai Jai Singh II in Jaipur, Delhi, and other cities, these are not just statues; they are massive scientific calculators. The Vrihat Samrat Yantra is the world's largest stone sundial, standing 27 meters high. Its shadow moves at a speed of four centimeters per minute, letting us tell local time to within two seconds!",
-      "These stone instruments were designed to prevent the errors that occurred with smaller metal instruments. By using local stone and plaster, Jai Singh created structures that resisted thermal expansion and remained perfectly calibrated for centuries, tracking solar declination and stellar coordinates.",
-      "Walking through Jantar Mantar feels like walking inside a giant mechanical computer. It showcases a beautiful union of art, architecture, and advanced astronomy, proving that Indian science was bold, large-scale, and incredibly precise."
+      "Every year, millions of Indian teenagers sit for exams that decide their entire future — JEE, NEET, UPSC. The pressure destroys childhoods, mental health, and creativity. We've normalized this. But this system wasn't designed by Indians for Indians. It was inherited from the British, who created exams to train obedient civil servants — not thinkers, not innovators, not people who ask why.",
+      "Rote learning. Memorization. Competition over curiosity. We've turned a colonial bureaucracy test into the gatekeeper of dreams. The system produces excellent clerks. But does it produce fulfilled humans? 200 years later, we're still studying for someone else's exam. What would an Indian education system look like if we designed it for ourselves?"
+    ]
+  },
+  {
+    title: "A Hollywood Movie About Mars Cost More Than India's Actual Trip to Mars",
+    source: "Mangalyaan, ISRO, 2013",
+    tag: "the ultimate flex",
+    paragraphs: [
+      "India's Mangalyaan mission to Mars had a budget of $74 million. The movie 'The Martian' cost $108 million to make. A Hollywood film about going to Mars cost more than India actually going to Mars. And here's the craziest part: India made it on the first attempt — something no other nation had ever done before.",
+      "The mission was built with off-the-shelf components, improvised engineering, and a budget that NASA spends on coffee. While the world laughed at the idea of a developing country reaching Mars, ISRO just… did it. For less than the cost of a Hollywood blockbuster. That's not just smart. That's a country saying: we don't need your budget. We need your belief."
+    ]
+  },
+  {
+    title: "A God Dancing at the Edge of Physics",
+    source: "Nataraja, The Cosmic Dance of Shiva",
+    tag: "when myth meets math",
+    paragraphs: [
+      "Look at a statue of Nataraja — Shiva dancing within a ring of fire. One hand holds a drum (creation). Another holds fire (destruction). One foot is raised (liberation). The other crushes a demon (ignorance). The dance never stops. It is the rhythm of the universe — birth, death, rebirth, over and over.",
+      "When physicists at CERN saw the Nataraja, they didn't see mythology. They saw a metaphor for what they observe in particle accelerators — subatomic particles appearing and vanishing, matter and energy constantly exchanging form. Feynman said the dance of Shiva was the best description of the quantum world he'd ever seen. Sometimes the deepest truths arrive not in equations but in stories, carved in stone, waiting centuries for science to catch up."
+    ]
+  },
+  {
+    title: "The Matrix Wasn't Inspired by the Future. It Was Inspired by a 5,000-Year-Old Text.",
+    source: "The Bhagavad Gita meets The Matrix",
+    tag: "pop culture & philosophy",
+    paragraphs: [
+      "The Wachowskis wanted Neo to feel like a reluctant hero. So they gave him the same dilemma Arjuna faced in the Bhagavad Gita — a warrior who doesn't want to fight but must see through the illusion of the world to find his purpose. The red pill isn't just a plot device. It's the concept of Maya: reality as we perceive it is a veil, and truth lies beyond it.",
+      "Keanu Reeves has said the Gita shaped his entire approach to the role. 'There is no spoon' isn't just a cool line — it's the philosophy that the physical world is a construct and the mind is what's real. One of the most influential films of the 21st century didn't look to the future for inspiration. It looked 5,000 years into the past."
+    ]
+  },
+  {
+    title: "The Man Who Ended Worlds Found His Words in an Ancient Indian Scripture",
+    source: "Oppenheimer & The Bhagavad Gita",
+    tag: "history meets ancient wisdom",
+    paragraphs: [
+      "When Robert Oppenheimer watched the first nuclear bomb explode over New Mexico, a line from the Bhagavad Gita flashed through his mind: 'Now I am become Death, the destroyer of worlds.' He had learned Sanskrit to read the Gita in its original language. In the most defining moment of modern history, he reached for an ancient Indian text to make sense of it.",
+      "He wasn't being dramatic. He genuinely believed the Gita contained the deepest truths about creation and destruction. When the 20th century needed words big enough for the atomic age, it found them in a book written thousands of years before."
+    ]
+  },
+  {
+    title: "Before Paris or Milan, India Ruled Global Fashion for 2,000 Years",
+    source: "India's Textile Empire",
+    tag: "forgotten history",
+    paragraphs: [
+      "Roman emperors paid fortunes for Indian muslin so fine it was called 'woven air.' A single bolt of Dhaka muslin could be pulled through a wedding ring. Indian cotton, silk, and calico dominated global markets from Rome to China. Long before Paris or Milan, the world's fashion capital was Bengal, Gujarat, and Tamil Nadu.",
+      "Then colonial policies systematically dismantled the industry — tariffs, forced raw cotton exports, factory-made cloth flooding Indian markets. Millions of weavers lost their livelihoods. An entire global industry was erased so thoroughly that the world forgot India was once the center of everything we wear. But the threads are still there, woven into the fabric of fashion history."
+    ]
+  },
+  {
+    title: "The Most Powerful Weapon Colonizers Used Wasn't a Gun. It Was a Classroom.",
+    source: "Macaulay's Minute on Education, 1835",
+    tag: "the colonized mind",
+    paragraphs: [
+      "In 1835, Thomas Macaulay declared that 'a single shelf of a good European library was worth the whole native literature of India and Arabia.' This wasn't an opinion — it became British policy. English was made the language of power. Sanskrit, Persian, Hindi, Tamil — all pushed aside. Generations were taught their own languages weren't good enough for science or philosophy.",
+      "That's the deepest scar of colonization — not the wealth stolen, but the identity erased. When you're raised believing your language is backward, your culture is primitive, your history is unimportant, you start believing it. The British left nearly 80 years ago. But the voice that says 'ours isn't good enough'? That voice takes generations to silence. Recognizing it is the first step."
+    ]
+  },
+  {
+    title: "In 10,000 Years of Civilization, India Never Invaded a Single Country",
+    source: "A History Without Conquest",
+    tag: "the quiet giant",
+    paragraphs: [
+      "Name one country India invaded to colonize. You can't. Because it never happened. In 10,000 years of continuous civilization, India never launched a war of aggression to take someone else's land. Its ideas — Buddhism, mathematics, philosophy — spread across Asia through teachers and traders, not soldiers and swords.",
+      "Think about how rare that is. Almost every great civilization — Rome, Britain, Persia, Mongolia, China — built itself through conquest. India built itself through absorption. It welcomed invaders, absorbed their cultures, and outlasted them all. That's not weakness. That's a different kind of strength. The kind that doesn't need to dominate to matter."
+    ]
+  },
+  {
+    title: "The World's Persecuted Found a Home in India. Every Single Time.",
+    source: "India's Legacy of Refuge",
+    tag: "the open door",
+    paragraphs: [
+      "When Jews fled persecution 2,000 years ago, India welcomed them. They still live here peacefully. When the first Christians arrived with Thomas, India gave them space. When Parsees escaped religious genocide in Persia, India said: stay. When Tibetans fled China, India opened its borders. When Sri Lankans, Burmese, and Bangladeshis fled war, India didn't turn them away.",
+      "There is no other country on Earth that can tell this story. India has been absorbing the world's refugees for millennia — not because it had to, but because its culture never learned to say no. The guest is God. Atithi Devo Bhava. That's not just a saying. It's the quietest, most beautiful revolution in human history."
     ]
   }
 ]
@@ -164,221 +222,196 @@ const CURIOSITY_STORIES = [
 const SCHOLARS = [
   {
     id: 1, name: 'Aryabhata', period: '476 – 550 CE',
-    title: 'Pioneer of Earth\'s rotation, eclipses, and mathematical π.',
-    desc: 'Calculated π to 4 decimal places, proved the Earth rotates on its axis to cause day and night, and explained solar and lunar eclipses scientifically.',
+    title: 'He saw a spinning Earth when everyone believed the sky was a ceiling.',
+    desc: 'At 23, he calculated π, mapped the solar year, and proved the Earth rotates — not because he was told, but because he asked the night sky better questions.',
     img: aryabhataPortrait,
     field: 'mathematics', color: '#c9a84c',
     story: {
-      title: "Aryabhata: The Astronomer Who Mapped the Earth and Stars",
+      title: "Aryabhata: The Young Man Who Refused to Believe What Everyone Believed",
       source: "Aryabhatiya, 499 CE",
       paragraphs: [
-        "In the year 499 CE, a young genius named Aryabhata sat in his observatory in Kusumapura, modern Patna. At just twenty-three years old, he wrote the Aryabhatiya, a masterwork in mathematics and astronomy written in poetic verses.",
-        "Aryabhata was the first in the world to suggest that the Earth is a sphere floating in space, and that it rotates on its own axis. He explained that this rotation is what makes the sun and stars appear to move across the sky, just as trees seem to run backward to someone in a moving boat.",
-        "He calculated the length of the solar year as 365.258 days—off by only a few minutes from modern science. He calculated the value of Pi to four decimal places (3.1416) and called it an 'approximate' value, showing he understood that Pi is irrational.",
-        "Furthermore, Aryabhata discarded the superstitious belief that eclipses are caused by demons swallowing the sun. He proved mathematically that solar and lunar eclipses are simply shadows cast by the Earth and the Moon. A true father of science!"
+        "At 23, while the world saw a flat Earth under a domed sky, Aryabhata watched the stars and saw something else: a sphere, spinning in an infinite void. He called it Bhugola. He realized the stars weren't moving — we were. Like watching the shore drift backward from a boat. He was describing relativity, 1,400 years before Einstein.",
+        "He calculated the solar year to minutes of accuracy, found π to four decimals, and proved eclipses were shadows — not demons. No telescope. No permission. Just a young mind asking: what if everything we know is wrong? The bravest thing you can do is trust your own eyes when the whole world tells you you're seeing things. Aryabhata did that at 23."
       ]
     }
   },
   {
     id: 2, name: 'Bhaskaracharya', period: '1114 – 1185 CE',
-    title: 'Discovered gravity equations and conceived calculus.',
-    desc: 'In Siddhanta Shiromani, Bhaskaracharya wrote that objects fall because the Earth attracts them. He calculated earth\'s orbit time and laid foundations for calculus.',
+    title: 'He felt gravity\'s pull 500 years before Newton.',
+    desc: 'While the world saw apples fall, Bhaskaracharya saw a universal force. He wrote equations of attraction, motion, and the infinite — long before calculus had a name.',
     img: bhaskaraPortrait,
     field: 'astronomy', color: '#8b6f4c',
     story: {
-      title: "Bhaskaracharya: The Sage of Gravity and Motion",
+      title: "Bhaskaracharya: The Man Who Saw the Invisible Force Holding Everything Together",
       source: "Siddhanta Shiromani, 1150 CE",
       paragraphs: [
-        "Five hundred years before Sir Isaac Newton watched an apple fall, Bhaskaracharya (also known as Bhaskara II) was calculating the force that holds our universe together. In his mathematical masterpiece, the Siddhanta Shiromani, he wrote down the fundamental law of gravity.",
-        "Bhaskaracharya stated: 'Objects fall toward the earth because of a force of attraction. The earth, by its nature, attracts any massive object floating in space toward itself.' He understood that gravity is a universal pull, not a localized phenomenon.",
-        "Bhaskaracharya also made remarkable breakthroughs in mathematics. He was the first to explain that dividing any number by zero results in infinity, and he wrote equations calculating the instantaneous speed of planets, anticipating calculus.",
-        "His work on arithmetic, algebra, and geometry was so advanced that it laid the foundation for planetary coordinates used for centuries. He proved that ancient India was doing advanced calculus while Europe was still in the Dark Ages."
+        "500 years before Newton, Bhaskaracharya wrote that objects fall because the Earth pulls them — a universal force of attraction. He was describing gravity and the gravitational field in the 12th century. Europe wouldn't catch up for another 500 years.",
+        "He also wrote that dividing by zero yields infinity. He calculated a planet's instantaneous speed by breaking motion into infinitely small pieces — the foundational idea of calculus. He wasn't ahead of his time. He was operating in a time that hadn't arrived yet. Genius doesn't wait for permission. It just sees what others don't."
       ]
     }
   },
   {
     id: 3, name: 'Lilavati', period: 'by Bhaskaracharya',
-    title: 'Mathematics written like poetry. Beauty, logic, and creativity.',
-    desc: 'A poetic dialogue of mathematical problems solved by Bhaskara\'s daughter, representing a beautiful union of logic and emotion.',
+    title: 'Mathematics, written like a love letter.',
+    desc: 'A father\'s grief turned into poetry. Bhaskaracharya named his greatest work after his daughter, creating a book where numbers told stories and equations felt like lullabies.',
     img: lilavatiPortrait,
     field: 'mathematics', color: '#d4a82a',
     story: {
-      title: "Līlāvatī: A Father's Love Letter to Numbers",
+      title: "Līlāvatī: When a Father Turned His Grief Into the Most Beautiful Math Book Ever Written",
       source: "Līlāvatī of Bhāskara II, 12th Century CE",
       paragraphs: [
-        "In the 12th century, the mathematician Bhāskara II wrote a treatise that would change mathematics forever. But unlike the dry, formulaic textbooks we know today, the Līlāvatī was different. It was a conversation — a poetic dialogue between a father and his daughter.",
-        "Līlāvatī, Bhāskara's daughter, was told that if she waited until a precise astrological moment to get married, her life would be blessed. But the moment passed — a pearl dropped into a cup went unnoticed. In consolation, Bhāskara named his greatest work after her, writing mathematical problems as stories for her to solve.",
-        "\"Beautiful Līlāvatī, tell me, how many combinations of flavors can you make with six different tastes?\" — the problems were posed as riddles, as poems, as stories. The Līlāvatī covered arithmetic, geometry, algebra, and even early calculus concepts — all wrapped in the warmth of a father teaching his daughter.",
-        "The manuscript opens with a benediction to the gods but reads like a lullaby of logic. It's why the Līlāvatī remains one of the most beloved mathematical texts in history — not because it was the most advanced, but because it was the most human."
+        "Most math textbooks are dry and forgettable. The Līlāvatī is a conversation — a father teaching his daughter through riddles and poems. Bhaskaracharya named it after Līlāvatī, 'one who plays,' because he wanted math to feel like play.",
+        "\"Beautiful Līlāvatī, tell me — how many flavor combinations can you make with six tastes?\" The problems are stories, the equations are verses. Arithmetic, geometry, algebra, early calculus — all wrapped in a father's love. Not the most advanced math book ever written. Just the most human. Because math, at its best, is just a way of saying: I love you."
       ]
     }
   },
   {
     id: 4, name: 'Charaka', period: 'circa 300 BCE',
-    title: 'Father of Ayurvedic Medicine. Formulated holistic anatomy and bio-energies.',
-    desc: 'Author of the Charaka Samhita. Mapped the human circulatory system, digestive system, and proposed that health is a balance of mind, body, and spirit.',
+    title: 'He believed healing begins with balance, not medicine.',
+    desc: 'Charaka saw health as harmony — between body, mind, and nature. He mapped the human body from the inside out, and reminded us that true medicine treats the person, not the symptom.',
     img: charakaPortrait,
     field: 'medicine', color: '#4a7c59',
     story: {
-      title: "Charaka: The Sage of Ayurvedic Medicine and Healing",
+      title: "Charaka: The Physician Who Saw Health as Harmony",
       source: "Charaka Samhita, circa 300 BCE",
       paragraphs: [
-        "Long before modern medicine was born, the sage Charaka was walking across India, studying plants, observing patients, and compiling the world's most advanced ancient medical manual: the Charaka Samhita. He is remembered as the Father of Indian Medicine.",
-        "Charaka believed that prevention is better than cure, and that health is not just the absence of disease. He defined health as a perfect balance of three biological energies, or Doshas: Vata (air/space), Pitta (fire), and Kapha (water/earth).",
-        "The Charaka Samhita contains detailed descriptions of human anatomy, the circulatory system, and digestion. Charaka described the heart as the central hub of life, connected to ten main channels that carry nutrients and consciousness throughout the body.",
-        "He also wrote an ethical oath for doctors, demanding that they serve patients with absolute dedication, charge no fee from the poor, and maintain complete confidentiality. This oath predates the western Hippocratic Oath by centuries, showcasing India's ancient wisdom."
+        "Long before medicine became prescriptions and lab reports, Charaka understood that health is balance — between body, mind, and nature. He mapped the human body like a continent, describing the heart as a central hub connected to ten channels carrying energy and consciousness.",
+        "He wrote an oath for physicians — centuries before Hippocrates — demanding they treat the poor for free, keep confidentiality, and serve with absolute dedication. Charaka didn't just practice medicine. He defined what it means to care for another human being. Long before it was a profession, he knew healing was an act of love."
       ]
     }
   },
   {
     id: 5, name: 'Panini', period: 'circa 400 BCE',
-    title: 'Algebraic genius who built the first formal grammar compiler.',
-    desc: 'Formulated a system of 3,996 rules for Sanskrit that predate modern programming compilers and Backus-Naur computer logic.',
+    title: 'He built the world\'s first programming language — 2,400 years ago.',
+    desc: 'Panini didn\'t just write grammar. He invented an algorithmic system of 3,996 rules so precise that modern computer scientists recognized it as the ancestor of all programming languages.',
     img: paniniPortrait,
     field: 'literature', color: '#7c6b4a',
     story: {
-      title: "Panini: The Algebraic Genius of Language",
+      title: "Panini: The Grammarian Who Accidentally Invented Computer Science",
       source: "Ashtadhyayi, circa 400 BCE",
       paragraphs: [
-        "In the 4th century BCE, a scholar named Panini achieved a feat of pure logic that continues to amaze modern computer scientists. He wrote the Ashtadhyayi, a book containing 3,996 rules that formalize the grammar and pronunciation of Sanskrit.",
-        "Panini did not just write a list of grammar rules; he built a machine. His rules are algebraic formulas that use auxiliary symbols, context-sensitive markers, and recursive logic. You input a word root, apply the rules in order, and the correct grammatical form emerges.",
-        "This was the world's first formal system, preceding the invention of computer programming by over two thousand years. Panini's rules map directly to Backus-Naur Form (BNF), the mathematical metalanguage used to define modern computer code languages today.",
-        "Panini proved that language is a structured code. His logic inspired both modern linguistics and the architecture of computer compilers, making him a silent founding father of the digital age. Truly, a genius of the highest order."
+        "Panini created 3,996 rules that don't just describe Sanskrit — they generate it. Input a root, apply the rules in order, and the perfect word emerges. Variables, recursion, conditionals — all in verse. It was the world's first compiler, 2,400 years before the first computer.",
+        "When John Backus designed BNF for programming languages, he unknowingly replicated Panini's logic. Every line of code you write traces back to a man who saw language as pure, structured mathematics. He proved that language itself is code — and cracked it 24 centuries before anyone else. Before there was a language for computers, there was a computer for language. Built entirely in the mind."
       ]
     }
   },
   {
     id: 6, name: 'Sushruta', period: 'circa 600 BCE',
-    title: 'Father of Surgery. Designed 120+ surgical tools and rhinoplasty.',
-    desc: 'Operating in ancient Varanasi, Sushruta described skin grafts, bone setting, and plastic surgery procedures that are close to modern standards.',
+    title: 'He performed plastic surgery in 600 BCE. With hands, not machines.',
+    desc: 'Sushruta believed the human body deserved understanding, precision, and care. He designed 120 surgical tools, rebuilt faces, and wrote the first surgical manual — all before the West had a word for surgery.',
     img: sushrutaPortrait,
     field: 'medicine', color: '#a33b3b',
     story: {
-      title: "Sushruta: The First Surgeon of Human History",
+      title: "Sushruta: The Surgeon Who Rebuilt Faces 2,600 Years Ago",
       source: "Sushruta Samhita, circa 600 BCE",
       paragraphs: [
-        "In the ancient city of Varanasi, on the banks of the sacred Ganges, the physician Sushruta was performing surgeries that sound impossible for his time. Operating in 600 BCE, he is universally recognized as the Father of Surgery.",
-        "Sushruta Samhita, his surgical treatise, lists over 120 surgical instruments (including scalpels, forceps, needles, and catheters) and details 300 different operations. He had his students practice incisions on melons and gourds before operating.",
-        "He is most famous for inventing rhinoplasty—the reconstruction of the nose. In ancient India, cutting off the nose was a common punishment. Sushruta would cut a flap of skin from the patient's cheek or forehead, rotate it, and suture it to form a new nose.",
-        "He also detailed cataract operations using a curved needle to push the cloudy lens aside, and set complex bone fractures. Sushruta understood the importance of sterilization, advising that instruments be heated and wounds washed with antiseptic herbs. A true marvel!"
+        "In Varanasi, 2,600 years ago, Sushruta taught students to practice incisions on gourds before touching a human body. He designed 120 surgical instruments shaped like birds and animals to fit the hand naturally. He invented rhinoplasty — rebuilding a severed nose with a skin flap from the cheek. Plastic surgery, millennia before the term existed.",
+        "His Samhita describes 300 procedures — cataract removal, bone setting, wound sterilization with herbs. Every principle he laid down — preparation, sanitation, precision — is still the foundation of surgery today. Every time a surgeon washes their hands before an operation, they're following a rule written 2,600 years ago by a man who believed cleanliness was next to reverence."
       ]
     }
   },
   {
     id: 7, name: 'Brahmagupta', period: '598 – 668 CE',
-    title: 'First mathematician to define Zero as a real number and negative rules.',
-    desc: 'Established that zero represents nothingness in math, and formulated laws for multiplying negative integers ("debts").',
+    title: 'He gave nothingness a name — and changed the world.',
+    desc: 'Before Brahmagupta, zero was just a gap. He made it a number. He defined its rules, and in doing so, unlocked algebra, calculus, and the logic behind every computer on Earth.',
     img: brahmaguptaPortrait,
     field: 'mathematics', color: '#c9a84c',
     story: {
-      title: "Brahmagupta: The Man Who Defined Zero",
+      title: "Brahmagupta: The Man Who Looked at Nothing and Saw Everything",
       source: "Brahmasphuta Siddhanta, 628 CE",
       paragraphs: [
-        "While zero was sometimes used as a blank space in ancient civilizations, it was the Indian mathematician Brahmagupta who first defined Zero as a complete number in the year 628 CE. He gave zero its own name, Shunya, meaning empty.",
-        "In his work Brahmasphuta Siddhanta, Brahmagupta wrote down the algebraic rules of Zero for the first time in history. He explained that subtracting a number from itself results in zero, and that any number multiplied by zero is zero.",
-        "Brahmagupta also introduced the concept of negative numbers, calling them 'debts' (Rina) and positive numbers 'fortunes' (Dhana). He established rules like 'a debt multiplied by a debt is a fortune,' which is the mathematical law of minus times minus.",
-        "By treating zero and negative numbers as real entities, Brahmagupta unlocked the door to modern algebra. His formulas for quadratic equations and geometry are still taught in schools today, making him a giant of world mathematics."
+        "Before 628 CE, zero was just a blank space. Brahmagupta gave emptiness a name — Shunya — and wrote its laws: a number minus itself is zero, zero times anything is zero, adding zero changes nothing. He completed the number system by treating nothing as something.",
+        "He also introduced negatives as 'debts' and positives as 'fortunes.' Every quadratic equation, every spreadsheet, every computer traces back to this one act of intellectual courage. Brahmagupta proved that nothing matters — literally. And in doing so, made nothing the most important number in existence."
       ]
     }
   },
   {
     id: 8, name: 'Madhava', period: '1340 – 1425 CE',
-    title: 'Pioneer of mathematical analysis and infinite series calculus.',
-    desc: 'Discovered trigonometric series limits and calculated π to 11 decimal places 300 years before Newton and Leibniz.',
+    title: 'He saw infinity — and made it calculate.',
+    desc: 'On the shores of Kerala, Madhava discovered infinite series 300 years before Newton. He understood that some patterns never end — and used that infinity to find π with astonishing precision.',
     img: madhavaPortrait,
     field: 'mathematics', color: '#b8924a',
     story: {
-      title: "Madhava of Sangamagrama: The Pioneer of Infinite Series Calculus",
+      title: "Madhava of Sangamagrama: The Man Who Calculated With Infinity",
       source: "Kerala School of Mathematics, circa 1400 CE",
       paragraphs: [
-        "Deep in the green land of Kerala, in the late 14th century, a brilliant mathematician named Madhava was solving mathematical problems that would not be solved in Europe for another three hundred years. He founded the Kerala School of Astronomy.",
-        "Madhava discovered infinite series expansions for trigonometric functions like sine, cosine, and tangent. He used these series to calculate the value of Pi to eleven decimal places (3.14159265359), which was a world record for precision.",
-        "His calculations of limits and infinite series laid the foundational stones of mathematical analysis and calculus, centuries before Isaac Newton and Gottfried Leibniz were even born. He understood that infinite addition can lead to a finite limit.",
-        "Madhava's work was preserved by his students on palm leaf manuscripts. He represents a golden age of Indian mathematics, proving that advanced calculus was thriving on the Malabar coast long before the European scientific revolution. Wow!"
+        "On the coast of Kerala, in the 14th century, Madhava discovered infinite series for sine, cosine, and tangent — formulas that add up forever but converge to exact values. This is the heart of calculus, and Madhava reached it 300 years before Europe.",
+        "He used these series to calculate π to 11 decimal places — a world record that stood for centuries. His work was preserved on palm-leaf manuscripts by his students. Three centuries later, Newton and Leibniz would independently rediscover what Madhava had already mapped. One person, on a coast, chasing infinity — and winning. While the world waited for calculus, Madhava was already there, alone with his palm leaves, having conversations with the infinite."
       ]
     }
   },
   {
     id: 9, name: 'Chanakya', period: '375 – 283 BCE',
-    title: 'Master of Statecraft, Economics, and Political Strategy.',
-    desc: 'Authored the Arthashastra, defining state planning, espionage, and taxation systems centuries before Machiavelli\'s Prince.',
+    title: 'He knew that power is nothing without wisdom.',
+    desc: 'Chanakya understood something timeless: emotions can destroy kingdoms faster than armies ever could. His Arthashastra is not about war — it\'s about the art of staying human while holding power.',
     img: chanakyaPortrait,
     field: 'literature', color: '#7c6b4a',
     story: {
-      title: "Chanakya: The Master of Strategy and Statecraft",
+      title: "Chanakya: The Strategist Who Understood Power and Human Nature Better Than Anyone",
       source: "Arthashastra, circa 300 BCE",
       paragraphs: [
-        "In the ancient university city of Taxila, a brilliant professor of political science and economics was quietly planning the unification of India. His name was Chanakya (also known as Kautilya or Vishnugupta). He would go on to help Chandragupta Maurya establish the Maurya Empire, one of the largest empires in Indian history.",
-        "Chanakya compiled his wisdom in the Arthashastra, a monumental treatise on statecraft, economic policy, and military strategy. It covers everything from the duties of a king, foreign diplomacy, tax systems, and consumer protection to the management of forests, mines, and spy networks.",
-        "Unlike many ancient texts, the Arthashastra is completely pragmatic and realistic. It explains how a state must protect its citizens, manage its treasury, and handle hostile neighbors using four methods of diplomacy: Sama (peace), Dama (concession), Bheda (division), and Danda (force).",
-        "His ideas on governance, tax rates, and intelligence gathering are so advanced that they still align with modern administrative science. Chanakya proved that ancient India possessed a sophisticated, highly organized system of political theory long before similar works appeared in Europe. Wow!"
+        "Chanakya understood something few strategists grasp: emotions destroy kingdoms faster than enemies. His Arthashastra covers economics, diplomacy, taxes, intelligence — but beneath every rule is a deep understanding of human psychology. Greed, fear, pride — those are the real forces shaping history.",
+        "He outlined four methods of diplomacy — Sama (persuasion), Bheda (division), Danda (force) — and advised trying peace first. His ideas are still studied in military academies and business schools. Chanakya didn't just write about power. He wrote about the human heart, because that's where all power really lives. The hardest battle isn't against an enemy. It's against your own ego."
       ]
     }
   },
   {
     id: 10, name: 'Patanjali', period: 'circa 150 BCE',
-    title: 'Father of Yoga Philosophy and Mind-Breath Science.',
-    desc: 'Author of the Yoga Sutras, codifying the 8-limbed path (Ashtanga) to achieve mental calm and cosmic consciousness.',
+    title: 'He mapped the mind before psychology existed.',
+    desc: 'Patanjali didn\'t invent yoga — he gave it structure. 196 sutras, 8 limbs, one goal: to quiet the endless noise of the mind. He was the original psychologist, prescribing breath as medicine.',
     img: patanjaliPortrait,
     field: 'literature', color: '#8b6f4c',
     story: {
-      title: "Patanjali: Codifying the Science of Mind and Breath",
+      title: "Patanjali: The Psychologist Who Discovered the Architecture of the Mind",
       source: "Yoga Sutras of Patanjali, circa 150 BCE",
       paragraphs: [
-        "For thousands of years, the practice of Yoga was scattered across various oral traditions in India. Around the 2nd century BCE, the sage Patanjali undertook the task of codifying this ancient wisdom into a structured, scientific system: the Yoga Sutras.",
-        "Patanjali defined Yoga as 'Chitta Vritti Nirodha'—the cessation of the fluctuations of the mind. He outlined the Ashtanga Yoga, or the Eight-Limbed Path, which is a systematic guide for living a purposeful, disciplined, and spiritually fulfilled life.",
-        "This eight-fold path ranges from moral codes (Yamas and Niyamas) and physical postures (Asanas) to breath control (Pranayama), sensory withdrawal (Pratyahara), concentration (Dharana), meditation (Dhyana), and ultimate absorption (Samadhi). It is not merely physical exercise, but a deep psychological science.",
-        "Patanjali's work shows that ancient India understood the deep connection between breath, body, and mental peace. Today, millions of people worldwide practice yoga to find balance, but its roots lie in the profound psychological science codified by Patanjali. Truly a gift from India to the world!"
+        "Before therapy, before neuroscience, Patanjali looked at the human mind and saw its restlessness — the chattering, the looping thoughts, the anxieties. He wrote a manual for quieting it. He called it the Yoga Sutras.",
+        "His definition of yoga: 'Chitta Vritti Nirodha' — stopping the fluctuations of the mind. Eight limbs: ethics, breath, concentration, meditation. Not mysticism — a systematic psychological technology for inner peace. He understood 2,000 years ago that the breath is a bridge between body and mind. Peace is a skill you can cultivate. And like any skill, it takes practice."
       ]
     }
   },
   {
     id: 11, name: 'Kanada', period: 'circa 600 BCE',
-    title: 'Pioneer of Atomic Theory and Vaisheshika Physics.',
-    desc: 'Formulated the concept of Paramanu (indivisible atoms) and laws of force and motion centuries before Dalton and Newton.',
+    title: 'He saw the invisible — atoms, force, and motion.',
+    desc: '2,600 years ago, Kanada declared that matter is made of tiny, indestructible particles. He called them paramanu. He was naming atoms before telescopes or microscopes — using nothing but logic.',
     img: kanadaPortrait,
     field: 'mathematics', color: '#4a7c59',
     story: {
-      title: "Sage Kanada: The Father of Atomic Theory",
+      title: "Kanada: The Philosopher Who Saw Atoms With Pure Reason",
       source: "Vaisheshika Sutra, circa 600 BCE",
       paragraphs: [
-        "More than 2,000 years before John Dalton or Democritus, Sage Kanada formulated the concept that all matter is made of tiny, indivisible particles. He called these particles 'Paramanu' (atoms).",
-        "Kanada wrote in the Vaisheshika Sutra that atoms are eternal and indestructible. He explained that atoms combine in pairs and triplets to form molecules, and that chemical changes occur due to heat and light energy.",
-        "He also formulated early laws of force and motion, proving that ancient Indian science was mapping out the physical foundations of the universe using pure logic and empirical observation. Wow, this is my India!"
+        "2,600 years ago, before microscopes or particle accelerators, Kanada asked: what is the world made of? His answer: Paramanu — tiny, indestructible particles that combine to form everything. He was describing atoms through pure logic, without a single instrument.",
+        "He wrote that atoms are eternal, that they pair and triplet into molecules, that heat and light cause chemical change. It took the world 2,000 years and a particle accelerator to confirm what Kanada reasoned with nothing but his mind. Sometimes the greatest instrument of discovery isn't a microscope. It's a sharp brain and the courage to ask: what is this really made of?"
       ]
     }
   },
   {
     id: 12, name: 'Gargi', period: 'circa 700 BCE',
-    title: 'Renowned Vedic Philosopher and Cosmologist.',
-    desc: 'Challenged the greatest scholars of ancient India in debates on cosmology and the nature of reality in Upanishadic courts.',
+    title: 'She asked questions no one dared to ask.',
+    desc: 'In a court of kings and sages, Gargi stood up and challenged the universe itself. She didn\'t ask about rituals — she asked what holds the stars in place. Her questions still echo through time.',
     img: gargiPortrait,
     field: 'literature', color: '#d4a82a',
     story: {
-      title: "Gargi Vachaknavi: The Philosopher Who Challenged Kings",
+      title: "Gargi: The Woman Who Questioned the Universe and Silenced Kings",
       source: "Brihadaranyaka Upanishad, circa 700 BCE",
       paragraphs: [
-        "In the royal court of King Janaka of Videha, a grand gathering of the greatest minds of ancient India was taking place. The king had offered a prize of a thousand cows, their horns gold-plated, to the wisest scholar present. While male philosophers debated, a woman stood up to challenge the assembly: Gargi Vachaknavi.",
-        "Gargi was a renowned philosopher, daughter of sage Vachaknu. She engaged in a legendary debate with the revered sage Yajnavalkya. Unlike others who asked simple ritualistic questions, Gargi questioned him on the origin of all existence and the structure of the cosmos.",
-        "She asked: 'If all this earth is woven like warp and woof on water, what then is water woven on?' Yajnavalkya replied 'On air.' She pushed further and further, asking what air, space, the worlds of the sun, moon, and stars are woven on, tracing the universe back to its ultimate source, Brahman.",
-        "Her questions were so profound and her logic so sharp that the entire assembly fell silent. Gargi proved that intellectual greatness in ancient India knew no boundaries of gender, and she remains a towering symbol of wisdom and courage. Wow, this is my India!"
+        "In King Janaka's court, the greatest minds had gathered. A thousand gold-horned cows awaited the wisest scholar. While men debated rituals, a woman rose and changed the conversation. Her name was Gargi.",
+        "She didn't ask about offerings. She asked: 'What is the earth woven on? Water. What is water woven on? Air. And air?' She pushed through space, through stars, to the edge of existence. Her questions were so profound the entire assembly fell silent. She proved that intellectual courage has no gender — and her questions are still ours today. She stood in a room full of men who thought they knew everything and asked: but do you really?"
       ]
     }
   },
   {
     id: 13, name: 'Khana', period: 'circa 800 – 1200 CE',
-    title: 'Legendary Female Astronomer and Meteorologist.',
-    desc: 'Composed mathematical maxims on agriculture, moon phases, and weather predictions that remain folklore in Bengal.',
+    title: 'She read the stars to feed the earth.',
+    desc: 'Khana turned astronomy into agriculture. Her simple rhymes predicted rain, drought, and harvests. While court astronomers calculated for kings, Khana calculated for farmers — science in service of life.',
     img: khanaPortrait,
     field: 'astronomy', color: '#b8924a',
     story: {
-      title: "Khana: The Star-Gazer of Ancient Agriculture",
+      title: "Khana: The Woman Who Made Astronomy a Tool for the People",
       source: "Khana's Bachan (Maxims of Khana), Medieval Era",
       paragraphs: [
-        "In medieval India, a woman named Khana became famous across Bengal and eastern India for her astonishing ability to predict weather, rainfall, and crop yields. She was a master of astronomy and meteorology, and her sayings (known as 'Khana's Bachan') are still quoted by farmers today.",
-        "Khana studied the movement of stars, the phases of the moon, and the behavior of wind currents to make accurate scientific predictions. She translated complex astronomical cycles into simple, rhythmic poetry that anyone could memorize and use.",
-        "For example, she wrote exact formulas for when to plant rice based on the moon's position, how to forecast a drought by observing clouds, and how to measure wind direction. Her knowledge was so precise that it often surpassed the predictions of the royal court astronomers.",
-        "Khana represents the beautiful integration of astronomy and practical science. She was a pioneer who used her mathematical genius to help ordinary people feed their families, proving that ancient Indian science was deeply rooted in the well-being of society."
+        "While court astronomers calculated for kings, a woman in Bengal used the same stars to help farmers plant rice. Khana translated astronomy into simple rhyming verses — when the moon is in this phase, plant now. When the wind blows this way, drought is coming.",
+        "Her predictions were so accurate that farmers trusted her over royal astronomers. Her maxims are still quoted in Bengal today. She represents science that doesn't stay in towers — it goes into fields, into homes, into survival. While court astronomers studied the stars for wonder, Khana studied them for life. That's a choice. And it matters."
       ]
     }
   }
@@ -1915,12 +1948,12 @@ function Heritage() {
               <span className="badge-star">✦</span>
             </div>
             <h1 className="hero-title">
-              brilliance<br />
-              from <span className="italic-gold">this land.</span>
+              minds that<br />
+              <span className="italic-gold">never really left.</span>
             </h1>
             <p className="hero-subtext">
-              The ideas. The minds.<br />
-              The legacy that still shapes the future of modern science and thought.
+              They were not gods. They were humans —<br />
+              curious, restless, brilliant. Their questions still echo in everything we build today.
             </p>
             <div className="hero-hindi-badge">
               <span>जिज्ञासा ही ज्ञान का पहला द्वार है।</span>
@@ -2028,16 +2061,16 @@ function Heritage() {
         <section className="ideas-section">
           <div className="ideas-container">
             <div className="ideas-left">
-              <span className="section-eyebrow">ideas that changed everything <span style={{fontSize: '11px'}}>∞</span></span>
-              <h2 className="section-title" style={{marginBottom: '20px'}}>Concepts that Shifted Civilization</h2>
-              <p className="ideas-left-desc">Ancient insights, eternal impact. Discovery of numerical matrices, circular astronomy, and human anatomy systems that defined the classical age.</p>
+              <span className="section-eyebrow">first. by centuries. <span style={{fontSize: '11px'}}>∞</span></span>
+              <h2 className="section-title" style={{marginBottom: '20px'}}>Things the Rest of the World Discovered Later</h2>
+              <p className="ideas-left-desc">Binary code. Chess. The decimal system. Pure zinc. A university with 10,000 students — 1,500 years ago. These aren't the stories you already know. Click. Let your jaw drop.</p>
               <button className="btn-ideas-more" onClick={() => document.getElementById('curiosity')?.scrollIntoView({ behavior: 'smooth' })}>
                 explore more <ArrowRight size={13} />
               </button>
             </div>
             
             <div className="ideas-grid">
-              {/* Card 1: Zero */}
+              {/* Card 1: Binary (Pingala) */}
               <div 
                 className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
                 style={{position: 'relative'}}
@@ -2051,16 +2084,19 @@ function Heritage() {
                 <OrnateCorners dark={dark} />
                 <div className="idea-icon-wrap">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 12c-2-2.5-5.5-4-8.5-4S1 10.5 1 12s2.5 4 5.5 4 6.5-1.5 8.5-4zm0 0c2 2.5 5.5 4 8.5 4s5.5-2.5 5.5-4-2.5-4-5.5-4-6.5 1.5-8.5 4z" />
+                    <rect x="4" y="6" width="6" height="12" rx="1" />
+                    <rect x="14" y="6" width="6" height="12" rx="1" />
+                    <text x="5" y="15" fontSize="8" fontWeight="bold" fill="currentColor">0</text>
+                    <text x="15" y="15" fontSize="8" fontWeight="bold" fill="currentColor">1</text>
                   </svg>
                 </div>
-                <h3 className="idea-sanskrit">शून्य (zero)</h3>
-                <span className="idea-sanskrit-sub">the concept of zero</span>
-                <p className="idea-description">India transformed mathematics from mere counting to infinite potential by treating zero as a complete mathematical entity.</p>
+                <h3 className="idea-sanskrit">द्वि-आधारी</h3>
+                <span className="idea-sanskrit-sub">pingala's binary code</span>
+                <p className="idea-description">2,000 years before computers, a poet mapped Sanskrit rhythms with 0s and 1s. Binary wasn't born in a lab — it was born in verse.</p>
                 <ArrowRight size={14} className="idea-card-arrow" />
               </div>
 
-              {/* Card 2: Round Earth */}
+              {/* Card 2: Chess (Chaturanga) */}
               <div 
                 className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
                 style={{position: 'relative'}}
@@ -2074,18 +2110,21 @@ function Heritage() {
                 <OrnateCorners dark={dark} />
                 <div className="idea-icon-wrap">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    <path d="M2 12h20M12 2v20" />
+                    <rect x="6" y="6" width="12" height="12" rx="1" />
+                    <line x1="6" y1="10" x2="18" y2="10" />
+                    <line x1="6" y1="14" x2="18" y2="14" />
+                    <line x1="10" y1="6" x2="10" y2="18" />
+                    <line x1="14" y1="6" x2="14" y2="18" />
+                    <circle cx="12" cy="12" r="2" fill="currentColor" opacity="0.3" />
                   </svg>
                 </div>
-                <h3 className="idea-sanskrit">पृथ्वी गोल है</h3>
-                <span className="idea-sanskrit-sub">the earth is round – Aryabhata</span>
-                <p className="idea-description">Long before European explorers, Aryabhata calculated Earth's round shape, spherical rotation, and orbital axis.</p>
+                <h3 className="idea-sanskrit">चतुरङ्ग</h3>
+                <span className="idea-sanskrit-sub">the birth of chess</span>
+                <p className="idea-description">1,500 years ago, a battlefield simulation became the world's greatest strategy game. Every chess match begins in ancient India.</p>
                 <ArrowRight size={14} className="idea-card-arrow" />
               </div>
 
-              {/* Card 3: Calculus */}
+              {/* Card 3: Nalanda University */}
               <div 
                 className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
                 style={{position: 'relative'}}
@@ -2099,17 +2138,19 @@ function Heritage() {
                 <OrnateCorners dark={dark} />
                 <div className="idea-icon-wrap">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <path d="M15 4c-2 0-3 1.5-3 3.5v9c0 2-1 3.5-3 3.5" />
-                    <path d="M8 12h8" />
+                    <rect x="5" y="8" width="14" height="12" rx="2" />
+                    <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="12" y1="12" x2="12" y2="16" />
+                    <line x1="9" y1="14" x2="15" y2="14" />
                   </svg>
                 </div>
-                <h3 className="idea-sanskrit">कलन (calculus)</h3>
-                <span className="idea-sanskrit-sub">explored by Bhaskaracharya</span>
-                <p className="idea-description">Bhaskaracharya laid foundations for derivatives and integration while calculating instantaneous motion of planets.</p>
+                <h3 className="idea-sanskrit">नालन्दा</h3>
+                <span className="idea-sanskrit-sub">the first great university</span>
+                <p className="idea-description">10,000 students from across Asia. 2,000 teachers. 9 stories of manuscripts. Oxford is 800 years old. Nalanda was 1,600.</p>
                 <ArrowRight size={14} className="idea-card-arrow" />
               </div>
 
-              {/* Card 4: Planet motion */}
+              {/* Card 4: Zinc */}
               <div 
                 className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
                 style={{position: 'relative'}}
@@ -2122,19 +2163,19 @@ function Heritage() {
               >
                 <OrnateCorners dark={dark} />
                 <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.3" />
-                    <ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-15 12 12)" />
-                    <ellipse cx="12" cy="12" rx="7" ry="2.2" transform="rotate(25 12 12)" />
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M6 20L10 8h8l4 12" />
+                    <path d="M8 16h8" />
+                    <circle cx="14" cy="5" r="2" fill="currentColor" opacity="0.3" />
                   </svg>
                 </div>
-                <h3 className="idea-sanskrit">ग्रहों की गति</h3>
-                <span className="idea-sanskrit-sub">planetary movements</span>
-                <p className="idea-description">Ancient calculations for orbits and eclipses with extremely accurate planetary coordinates, sans modern telescopes.</p>
+                <h3 className="idea-sanskrit">यशद</h3>
+                <span className="idea-sanskrit-sub">pure zinc distillation</span>
+                <p className="idea-description">India was producing pure zinc 500 years before Europe cracked it. The process was so advanced it became a lost art — then rediscovered.</p>
                 <ArrowRight size={14} className="idea-card-arrow" />
               </div>
 
-              {/* Card 5: Linguistics */}
+              {/* Card 5: Decimal System */}
               <div 
                 className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
                 style={{position: 'relative'}}
@@ -2147,25 +2188,20 @@ function Heritage() {
               >
                 <OrnateCorners dark={dark} />
                 <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="3" />
-                    <circle cx="6" cy="6" r="2" />
-                    <circle cx="18" cy="6" r="2" />
-                    <circle cx="6" cy="18" r="2" />
-                    <circle cx="18" cy="18" r="2" />
-                    <line x1="12" y1="12" x2="6" y2="6" />
-                    <line x1="12" y1="12" x2="18" y2="6" />
-                    <line x1="12" y1="12" x2="6" y2="18" />
-                    <line x1="12" y1="12" x2="18" y2="18" />
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <text x="5" y="16" fontSize="12" fontWeight="bold" fill="currentColor">1</text>
+                    <text x="11" y="16" fontSize="12" fontWeight="bold" fill="currentColor">0</text>
+                    <text x="9" y="8" fontSize="8" fill="currentColor" opacity="0.6">1</text>
+                    <text x="9" y="20" fontSize="8" fill="currentColor" opacity="0.6">0</text>
                   </svg>
                 </div>
-                <h3 className="idea-sanskrit">अष्टाध्यायी</h3>
-                <span className="idea-sanskrit-sub">foundational text of linguistics</span>
-                <p className="idea-description">Panini's 3,996 rule system mapping natural language structures, acting as the world's first formal algorithmic grammar.</p>
+                <h3 className="idea-sanskrit">दशमलव</h3>
+                <span className="idea-sanskrit-sub">the decimal system</span>
+                <p className="idea-description">The way you write numbers — ones, tens, hundreds — was an Indian breakthrough. Before this, multiplication needed specialists. Now you just move a dot.</p>
                 <ArrowRight size={14} className="idea-card-arrow" />
               </div>
 
-              {/* Card 6: Surgery */}
+              {/* Card 6: Cosmic Numbers */}
               <div 
                 className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
                 style={{position: 'relative'}}
@@ -2178,18 +2214,16 @@ function Heritage() {
               >
                 <OrnateCorners dark={dark} />
                 <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="5" r="2" />
-                    <path d="M12 7c-2 0-3.5 1-4 3l-1.5 5.5c-.3 1 .5 1.5 1.2 1.2L12 15l4.3 1.7c.7.3 1.5-.2 1.2-1.2L16 10c-.5-2-2-3-4-3z" />
-                    <path d="M8 18c0-1.5 1.5-2.5 4-2.5s4 1 4 2.5" />
-                    <circle cx="12" cy="5" r="0.5" fill="currentColor" />
-                    <circle cx="12" cy="9" r="0.5" fill="currentColor" />
-                    <circle cx="12" cy="12" r="0.5" fill="currentColor" />
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" opacity="0.3" />
+                    <path d="M12 2c3 3 3 9 3 12s0 9-3 12" />
+                    <path d="M12 2c-3 3-3 9-3 12s0 9 3 12" />
+                    <circle cx="12" cy="12" r="2" fill="currentColor" opacity="0.5" />
                   </svg>
                 </div>
-                <h3 className="idea-sanskrit">शरीर विज्ञान</h3>
-                <span className="idea-sanskrit-sub">knowledge of anatomy and surgery</span>
-                <p className="idea-description">Sushruta's advanced tools and operating methods, detailing plastic surgery, rhinoplasty, and cataract removal in 600 BCE.</p>
+                <h3 className="idea-sanskrit">असङ्ख्य</h3>
+                <span className="idea-sanskrit-sub">naming the countless</span>
+                <p className="idea-description">Ancient Indians named numbers up to 10^53 — a 1 with 53 zeros. They measured time in billions of years when everyone else counted in thousands.</p>
                 <ArrowRight size={14} className="idea-card-arrow" />
               </div>
             </div>
@@ -2200,9 +2234,9 @@ function Heritage() {
         <section id="curiosity" className="curiosity-section">
           <div className="curiosity-container">
             <div className="curiosity-left">
-              <span className="section-eyebrow">late night curiosity <span style={{fontSize: '11px'}}>🌙</span></span>
-              <h2 className="section-title" style={{marginBottom: '20px'}}>Curated Wonders & Insights</h2>
-              <p className="curiosity-left-desc">Bite-sized stories and lesser-known historical details from India's ancient mathematical and scientific legacy. Read, ponder, and play.</p>
+              <span className="section-eyebrow">sit with this. 🌙</span>
+              <h2 className="section-title" style={{marginBottom: '20px'}}>Things That Don't Feel Real</h2>
+              <p className="curiosity-left-desc">Not history. Not facts. Just quiet mind-bending moments from a past that feels impossibly ahead of itself. A pillar that refuses to rust. A universe that hums. A recipe that vanished. Sit with these.</p>
               <button className="btn-ideas-more" onClick={() => setModalData({
                 title: CURIOSITY_STORIES[0].title,
                 source: CURIOSITY_STORIES[0].source,
@@ -2264,7 +2298,7 @@ function Heritage() {
                   <span className="logo-subtitle">धीरे धीरे रे मना</span>
                 </div>
               </div>
-              <p className="footer-tagline">Tracing the intellectual systems, calculations, and holistic scripts that shaped human thought across time.</p>
+              <p className="footer-tagline">Listening to the voices that refused to be silenced by time. Their questions are still our questions.</p>
             </div>
 
             <div className="footer-center">
@@ -2322,10 +2356,10 @@ function Heritage() {
                   "जिज्ञासा ही ज्ञान का पहला द्वार है।"
                 </p>
                 <p className="story-modal-paragraph text-sm opacity-85 leading-relaxed" style={{ textIndent: 0 }}>
-                  Welcome to the Heritage Sanctuary. Here, we trace the logical scripts, mathematical proofs, and cosmological models designed by the great minds of ancient India.
+                  This is not a history lesson. It is a meeting — with minds who lived centuries before us, but whose questions still shape our world. Step quietly. Think deeply.
                 </p>
                 <p className="story-modal-paragraph text-sm opacity-85 leading-relaxed" style={{ textIndent: 0 }}>
-                  Resonant Tibetan singing bowl tones are active, creating a quiet space for contemplation as you explore.
+                  Tibetan singing bowl tones are active, creating space for quiet reflection as you journey through time.
                 </p>
                 <button
                   onClick={handleCloseIntro}
@@ -2346,7 +2380,7 @@ function Heritage() {
           <div className="scholars-grid-overlay" onClick={() => setShowAllGrid(false)}>
             <div className="scholars-grid-container" onClick={(e) => e.stopPropagation()}>
               <div className="scholars-grid-header">
-                <h2 className="scholars-grid-title">Giants of Indian Wisdom</h2>
+                <h2 className="scholars-grid-title">All Minds, One Conversation</h2>
                 <button className="scholars-grid-close" onClick={() => setShowAllGrid(false)} aria-label="Close grid modal">
                   <X size={18} />
                 </button>
