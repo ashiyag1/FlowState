@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { useTheme } from '../../context/ThemeContext'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import BookCard from '../../components/wisdom/BookCard.jsx'
 
 export default function ExploreByTopic({ books, onBookOpen }) {
@@ -34,122 +35,56 @@ export default function ExploreByTopic({ books, onBookOpen }) {
   if (!books.length) return null
 
   return (
-    <section style={styles.section}>
-      <div style={styles.headerRow}>
-        <h2 style={styles.sectionTitle(dark)}>Explore by Topic</h2>
+    <section className="relative w-full flex-shrink-0">
+      <div className="mb-3">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold font-serif text-sandalwood dark:text-gold" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
+          Explore by Topic
+        </h2>
       </div>
 
-      <div style={styles.carousel}>
+      <div className="relative flex items-center py-2 px-1">
         {canScrollLeft && (
-          <button style={{ ...styles.arrow, left: '-8px' }} onClick={() => scroll(-1)} aria-label="Previous">
-            ‹
+          <button 
+            className="absolute left-0 z-20 w-8 h-8 rounded-full border border-gold/35 dark:border-gold/20 bg-white/80 dark:bg-[#1a1208]/90 text-gold flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95 transition-all hover:bg-gold/10"
+            onClick={() => scroll(-1)} 
+            aria-label="Previous"
+          >
+            <ChevronLeft size={16} />
           </button>
         )}
 
-        <div style={styles.trackWrap}>
-          <div ref={scrollRef} style={styles.track}>
+        <div className="flex-1 overflow-hidden">
+          <div 
+            ref={scrollRef} 
+            className="flex gap-4 overflow-x-auto py-3 px-2 scroll-smooth scrollbar-none touch-pan-x"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {books.map((b) => (
-              <div key={b.id} style={styles.slot}>
+              <div key={b.id} className="flex-shrink-0 flex items-end">
                 <BookCard book={b} onClick={() => onBookOpen?.(b)} />
               </div>
             ))}
-            <div style={{ flexShrink: 0, width: '8px' }} />
+            <div className="w-2 flex-shrink-0" />
           </div>
         </div>
 
         {canScrollRight && (
-          <button style={{ ...styles.arrow, right: '-8px' }} onClick={() => scroll(1)} aria-label="Next">
-            ›
+          <button 
+            className="absolute right-0 z-20 w-8 h-8 rounded-full border border-gold/35 dark:border-gold/20 bg-white/80 dark:bg-[#1a1208]/90 text-gold flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95 transition-all hover:bg-gold/10"
+            onClick={() => scroll(1)} 
+            aria-label="Next"
+          >
+            <ChevronRight size={16} />
           </button>
         )}
       </div>
 
-      <div style={styles.shelfOuter}>
-        <div style={styles.shelfTop} />
-        <div style={styles.shelfBody} />
-        <div style={styles.shelfShadow} />
+      {/* Ornate Wood Bookshelf Shelf design */}
+      <div className="relative mx-1.5 mt-1 select-none pointer-events-none">
+        <div className="h-[4px] bg-gradient-to-r from-transparent via-[#8a5a2b] via-[#c9933a] via-[#8a5a2b] to-transparent rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
+        <div className="h-[6px] bg-gradient-to-b from-[#5c3a1a] to-[#2e1d0d] rounded-b-md opacity-90" />
+        <div className="h-[4px] bg-gradient-to-b from-black/15 to-transparent rounded-b-md mx-1" />
       </div>
     </section>
   )
-}
-
-const styles = {
-  section: {
-    flexShrink: 0,
-  },
-  headerRow: {
-    marginBottom: '0.35rem',
-  },
-  sectionTitle: (dark) => ({
-    fontSize: '1rem',
-    fontFamily: '"Cinzel", serif',
-    fontWeight: 600,
-    color: dark ? '#e8d9b5' : '#5c3d1e',
-    margin: 0,
-    letterSpacing: '0.01em',
-  }),
-  carousel: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0.25rem 0 0',
-  },
-  trackWrap: {
-    flex: 1,
-    overflow: 'hidden',
-  },
-  track: {
-    display: 'flex',
-    gap: '18px',
-    overflowX: 'auto',
-    scrollBehavior: 'smooth',
-    padding: '0.5rem 0.5rem 0',
-    scrollbarWidth: 'none',
-    msOverflowStyle: 'none',
-    WebkitOverflowScrolling: 'touch',
-  },
-  slot: {
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'flex-end',
-  },
-  arrow: {
-    position: 'absolute',
-    top: '44%',
-    transform: 'translateY(-50%)',
-    zIndex: 5,
-    width: '32px',
-    height: '32px',
-    borderRadius: '50%',
-    border: 'none',
-    background: 'linear-gradient(135deg, #c9a84c, #8b6914)',
-    color: '#fff',
-    fontSize: '1.2rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 2px 10px rgba(139,105,20,0.2)',
-    transition: 'transform 0.2s, box-shadow 0.2s',
-  },
-  shelfOuter: {
-    position: 'relative',
-    margin: '0.35rem 0.5rem 0',
-  },
-  shelfTop: {
-    height: '3px',
-    background: 'linear-gradient(90deg, transparent 4%, #6b4a20 15%, #a07830 30%, #c9a050 50%, #a07830 70%, #6b4a20 85%, transparent 96%)',
-    borderRadius: '2px 2px 0 0',
-  },
-  shelfBody: {
-    height: '5px',
-    background: 'linear-gradient(180deg, #7a5528, #4a3015)',
-    borderRadius: '0 0 3px 3px',
-  },
-  shelfShadow: {
-    height: '3px',
-    background: 'linear-gradient(180deg, rgba(0,0,0,0.10), transparent)',
-    borderRadius: '0 0 3px 3px',
-    margin: '0 3px',
-  },
 }

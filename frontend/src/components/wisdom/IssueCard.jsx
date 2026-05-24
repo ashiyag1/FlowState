@@ -1,91 +1,43 @@
+import { motion } from 'framer-motion'
+
 export default function IssueCard({ issue, dark, onClick }) {
   return (
-    <div style={styles.card(dark)} onClick={onClick}>
-      <div style={styles.left}>
-        <span style={{
-          ...styles.tag,
-          background: issue.color + '22',
-          color: issue.color,
-        }}>
-          {issue.tag}
-        </span>
-        <span style={styles.title(dark)}>{issue.title}</span>
+    <motion.div 
+      onClick={onClick}
+      whileHover={{ y: -4, scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ duration: 0.2 }}
+      className="flex items-center justify-between gap-4 p-4 bg-white/65 dark:bg-white/[0.03] hover:bg-white/80 dark:hover:bg-white/[0.06] border border-gold/15 dark:border-gold/10 hover:border-gold/35 dark:hover:border-gold/25 rounded-2xl cursor-pointer shadow-sm hover:shadow-md h-[80px] w-full box-sizing-border"
+    >
+      <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span 
+            className="text-[9px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded-md"
+            style={{
+              background: issue.color + '15',
+              color: issue.color,
+            }}
+          >
+            {issue.tag}
+          </span>
+          <span className="text-xs font-bold uppercase tracking-wider text-saffron/80 dark:text-saffron-lt text-[9px]">
+            {issue.approach}
+          </span>
+        </div>
+        <h3 className="text-xs sm:text-sm font-bold text-ink dark:text-ivory font-serif truncate leading-tight">
+          {issue.title}
+        </h3>
       </div>
-      <p style={styles.desc(dark)}>{issue.summary}</p>
-      <div style={styles.right}>
-        <span style={styles.approach(issue)}>{issue.approach}</span>
-        <span style={styles.arrow}>→</span>
-      </div>
-    </div>
-  )
-}
 
-const styles = {
-  card: (dark) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.85rem 1rem',
-    background: dark ? 'rgba(40,30,15,0.25)' : 'rgba(255,255,255,0.5)',
-    border: dark ? '1px solid rgba(201,168,76,0.06)' : '1px solid rgba(201,168,76,0.12)',
-    borderRadius: '11px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    height: '72px',
-    boxSizing: 'border-box',
-  }),
-  left: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.2rem',
-    minWidth: 0,
-    width: '110px',
-    flexShrink: 0,
-  },
-  tag: {
-    fontSize: '0.5rem',
-    padding: '0.1rem 0.35rem',
-    borderRadius: '5px',
-    fontWeight: 600,
-    alignSelf: 'flex-start',
-    letterSpacing: '0.02em',
-  },
-  title: (dark) => ({
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    color: dark ? '#e8d9b5' : '#3a2a10',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    lineHeight: 1.25,
-  }),
-  desc: (dark) => ({
-    fontSize: '0.74rem',
-    color: dark ? '#a09070' : '#7a6a50',
-    margin: 0,
-    lineHeight: 1.35,
-    flex: 1,
-    minWidth: 0,
-  }),
-  right: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.4rem',
-    flexShrink: 0,
-  },
-  approach: (issue) => ({
-    fontSize: '0.55rem',
-    padding: '0.14rem 0.4rem',
-    borderRadius: '5px',
-    background: issue.color + '18',
-    color: issue.color,
-    fontWeight: 600,
-    letterSpacing: '0.03em',
-    whiteSpace: 'nowrap',
-  }),
-  arrow: {
-    fontSize: '0.8rem',
-    color: '#c9a84c',
-    opacity: 0.5,
-  },
+      <p className="hidden sm:block text-xs text-mist-dark dark:text-ocean-lt/60 leading-normal line-clamp-2 max-w-[200px] flex-1">
+        {issue.summary}
+      </p>
+
+      <div className="flex items-center gap-1.5 flex-shrink-0">
+        <span className="text-sm text-gold dark:text-gold/80 font-bold transition-transform duration-350 hover:translate-x-1">
+          →
+        </span>
+      </div>
+    </motion.div>
+  )
 }

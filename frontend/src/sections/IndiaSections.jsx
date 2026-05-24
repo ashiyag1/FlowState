@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext'
 import { INDIA_LEGACY } from '../utils'
 import SectionHeading from '../components/SectionHeading'
 import OrnateDivider from '../components/OrnateDivider'
+import DiyaLamp from '../icons/DiyaLamp'
 
 const fadeUp = (delay = 0) => ({
   hidden: { opacity: 0, y: 26 },
@@ -64,15 +65,19 @@ export default function IndiaSections() {
                 onMouseLeave={() => setActiveIdx(null)}
                 onClick={() => setActiveIdx(active ? null : i)}
               >
-                <div style={{
-                  ...carouselStyles.card(dark),
-                  ...(active ? carouselStyles.cardActive(dark) : {}),
-                  borderColor: active
-                    ? 'rgba(217,119,6,0.25)'
-                    : dark
-                      ? 'rgba(201,168,76,0.08)'
-                      : 'rgba(201,168,76,0.14)',
-                }}>
+                <div 
+                  className="fs-sandstone-tablet fs-gold-corner-card"
+                  style={{
+                    ...carouselStyles.card(dark),
+                    ...(active ? carouselStyles.cardActive(dark) : {}),
+                    borderColor: active
+                      ? 'rgba(217,119,6,0.5)'
+                      : dark
+                        ? 'rgba(201,168,76,0.18)'
+                        : 'rgba(201,168,76,0.28)',
+                    padding: '1.2rem 1.1rem 0.9rem',
+                  }}
+                >
                   <div style={carouselStyles.topBorder(active)} />
 
                   <div style={carouselStyles.cardHeader}>
@@ -102,9 +107,25 @@ export default function IndiaSections() {
           <div style={{ flexShrink: 0, width: '4px' }} />
         </div>
 
-        <div style={carouselStyles.shelfShadow} />
-        <div style={carouselStyles.shelfTop} />
-        <div style={carouselStyles.shelfBody} />
+        {/* Tactile Wooden Shelf with Glowing oil Diyas */}
+        <div className="relative mt-[-4px] mx-[0.5rem] z-10 flex items-end justify-between pointer-events-none">
+          {/* Left Diya */}
+          <div style={{ transform: 'translateY(16px) translateX(6px)', filter: 'drop-shadow(0 -4px 8px rgba(232,119,34,0.35))' }} className="z-20">
+            <DiyaLamp size={38} />
+          </div>
+
+          {/* Shelf Body */}
+          <div className="flex-1 flex flex-col justify-end">
+            <div className="fs-wooden-shelf-top h-[3px]" />
+            <div className="fs-wooden-shelf-decor h-[6px] rounded-b-[3px]" />
+            <div className="h-[6px] bg-gradient-to-b from-black/25 to-transparent rounded-b-[4px]" />
+          </div>
+
+          {/* Right Diya */}
+          <div style={{ transform: 'translateY(16px) translateX(-6px)', filter: 'drop-shadow(0 -4px 8px rgba(232,119,34,0.35))' }} className="z-20">
+            <DiyaLamp size={38} />
+          </div>
+        </div>
 
         <div style={carouselStyles.arrows}>
           <button style={{ ...carouselStyles.arrow, opacity: canScrollLeft ? 0.85 : 0.2 }} onClick={() => scrollLegacy(-1)} disabled={!canScrollLeft}>‹</button>

@@ -6,60 +6,30 @@ export default function TopicFilterBar({ topics, active, onChange }) {
   const scrollRef = useRef(null)
 
   return (
-    <div style={styles.wrapper}>
-      <div ref={scrollRef} style={styles.bar}>
-        {topics.map((t) => (
-          <button
-            key={t}
-            onClick={() => onChange(t)}
-            style={{
-              ...styles.pill,
-              background: active === t
-                ? (dark ? 'rgba(201,168,76,0.2)' : '#c9a84c')
-                : 'transparent',
-              color: active === t
-                ? (dark ? '#e8d9b5' : '#fff')
-                : (dark ? '#a09070' : '#5c3d1e'),
-              borderColor: active === t
-                ? (dark ? 'rgba(201,168,76,0.3)' : '#8b6914')
-                : (dark ? 'rgba(201,168,76,0.08)' : 'rgba(201,168,76,0.15)'),
-              boxShadow: active === t
-                ? (dark ? '0 2px 8px rgba(201,168,76,0.08)' : '0 2px 8px rgba(139,105,20,0.15)')
-                : 'none',
-            }}
-          >
-            {t}
-          </button>
-        ))}
+    <div className="my-6 flex-shrink-0">
+      <div
+        ref={scrollRef}
+        className="flex gap-2.5 overflow-x-auto py-1 scrollbar-none touch-pan-x"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {topics.map((t) => {
+          const isActive = active === t
+          return (
+            <button
+              key={t}
+              onClick={() => onChange(t)}
+              className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-300 transform active:scale-95 border cursor-pointer
+                ${isActive 
+                  ? 'bg-gradient-to-r from-gold to-gold/80 text-white dark:text-ink border-gold shadow-[0_4px_12px_rgba(201,147,58,0.25)] scale-105' 
+                  : 'bg-white/40 dark:bg-white/[0.02] border-gold/15 dark:border-gold/10 hover:border-gold/45 text-ink/70 dark:text-ivory/70 hover:text-ink dark:hover:text-ivory hover:-translate-y-[1px]'
+                }
+              `}
+            >
+              {t}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
-}
-
-const styles = {
-  wrapper: {
-    margin: '0.4rem 0 0.15rem',
-    flexShrink: 0,
-  },
-  bar: {
-    display: 'flex',
-    gap: '0.4rem',
-    overflowX: 'auto',
-    padding: '0.2rem 0',
-    scrollbarWidth: 'none',
-    msOverflowStyle: 'none',
-    WebkitOverflowScrolling: 'touch',
-  },
-  pill: {
-    padding: '0.3rem 0.85rem',
-    borderRadius: '20px',
-    cursor: 'pointer',
-    fontSize: '0.72rem',
-    fontFamily: '"Lora", serif',
-    fontWeight: 500,
-    whiteSpace: 'nowrap',
-    transition: 'all 0.2s ease',
-    border: '1px solid',
-    flexShrink: 0,
-  },
 }

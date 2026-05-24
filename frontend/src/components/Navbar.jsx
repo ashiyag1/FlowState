@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { Sun, Moon, LogIn, LogOut, Volume2, VolumeX, Menu, X, User } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
@@ -14,7 +14,7 @@ const NAV = [
   { to: '/journal', label: 'Journal',   sub: 'Chintan'   },
   { to: '/quotes',  label: 'Wisdom',    sub: 'Gyan'      },
   { to: '/heritage', label: 'Heritage', sub: 'Sampada'   },
-  { to: '/community', label: 'Sangha',  sub: 'Community' },
+  { to: '/community', label: 'Community',  sub: 'Sangha' },
 ]
 
 function FlowSymbol({ size = 32 }) {
@@ -125,14 +125,56 @@ function MobileNavItem({ to, label, sub, onClick }) {
   )
 }
 
+/* ── Avatar component (shared between desktop & mobile) ── */
+function ProfileAvatar({ user, size = 30, onClick, style = {} }) {
+  const initial = user?.name?.charAt(0)?.toUpperCase() || '?'
+  return (
+    <motion.button
+      type="button"
+      whileTap={{ scale: 0.92 }}
+      whileHover={{ scale: 1.05 }}
+      onClick={onClick}
+      style={{
+        width: size, height: size, borderRadius: '50%',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: '1.5px solid rgba(212,168,42,0.4)',
+        background: user?.avatar ? 'transparent' : 'linear-gradient(135deg, #C9933A, #E8B96A)',
+        cursor: 'pointer', overflow: 'hidden',
+        boxShadow: '0 0 12px rgba(212,168,42,0.15), inset 0 1px 0 rgba(255,240,190,0.2)',
+        padding: 0,
+        ...style,
+      }}
+      aria-label="Profile"
+    >
+      {user?.avatar ? (
+        <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+      ) : (
+        <span style={{
+          fontFamily: "'Cinzel', serif",
+          fontSize: size * 0.42,
+          fontWeight: 700,
+          color: '#fff',
+          lineHeight: 1,
+          textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+        }}>
+          {initial}
+        </span>
+      )}
+    </motion.button>
+  )
+}
+
 export default function Navbar() {
   const { dark, toggle } = useTheme()
   const { isMuted, toggleMute } = useSoundEffects()
   const { user, isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate()
   const [visible,    setVisible]  = useState(true)
   const [scrolled,   setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
   const lastY = useRef(0)
+  const dropdownRef = useRef(null)
 
   useEffect(() => {
     const onScroll = () => {
@@ -145,6 +187,18 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive:true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    if (!profileOpen) return
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [profileOpen])
 
   const glassBg = dark
     ? 'rgba(16, 10, 4, 0.68)'
@@ -275,25 +329,113 @@ export default function Navbar() {
               {isMuted ? <VolumeX size={12}/> : <Volume2 size={12}/>}
             </motion.button>
 
-            {/* Sign In / Logout — softer glass CTA */}
+            {/* Profile Avatar / Sign In */}
             {isAuthenticated ? (
-              <motion.div whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}
-                onClick={logout}
-                style={{
-                  display:'inline-flex', alignItems:'center', gap:5,
-                  padding:'5px 12px', borderRadius:999,
-                  fontFamily:"'Cinzel',serif", fontSize:'0.64rem',
-                  fontWeight:600, letterSpacing:'0.08em',
-                  color: dark ? '#f5e6c8' : '#5c3d1e',
-                  textTransform:'uppercase',
-                  background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
-                  border:'1px solid rgba(212,168,42,0.22)',
-                  boxShadow:'0 1px 4px rgba(160,100,10,0.04)',
-                  cursor:'pointer', transition:'all 0.25s ease',
-                }}>
-                <LogOut size={10}/>
-                <span>Logout ({user?.name?.split(' ')[0]})</span>
-              </motion.div>
+              <div ref={dropdownRef} style={{ position: 'relative' }}>
+                <ProfileAvatar user={user} size={30} onClick={() => setProfileOpen(p => !p)} />
+
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.92, y: -8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                      transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                      style={{
+                        position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                        width: 230, zIndex: 100,
+                        borderRadius: 16,
+                        background: dark
+                          ? 'rgba(22, 14, 6, 0.92)'
+                          : 'rgba(253, 248, 235, 0.95)',
+                        backdropFilter: 'blur(32px) saturate(1.4)',
+                        WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
+                        border: '1px solid rgba(212,168,42,0.22)',
+                        boxShadow: '0 16px 48px rgba(0,0,0,0.3), 0 0 40px rgba(212,168,42,0.06)',
+                        overflow: 'hidden',
+                        pointerEvents: 'auto',
+                      }}
+                    >
+                      {/* Gold accent line at top */}
+                      <div style={{
+                        height: 2,
+                        background: 'linear-gradient(90deg, transparent, rgba(212,168,42,0.5), rgba(232,134,42,0.3), transparent)',
+                      }} />
+
+                      {/* User Info */}
+                      <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(212,168,42,0.12)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <ProfileAvatar user={user} size={36} onClick={() => {}} style={{ cursor: 'default' }} />
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{
+                              fontFamily: "'Cinzel', serif",
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              color: dark ? '#f5e6c8' : '#3d2208',
+                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                            }}>
+                              {user?.name || 'User'}
+                            </div>
+                            <div style={{
+                              fontSize: '0.65rem',
+                              color: dark ? 'rgba(212,168,42,0.55)' : 'rgba(92,61,30,0.5)',
+                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                              marginTop: 2,
+                            }}>
+                              {user?.email || ''}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div style={{ padding: '6px 8px' }}>
+                        <motion.div
+                          whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
+                          onClick={() => { setProfileOpen(false); navigate('/profile') }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '10px 10px', borderRadius: 10,
+                            cursor: 'pointer', transition: 'background 0.15s',
+                          }}
+                        >
+                          <User size={13} style={{ color: dark ? '#d9b96a' : '#8a5a12', flexShrink: 0 }} />
+                          <span style={{
+                            fontFamily: "'Cinzel', serif",
+                            fontSize: '0.7rem',
+                            fontWeight: 500,
+                            letterSpacing: '0.06em',
+                            color: dark ? '#e8d5a8' : '#5c3d1e',
+                          }}>
+                            View Profile
+                          </span>
+                        </motion.div>
+
+                        <motion.div
+                          whileHover={{ backgroundColor: dark ? 'rgba(180,40,40,0.1)' : 'rgba(180,40,40,0.06)' }}
+                          onClick={() => { setProfileOpen(false); logout(); navigate('/') }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '10px 10px', borderRadius: 10,
+                            cursor: 'pointer', transition: 'background 0.15s',
+                          }}
+                        >
+                          <LogOut size={13} style={{ color: '#b45a3c', flexShrink: 0 }} />
+                          <span style={{
+                            fontFamily: "'Cinzel', serif",
+                            fontSize: '0.7rem',
+                            fontWeight: 500,
+                            letterSpacing: '0.06em',
+                            color: '#b45a3c',
+                          }}>
+                            Logout
+                          </span>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
               <NavLink to="/login" style={{ textDecoration:'none' }}>
                 <motion.div whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}
@@ -473,21 +615,70 @@ export default function Navbar() {
                 </div>
 
                 {isAuthenticated ? (
-                  <div onClick={() => { logout(); setMobileOpen(false); }}
-                    style={{
-                      display:'flex', alignItems:'center', justifyContent:'center', gap:8,
-                      padding:'10px 18px', borderRadius:999,
-                      fontFamily:"'Cinzel',serif", fontSize:'0.7rem',
-                      fontWeight:600, letterSpacing:'0.08em',
-                      color: dark ? '#f5e6c8' : '#5c3d1e',
-                      textTransform:'uppercase',
-                      background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.35)',
-                      border:'1px solid rgba(212,168,42,0.22)',
-                      cursor:'pointer',
+                  <>
+                    {/* Profile section in mobile */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 14px',
+                      borderRadius: 16,
+                      background: dark ? 'rgba(212,168,42,0.06)' : 'rgba(212,168,42,0.05)',
+                      border: '1px solid rgba(212,168,42,0.12)',
                     }}>
-                    <LogOut size={11}/>
-                    Logout ({user?.name?.split(' ')[0]})
-                  </div>
+                      <ProfileAvatar user={user} size={34} onClick={() => {}} style={{ cursor: 'default' }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontFamily: "'Cinzel', serif",
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          color: dark ? '#f5e6c8' : '#3d2208',
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
+                          {user?.name || 'User'}
+                        </div>
+                        <div style={{
+                          fontSize: '0.62rem',
+                          color: dark ? 'rgba(212,168,42,0.5)' : 'rgba(92,61,30,0.45)',
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          marginTop: 1,
+                        }}>
+                          {user?.email || ''}
+                        </div>
+                      </div>
+                    </div>
+
+                    <NavLink to="/profile" onClick={() => setMobileOpen(false)} style={{ textDecoration: 'none' }}>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                        padding: '10px 18px', borderRadius: 999,
+                        fontFamily: "'Cinzel',serif", fontSize: '0.7rem',
+                        fontWeight: 600, letterSpacing: '0.08em',
+                        color: dark ? '#f5e6c8' : '#5c3d1e',
+                        textTransform: 'uppercase',
+                        background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.35)',
+                        border: '1px solid rgba(212,168,42,0.22)',
+                        cursor: 'pointer',
+                      }}>
+                        <User size={11} />
+                        View Profile
+                      </div>
+                    </NavLink>
+
+                    <div onClick={() => { logout(); setMobileOpen(false); navigate('/') }}
+                      style={{
+                        display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                        padding:'10px 18px', borderRadius:999,
+                        fontFamily:"'Cinzel',serif", fontSize:'0.7rem',
+                        fontWeight:600, letterSpacing:'0.08em',
+                        color: '#b45a3c',
+                        textTransform:'uppercase',
+                        background: dark ? 'rgba(180,60,40,0.06)' : 'rgba(180,60,40,0.04)',
+                        border:'1px solid rgba(180,60,40,0.15)',
+                        cursor:'pointer',
+                      }}>
+                      <LogOut size={11}/>
+                      Logout
+                    </div>
+                  </>
                 ) : (
                   <NavLink to="/login" onClick={() => setMobileOpen(false)} style={{ textDecoration:'none' }}>
                     <div style={{

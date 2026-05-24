@@ -7,7 +7,7 @@ export default function StatCard({
   const { dark } = useTheme()
 
   return (
-    <div className="fs-dash-card" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className="fs-gold-corner-card fs-sandstone-tablet" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '235px', position: 'relative' }}>
       {to && (
         <Link
           to={to}

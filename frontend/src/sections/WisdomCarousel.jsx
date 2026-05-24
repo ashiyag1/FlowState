@@ -161,7 +161,7 @@ function SlideCard({ slide }) {
     <AnimatePresence mode="wait">
       <motion.div
         key={slide.title}
-        className="fs-wisdom-glass"
+        className="fs-wisdom-glass overflow-hidden"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
@@ -170,6 +170,32 @@ function SlideCard({ slide }) {
         <span className="fs-wisdom-om" aria-hidden>
           Om
         </span>
+
+        {/* Slow spinning Mandala watermark */}
+        <svg
+          className="absolute right-[-45px] bottom-[-45px] opacity-[0.08] text-gold dark:text-gold-lt pointer-events-none fs-mandala-spin"
+          style={{ width: 170, height: 170 }}
+          viewBox="0 0 100 100"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="0.8"
+        >
+          <circle cx="50" cy="50" r="46" />
+          <circle cx="50" cy="50" r="36" />
+          <circle cx="50" cy="50" r="26" />
+          <circle cx="50" cy="50" r="16" />
+          {Array.from({ length: 12 }).map((_, idx) => {
+            const angle = (idx * 360) / 12
+            return (
+              <g key={idx} transform={`rotate(${angle} 50 50)`}>
+                <path d="M50 4 C46 22, 54 22, 50 4" />
+                <path d="M50 14 C48 26, 52 26, 50 14" />
+                <line x1="50" y1="4" x2="50" y2="50" strokeDasharray="1,1" />
+              </g>
+            )
+          })}
+        </svg>
+
         <span className="fs-wisdom-pill">{slide.tag}</span>
         <h3>{slide.title}</h3>
         <p>{slide.body}</p>
@@ -267,11 +293,13 @@ function WisdomStyles() {
         position: relative;
         min-height: 236px;
         padding: 35px 42px 26px 54px;
-        background:
-          radial-gradient(circle at 50% 0%, rgba(255, 235, 171, 0.46), transparent 46%),
-          linear-gradient(90deg, #f6d38a 0%, #fff0c1 12%, #ffe8ae 50%, #f2c978 100%);
-        border: 1px solid rgba(123, 79, 28, 0.24);
-        box-shadow: inset 0 0 35px rgba(126, 73, 21, 0.17), 0 14px 32px rgba(41, 24, 7, 0.28);
+        background: 
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"),
+          linear-gradient(90deg, #e2cb9f 0%, #f6e7c9 6%, #fdf8e9 12%, #fbf3dd 50%, #f6e7c9 88%, #edd8ba 94%, #dbbe97 100%);
+        border: 1px solid rgba(139, 94, 30, 0.32);
+        box-shadow: 
+          0 12px 30px rgba(45,30,15,0.22),
+          inset 0 0 35px rgba(126, 73, 21, 0.14);
         color: #573512;
       }
 
@@ -280,21 +308,42 @@ function WisdomStyles() {
         position: absolute;
         inset: 10px 24px;
         border: 1px solid rgba(146, 92, 34, 0.18);
-        background-image: repeating-linear-gradient(0deg, rgba(108, 72, 28, 0.055), rgba(108, 72, 28, 0.055) 1px, transparent 1px, transparent 26px);
+        background-image: repeating-linear-gradient(0deg, rgba(108, 72, 28, 0.04), rgba(108, 72, 28, 0.04) 1px, transparent 1px, transparent 26px);
         pointer-events: none;
       }
 
       .fs-scroll-rod {
         position: absolute;
-        top: 11px;
-        bottom: 11px;
-        width: 22px;
+        top: -6px;
+        bottom: -6px;
+        width: 14px;
         border-radius: 999px;
         background:
           linear-gradient(90deg, rgba(42, 19, 6, 0.4), transparent 25%, rgba(255, 186, 73, 0.86) 48%, rgba(54, 24, 5, 0.7) 100%),
-          #9a5517;
-        box-shadow: 0 0 12px rgba(28, 12, 2, 0.5);
+          #7e491e;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.3);
         z-index: 3;
+      }
+
+      .fs-scroll-rod::before,
+      .fs-scroll-rod::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 22px;
+        height: 12px;
+        background: radial-gradient(circle at center, #ffe090 0%, #c9a84c 60%, #7e5a1e 100%);
+        border: 1px solid rgba(126, 85, 20, 0.4);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      }
+      .fs-scroll-rod::before {
+        top: -10px;
+        border-radius: 6px 6px 2px 2px;
+      }
+      .fs-scroll-rod::after {
+        bottom: -10px;
+        border-radius: 2px 2px 6px 6px;
       }
 
       .fs-scroll-rod-left { left: 9px; }
@@ -497,20 +546,21 @@ function WisdomStyles() {
         width: 42px;
         height: 42px;
         border-radius: 50%;
-        border: 1px solid rgba(255,255,255,0.72);
-        background: rgba(255,255,255,0.13);
+        border: 1.5px solid #dcae52;
+        background: linear-gradient(135deg, #c9a84c 0%, #8b6914 100%);
         color: white;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        backdrop-filter: blur(2px);
-        transition: background 0.2s ease, transform 0.2s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
       }
 
       .fs-wisdom-controls > button:hover {
-        background: rgba(255,255,255,0.24);
-        transform: translateY(-1px);
+        background: linear-gradient(135deg, #e8c97a 0%, #a27e1f 100%);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 14px rgba(201,168,76,0.35);
       }
 
       .fs-wisdom-dots {

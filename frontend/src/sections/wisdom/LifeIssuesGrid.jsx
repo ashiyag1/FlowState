@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { useTheme } from '../../context/ThemeContext'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import IssueCard from '../../components/wisdom/IssueCard.jsx'
 import IssueDetailModal from '../../components/wisdom/IssueDetailModal.jsx'
 
@@ -9,45 +10,77 @@ export default function LifeIssuesGrid({ issues }) {
   const [selectedIssue, setSelectedIssue] = useState(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const [scrollProgress, setScrollProgress] = useState(0)
 
-  const updateArrows = () => {
+  const handleScrollUpdate = () => {
     const el = scrollRef.current
     if (!el) return
+    
+    // Update arrow visibility
     setCanScrollLeft(el.scrollLeft > 6)
     setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 6)
+
+    // Calculate scroll progress percentage
+    const maxScroll = el.scrollWidth - el.clientWidth
+    if (maxScroll > 0) {
+      setScrollProgress(el.scrollLeft / maxScroll)
+    } else {
+      setScrollProgress(0)
+    }
   }
 
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
-    el.addEventListener('scroll', updateArrows)
-    updateArrows()
-    const ro = new ResizeObserver(updateArrows)
+    
+    el.addEventListener('scroll', handleScrollUpdate)
+    handleScrollUpdate()
+    
+    const ro = new ResizeObserver(handleScrollUpdate)
     ro.observe(el)
-    return () => { el.removeEventListener('scroll', updateArrows); ro.disconnect() }
+    
+    return () => {
+      el.removeEventListener('scroll', handleScrollUpdate)
+      ro.disconnect()
+    }
   }, [issues])
 
   const scroll = (dir) => {
     const el = scrollRef.current
     if (!el) return
-    el.scrollBy({ left: dir * 380, behavior: 'smooth' })
+    const scrollAmount = el.clientWidth * 0.75
+    el.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
   }
 
+  if (!issues.length) return null
+
   return (
-    <section style={styles.section}>
-      <div style={styles.headerRow}>
-        <h2 style={styles.sectionTitle(dark)}>What would you like help with?</h2>
+    <section className="relative w-full">
+      <div className="mb-3">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold font-serif text-sandalwood dark:text-gold" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
+          What would you like help with?
+        </h2>
       </div>
 
-      <div style={styles.carousel}>
+      <div className="relative flex items-center py-2 px-1">
         {canScrollLeft && (
-          <button style={{ ...styles.arrow, left: '-8px' }} onClick={() => scroll(-1)} aria-label="Previous">‹</button>
+          <button 
+            className="absolute left-0 z-20 w-8 h-8 rounded-full border border-gold/35 dark:border-gold/20 bg-white/80 dark:bg-[#1a1208]/90 text-gold flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95 transition-all hover:bg-gold/10"
+            onClick={() => scroll(-1)} 
+            aria-label="Previous"
+          >
+            <ChevronLeft size={16} />
+          </button>
         )}
 
-        <div style={styles.trackWrap}>
-          <div ref={scrollRef} style={styles.track}>
+        <div className="flex-1 overflow-hidden">
+          <div 
+            ref={scrollRef} 
+            className="flex gap-4 overflow-x-auto py-3 px-2 scroll-smooth scrollbar-none touch-pan-x"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             {issues.map(issue => (
-              <div key={issue.id} style={styles.slot}>
+              <div key={issue.id} className="flex-shrink-0 w-[290px] sm:w-[350px]">
                 <IssueCard
                   issue={issue}
                   dark={dark}
@@ -55,13 +88,27 @@ export default function LifeIssuesGrid({ issues }) {
                 />
               </div>
             ))}
-            <div style={{ flexShrink: 0, width: '6px' }} />
+            <div className="w-2 flex-shrink-0" />
           </div>
         </div>
 
         {canScrollRight && (
-          <button style={{ ...styles.arrow, right: '-8px' }} onClick={() => scroll(1)} aria-label="Next">›</button>
+          <button 
+            className="absolute right-0 z-20 w-8 h-8 rounded-full border border-gold/35 dark:border-gold/20 bg-white/80 dark:bg-[#1a1208]/90 text-gold flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95 transition-all hover:bg-gold/10"
+            onClick={() => scroll(1)} 
+            aria-label="Next"
+          >
+            <ChevronRight size={16} />
+          </button>
         )}
+      </div>
+
+      {/* Sleek Golden Progress Tracker Bar */}
+      <div className="relative mx-auto mt-2 w-36 h-1 bg-gold/10 dark:bg-gold/5 rounded-full overflow-hidden">
+        <div 
+          className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-gold to-gold/75 rounded-full transition-all duration-75"
+          style={{ width: `${scrollProgress * 100}%` }}
+        />
       </div>
 
       {selectedIssue && (
@@ -72,64 +119,4 @@ export default function LifeIssuesGrid({ issues }) {
       )}
     </section>
   )
-}
-
-const styles = {
-  section: {
-    flex: 1,
-    minHeight: 0,
-  },
-  headerRow: {
-    marginBottom: '0.55rem',
-  },
-  sectionTitle: (dark) => ({
-    fontSize: '1rem',
-    fontFamily: '"Cinzel", serif',
-    fontWeight: 600,
-    color: dark ? '#e8d9b5' : '#5c3d1e',
-    margin: 0,
-    letterSpacing: '0.01em',
-  }),
-  carousel: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  trackWrap: {
-    flex: 1,
-    overflow: 'hidden',
-  },
-  track: {
-    display: 'flex',
-    gap: '10px',
-    overflowX: 'auto',
-    scrollBehavior: 'smooth',
-    padding: '0.3rem 0.25rem 0.35rem',
-    scrollbarWidth: 'none',
-    msOverflowStyle: 'none',
-    WebkitOverflowScrolling: 'touch',
-  },
-  slot: {
-    flexShrink: 0,
-    width: '390px',
-  },
-  arrow: {
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    zIndex: 5,
-    width: '28px',
-    height: '28px',
-    borderRadius: '50%',
-    border: 'none',
-    background: 'linear-gradient(135deg, #c9a84c, #8b6914)',
-    color: '#fff',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 1px 6px rgba(139,105,20,0.15)',
-    transition: 'transform 0.2s, box-shadow 0.2s',
-  },
 }

@@ -22,12 +22,14 @@ export default function Home() {
 
   // Floating particles
   const particles = useMemo(() =>
-    Array.from({ length: 18 }, (_, i) => ({
-      x: 5 + (i * 9.7) % 90,
-      y: 10 + (i * 12.3 + 7) % 80,
-      delay: i * 0.5,
-      duration: 6 + (i % 4) * 2,
-      char: i % 3 === 0 ? '✦' : i % 3 === 1 ? '·' : '◈',
+    Array.from({ length: 24 }, (_, i) => ({
+      x: 5 + (i * 7.7) % 90,
+      y: 10 + (i * 11.3 + 7) % 80,
+      delay: i * 0.4,
+      duration: 7 + (i % 5) * 2.5,
+      char: i % 4 === 0 ? '✦' : i % 4 === 1 ? '·' : i % 4 === 2 ? '◈' : '✧',
+      color: i % 3 === 0 ? '#c9a84c' : i % 3 === 1 ? '#e87722' : '#d4607a',
+      fontSize: 8 + (i % 3) * 3,
     })), []
   )
 
@@ -83,9 +85,21 @@ export default function Home() {
             {particles.map((s, i) => (
               <motion.div
                 key={i}
-                className="absolute text-gold/30 dark:text-gold/20"
-                style={{ top: `${s.y}%`, left: `${s.x}%`, fontSize: i % 3 === 0 ? '12px' : i % 3 === 1 ? '6px' : '9px' }}
-                animate={{ opacity: [0, 0.65, 0], y: [0, -28, 0], rotate: [0, 180, 360] }}
+                className="absolute"
+                style={{ 
+                  top: `${s.y}%`, 
+                  left: `${s.x}%`, 
+                  fontSize: `${s.fontSize}px`, 
+                  color: s.color,
+                  opacity: 0.25,
+                  filter: 'drop-shadow(0 0 4px rgba(253,246,227,0.4))'
+                }}
+                animate={{ 
+                  opacity: [0, 0.65, 0], 
+                  y: [0, -45, 0],
+                  x: [0, (i % 2 === 0 ? 12 : -12), 0],
+                  rotate: [0, 180, 360] 
+                }}
                 transition={{ duration: s.duration, repeat: Infinity, delay: s.delay, ease: 'easeInOut' }}
               >
                 {s.char}

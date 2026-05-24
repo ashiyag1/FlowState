@@ -1,95 +1,61 @@
-import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { useTheme } from '../../context/ThemeContext'
+import pageBg from '../../assets/page.webp'
 
 export default function BookCard({ book, onClick }) {
-  const [hovered, setHovered] = useState(false)
+  const { dark } = useTheme()
 
   return (
-    <div
-      style={{
-        ...styles.card,
-        transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
-        boxShadow: hovered
-          ? '0 12px 32px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.15)'
-          : '0 4px 16px rgba(0,0,0,0.15)',
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+    <motion.div
       onClick={onClick}
+      whileHover={{ y: -8, scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      className="relative w-[170px] h-[255px] rounded-xl overflow-hidden cursor-pointer flex-shrink-0 shadow-lg hover:shadow-2xl border"
+      style={{
+        borderColor: dark ? 'rgba(201, 168, 76, 0.2)' : 'rgba(139, 111, 76, 0.22)'
+      }}
     >
+      {/* Book Spine (left boundary effect to mimic real book cover) */}
+      <div className="absolute left-0 top-0 bottom-0 w-[6px] bg-black/20 dark:bg-black/35 rounded-l-xl z-20 shadow-[1px_0_3px_rgba(0,0,0,0.15)]" />
+      <div className="absolute left-[6px] top-0 bottom-0 w-[1px] bg-white/10 dark:bg-white/[0.04] z-20" />
+
+      {/* Linen/Paper Texture Overlay */}
+      <div 
+        className="absolute inset-0 opacity-[0.06] dark:opacity-[0.03] pointer-events-none mix-blend-multiply z-10"
+        style={{
+          backgroundImage: `url(${pageBg})`,
+          backgroundSize: 'cover',
+        }}
+      />
+
+      {/* Book Cover Image or Fallback */}
       {book.image ? (
-        <img src={book.image} alt={book.title} style={styles.coverImg} />
+        <img src={book.image} alt={book.title} className="absolute inset-0 w-full h-full object-cover z-0" />
       ) : (
-        <div style={{ ...styles.fallback, background: book.bg }}>
-          <span style={{ fontSize: 44 }}>{book.emoji}</span>
+        <div 
+          className="absolute inset-0 flex items-center justify-center z-0"
+          style={{ background: book.bg || '#7A5230' }}
+        >
+          <span className="text-5xl drop-shadow-md select-none">{book.emoji || '📖'}</span>
         </div>
       )}
 
-      <div style={styles.overlay}>
-        <div style={styles.gradient} />
-        <div style={styles.content}>
-          <span style={styles.scripture}>{book.scripture}</span>
-          <span style={styles.title}>{book.title}</span>
-        </div>
+      {/* Premium Content Overlay */}
+      <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end p-4 pt-16 bg-gradient-to-t from-black/90 via-black/55 to-transparent">
+        <span 
+          className="text-[9px] font-bold tracking-[0.1em] uppercase text-gold/90 mb-1"
+          style={{ fontFamily: "'Outfit', sans-serif" }}
+        >
+          {book.scripture}
+        </span>
+        <span 
+          className="text-sm font-bold text-white leading-snug"
+          style={{ fontFamily: "'Lora', serif" }}
+        >
+          {book.title}
+        </span>
       </div>
-    </div>
+    </motion.div>
   )
-}
-
-const styles = {
-  card: {
-    width: '180px',
-    height: '270px',
-    flexShrink: 0,
-    borderRadius: '8px',
-    cursor: 'pointer',
-    position: 'relative',
-    overflow: 'hidden',
-    transition: 'transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s cubic-bezier(0.22,1,0.36,1)',
-  },
-  coverImg: {
-    position: 'absolute',
-    inset: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  fallback: {
-    position: 'absolute',
-    inset: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 2,
-  },
-  gradient: {
-    position: 'absolute',
-    inset: 0,
-    background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.8) 100%)',
-  },
-  content: {
-    position: 'relative',
-    padding: '2.5rem 0.75rem 0.75rem',
-  },
-  scripture: {
-    display: 'block',
-    fontSize: '0.6rem',
-    fontWeight: 700,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.65)',
-    marginBottom: '0.15rem',
-  },
-  title: {
-    display: 'block',
-    fontSize: '0.9rem',
-    fontWeight: 700,
-    color: '#fff',
-    lineHeight: 1.25,
-  },
 }

@@ -11,6 +11,7 @@ import StatCard from '../components/StatCard'
 import LotusRow from '../components/LotusRow'
 import TambaaVessel from '../icons/TambaaVessel'
 import DiyaLamp from '../icons/DiyaLamp'
+import BreathingPortal from '../components/BreathingPortal'
 
 import realLotusImg from '../assets/dashboard/real-lotus.webp'
 import realDiyaImg from '../assets/dashboard/real-diya.webp'
@@ -87,6 +88,16 @@ export default function DailyFlow() {
 
       <LotusDivider />
 
+      {/* ── BREATHING PORTAL (full-width) ── */}
+      <motion.div
+        variants={fadeUp(0.03)}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+      >
+        <BreathingPortal />
+      </motion.div>
+
       {/* ── SANKALPA (full-width) ── */}
       <motion.div
         variants={fadeUp(0.06)}
@@ -98,16 +109,19 @@ export default function DailyFlow() {
         <SankalpaCard />
       </motion.div>
 
-      {/* ── WATER & HABITS (two-column spread) ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '1.2rem',
-        marginBottom: '1.2rem',
-        alignItems: 'start',
-      }}>
+      {/* ── DAILY PRACTICE GRID (three-column spread) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.2rem] mb-[1.2rem] items-stretch">
         <motion.div
-          variants={fadeUp(0.10)}
+          variants={fadeUp(0.08)}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+        >
+          <DateCard />
+        </motion.div>
+
+        <motion.div
+          variants={fadeUp(0.12)}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
@@ -120,7 +134,7 @@ export default function DailyFlow() {
         </motion.div>
 
         <motion.div
-          variants={fadeUp(0.14)}
+          variants={fadeUp(0.16)}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
@@ -166,7 +180,7 @@ export default function DailyFlow() {
         </p>
       </motion.div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {FEATURES.map((f, i) => (
           <motion.div
             key={f.to}
@@ -176,31 +190,21 @@ export default function DailyFlow() {
             viewport={{ once: true }}
           >
             <Link to={f.to} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-              <div style={{
-                position: 'relative',
-                borderRadius: '16px',
-                padding: '1.5rem 1.25rem',
-                background: dark
-                  ? 'linear-gradient(145deg, rgba(40,30,15,0.6), rgba(30,22,10,0.4))'
-                  : 'linear-gradient(145deg, rgba(255,249,235,0.9), rgba(248,237,210,0.85))',
-                border: dark
-                  ? '1px solid rgba(201,168,76,0.08)'
-                  : '1px solid rgba(201,168,76,0.18)',
-                boxShadow: dark
-                  ? '0 4px 20px rgba(0,0,0,0.2)'
-                  : '0 4px 20px rgba(92,61,30,0.07)',
-                overflow: 'hidden',
-                transition: 'all 0.35s cubic-bezier(0.22,1,0.36,1)',
-                height: '100%',
-              }}
-              className="fs-daily-feature-card"
+              <div 
+                className="fs-gold-corner-card"
+                style={{
+                  position: 'relative',
+                  padding: '1.5rem 1.25rem',
+                  overflow: 'hidden',
+                  height: '100%',
+                }}
               >
                 <div style={{
                   position: 'absolute', top: 0, left: 0, right: 0, height: 3,
                   background: `linear-gradient(90deg, ${f.accent}, transparent)`,
                 }} />
                 <h3 style={{
-                  fontFamily: "'Cormorant Garamond', serif", fontSize: '1.15rem',
+                  fontFamily: "'Cormorant Garamond', serif", fontSize: '1.22rem',
                   fontWeight: 600, color: dark ? '#e8d9b5' : '#5C3D1E',
                   margin: '0 0 0.4rem', lineHeight: 1.3,
                 }}>{f.title}</h3>
@@ -222,7 +226,7 @@ export default function DailyFlow() {
         ))}
       </div>
 
-      {/* ── CLOSING: DATE + AFFIRMATION ── */}
+      {/* ── CLOSING: AFFIRMATION ── */}
       <motion.div
         variants={fadeUp(0.20)}
         initial="hidden"
@@ -236,23 +240,24 @@ export default function DailyFlow() {
             : '1px solid rgba(201,168,76,0.16)',
         }}
       >
-        <DateCard />
         <div style={{
-          marginTop: '1rem',
-          padding: '0.8rem 1.2rem',
-          borderRadius: '12px',
+          padding: '1.2rem 1.6rem',
+          borderRadius: '16px',
           background: dark
-            ? 'rgba(40,30,15,0.3)'
+            ? 'rgba(40,30,15,0.35)'
             : 'rgba(201,168,76,0.06)',
+          border: dark ? '1px solid rgba(201,168,76,0.08)' : '1px solid rgba(201,168,76,0.14)',
           textAlign: 'center',
+          maxWidth: '560px',
+          margin: '0 auto'
         }}>
           <p style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: '1rem',
+            fontSize: '1.15rem',
             fontStyle: 'italic',
             color: dark ? '#e8d9b5' : '#5C3D1E',
             margin: 0,
-            letterSpacing: '0.02em',
+            letterSpacing: '0.04em',
           }}>
             "Peace flows when you do."
           </p>

@@ -41,7 +41,16 @@ function timeAgo(dateStr) {
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }
+  password: { type: String, required: true },
+  avatar: { type: String, default: '' },
+  bio: { type: String, default: '' },
+  location: { type: String, default: '' },
+  joinedAt: { type: Date, default: Date.now },
+  preferences: {
+    theme: { type: String, default: 'light' },
+    soundEnabled: { type: Boolean, default: true },
+    notificationsEnabled: { type: Boolean, default: true }
+  }
 })
 
 const WaterLogSchema = new mongoose.Schema({
@@ -136,7 +145,17 @@ export async function dbCreateUser(name, email, passwordHash) {
     if (db.users.find(u => u.email === email)) {
       throw new Error('User already exists')
     }
-    const newUser = { id: Math.random().toString(36).slice(2, 9), name, email, password: passwordHash }
+    const newUser = {
+      id: Math.random().toString(36).slice(2, 9),
+      name,
+      email,
+      password: passwordHash,
+      avatar: '',
+      bio: '',
+      location: '',
+      joinedAt: new Date().toISOString(),
+      preferences: { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+    }
     db.users.push(newUser)
     await writeJsonDB(db)
     return newUser
@@ -160,7 +179,18 @@ export async function dbFindUserById(id) {
   } else {
     const db = await readJsonDB()
     const user = db.users.find(u => u.id === id)
-    return user ? { _id: user.id, id: user.id, name: user.name, email: user.email } : null
+    return user ? {
+      _id: user.id,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      avatar: user.avatar || '',
+      bio: user.bio || '',
+      location: user.location || '',
+      joinedAt: user.joinedAt || new Date().toISOString(),
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+    } : null
   }
 }
 
@@ -558,5 +588,113 @@ export async function dbAddIntention(author, text) {
     db.intentions.push(int)
     await writeJsonDB(db)
     return { id: int.id, author, text, time: timeStr }
+  }
+}
+
+// ── PROFILE METHODS ────────────────────────────────────
+export async function dbUpdateUserProfile(userId, updates) {
+  await connectDB()
+  const allowed = {}
+  if (updates.name !== undefined) allowed.name = updates.name
+  if (updates.bio !== undefined) allowed.bio = updates.bio
+  if (updates.location !== undefined) allowed.location = updates.location
+  if (updates.preferences !== undefined) allowed.preferences = updates.preferences
+
+  if (IS_MONGO) {
+    const user = await User.findByIdAndUpdate(userId, { $set: allowed }, { new: true })
+    if (!user) throw new Error('User not found')
+    return {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar || '',
+      bio: user.bio || '',
+      location: user.location || '',
+      joinedAt: user.joinedAt,
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+    }
+  } else {
+    const db = await readJsonDB()
+    const user = db.users.find(u => u.id === userId)
+    if (!user) throw new Error('User not found')
+    Object.assign(user, allowed)
+    await writeJsonDB(db)
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar || '',
+      bio: user.bio || '',
+      location: user.location || '',
+      joinedAt: user.joinedAt || new Date().toISOString(),
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+    }
+  }
+}
+
+export async function dbUpdateUserAvatar(userId, avatar) {
+  await connectDB()
+  if (IS_MONGO) {
+    const user = await User.findByIdAndUpdate(userId, { $set: { avatar } }, { new: true })
+    if (!user) throw new Error('User not found')
+    return {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar || '',
+      bio: user.bio || '',
+      location: user.location || '',
+      joinedAt: user.joinedAt,
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+    }
+  } else {
+    const db = await readJsonDB()
+    const user = db.users.find(u => u.id === userId)
+    if (!user) throw new Error('User not found')
+    user.avatar = avatar
+    await writeJsonDB(db)
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar || '',
+      bio: user.bio || '',
+      location: user.location || '',
+      joinedAt: user.joinedAt || new Date().toISOString(),
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+    }
+  }
+}
+
+export async function dbChangePassword(userId, newPasswordHash) {
+  await connectDB()
+  if (IS_MONGO) {
+    const user = await User.findByIdAndUpdate(userId, { $set: { password: newPasswordHash } }, { new: true })
+    if (!user) throw new Error('User not found')
+  } else {
+    const db = await readJsonDB()
+    const user = db.users.find(u => u.id === userId)
+    if (!user) throw new Error('User not found')
+    user.password = newPasswordHash
+    await writeJsonDB(db)
+  }
+}
+
+export async function dbDeleteUser(userId) {
+  await connectDB()
+  if (IS_MONGO) {
+    await User.findByIdAndDelete(userId)
+    await WaterLog.deleteMany({ userId })
+    await Habit.deleteMany({ userId })
+    await HabitDone.deleteMany({ userId })
+    await JournalEntry.deleteMany({ userId })
+  } else {
+    const db = await readJsonDB()
+    db.users = db.users.filter(u => u.id !== userId)
+    delete db.waterLogs[userId]
+    db.habits = db.habits.filter(h => h.userId !== userId)
+    delete db.habitDone[userId]
+    db.journalEntries = db.journalEntries.filter(e => e.userId !== userId)
+    await writeJsonDB(db)
   }
 }

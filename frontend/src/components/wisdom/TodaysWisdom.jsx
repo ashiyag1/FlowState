@@ -1,5 +1,6 @@
 import { useWisdom } from '../../context/WisdomContext'
 import { useTheme } from '../../context/ThemeContext'
+import { Heart, Share2 } from 'lucide-react'
 import ManuscriptCard from './ManuscriptCard'
 
 export default function TodaysWisdom({ wisdom }) {
@@ -7,99 +8,68 @@ export default function TodaysWisdom({ wisdom }) {
   const { dark } = useTheme()
   const isSaved = savedWisdom.includes('today')
 
+  const handleShare = () => {
+    const text = `${wisdom.sanskrit}\n\n${wisdom.english}\n— ${wisdom.source}`
+    if (navigator.share) {
+      navigator.share({ title: "Daily Wisdom", text })
+    } else {
+      navigator.clipboard.writeText(text)
+      alert("Quote copied to clipboard!")
+    }
+  }
+
   return (
-    <div style={styles.container}>
+    <div className="w-full">
       <ManuscriptCard>
-        <span style={styles.prefix}>🪔</span>
-        <div style={styles.textGroup}>
-          <p style={styles.sanskrit(dark)}>{wisdom.sanskrit}</p>
-          <div style={styles.meta}>
-            <span style={styles.english(dark)}>{wisdom.english}</span>
-            <span style={styles.source(dark)}>— {wisdom.source}</span>
-          </div>
+        {/* Left Decorative Lamp (Diya) */}
+        <div className="flex-shrink-0 text-xl sm:text-2xl opacity-90 select-none">
+          🪔
         </div>
-        <div style={styles.actions}>
-          <button style={styles.actionBtn(dark)} onClick={() => toggleSavedWisdom('today')}>
-            {isSaved ? '❤️' : '🤍'}
+
+        {/* Central Quote Text */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center gap-1.5 min-w-0 px-2 sm:px-4">
+          <p 
+            className="text-sm sm:text-base md:text-lg font-bold leading-normal text-ink dark:text-ivory"
+            style={{ fontFamily: "'Noto Serif Devanagari', 'Lora', serif" }}
+          >
+            {wisdom.sanskrit}
+          </p>
+          <p 
+            className="text-xs sm:text-sm italic text-mist-dark dark:text-ocean-lt/60 leading-normal"
+            style={{ fontFamily: "'Lora', serif" }}
+          >
+            "{wisdom.english}"
+          </p>
+          <span 
+            className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-saffron/90 dark:text-saffron-lt mt-1"
+            style={{ fontFamily: "'Outfit', sans-serif" }}
+          >
+            — {wisdom.source.toUpperCase()}
+          </span>
+        </div>
+
+        {/* Right Action Buttons - Vertically stacked round white buttons */}
+        <div className="flex flex-col gap-2 flex-shrink-0">
+          <button 
+            onClick={() => toggleSavedWisdom('today')}
+            className={`w-8 h-8 rounded-full border flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer
+              ${isSaved 
+                ? 'bg-red-500/10 border-red-500/30 text-red-500' 
+                : 'bg-white/90 dark:bg-white/[0.04] border-gold/20 dark:border-gold/15 text-gold'
+              }`}
+            title={isSaved ? "Saved to Favorites" : "Add to Favorites"}
+          >
+            <Heart size={14} className={isSaved ? 'fill-current' : ''} />
           </button>
-          <button style={styles.actionBtn(dark)}>↗</button>
+          <button 
+            onClick={handleShare}
+            className="w-8 h-8 rounded-full border flex items-center justify-center bg-white/90 dark:bg-white/[0.04] border-gold/20 dark:border-gold/15 text-gold shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            title="Share Quote"
+          >
+            <Share2 size={13} />
+          </button>
         </div>
       </ManuscriptCard>
     </div>
   )
-}
-
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  prefix: {
-    fontSize: 'clamp(1rem, 2vw, 1.5rem)',
-    opacity: 0.3,
-    flexShrink: 0,
-  },
-  textGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '0.1rem',
-    flex: 1,
-    minWidth: 0,
-  },
-  sanskrit: (dark) => ({
-    margin: 0,
-    fontSize: 'clamp(0.8rem, 1.6vw, 1.1rem)',
-    fontFamily: '"Lora", serif',
-    fontStyle: 'italic',
-    color: dark ? '#f0e0c0' : '#3a2510',
-    lineHeight: 1.35,
-    fontWeight: 600,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: '100%',
-  }),
-  meta: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    maxWidth: '100%',
-    overflow: 'hidden',
-  },
-  english: (dark) => ({
-    fontSize: 'clamp(0.65rem, 1.2vw, 0.85rem)',
-    fontFamily: '"Lora", serif',
-    color: dark ? '#d4c090' : '#4a3018',
-    lineHeight: 1.35,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    fontWeight: 500,
-  }),
-  source: (dark) => ({
-    fontSize: 'clamp(0.55rem, 1vw, 0.7rem)',
-    color: dark ? '#a09070' : '#8b6914',
-    fontStyle: 'italic',
-    fontFamily: '"Lora", serif',
-    opacity: 0.8,
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
-  }),
-  actions: {
-    display: 'flex',
-    gap: '0.3rem',
-    flexShrink: 0,
-    paddingLeft: '0.5rem',
-  },
-  actionBtn: (dark) => ({
-    padding: '0.25rem 0.5rem',
-    background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
-    border: '1px solid rgba(201,168,76,0.18)',
-    borderRadius: '7px',
-    cursor: 'pointer',
-    fontSize: '0.7rem',
-    color: '#c9a84c',
-    transition: 'background 0.2s',
-  }),
 }

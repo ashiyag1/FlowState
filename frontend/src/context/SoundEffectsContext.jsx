@@ -265,7 +265,13 @@ export function SoundEffectsProvider({ children }) {
       const audio = new Audio(mp3Sources[presetName])
       audio.loop = true
       audio.volume = preset.volume
-      audio.play()
+      try {
+        audio.play().catch(err => {
+          console.warn("Audio playback was blocked or failed:", err)
+        })
+      } catch (err) {
+        console.warn("Audio playback failed synchronously:", err)
+      }
       mp3Ref.current = audio
       droneRef.current = { isMp3: true }
       return

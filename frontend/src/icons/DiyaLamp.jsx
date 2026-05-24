@@ -45,27 +45,30 @@ export default function DiyaLamp({ size = 58 }) {
         </radialGradient>
       </defs>
 
-      {/* ambient glow */}
-      <ellipse cx="29" cy="22" rx="14" ry="16" fill="url(#dl-glow)" />
+      {/* flickering flame group */}
+      <g className="fs-diya-flicker">
+        {/* ambient glow */}
+        <ellipse cx="29" cy="22" rx="14" ry="16" fill="url(#dl-glow)" />
 
-      {/* outer flame */}
-      <path
-        d="M29 36 Q22 28 24 18 Q26 12 29 8 Q32 12 34 18 Q36 28 29 36Z"
-        fill="url(#dl-flameOuter)"
-      />
+        {/* outer flame */}
+        <path
+          d="M29 36 Q22 28 24 18 Q26 12 29 8 Q32 12 34 18 Q36 28 29 36Z"
+          fill="url(#dl-flameOuter)"
+        />
 
-      {/* flame body */}
-      <path
-        d="M29 35 Q23 27 25 19 Q27 13 29 10 Q31 13 33 19 Q35 27 29 35Z"
-        fill="url(#dl-flameCore)"
-      />
+        {/* flame body */}
+        <path
+          d="M29 35 Q23 27 25 19 Q27 13 29 10 Q31 13 33 19 Q35 27 29 35Z"
+          fill="url(#dl-flameCore)"
+        />
 
-      {/* inner bright core */}
-      <path
-        d="M29 32 Q26 26 27 21 Q28 17 29 15 Q30 17 31 21 Q32 26 29 32Z"
-        fill="#fff8d0"
-        opacity="0.85"
-      />
+        {/* inner bright core */}
+        <path
+          d="M29 32 Q26 26 27 21 Q28 17 29 15 Q30 17 31 21 Q32 26 29 32Z"
+          fill="#fff8d0"
+          opacity="0.85"
+        />
+      </g>
 
       {/* wick */}
       <rect x="28" y="34" width="2" height="5" rx="1" fill="#5a3010" />

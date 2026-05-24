@@ -12,9 +12,13 @@ export default function SavedPages({ onBookOpen }) {
 
   if (!savedPages.length) {
     return (
-      <div style={styles.card(dark)}>
-        <h3 style={styles.title(dark)}>Saved Pages</h3>
-        <p style={styles.empty(dark)}>Bookmark pages while reading</p>
+      <div className="card bg-white/60 dark:bg-white/[0.03] border-gold/20 dark:border-gold/10 p-4 rounded-2xl shadow-sm">
+        <h3 className="text-xs font-extrabold uppercase tracking-wider text-sandalwood dark:text-gold mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+          Saved Verses
+        </h3>
+        <p className="text-xs text-mist-dark/60 dark:text-ocean-lt/40 italic text-center py-2">
+          Bookmark pages while reading
+        </p>
       </div>
     )
   }
@@ -34,49 +38,72 @@ export default function SavedPages({ onBookOpen }) {
   const keyFor = (item) => `${item.bookId}-${item.pageIdx}`
 
   return (
-    <div style={styles.card(dark)}>
-      <h3 style={styles.title(dark)}>Saved Pages</h3>
-      <div style={styles.list}>
+    <div className="card bg-white/60 dark:bg-white/[0.03] border-gold/20 dark:border-gold/10 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+      <h3 className="text-xs font-extrabold uppercase tracking-wider text-sandalwood dark:text-gold mb-3" style={{ fontFamily: "'Cinzel', serif" }}>
+        Saved Verses
+      </h3>
+      <div className="flex flex-col gap-1.5">
         {savedPages.slice(0, 10).map((item) => {
           const key = keyFor(item)
           const notes = getPageNotes(item.bookId, item.pageIdx)
           const isOpen = showNotes[key]
           return (
-            <div key={key}>
-              <div style={styles.item(dark)} onClick={() => handleOpen(item)}>
-                <div style={styles.thumb}>{item.bookEmoji || '📖'}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={styles.pageTitle(dark)}>{item.heading}</div>
-                  <div style={styles.bookSub(dark)}>
-                    {item.bookTitle}
-                    <span style={styles.progress}> · p.{item.pageIdx + 1}</span>
-                  </div>
+            <div key={key} className="flex flex-col border-b border-gold/5 last:border-b-0 pb-1.5 last:pb-0">
+              <div 
+                onClick={() => handleOpen(item)}
+                className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-gold/5 transition-all duration-200 cursor-pointer border border-transparent"
+              >
+                <div className="text-lg w-8 h-8 rounded-lg bg-gold/10 dark:bg-gold/5 flex items-center justify-center flex-shrink-0 select-none">
+                  {item.bookEmoji || '📖'}
                 </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-bold text-ink dark:text-ivory truncate">
+                    {item.heading}
+                  </h4>
+                  <p className="text-[10px] text-mist-dark/60 dark:text-ocean-lt/50 truncate mt-0.5">
+                    {item.bookTitle}
+                    <span className="text-gold font-bold ml-1">· p.{item.pageIdx + 1}</span>
+                  </p>
+                </div>
+                
                 {notes.length > 0 && (
                   <button
-                    style={styles.showNotesBtn(dark, isOpen)}
                     onClick={(e) => toggleNotes(key, e)}
-                    title={isOpen ? 'Hide notes' : `Show ${notes.length} note${notes.length > 1 ? 's' : ''}`}
-                  >{notes.length}</button>
+                    className={`px-1.5 py-0.5 rounded text-[8px] font-bold border cursor-pointer select-none transition-colors
+                      ${isOpen 
+                        ? 'bg-gold border-gold text-white dark:text-ink' 
+                        : 'bg-gold/10 dark:bg-gold/5 border-gold/25 text-gold hover:bg-gold/15'
+                      }`}
+                    title={isOpen ? 'Hide notes' : `Show ${notes.length} sticky note${notes.length > 1 ? 's' : ''}`}
+                  >
+                    📝 {notes.length}
+                  </button>
                 )}
+                
                 <button
-                  style={styles.removeBtn(dark)}
                   onClick={(e) => { e.stopPropagation(); removeSavedPage(item.bookId, item.pageIdx) }}
-                  title="Remove"
-                >✕</button>
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] text-mist-dark/45 dark:text-ocean-lt/30 hover:text-red-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer"
+                  title="Remove bookmark"
+                >
+                  ✕
+                </button>
               </div>
+
               {isOpen && notes.length > 0 && (
-                <div style={styles.stickyRow}>
+                <div className="flex flex-col gap-1.5 pl-11 pr-2 py-1">
                   {notes.map((n, ni) => (
                     <div
                       key={n.id}
+                      className="p-2 rounded shadow-sm border text-[10px] leading-relaxed relative text-ink-soft select-text"
                       style={{
-                        ...styles.stickyNote,
-                        background: n.color + 'E0',
+                        background: n.color ? n.color + 'D9' : '#fff9dbD9',
+                        borderColor: 'rgba(0,0,0,0.06)',
                         transform: `rotate(${STICKY_ROTATIONS[ni % STICKY_ROTATIONS.length]})`,
+                        fontFamily: "'Caveat', 'Lora', cursive, sans-serif",
+                        fontWeight: 600
                       }}
                     >
-                      <span style={styles.stickyNoteText}>{n.text}</span>
+                      {n.text}
                     </div>
                   ))}
                 </div>
@@ -87,116 +114,4 @@ export default function SavedPages({ onBookOpen }) {
       </div>
     </div>
   )
-}
-
-const styles = {
-  card: (dark) => ({
-    padding: '0.7rem',
-    background: dark ? 'rgba(40,30,15,0.2)' : 'rgba(255,255,255,0.35)',
-    border: dark ? '1px solid rgba(201,168,76,0.06)' : '1px solid rgba(201,168,76,0.08)',
-    borderRadius: '10px',
-  }),
-  title: (dark) => ({
-    margin: '0 0 0.35rem',
-    fontSize: '0.8rem',
-    fontFamily: '"Cinzel", serif',
-    fontWeight: 600,
-    color: dark ? '#c9b080' : '#6a5a40',
-  }),
-  empty: (dark) => ({
-    fontSize: '0.7rem',
-    color: dark ? '#6a5a40' : '#a09070',
-    fontStyle: 'italic',
-    margin: 0,
-    textAlign: 'center',
-    padding: '0.2rem 0',
-  }),
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  item: (dark) => ({
-    display: 'flex',
-    gap: '0.3rem',
-    padding: '0.35rem 0',
-    alignItems: 'center',
-    borderBottom: dark ? '1px solid rgba(201,168,76,0.04)' : '1px solid rgba(201,168,76,0.06)',
-    cursor: 'pointer',
-    transition: 'background 0.15s',
-  }),
-  thumb: {
-    fontSize: '0.9rem',
-    width: '26px',
-    height: '26px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  pageTitle: (dark) => ({
-    fontSize: '0.7rem',
-    fontWeight: 600,
-    color: dark ? '#c9b080' : '#5c3d1e',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  }),
-  bookSub: (dark) => ({
-    fontSize: '0.6rem',
-    color: dark ? '#6a5a40' : '#a09070',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  }),
-  progress: {
-    fontSize: '0.55rem',
-    color: '#c9a84c',
-    opacity: 0.7,
-  },
-  showNotesBtn: (dark, isOpen) => ({
-    background: isOpen ? '#c9a84c' : (dark ? '#3a2a10' : '#f0e8d0'),
-    border: isOpen ? 'none' : (dark ? '1px solid #4a3a20' : '1px solid #d4c5a0'),
-    borderRadius: '8px',
-    fontSize: '0.5rem',
-    fontWeight: 700,
-    color: isOpen ? '#fff' : (dark ? '#c9b080' : '#8b6914'),
-    padding: '1px 4px',
-    cursor: 'pointer',
-    lineHeight: 1.3,
-    minWidth: '16px',
-    textAlign: 'center',
-    flexShrink: 0,
-  }),
-  removeBtn: (dark) => ({
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '0.55rem',
-    color: dark ? '#4a3a20' : '#c0b8a0',
-    padding: '0.15rem',
-    flexShrink: 0,
-  }),
-  stickyRow: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    padding: '4px 2px 4px 28px',
-  },
-  stickyNote: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    padding: '4px 7px',
-    borderRadius: '2px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-    fontSize: '0.6rem',
-    lineHeight: 1.4,
-    fontStyle: 'italic',
-    fontFamily: '"Caveat", "Segoe Script", cursive',
-    maxWidth: '95%',
-  },
-  stickyNoteText: {
-    flex: 1,
-    color: '#2a1e10',
-    wordBreak: 'break-word',
-  },
 }

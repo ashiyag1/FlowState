@@ -114,15 +114,99 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false)
   }, [])
 
+  // Update profile (name, bio, location, preferences)
+  const updateProfile = useCallback(async (data) => {
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Update failed')
+      setUser(prev => ({ ...prev, ...result.user }))
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  }, [token])
+
+  // Update avatar
+  const updateAvatar = useCallback(async (base64) => {
+    try {
+      const res = await fetch('/api/profile/avatar', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ avatar: base64 })
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Avatar update failed')
+      setUser(prev => ({ ...prev, avatar: result.user?.avatar || base64 }))
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  }, [token])
+
+  // Change password
+  const changePassword = useCallback(async (currentPassword, newPassword) => {
+    try {
+      const res = await fetch('/api/profile/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Password change failed')
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  }, [token])
+
+  // Delete account
+  const deleteAccount = useCallback(async () => {
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (!res.ok) {
+        const result = await res.json()
+        throw new Error(result.error || 'Delete failed')
+      }
+      logout()
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  }, [token, logout])
+
   return (
     <AuthContext.Provider value={{
       token,
       user,
+      setUser,
       isAuthenticated,
       loading,
       login,
       signup,
-      logout
+      logout,
+      updateProfile,
+      updateAvatar,
+      changePassword,
+      deleteAccount
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,6 +1,5 @@
 import { useWisdom } from '../../context/WisdomContext'
 import { useTheme } from '../../context/ThemeContext'
-
 import { TOPIC_BOOKS } from '../../data/wisdomData'
 
 export default function ContinueExploring({ onBookOpen }) {
@@ -9,9 +8,13 @@ export default function ContinueExploring({ onBookOpen }) {
 
   if (!openedBooks.length) {
     return (
-      <div style={styles.card(dark)}>
-        <h3 style={styles.title(dark)}>Continue Exploring</h3>
-        <p style={styles.empty(dark)}>Open a book above to begin</p>
+      <div className="card bg-white/60 dark:bg-white/[0.03] border-gold/20 dark:border-gold/10 p-4 rounded-2xl shadow-sm">
+        <h3 className="text-xs font-extrabold uppercase tracking-wider text-sandalwood dark:text-gold mb-2" style={{ fontFamily: "'Cinzel', serif" }}>
+          Continue Reading
+        </h3>
+        <p className="text-xs text-mist-dark/60 dark:text-ocean-lt/40 italic text-center py-2">
+          Open a book above to begin
+        </p>
       </div>
     )
   }
@@ -24,101 +27,41 @@ export default function ContinueExploring({ onBookOpen }) {
   }
 
   return (
-    <div style={styles.card(dark)}>
-      <h3 style={styles.title(dark)}>Continue Exploring</h3>
-      <div style={styles.list}>
+    <div className="card bg-white/60 dark:bg-white/[0.03] border-gold/20 dark:border-gold/10 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+      <h3 className="text-xs font-extrabold uppercase tracking-wider text-sandalwood dark:text-gold mb-3" style={{ fontFamily: "'Cinzel', serif" }}>
+        Continue Reading
+      </h3>
+      <div className="flex flex-col gap-1">
         {openedBooks.slice(0, 4).map(item => (
-          <div key={item.id} style={styles.item(dark)} onClick={() => handleResume(item)}>
-            <div style={styles.thumb}>{item.emoji}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={styles.bookTitle(dark)}>{item.title}</div>
-              <div style={styles.bookSub(dark)}>
+          <div 
+            key={item.id} 
+            onClick={() => handleResume(item)}
+            className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-gold/5 transition-all duration-200 cursor-pointer border border-transparent hover:border-gold/10"
+          >
+            <div className="text-lg w-8 h-8 rounded-lg bg-gold/10 dark:bg-gold/5 flex items-center justify-center flex-shrink-0">
+              {item.emoji}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-xs font-bold text-ink dark:text-ivory truncate">
+                {item.title}
+              </h4>
+              <p className="text-[10px] text-mist-dark/60 dark:text-ocean-lt/50 truncate mt-0.5">
                 {item.scripture}
-                {item.lastPage != null && <span style={styles.progress}> · p.{item.lastPage + 1}</span>}
-              </div>
+                {item.lastPage != null && (
+                  <span className="text-gold font-bold ml-1">· p.{item.lastPage + 1}</span>
+                )}
+              </p>
             </div>
             <button
-              style={styles.removeBtn(dark)}
               onClick={(e) => { e.stopPropagation(); removeOpenedBook(item.id) }}
-            >✕</button>
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] text-mist-dark/45 dark:text-ocean-lt/30 hover:text-red-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-none bg-transparent cursor-pointer"
+              title="Remove from history"
+            >
+              ✕
+            </button>
           </div>
         ))}
       </div>
     </div>
   )
-}
-
-const styles = {
-  card: (dark) => ({
-    padding: '0.7rem',
-    background: dark ? 'rgba(40,30,15,0.2)' : 'rgba(255,255,255,0.35)',
-    border: dark ? '1px solid rgba(201,168,76,0.06)' : '1px solid rgba(201,168,76,0.08)',
-    borderRadius: '10px',
-  }),
-  title: (dark) => ({
-    margin: '0 0 0.35rem',
-    fontSize: '0.8rem',
-    fontFamily: '"Cinzel", serif',
-    fontWeight: 600,
-    color: dark ? '#c9b080' : '#6a5a40',
-  }),
-  empty: (dark) => ({
-    fontSize: '0.7rem',
-    color: dark ? '#6a5a40' : '#a09070',
-    fontStyle: 'italic',
-    margin: 0,
-    textAlign: 'center',
-    padding: '0.2rem 0',
-  }),
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  item: (dark) => ({
-    display: 'flex',
-    gap: '0.4rem',
-    padding: '0.35rem 0',
-    alignItems: 'center',
-    borderBottom: dark ? '1px solid rgba(201,168,76,0.04)' : '1px solid rgba(201,168,76,0.06)',
-    cursor: 'pointer',
-    transition: 'background 0.15s',
-  }),
-  thumb: {
-    fontSize: '0.9rem',
-    width: '26px',
-    height: '26px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  bookTitle: (dark) => ({
-    fontSize: '0.7rem',
-    fontWeight: 600,
-    color: dark ? '#c9b080' : '#5c3d1e',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  }),
-  bookSub: (dark) => ({
-    fontSize: '0.6rem',
-    color: dark ? '#6a5a40' : '#a09070',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  }),
-  progress: {
-    fontSize: '0.55rem',
-    color: '#c9a84c',
-    opacity: 0.7,
-  },
-  removeBtn: (dark) => ({
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '0.55rem',
-    color: dark ? '#4a3a20' : '#c0b8a0',
-    padding: '0.15rem',
-    flexShrink: 0,
-  }),
 }

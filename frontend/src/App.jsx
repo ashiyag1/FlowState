@@ -22,6 +22,7 @@ const Heritage    = lazy(() => import('./pages/Heritage'))
 const Community   = lazy(() => import('./pages/Community'))
 const Login       = lazy(() => import('./pages/Login'))
 const AIAssistant = lazy(() => import('./components/AIAssistant'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 
 function ScrollReset() {
   const { pathname } = useLocation()
@@ -49,6 +50,7 @@ export default function App() {
                     <Route path="/heritage" element={<Heritage />} />
                     <Route path="/community" element={<Community />} />
                     <Route path="/login"   element={<Login />} />
+                    <Route path="/profile" element={<ProfilePage />} />
                     <Route path="*"        element={<Home />} />
                   </Routes>
                 </Suspense>

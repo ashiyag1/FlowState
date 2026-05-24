@@ -293,36 +293,52 @@ function HeroText({ tod, config }) {
         transition={{ delay: 0.4 }}
         style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1rem' }}
       >
-        <Link
-          to="/water"
-          onClick={playHydrationSound}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '12px 26px', borderRadius: 999, textDecoration: 'none',
-            fontFamily: "'Cinzel', serif", fontSize: '0.8rem', fontWeight: 600,
-            color: 'white', letterSpacing: '0.08em',
-            background: 'linear-gradient(135deg, #E87722 0%, #c9600a 100%)',
-            border: '1px solid rgba(232,119,34,0.55)',
-            boxShadow: '0 4px 20px rgba(232,119,34,0.42), inset 0 1px 0 rgba(255,255,255,0.14)',
-          }}
+        <motion.div
+          whileHover={{ scale: 1.04, y: -2 }}
+          whileTap={{ scale: 0.96 }}
+          style={{ display: 'inline-block' }}
         >
-          💧 Track Water
-        </Link>
+          <Link
+            to="/water"
+            onClick={playHydrationSound}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '13px 28px', borderRadius: 999, textDecoration: 'none',
+              fontFamily: "'Cinzel', serif", fontSize: '0.78rem', fontWeight: 700,
+              color: 'white', letterSpacing: '0.12em',
+              background: 'linear-gradient(135deg, #E87722 0%, #c9a84c 100%)',
+              border: '2px double #e8c97a',
+              boxShadow: '0 6px 20px rgba(232, 119, 34, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+              transition: 'box-shadow 0.3s ease',
+            }}
+          >
+            💧 Track Water
+          </Link>
+        </motion.div>
 
-        <Link
-          to="/quotes"
-          onClick={playWisdomSound}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '12px 26px', borderRadius: 999, textDecoration: 'none',
-            fontFamily: "'Cinzel', serif", fontSize: '0.8rem', fontWeight: 500,
-            color: 'rgba(253,246,227,0.9)', letterSpacing: '0.08em',
-            background: 'rgba(253,246,227,0.1)', backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(201,168,76,0.48)',
-          }}
+        <motion.div
+          whileHover={{ scale: 1.04, y: -2 }}
+          whileTap={{ scale: 0.96 }}
+          style={{ display: 'inline-block' }}
         >
-          🕉️ Daily Wisdom
-        </Link>
+          <Link
+            to="/quotes"
+            onClick={playWisdomSound}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '13px 28px', borderRadius: 999, textDecoration: 'none',
+              fontFamily: "'Cinzel', serif", fontSize: '0.78rem', fontWeight: 700,
+              color: '#ffeab8', letterSpacing: '0.12em',
+              background: 'linear-gradient(135deg, #2b1c0c 0%, #150a02 100%)',
+              border: '2px double rgba(201, 168, 76, 0.65)',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+            }}
+          >
+            🕉️ Daily Wisdom
+          </Link>
+        </motion.div>
 
       </motion.div>
 

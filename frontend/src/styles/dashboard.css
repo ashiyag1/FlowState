@@ -79,3 +79,146 @@
   justify-content: center;
   font-size: 1.2rem;
 }
+
+/* ── SACRED SPACE & TEMPLE ARCH EFFECTS ── */
+.fs-temple-arch {
+  clip-path: ellipse(85% 100% at 50% 100%);
+  border-radius: 40px 40px 16px 16px;
+}
+
+.fs-temple-window-frame {
+  position: relative;
+  border-radius: 999px 999px 24px 24px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  box-shadow: 
+    0 0 0 3px rgba(22, 14, 6, 0.95),
+    0 0 0 4px rgba(201, 168, 76, 0.25),
+    0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.fs-gold-corner-card {
+  position: relative;
+  border: 1px solid rgba(201, 168, 76, 0.32);
+  border-radius: 20px;
+  padding: 1.75rem;
+  background: linear-gradient(145deg, rgba(255,250,240,0.97), rgba(248,238,212,0.94));
+  box-shadow: 
+    inset 0 0 0 1px rgba(255,255,255,0.6),
+    0 8px 30px rgba(92,61,30,0.08);
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dark .fs-gold-corner-card {
+  background: linear-gradient(145deg, rgba(32,22,12,0.97), rgba(22,15,8,0.94));
+  border-color: rgba(201, 168, 76, 0.18);
+  box-shadow: 
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    0 8px 30px rgba(0,0,0,0.4);
+}
+
+.fs-gold-corner-card::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px dashed rgba(201, 168, 76, 0.22);
+  border-radius: 14px;
+  pointer-events: none;
+}
+
+.fs-gold-corner-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(217, 119, 6, 0.45);
+  box-shadow: 
+    0 12px 35px rgba(217, 119, 6, 0.12),
+    0 0 0 1px rgba(217, 119, 6, 0.15);
+}
+
+.dark .fs-gold-corner-card:hover {
+  border-color: rgba(217, 119, 6, 0.35);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(217, 119, 6, 0.1);
+}
+
+/* ── TACTILE PARCHMENT MANUSCRIPT ── */
+.fs-parchment-manuscript {
+  background: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"),
+    linear-gradient(90deg, #e4cca2 0%, #f6e8cc 6%, #fdf8eb 12%, #fbf4e0 50%, #f6e8cc 88%, #edd9bd 94%, #dcbe99 100%);
+  box-shadow: 
+    0 14px 28px rgba(45,30,15,0.22),
+    inset 0 0 30px rgba(139, 94, 30, 0.12);
+  border-radius: 6px;
+  position: relative;
+  border-left: 2px solid #8a5a2b;
+  border-right: 2px solid #8a5a2b;
+}
+
+/* ── BREATHING PORTAL WIDGET ── */
+.fs-breathing-portal {
+  background: linear-gradient(135deg, rgba(38,26,14,0.95), rgba(20,13,7,0.92));
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 25px rgba(201, 168, 76, 0.08);
+}
+
+.fs-breathing-ring-outer {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,119,34,0.06) 0%, rgba(201,168,76,0.03) 70%, transparent 100%);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.fs-breathing-ring-inner {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,119,34,0.75) 0%, rgba(201,168,76,0.5) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 20px rgba(232,119,34,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  transition: transform 4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── SANDSTONE TABLET ── */
+.fs-sandstone-tablet {
+  background: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    linear-gradient(165deg, rgba(245,236,212,0.98), rgba(230,215,188,0.96));
+  border: 1px solid rgba(180, 140, 50, 0.35);
+  box-shadow: 
+    0 4px 15px rgba(92,61,30,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.dark .fs-sandstone-tablet {
+  background: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    linear-gradient(165deg, rgba(38,28,16,0.96), rgba(28,20,11,0.92));
+  border-color: rgba(201, 168, 76, 0.22);
+  box-shadow: 
+    0 4px 20px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+/* ── WOOD SHELF ENHANCED ── */
+.fs-wooden-shelf-decor {
+  background: linear-gradient(180deg, #7c5a2c 0%, #462c12 40%, #2f1d0a 100%);
+  box-shadow: 
+    0 8px 18px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.fs-wooden-shelf-top {
+  background: linear-gradient(90deg, transparent 2%, #8e6c30 10%, #dcae52 35%, #ffd475 50%, #dcae52 65%, #8e6c30 90%, transparent 98%);
+}
+

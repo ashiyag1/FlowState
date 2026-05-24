@@ -13,6 +13,8 @@ import QuoteBanner from '../sections/wisdom/QuoteBanner'
 import Sidebar from '../sections/wisdom/SideBar'
 import BookDetailModal from '../components/wisdom/BookDetailModal.jsx'
 import WisdomAmbientSound from '../components/wisdom/WisdomAmbientSound.jsx'
+import WisdomSparkles from '../components/wisdom/WisdomSparkles.jsx'
+import MandalaPortal from '../components/wisdom/MandalaPortal.jsx'
 import {
   FILTER_TOPICS, TOPIC_BOOKS, LIFE_ISSUES, TODAY_WISDOM,
 } from '../data/wisdomData'
@@ -21,19 +23,39 @@ function WisdomContent() {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const [activeTopic, setActiveTopic] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedBook, setSelectedBook] = useState(null)
+  const [pendingBook, setPendingBook] = useState(null)
+  const [mandalaOpen, setMandalaOpen] = useState(false)
   const { dark } = useTheme()
   const { markStreakToday, openBook, getBookProgress } = useWisdom()
   const [bookInitialPage, setBookInitialPage] = useState(0)
 
   useEffect(() => { markStreakToday() }, [markStreakToday])
 
-  const filteredBooks =
-    activeTopic === 'All'
-      ? TOPIC_BOOKS
-      : TOPIC_BOOKS.filter(book =>
-          book.title.toLowerCase().includes(activeTopic.toLowerCase())
-        )
+  // Filter books by active topic and search query
+  const filteredBooks = TOPIC_BOOKS.filter(book => {
+    const matchesTopic = activeTopic === 'All' || book.title.toLowerCase().includes(activeTopic.toLowerCase());
+    const matchesSearch = !searchQuery || 
+      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.scripture.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (book.subtitle && book.subtitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (book.pages && book.pages.some(p => 
+        p.heading.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        p.text.toLowerCase().includes(searchQuery.toLowerCase())
+      ));
+    return matchesTopic && matchesSearch;
+  })
+
+  // Filter issues by search query
+  const filteredIssues = LIFE_ISSUES.filter(issue => {
+    return !searchQuery ||
+      issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      issue.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      issue.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      issue.approach.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (issue.steps && issue.steps.some(step => step.toLowerCase().includes(searchQuery.toLowerCase())));
+  })
 
   const handleBookOpen = (book, page) => {
     if (!isAuthenticated) {
@@ -41,17 +63,27 @@ function WisdomContent() {
       return
     }
     const resumeFrom = page ?? getBookProgress(book.id)
-    openBook(book, resumeFrom)
-    setBookInitialPage(resumeFrom)
-    setSelectedBook(book)
+    setPendingBook({ book, page: resumeFrom })
+    setMandalaOpen(true)
+  }
+
+  const handleMandalaComplete = () => {
+    if (pendingBook) {
+      const { book, page } = pendingBook
+      openBook(book, page)
+      setBookInitialPage(page)
+      setSelectedBook(book)
+    }
+    setMandalaOpen(false)
   }
 
   return (
     <div style={styles.page(dark)}>
       <div style={styles.backdropOverlay(dark)} />
+      <WisdomSparkles />
       <WisdomAmbientSound />
       <div style={styles.container}>
-        <HeroHeader />
+        <HeroHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
         <TopicFilterBar
           topics={FILTER_TOPICS}
@@ -59,17 +91,33 @@ function WisdomContent() {
           onChange={setActiveTopic}
         />
 
-        <div style={styles.columns}>
-          <div style={styles.main}>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 flex-1 mt-4 pb-8">
+          <div className="lg:col-span-3 flex flex-col gap-9 overflow-hidden min-w-0">
             <TodaysWisdom wisdom={TODAY_WISDOM} />
-            <ExploreByTopic
-              books={filteredBooks.length ? filteredBooks : TOPIC_BOOKS}
-              onBookOpen={handleBookOpen}
-            />
-            <LifeIssuesGrid issues={LIFE_ISSUES} />
+            
+            {filteredBooks.length > 0 ? (
+              <ExploreByTopic
+                books={filteredBooks}
+                onBookOpen={handleBookOpen}
+              />
+            ) : (
+              <div className="text-center py-10 bg-white/5 dark:bg-white/[0.02] border border-gold/10 rounded-2xl">
+                <span className="text-2xl block mb-2">📚</span>
+                <p className="text-sm text-mist-dark dark:text-ocean-lt/60">No books match your search.</p>
+              </div>
+            )}
+
+            {filteredIssues.length > 0 ? (
+              <LifeIssuesGrid issues={filteredIssues} />
+            ) : (
+              <div className="text-center py-10 bg-white/5 dark:bg-white/[0.02] border border-gold/10 rounded-2xl">
+                <span className="text-2xl block mb-2">🌿</span>
+                <p className="text-sm text-mist-dark dark:text-ocean-lt/60">No issues match your search.</p>
+              </div>
+            )}
           </div>
 
-          <aside style={styles.sidebar}>
+          <aside className="lg:col-span-1 lg:sticky lg:top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto w-full pb-8 pr-1 scrollbar-thin">
             <Sidebar onBookOpen={handleBookOpen} />
           </aside>
         </div>
@@ -84,6 +132,12 @@ function WisdomContent() {
           onClose={() => setSelectedBook(null)}
         />
       )}
+
+      <MandalaPortal 
+        isOpen={mandalaOpen}
+        book={pendingBook?.book}
+        onComplete={handleMandalaComplete}
+      />
     </div>
   )
 }
