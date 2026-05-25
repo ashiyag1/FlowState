@@ -46,13 +46,20 @@ export async function evaluateAchievements(userId) {
   if (!user) throw new Error('User not found');
   
   const stats = user.stats || {
-    sankalpaCount: 0,
-    breathingCount: 0,
-    wisdomCount: 0,
+    sankalpaDates: [],
+    breathingDates: [],
+    wisdomDates: [],
     booksOpened: [],
-    sunriseActivities: 0,
-    midnightJournals: 0
+    sunriseDates: [],
+    midnightJournalDates: []
   };
+
+  const sankalpaDates = Array.isArray(stats.sankalpaDates) ? stats.sankalpaDates : [];
+  const breathingDates = Array.isArray(stats.breathingDates) ? stats.breathingDates : [];
+  const wisdomDates = Array.isArray(stats.wisdomDates) ? stats.wisdomDates : [];
+  const booksOpened = Array.isArray(stats.booksOpened) ? stats.booksOpened : [];
+  const sunriseDates = Array.isArray(stats.sunriseDates) ? stats.sunriseDates : [];
+  const midnightJournalDates = Array.isArray(stats.midnightJournalDates) ? stats.midnightJournalDates : [];
 
   // 2. Fetch water logs
   const waterData = await dbGetWater(userId);
@@ -94,16 +101,19 @@ export async function evaluateAchievements(userId) {
 
   // 4. Fetch journal entries
   const journalEntries = await dbGetJournal(userId);
-  const journalCount = journalEntries.length;
   const journalDates = new Set(journalEntries.map(e => e.date));
+  const journalCount = journalDates.size;
 
-  // 5. Calculate Cosmic Rhythm (ANY activity consecutive days streak)
-  // Union of all active dates: water, habit, journal, and sankalpa
-  // Since sankalpa set/completions are logged in stats, we use dates where user performed at least one activity
+  // 5. Calculate Cosmic Rhythm & Wisdom Streaks
+  const maxWisdomStreak = computeMaxConsecutiveDays(new Set(wisdomDates));
+
   const allActivityDates = new Set([
     ...waterDates,
     ...habitDates,
-    ...journalDates
+    ...journalDates,
+    ...breathingDates,
+    ...sankalpaDates,
+    ...wisdomDates
   ]);
   
   const maxCosmicStreak = computeMaxConsecutiveDays(allActivityDates);
@@ -113,17 +123,17 @@ export async function evaluateAchievements(userId) {
     "3_day_streak": maxHabitStreak,
     "journalled_10_times": journalCount,
     "hydration_sage": waterSuccessDays,
-    "wisdom_seeker": stats.wisdomCount || 0,
+    "wisdom_seeker": new Set(booksOpened.map(String)).size,
     "cosmic_rhythm": maxCosmicStreak,
-    "sunrise_consistency": stats.sunriseActivities || 0,
-    "third_eye_open": (stats.booksOpened || []).length,
+    "sunrise_consistency": sunriseDates.length,
+    "third_eye_open": maxWisdomStreak,
     "the_unshaken": maxHabitStreak,
-    "Sankalpa_keeper": stats.sankalpaCount || 0,
-    "calm_mind": stats.breathingCount || 0,
+    "Sankalpa_keeper": sankalpaDates.length,
+    "calm_mind": breathingDates.length,
     "daily_journaling_30_times": journalCount,
     "discipline_builder": maxHabitsInADay,
-    "focus_monk": stats.breathingCount || 0,
-    "midnight_reflector": stats.midnightJournals || 0
+    "focus_monk": breathingDates.length,
+    "midnight_reflector": midnightJournalDates.length
   };
 
   // 7. Get existing badges & evaluate
@@ -134,10 +144,10 @@ export async function evaluateAchievements(userId) {
     { id: "3_day_streak", target: 3 },
     { id: "journalled_10_times", target: 10 },
     { id: "hydration_sage", target: 5 },
-    { id: "wisdom_seeker", target: 5 },
+    { id: "wisdom_seeker", target: 3 },
     { id: "cosmic_rhythm", target: 7 },
     { id: "sunrise_consistency", target: 3 },
-    { id: "third_eye_open", target: 3 },
+    { id: "third_eye_open", target: 21 },
     { id: "the_unshaken", target: 10 },
     { id: "Sankalpa_keeper", target: 5 },
     { id: "calm_mind", target: 5 },

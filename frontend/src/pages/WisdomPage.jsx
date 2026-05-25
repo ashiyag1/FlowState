@@ -108,7 +108,7 @@ function WisdomContent() {
             ) : (
               <div className="text-center py-10 bg-white/5 dark:bg-white/[0.02] border border-gold/10 rounded-2xl">
                 <span className="text-2xl block mb-2">📚</span>
-                <p className="text-sm text-mist-dark dark:text-ocean-lt/60">No books match your search.</p>
+                <p className="text-sm text-mist-dark dark:text-sand-lt/70">No books match your search.</p>
               </div>
             )}
 
@@ -117,7 +117,7 @@ function WisdomContent() {
             ) : (
               <div className="text-center py-10 bg-white/5 dark:bg-white/[0.02] border border-gold/10 rounded-2xl">
                 <span className="text-2xl block mb-2">🌿</span>
-                <p className="text-sm text-mist-dark dark:text-ocean-lt/60">No issues match your search.</p>
+                <p className="text-sm text-mist-dark dark:text-sand-lt/70">No issues match your search.</p>
               </div>
             )}
           </div>

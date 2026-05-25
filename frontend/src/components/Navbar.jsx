@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Sun, Moon, LogIn, LogOut, Volume2, VolumeX, Menu, X, User, Award } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { useSoundEffects } from '../hooks/useSoundEffects'
@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import NotificationsButton from './NotificationsButton'
 import { useAchievements } from '../context/AchievementsContext'
+import { useWellness } from '../context/WellnessContext'
 
 const NAV = [
   { to: '/',        label: 'Home',      sub: 'Sanctuary' },
@@ -17,6 +18,58 @@ const NAV = [
   { to: '/heritage', label: 'Heritage', sub: 'Sampada'   },
   { to: '/community', label: 'Community',  sub: 'Sangha' },
 ]
+
+const BRANDING_OPTIONS = {
+  'Tarang-FlowState': {
+    name: 'Tarang‑FlowState',
+    meaning: 'Wave of FlowState',
+    fontFamily: "'Samarkan', 'Yatra One', 'Tiro Devanagari Hindi', 'Cormorant Garamond', serif",
+    letterSpacing: '0.04em',
+    fontStyle: 'normal',
+    fontWeight: 400
+  },
+  'Saanjh': {
+    name: 'Saanjh',
+    meaning: 'Twilight Sanctuary',
+    fontFamily: "'Lora', serif",
+    letterSpacing: '0.08em',
+    fontStyle: 'italic',
+    fontWeight: 600
+  },
+  'Antara': {
+    name: 'Antara',
+    meaning: 'Inner Space & Rhythm',
+    fontFamily: "'Cinzel', serif",
+    letterSpacing: '0.14em',
+    fontStyle: 'normal',
+    fontWeight: 500
+  },
+  'Sattva': {
+    name: 'Sattva',
+    meaning: 'Purity & Stillness',
+    fontFamily: "'Lexend', sans-serif",
+    letterSpacing: '0.12em',
+    fontStyle: 'normal',
+    fontWeight: 300,
+    textTransform: 'uppercase'
+  },
+  'Sukoon': {
+    name: 'Sukoon',
+    meaning: 'Calmness & Peace',
+    fontFamily: "'Noto Serif Devanagari', serif",
+    letterSpacing: '0.06em',
+    fontStyle: 'normal',
+    fontWeight: 600
+  },
+  'Ekaa': {
+    name: 'Ekaa',
+    meaning: 'Single-Pointed Focus',
+    fontFamily: "'Playfair Display', serif",
+    letterSpacing: '0.1em',
+    fontStyle: 'italic',
+    fontWeight: 700
+  }
+}
 
 function FlowSymbol({ size = 32 }) {
   return (
@@ -170,6 +223,7 @@ export default function Navbar() {
   const { isMuted, toggleMute } = useSoundEffects()
   const { user, isAuthenticated, logout } = useAuth()
   const { setGalleryOpen } = useAchievements()
+  const { journal, habitDone } = useWellness()
   const navigate = useNavigate()
   const [visible,    setVisible]  = useState(true)
   const [scrolled,   setScrolled] = useState(false)
@@ -177,6 +231,40 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false)
   const lastY = useRef(0)
   const dropdownRef = useRef(null)
+
+  const [selectedBranding, setSelectedBranding] = useState(() => {
+    return localStorage.getItem('fwa_selected_branding') || 'Tarang-FlowState'
+  })
+  const [nameDropdownOpen, setNameDropdownOpen] = useState(false)
+  const [mobileNameDropdownOpen, setMobileNameDropdownOpen] = useState(false)
+  const nameDropdownRef = useRef(null)
+  const mobileNameDropdownRef = useRef(null)
+
+  useEffect(() => {
+    if (!nameDropdownOpen) return
+    const handleClick = (e) => {
+      if (nameDropdownRef.current && !nameDropdownRef.current.contains(e.target)) {
+        setNameDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [nameDropdownOpen])
+
+  useEffect(() => {
+    if (!mobileNameDropdownOpen) return
+    const handleClick = (e) => {
+      if (mobileNameDropdownRef.current && !mobileNameDropdownRef.current.contains(e.target)) {
+        setMobileNameDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [mobileNameDropdownOpen])
+
+  const currentBranding = useMemo(() => {
+    return BRANDING_OPTIONS[selectedBranding] || BRANDING_OPTIONS['Tarang-FlowState']
+  }, [selectedBranding])
 
   useEffect(() => {
     const onScroll = () => {
@@ -218,19 +306,27 @@ export default function Navbar() {
     ? '0 12px 48px rgba(0,0,0,0.55), 0 0 80px rgba(212,168,42,0.06), inset 0 1px 0 rgba(232,199,122,0.05)'
     : '0 8px 32px rgba(0,0,0,0.4), 0 0 60px rgba(212,168,42,0.04), inset 0 1px 0 rgba(232,199,122,0.04)'
 
+  // Compute journal streak from local journal entries
+  const journalStreak = useMemo(() => {
+    const dates = [...new Set(journal.map(e => e.date))].sort().reverse()
+    let count = 0
+    const todayDate = new Date()
+    for (let i = 0; i < dates.length; i++) {
+      const d = new Date(todayDate)
+      d.setDate(d.getDate() - i)
+      const expected = d.toISOString().slice(0, 10)
+      if (dates[i] === expected) count++
+      else break
+    }
+    return count
+  }, [journal])
+
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const journaledToday = journal.some(e => e.date === todayStr)
+  const streakAtRisk = journalStreak > 0 && !journaledToday
+
   return (
     <>
-      <style>{`
-        @import url('https://fonts.cdnfonts.com/css/samarkan');
-
-        @keyframes floatY {
-          0%,100% { transform:translateY(0); }
-          50%      { transform:translateY(-3px); }
-        }
-        .nb-float { animation: floatY 4s ease-in-out infinite; }
-
-      `}</style>
-
       <motion.header
         animate={{ y: visible ? 0 : -120, opacity: visible ? 1 : 0 }}
         transition={{ duration:0.35, ease:[0.4,0,0.2,1] }}
@@ -273,27 +369,189 @@ export default function Navbar() {
           </div>
 
           {/* CENTRE — brand */}
-          <NavLink to="/" style={{ textDecoration:'none' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              <div className="nb-float" style={{ position:'relative' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, position:'relative' }} ref={nameDropdownRef}>
+            <NavLink to="/" style={{ textDecoration:'none' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <div className="nb-float" style={{ position:'relative' }}>
+                  <span style={{
+                    position:'absolute', inset:0, borderRadius:'50%',
+                    background:'radial-gradient(circle,rgba(212,168,42,0.35) 0%,transparent 70%)',
+                    filter:'blur(8px)', transform:'scale(1.4)', opacity:0.4,
+                    pointerEvents:'none',
+                  }}/>
+                  <FlowSymbol size={28}/>
+                </div>
                 <span style={{
-                  position:'absolute', inset:0, borderRadius:'50%',
-                  background:'radial-gradient(circle,rgba(212,168,42,0.35) 0%,transparent 70%)',
-                  filter:'blur(8px)', transform:'scale(1.4)', opacity:0.4,
-                  pointerEvents:'none',
-                }}/>
-                <FlowSymbol size={28}/>
+                  ...wordmarkStyle,
+                  fontSize:'1.28rem',
+                  color: dark ? '#e8c46a' : '#8a5a12',
+                  fontFamily: currentBranding.fontFamily,
+                  letterSpacing: currentBranding.letterSpacing,
+                  fontStyle: currentBranding.fontStyle,
+                  fontWeight: currentBranding.fontWeight,
+                  textTransform: currentBranding.textTransform || 'none',
+                  transition: 'all 0.5s ease',
+                }}>{currentBranding.name}</span>
               </div>
-              <span style={{
-                ...wordmarkStyle,
-                fontSize:'1.28rem',
-                color: dark ? '#e8c46a' : '#8a5a12',
-              }}>Tarang‑FlowState</span>
-            </div>
-          </NavLink>
+            </NavLink>
+            
+            <button
+              type="button"
+              onClick={() => setNameDropdownOpen(prev => !prev)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: dark ? 'rgba(232, 196, 106, 0.55)' : 'rgba(138, 90, 18, 0.55)',
+                cursor: 'pointer',
+                fontSize: '11px',
+                padding: '4px 2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                outline: 'none',
+              }}
+              title="Explore Sanctuary Names"
+            >
+              ✦
+            </button>
+
+            {/* Dropdown Menu */}
+            <AnimatePresence>
+              {nameDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  style={{
+                    position: 'absolute', top: 'calc(100% + 12px)', left: 0,
+                    width: 250, zIndex: 100,
+                    borderRadius: 16,
+                    background: dark
+                      ? 'rgba(22, 14, 6, 0.95)'
+                      : 'rgba(253, 248, 235, 0.98)',
+                    backdropFilter: 'blur(32px) saturate(1.4)',
+                    WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
+                    border: '1px solid rgba(212,168,42,0.22)',
+                    boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
+                    padding: '8px',
+                    pointerEvents: 'auto',
+                  }}
+                >
+                  <div style={{
+                    fontSize: '9px',
+                    fontFamily: "'Cinzel', serif",
+                    letterSpacing: '0.12em',
+                    color: dark ? 'rgba(212,168,42,0.6)' : 'rgba(138,90,18,0.6)',
+                    padding: '6px 8px 4px',
+                    borderBottom: '1px solid rgba(212,168,42,0.1)',
+                    marginBottom: '4px',
+                    textTransform: 'uppercase',
+                  }}>
+                    Select Sanctuary Name
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {Object.entries(BRANDING_OPTIONS).map(([key, opt]) => {
+                      const isSelected = selectedBranding === key
+                      return (
+                        <motion.button
+                          key={key}
+                          whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
+                          onClick={() => {
+                            setSelectedBranding(key)
+                            localStorage.setItem('fwa_selected_branding', key)
+                            setNameDropdownOpen(false)
+                          }}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            padding: '8px 10px',
+                            borderRadius: 10,
+                            background: isSelected
+                              ? (dark ? 'rgba(212,168,42,0.14)' : 'rgba(212,168,42,0.1)')
+                              : 'transparent',
+                            border: isSelected
+                              ? '1px solid rgba(212,168,42,0.25)'
+                              : '1px solid transparent',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            width: '100%',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <span style={{
+                            fontFamily: opt.fontFamily,
+                            fontSize: '0.92rem',
+                            fontWeight: opt.fontWeight,
+                            fontStyle: opt.fontStyle,
+                            letterSpacing: opt.letterSpacing,
+                            textTransform: opt.textTransform || 'none',
+                            color: isSelected
+                              ? (dark ? '#ffe090' : '#8a5a12')
+                              : (dark ? '#e8d5a8' : '#5c3d1e'),
+                          }}>
+                            {opt.name}
+                          </span>
+                          <span style={{
+                            fontFamily: "'Lora', serif",
+                            fontStyle: 'italic',
+                            fontSize: '0.62rem',
+                            color: dark ? 'rgba(212,168,42,0.5)' : 'rgba(92,61,30,0.5)',
+                            marginTop: 1,
+                          }}>
+                            {opt.meaning}
+                          </span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* RIGHT — actions */}
           <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+            {/* Streak Pill */}
+            {journalStreak > 0 && (
+              <motion.button
+                type="button"
+                onClick={() => navigate('/journal')}
+                title={streakAtRisk ? "Journal today to keep your streak alive!" : `${journalStreak}-day journal streak 🔥`}
+                animate={streakAtRisk ? { scale: [1, 1.06, 1] } : {}}
+                transition={{ repeat: Infinity, duration: 1.6 }}
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 3,
+                  padding: '3px 8px 3px 6px',
+                  borderRadius: 999,
+                  border: streakAtRisk
+                    ? '1px solid rgba(251,146,60,0.5)'
+                    : '1px solid rgba(212,168,42,0.35)',
+                  background: streakAtRisk
+                    ? 'rgba(251,146,60,0.12)'
+                    : 'rgba(212,168,42,0.1)',
+                  boxShadow: streakAtRisk
+                    ? '0 0 10px rgba(251,146,60,0.2)'
+                    : '0 0 10px rgba(212,168,42,0.12)',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                }}
+              >
+                <span style={{ fontSize: 13 }}>🔥</span>
+                <span style={{
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: '0.6rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                  color: streakAtRisk ? '#fb923c' : (dark ? '#e8c46a' : '#8a5a12'),
+                }}>
+                  {journalStreak}
+                </span>
+              </motion.button>
+            )}
             <motion.button type="button" whileTap={{ scale:0.88 }} onClick={toggle}
               style={{
                 width:30, height:30, borderRadius:'50%',
@@ -491,13 +749,135 @@ export default function Navbar() {
           margin:'0 auto',
           pointerEvents:'auto',
         }}>
-          <NavLink to="/" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:8 }}>
-            <FlowSymbol size={24}/>
-            <span style={{
-              ...wordmarkStyle, fontSize:'1.15rem',
-              color: dark ? '#e8c46a' : '#8a5a12',
-            }}>Tarang‑FlowState</span>
-          </NavLink>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, position: 'relative' }} ref={mobileNameDropdownRef}>
+            <NavLink to="/" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:8 }}>
+              <FlowSymbol size={24}/>
+              <span style={{
+                ...wordmarkStyle,
+                fontSize:'1.15rem',
+                color: dark ? '#e8c46a' : '#8a5a12',
+                fontFamily: currentBranding.fontFamily,
+                letterSpacing: currentBranding.letterSpacing,
+                fontStyle: currentBranding.fontStyle,
+                fontWeight: currentBranding.fontWeight,
+                textTransform: currentBranding.textTransform || 'none',
+                transition: 'all 0.5s ease',
+              }}>{currentBranding.name}</span>
+            </NavLink>
+            <button
+              type="button"
+              onClick={() => setMobileNameDropdownOpen(prev => !prev)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: dark ? 'rgba(232, 196, 106, 0.55)' : 'rgba(138, 90, 18, 0.55)',
+                cursor: 'pointer',
+                fontSize: '10px',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                outline: 'none',
+              }}
+            >
+              ✦
+            </button>
+
+            {/* Mobile Brand selector dropdown */}
+            <AnimatePresence>
+              {mobileNameDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  style={{
+                    position: 'absolute', top: 'calc(100% + 8px)', left: 0,
+                    width: 230, zIndex: 100,
+                    borderRadius: 16,
+                    background: dark
+                      ? 'rgba(22, 14, 6, 0.96)'
+                      : 'rgba(253, 248, 235, 0.98)',
+                    backdropFilter: 'blur(32px) saturate(1.4)',
+                    WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
+                    border: '1px solid rgba(212,168,42,0.22)',
+                    boxShadow: '0 16px 48px rgba(0,0,0,0.35)',
+                    padding: '6px',
+                    pointerEvents: 'auto',
+                  }}
+                >
+                  <div style={{
+                    fontSize: '9px',
+                    fontFamily: "'Cinzel', serif",
+                    letterSpacing: '0.12em',
+                    color: dark ? 'rgba(212,168,42,0.6)' : 'rgba(138,90,18,0.6)',
+                    padding: '6px 8px 4px',
+                    borderBottom: '1px solid rgba(212,168,42,0.1)',
+                    marginBottom: '4px',
+                    textTransform: 'uppercase',
+                  }}>
+                    Select Sanctuary Name
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {Object.entries(BRANDING_OPTIONS).map(([key, opt]) => {
+                      const isSelected = selectedBranding === key
+                      return (
+                        <motion.button
+                          key={key}
+                          whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
+                          onClick={() => {
+                            setSelectedBranding(key)
+                            localStorage.setItem('fwa_selected_branding', key)
+                            setMobileNameDropdownOpen(false)
+                          }}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            padding: '6px 8px',
+                            borderRadius: 10,
+                            background: isSelected
+                              ? (dark ? 'rgba(212,168,42,0.14)' : 'rgba(212,168,42,0.1)')
+                              : 'transparent',
+                            border: isSelected
+                              ? '1px solid rgba(212,168,42,0.25)'
+                              : '1px solid transparent',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            width: '100%',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <span style={{
+                            fontFamily: opt.fontFamily,
+                            fontSize: '0.85rem',
+                            fontWeight: opt.fontWeight,
+                            fontStyle: opt.fontStyle,
+                            letterSpacing: opt.letterSpacing,
+                            textTransform: opt.textTransform || 'none',
+                            color: isSelected
+                              ? (dark ? '#ffe090' : '#8a5a12')
+                              : (dark ? '#e8d5a8' : '#5c3d1e'),
+                          }}>
+                            {opt.name}
+                          </span>
+                          <span style={{
+                            fontFamily: "'Lora', serif",
+                            fontStyle: 'italic',
+                            fontSize: '0.58rem',
+                            color: dark ? 'rgba(212,168,42,0.5)' : 'rgba(92,61,30,0.5)',
+                            marginTop: 1,
+                          }}>
+                            {opt.meaning}
+                          </span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           <div style={{ display:'flex', alignItems:'center', gap:6 }}>
             <NotificationsButton />
             <motion.button type="button" whileTap={{ scale:0.88 }} onClick={() => setGalleryOpen(true)}
@@ -574,12 +954,19 @@ export default function Navbar() {
                   background:'linear-gradient(90deg,transparent,rgba(212,168,42,0.2),transparent)',
                   opacity:0.3,
                 }}/>
-                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                   <FlowSymbol size={26}/>
                   <span style={{
-                    ...wordmarkStyle, fontSize:'1.15rem',
+                    ...wordmarkStyle,
+                    fontSize:'1.15rem',
                     color: dark ? '#e8c46a' : '#8a5a12',
-                  }}>Tarang</span>
+                    fontFamily: currentBranding.fontFamily,
+                    letterSpacing: currentBranding.letterSpacing,
+                    fontStyle: currentBranding.fontStyle,
+                    fontWeight: currentBranding.fontWeight,
+                    textTransform: currentBranding.textTransform || 'none',
+                    transition: 'all 0.5s ease',
+                  }}>{currentBranding.name}</span>
                 </div>
                 <motion.button type="button" whileTap={{ scale:0.88 }}
                   onClick={() => setMobileOpen(false)}

@@ -29,7 +29,7 @@ export default function IssueCard({ issue, dark, onClick }) {
         </h3>
       </div>
 
-      <p className="hidden sm:block text-xs text-mist-dark dark:text-ocean-lt/60 leading-normal line-clamp-2 max-w-[200px] flex-1">
+      <p className="hidden sm:block text-xs text-mist-dark dark:text-sand-lt/70 leading-normal line-clamp-2 max-w-[200px] flex-1">
         {issue.summary}
       </p>
 

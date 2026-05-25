@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAchievements, getBadgeImageUrl } from '../../context/AchievementsContext';
 import { Sparkles, X, Award, ShieldAlert, Trophy, ShieldCheck, Compass } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 const CATEGORIES = [
   { id: 'all', label: 'All', icon: Trophy },
@@ -15,7 +16,8 @@ const CATEGORIES = [
 ];
 
 export default function BadgeGallery() {
-  const { badges, isGalleryOpen, setGalleryOpen } = useAchievements();
+  const { badges, isGalleryOpen, setGalleryOpen, setActiveUnlockBadge, setIsFreshUnlock } = useAchievements();
+  const { isAuthenticated } = useAuth();
   const { dark } = useTheme();
   const [activeTab, setActiveTab] = useState('all');
 
@@ -102,6 +104,24 @@ export default function BadgeGallery() {
 
           {/* Badges Grid Scroll Container */}
           <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+            {!isAuthenticated && (
+              <div 
+                className="mb-6 p-4 rounded-2xl border text-xs leading-relaxed flex items-center gap-3"
+                style={{
+                  background: dark 
+                    ? 'rgba(232, 98, 42, 0.08)' 
+                    : 'rgba(232, 98, 42, 0.04)',
+                  borderColor: 'rgba(232, 98, 42, 0.25)',
+                  color: dark ? '#f3beab' : '#a24b27'
+                }}
+              >
+                <ShieldAlert size={16} className="shrink-0 text-saffron animate-pulse" />
+                <div>
+                  <span className="font-bold">Guest Mode:</span> You are currently logged out. Log in or create an account to start tracking progress and unlocking these beautiful spiritual milestones!
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
               {filteredBadges.map(badge => {
                 const isLegendary = badge.rarity === 'Legendary';
@@ -116,10 +136,16 @@ export default function BadgeGallery() {
                   <motion.div
                     key={badge.badgeId}
                     whileHover={!isLocked ? { y: -4, scale: 1.02 } : {}}
+                    onClick={() => {
+                      if (!isLocked) {
+                        setActiveUnlockBadge(badge);
+                        setIsFreshUnlock(false);
+                      }
+                    }}
                     className={`relative rounded-2xl border p-4 sm:p-5 flex flex-col items-center justify-between text-center overflow-hidden transition-all duration-300 ${
                       isLocked 
                         ? 'opacity-45 hover:opacity-60 bg-black/10 dark:bg-white/[0.01]' 
-                        : 'bg-white/40 dark:bg-white/[0.03]'
+                        : 'bg-white/40 dark:bg-white/[0.03] cursor-pointer'
                     }`}
                     style={{
                       borderColor: isLocked

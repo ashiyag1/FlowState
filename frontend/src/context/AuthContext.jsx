@@ -33,15 +33,23 @@ export function AuthProvider({ children }) {
           const data = await res.json()
           setUser(data.user)
           setIsAuthenticated(true)
-        } else {
-          // Token expired or invalid
+        } else if (res.status === 401) {
+          // Only sign out on 401 — token is genuinely invalid or expired
           localStorage.removeItem('fwa_auth_token')
           setToken(null)
           setUser(null)
           setIsAuthenticated(false)
+        } else {
+          // Any other error (404, 500, network issues, server restart) — 
+          // keep the token, stay logged in, retry will happen on next navigation
+          console.warn('Auth check returned status', res.status, '— keeping session alive')
+          // If we have a stored token, trust it and keep user logged in
+          // The server may have just restarted or be temporarily unavailable
         }
       } catch (err) {
-        console.error('Failed to authenticate token:', err)
+        // Network error — server may be down or restarting
+        // Do NOT sign out — keep the session alive
+        console.error('Auth check network error — keeping session alive:', err.message)
       } finally {
         setLoading(false)
       }

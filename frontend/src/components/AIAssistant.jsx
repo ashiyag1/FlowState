@@ -1,19 +1,54 @@
 import { useState, useRef, useEffect } from 'react'
 import { X, Send, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useWellness } from '../context/WellnessContext'
+import { getEmotionalReflection } from '../utils/emotionalMemory'
 
-const INITIAL_MSG = {
-  role: 'assistant',
-  text: "Namaste. I am here when you need stillness, clarity, or simply a quiet presence.",
-  suggestions: [],
+/* ─────────────────────────────────────────────────────────────
+   COZY CAMPFIRE FRIEND ICON (Sahayak's Friendly Mascot)
+───────────────────────────────────────────────────────────── */
+function CozyFriendIcon({ size = 20, style = {} }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'all 0.3s ease', ...style }}>
+      {/* Clean speech bubble */}
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      {/* Small solid heart in the center */}
+      <path d="M12 12s-1.8-1.2-1.8-2.2c0-.6.4-1 .9-1 .3 0 .6.2.7.4l.2.3.2-.3c.1-.2.4-.4.7-.4.5 0 .9.4.9 1 0 1-1.8 2.2-1.8 2.2z" fill="currentColor" />
+    </svg>
+  )
 }
 
 export default function AIAssistant() {
+  const { journal, habitDone } = useWellness()
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState([INITIAL_MSG])
+  const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const listRef = useRef(null)
+
+  // Dynamically initialize greeting on mount/update based on time and reflection data
+  useEffect(() => {
+    const reflection = getEmotionalReflection(journal, habitDone)
+    let greeting = "Namaste. I am here when you need stillness, clarity, or simply a quiet presence."
+    let suggestions = ["Write in my journal", "Guide me in breathing", "Read some wisdom"]
+    
+    if (reflection.isReturning) {
+      greeting = `Namaste. ${reflection.message} I am here when you are ready to slow down.`
+      suggestions = ["Start breathing exercise", "Write in journal", "Just chat"]
+    } else if (reflection.tod === 'night') {
+      greeting = "Namaste. Still awake? Let's quiet the noise a little."
+      suggestions = ["Help me clear my mind", "Do a breathing exercise", "Read daily quotes"]
+    } else if (reflection.tod === 'morning') {
+      greeting = "Namaste. A new day begins. How are you feeling this morning?"
+      suggestions = ["Set my Sankalpa", "Log water intake", "Show daily quotes"]
+    }
+    
+    setMessages([{
+      role: 'assistant',
+      text: greeting,
+      suggestions: suggestions
+    }])
+  }, [journal, habitDone])
 
   useEffect(() => {
     if (listRef.current) {
@@ -98,7 +133,7 @@ export default function AIAssistant() {
                   background: 'linear-gradient(135deg, rgba(212,168,42,0.2), rgba(232,199,122,0.1))',
                   border: '1px solid rgba(212,168,42,0.3)',
                 }}>
-                  <Sparkles size={14} style={{ color: '#c4911e' }} />
+                  <CozyFriendIcon size={18} />
                 </div>
                 <div>
                   <div style={{
@@ -235,7 +270,7 @@ export default function AIAssistant() {
         }}
         aria-label="Toggle AI assistant"
       >
-        {open ? <X size={20} /> : <Sparkles size={20} />}
+        {open ? <X size={20} /> : <CozyFriendIcon size={26} />}
       </motion.button>
     </>
   )

@@ -77,13 +77,28 @@ export function WisdomProvider({ children }) {
     const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
     const result = []
     const td = new Date()
-    for (let i = 6; i >= 0; i--) {
+    const dayOfWeek = td.getDay()
+    // Monday = 1, Sunday = 0  → offset to Monday as start
+    const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+    for (let i = mondayOffset; i >= 0; i--) {
       const d = new Date(td)
       d.setDate(d.getDate() - i)
       const iso = d.toISOString().slice(0, 10)
       result.push({
         label: dayLabels[d.getDay()],
         done: !!streakLog[iso],
+      })
+    }
+    // remaining days of the week after today
+    const remaining = 7 - result.length
+    for (let i = 1; i <= remaining; i++) {
+      const d = new Date(td)
+      d.setDate(d.getDate() + i)
+      const iso = d.toISOString().slice(0, 10)
+      result.push({
+        label: dayLabels[d.getDay()],
+        done: false,
+        future: true,
       })
     }
     return result

@@ -1,33 +1,43 @@
 export default function TopBorder() {
   return (
-    <>
+    <div
+      style={{
+        height: '40px',
+        background: 'linear-gradient(to bottom, rgba(22, 14, 6, 0.4) 0%, transparent 100%)',
+        position: 'relative',
+        zIndex: 10,
+        marginTop: '-20px',
+      }}
+    >
       <div
         style={{
-          height: 8,
-          background:
-            'linear-gradient(90deg, var(--saffron), var(--gold), var(--forest), var(--gold), var(--saffron))',
+          position: 'absolute',
+          top: 0,
+          left: '10%',
+          right: '10%',
+          height: '1px',
+          background: 'radial-gradient(circle, rgba(201, 168, 76, 0.35) 0%, transparent 80%)',
         }}
       />
-
       <div
         style={{
           textAlign: 'center',
-          padding: '5px 0',
-          background:
-            'linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent)',
+          padding: '6px 0',
         }}
       >
         <span
           style={{
             fontFamily: "'Cinzel', serif",
-            fontSize: '0.6rem',
-            letterSpacing: '0.4em',
-            color: '#8b6914',
+            fontSize: '0.62rem',
+            letterSpacing: '0.35rem',
+            color: '#c9a84c',
+            opacity: 0.55,
+            textShadow: '0 0 8px rgba(201, 168, 76, 0.4)',
           }}
         >
           ✦ ✦ ✦
         </span>
       </div>
-    </>
+    </div>
   )
 }

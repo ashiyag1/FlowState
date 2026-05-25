@@ -118,7 +118,7 @@ export default function LotusOracle() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-[10px] text-mist-dark/60 dark:text-ocean-lt/40 font-serif italic mt-3"
+              className="text-[10px] text-mist-dark/60 dark:text-sand-lt/50 font-serif italic mt-3"
             >
               Tap the Lotus to seek guidance
             </motion.p>

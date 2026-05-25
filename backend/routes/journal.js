@@ -1,10 +1,21 @@
 import express from 'express'
-import { dbGetJournal, dbAddJournalEntry, dbDeleteJournalEntry } from '../db.js'
+import { dbGetJournal, dbAddJournalEntry, dbDeleteJournalEntry, dbGetMoodTrends } from '../db.js'
 import authMiddleware from '../middleware/auth.js'
 
 const router = express.Router()
 
 router.use(authMiddleware)
+
+// GET mood trends (heatmap + 7-day chart + stats)
+router.get('/mood-trends', async (req, res) => {
+  try {
+    const data = await dbGetMoodTrends(req.userId)
+    return res.status(200).json(data)
+  } catch (err) {
+    console.error('GET mood-trends error:', err)
+    return res.status(500).json({ error: 'Failed to retrieve mood trends' })
+  }
+})
 
 // GET journal entries
 router.get('/', async (req, res) => {

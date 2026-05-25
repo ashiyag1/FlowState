@@ -35,7 +35,7 @@ export default function TodaysWisdom({ wisdom }) {
             {wisdom.sanskrit}
           </p>
           <p 
-            className="text-xs sm:text-sm italic text-mist-dark dark:text-ocean-lt/60 leading-normal"
+            className="text-xs sm:text-sm italic text-mist-dark dark:text-sand-lt/85 leading-normal"
             style={{ fontFamily: "'Lora', serif" }}
           >
             "{wisdom.english}"
@@ -55,7 +55,7 @@ export default function TodaysWisdom({ wisdom }) {
             className={`w-8 h-8 rounded-full border flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer
               ${isSaved 
                 ? 'bg-red-500/10 border-red-500/30 text-red-500' 
-                : 'bg-white/90 dark:bg-white/[0.04] border-gold/20 dark:border-gold/15 text-gold'
+                : 'bg-white/90 dark:bg-ink-soft/80 border-gold/20 dark:border-gold/30 text-gold dark:text-gold-lt hover:bg-gold/10 dark:hover:bg-gold/20 hover:border-gold/45'
               }`}
             title={isSaved ? "Saved to Favorites" : "Add to Favorites"}
           >
@@ -63,7 +63,7 @@ export default function TodaysWisdom({ wisdom }) {
           </button>
           <button 
             onClick={handleShare}
-            className="w-8 h-8 rounded-full border flex items-center justify-center bg-white/90 dark:bg-white/[0.04] border-gold/20 dark:border-gold/15 text-gold shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            className="w-8 h-8 rounded-full border flex items-center justify-center bg-white/90 dark:bg-ink-soft/80 border-gold/20 dark:border-gold/30 text-gold dark:text-gold-lt shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 hover:bg-gold/10 dark:hover:bg-gold/20 hover:border-gold/45 cursor-pointer"
             title="Share Quote"
           >
             <Share2 size={13} />

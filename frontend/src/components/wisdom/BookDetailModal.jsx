@@ -20,6 +20,18 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const [isFemale, setIsFemale] = useState(true)
   const [showShare, setShowShare] = useState(false)
   const [previewImage, setPreviewImage] = useState(null)
+  const [previewBlob, setPreviewBlob] = useState(null)
+  const [copied, setCopied] = useState(false)
+
+  const handleClosePreview = useCallback(() => {
+    if (previewImage) {
+      URL.revokeObjectURL(previewImage)
+      setPreviewImage(null)
+    }
+    setPreviewBlob(null)
+    setCopied(false)
+  }, [previewImage])
+
   const [stickyOpen, setStickyOpen] = useState(false)
   const [stickyText, setStickyText] = useState('')
   const [stickyColor, setStickyColor] = useState('#FFD43B')
@@ -415,7 +427,8 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
                         if (!blob) return
                         const url = URL.createObjectURL(blob)
                         const file = new File([blob], 'wisdom-card.png', { type: 'image/png' })
-                        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+                        if (isMobile && navigator.share && navigator.canShare?.({ files: [file] })) {
                           await navigator.share({
                             title: cur.heading,
                             text: `hey checkout this wisdom card on tarang-flowstate`,
@@ -423,6 +436,7 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
                           })
                           URL.revokeObjectURL(url)
                         } else {
+                          setPreviewBlob(blob)
                           setPreviewImage(url)
                         }
                       } catch (err) {
@@ -470,7 +484,7 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
             background: 'rgba(0,0,0,0.75)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexDirection: 'column', gap: '1.5rem', padding: '1rem',
-          }} onClick={() => { URL.revokeObjectURL(previewImage); setPreviewImage(null) }}>
+          }} onClick={handleClosePreview}>
             <img src={previewImage} alt="Wisdom Card"
               style={{
                 maxWidth: '90vw', maxHeight: '70vh',
@@ -481,30 +495,49 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
             />
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}
               onClick={e => e.stopPropagation()}>
-              <button onClick={async () => {
+              <button onClick={() => {
                 try {
-                  const resp = await fetch(previewImage)
-                  const blob = await resp.blob()
-                  await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-                  alert('Image copied! Right-click and paste it where you need.')
-                } catch {
-                  alert('Copy not supported on this browser. Right-click the image and select "Copy Image".')
+                  if (!previewBlob) {
+                    alert('No image preview data found!')
+                    return
+                  }
+                  // Force the MIME type to be exactly image/png for OS clipboard compatibility
+                  const pngBlob = previewBlob.type === 'image/png'
+                    ? previewBlob
+                    : new Blob([previewBlob], { type: 'image/png' })
+
+                  const item = new ClipboardItem({ 'image/png': pngBlob })
+                  navigator.clipboard.write([item])
+                    .then(() => {
+                      setCopied(true)
+                      setTimeout(() => setCopied(false), 2000)
+                    })
+                    .catch((err) => {
+                      console.error('Clipboard write failed:', err)
+                      alert('Failed to copy image: ' + err.message)
+                    })
+                } catch (err) {
+                  console.error('Clipboard Item creation failed:', err)
+                  alert('Copy not supported: ' + err.message)
                 }
               }} style={{
                 padding: '0.6rem 1.5rem', borderRadius: '10px', border: 'none',
-                background: '#c9a84c', color: '#1a1208', fontWeight: 700,
+                background: copied ? '#27ae60' : '#c9a84c',
+                color: copied ? '#ffffff' : '#1a1208',
+                fontWeight: 700,
                 fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit',
+                transition: 'background 0.2s, color 0.2s',
               }}>
-                Copy Image
+                {copied ? 'Copied! ✓' : 'Copy Image'}
               </button>
               <a href={previewImage} download="wisdom-card.png" style={{
                 padding: '0.6rem 1.5rem', borderRadius: '10px', border: 'none',
                 background: '#8a6a40', color: '#fcf6e8', fontWeight: 700,
                 fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'none', fontFamily: 'inherit',
-              }} onClick={() => setTimeout(() => { URL.revokeObjectURL(previewImage); setPreviewImage(null) }, 1000)}>
+              }} onClick={() => setTimeout(handleClosePreview, 1000)}>
                 Download
               </a>
-              <button onClick={() => { URL.revokeObjectURL(previewImage); setPreviewImage(null) }} style={{
+              <button onClick={handleClosePreview} style={{
                 padding: '0.6rem 1.5rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.3)',
                 background: 'transparent', color: '#fcf6e8', fontWeight: 600,
                 fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit',

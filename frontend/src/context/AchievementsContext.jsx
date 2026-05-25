@@ -18,7 +18,7 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "journalled_10_times",
     title: "Journalled 10 Times",
-    description: "Write 10 journal entries.",
+    description: "Write journal entries on 10 different days.",
     imageFilename: "journalled_10_times.png",
     category: "journaling",
     rarity: "Common",
@@ -36,11 +36,11 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "wisdom_seeker",
     title: "Wisdom Seeker",
-    description: "Read daily wisdom quotes 5 times.",
+    description: "Open and read from 3 different books in Wisdom Library.",
     imageFilename: "wisdom_seeker.png",
     category: "wisdom",
     rarity: "Common",
-    targetProgress: 5
+    targetProgress: 3
   },
   {
     badgeId: "cosmic_rhythm",
@@ -54,7 +54,7 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "sunrise_consistency",
     title: "Sunrise Consistency",
-    description: "Complete habit or breathing before 8 AM on 3 days.",
+    description: "Complete habit or breathing before 8 AM on 3 different days.",
     imageFilename: "sunrise_consistency.png",
     category: "rituals",
     rarity: "Uncommon",
@@ -63,11 +63,11 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "third_eye_open",
     title: "Third Eye Open",
-    description: "Open and read from 3 different books in Wisdom Library.",
+    description: "Read the wisdom section daily for 21 days.",
     imageFilename: "third_eye_open.png",
     category: "wisdom",
     rarity: "Rare",
-    targetProgress: 3
+    targetProgress: 21
   },
   {
     badgeId: "the_unshaken",
@@ -81,7 +81,7 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "Sankalpa_keeper",
     title: "Sankalpa Keeper",
-    description: "Commit to and fulfill Daily Sankalpa on 5 days.",
+    description: "Commit to and fulfill Daily Sankalpa on 5 different days.",
     imageFilename: "Sankalpa_keeper.png",
     category: "rituals",
     rarity: "Uncommon",
@@ -90,7 +90,7 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "calm_mind",
     title: "Calm Mind",
-    description: "Practice breathing exercises or meditation 5 times.",
+    description: "Practice breathing exercises or meditation on 5 different days.",
     imageFilename: "calm_mind.png",
     category: "wellness",
     rarity: "Common",
@@ -99,7 +99,7 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "daily_journaling_30_times",
     title: "Daily Reflection Sage",
-    description: "Write 30 daily journal entries.",
+    description: "Write daily journal entries on 30 different days.",
     imageFilename: "daily_journaling_30_times.png",
     category: "journaling",
     rarity: "Rare",
@@ -117,7 +117,7 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "focus_monk",
     title: "Focus Monk",
-    description: "Complete breathing portal sessions 10 times.",
+    description: "Complete breathing portal sessions on 10 different days.",
     imageFilename: "focus_monk.png",
     category: "wellness",
     rarity: "Uncommon",
@@ -126,7 +126,7 @@ const FRONTEND_DEFAULT_BADGES = [
   {
     badgeId: "midnight_reflector",
     title: "Midnight Reflector",
-    description: "Log a night reflection journal entry (after 9 PM) on 3 days.",
+    description: "Log a night reflection journal entry (after 9 PM) on 3 different days.",
     imageFilename: "midnight_reflector.png",
     category: "journaling",
     rarity: "Uncommon",
@@ -178,6 +178,7 @@ export function AchievementsProvider({ children }) {
   const [badges, setBadges] = useState([]);
   const [isGalleryOpen, setGalleryOpen] = useState(false);
   const [activeUnlockBadge, setActiveUnlockBadge] = useState(null);
+  const [isFreshUnlock, setIsFreshUnlock] = useState(false);
   const [toasts, setToasts] = useState([]);
   
   const isFetchingRef = useRef(false);
@@ -200,15 +201,13 @@ export function AchievementsProvider({ children }) {
         isFetchingRef.current = false;
       }
     } else {
-      // Guest mode: load local badges progress
-      const localProgress = Store.get('fwa_local_badges', {});
+      // Guest mode: load badges progress as fully locked (0 progress)
       const merged = FRONTEND_DEFAULT_BADGES.map(badge => {
-        const prog = localProgress[badge.badgeId] || {};
         return {
           ...badge,
-          progress: prog.progress || 0,
-          isUnlocked: prog.isUnlocked || false,
-          unlockedAt: prog.unlockedAt || null
+          progress: 0,
+          isUnlocked: false,
+          unlockedAt: null
         };
       });
       setBadges(merged);
@@ -248,12 +247,13 @@ export function AchievementsProvider({ children }) {
         // Sync stats one by one or trigger a server check
         async function syncStats() {
           try {
-            // Send track event for accumulated stats
-            if (localStats.wisdomCount) {
+            // Sync each unique wisdom date so server can compute streak properly
+            const wisdomDatesToSync = localStats.wisdomDates || [];
+            for (const dateStr of wisdomDatesToSync) {
               await fetch('/api/badges/track', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ actionType: 'wisdom_read', metadata: { count: localStats.wisdomCount } })
+                body: JSON.stringify({ actionType: 'wisdom_read', localDate: dateStr })
               });
             }
             if (localStats.breathingCount) {
@@ -280,8 +280,8 @@ export function AchievementsProvider({ children }) {
               }
             }
             // Clear local stats once synced
-            Store.remove('fwa_local_stats');
-            Store.remove('fwa_local_badges');
+            Store.del('fwa_local_stats');
+            Store.del('fwa_local_badges');
             triggerServerCheck();
           } catch (e) {
             console.error('Failed syncing local stats to backend:', e);
@@ -323,10 +323,11 @@ export function AchievementsProvider({ children }) {
 
   // Evaluate achievements locally (for guest users)
   const evaluateLocalAchievements = useCallback((actionType, metadata = {}) => {
+    const todayStr = getToday();
     const stats = Store.get('fwa_local_stats', {
       sankalpaCount: 0,
       breathingCount: 0,
-      wisdomCount: 0,
+      wisdomDates: [],
       booksOpened: [],
       sunriseActivities: 0,
       midnightJournals: 0
@@ -337,12 +338,16 @@ export function AchievementsProvider({ children }) {
 
     // 1. Process local stats increment
     if (actionType === 'wisdom_read') {
-      stats.wisdomCount = (stats.wisdomCount || 0) + 1;
+      // Track unique dates for wisdom streak
+      const wisdomDates = new Set(stats.wisdomDates || []);
+      wisdomDates.add(todayStr);
+      stats.wisdomDates = Array.from(wisdomDates);
     } else if (actionType === 'breathing_completed') {
       stats.breathingCount = (stats.breathingCount || 0) + 1;
     } else if (actionType === 'sankalpa_completed') {
       stats.sankalpaCount = (stats.sankalpaCount || 0) + 1;
     } else if (actionType === 'book_opened' && metadata.bookId) {
+      // Track unique books opened
       const books = new Set(stats.booksOpened || []);
       books.add(metadata.bookId);
       stats.booksOpened = Array.from(books);
@@ -389,15 +394,21 @@ export function AchievementsProvider({ children }) {
     const allActivityDates = new Set([...waterDates, ...habitDates, ...journalDates]);
     const maxCosmicStreak = computeMaxConsecutiveDaysLocal(allActivityDates);
 
-    // Metrics lookup
+    // Compute local wisdom streak
+    const wisdomDatesSet = new Set(stats.wisdomDates || []);
+    const maxWisdomStreakLocal = computeMaxConsecutiveDaysLocal(wisdomDatesSet);
+
+    // Metrics lookup — STRICTLY mapped to badge definitions:
+    // wisdom_seeker = 3 different books opened
+    // third_eye_open = 21 consecutive days reading wisdom section
     const metrics = {
       "3_day_streak": maxHabitStreak,
       "journalled_10_times": journalCount,
       "hydration_sage": waterSuccessDays,
-      "wisdom_seeker": stats.wisdomCount,
+      "wisdom_seeker": (stats.booksOpened || []).length,   // 3 unique books
       "cosmic_rhythm": maxCosmicStreak,
       "sunrise_consistency": stats.sunriseActivities,
-      "third_eye_open": stats.booksOpened.length,
+      "third_eye_open": maxWisdomStreakLocal,               // 21-day wisdom streak
       "the_unshaken": maxHabitStreak,
       "Sankalpa_keeper": stats.sankalpaCount,
       "calm_mind": stats.breathingCount,
@@ -414,10 +425,10 @@ export function AchievementsProvider({ children }) {
       { id: "3_day_streak", target: 3 },
       { id: "journalled_10_times", target: 10 },
       { id: "hydration_sage", target: 5 },
-      { id: "wisdom_seeker", target: 5 },
+      { id: "wisdom_seeker", target: 3 },    // 3 different books
       { id: "cosmic_rhythm", target: 7 },
       { id: "sunrise_consistency", target: 3 },
-      { id: "third_eye_open", target: 3 },
+      { id: "third_eye_open", target: 21 },  // 21-day wisdom reading streak
       { id: "the_unshaken", target: 10 },
       { id: "Sankalpa_keeper", target: 5 },
       { id: "calm_mind", target: 5 },
@@ -461,7 +472,11 @@ export function AchievementsProvider({ children }) {
 
   // Track event entry point (called by components)
   const trackEvent = useCallback(async (actionType, metadata = {}) => {
-    // Perform checks for sunrise/midnight on client side automatically based on clock
+    // Return early if not authenticated; guest mode does not unlock achievements
+    if (!isAuthenticated || !token) {
+      return;
+    }
+
     const currentHour = new Date().getHours();
     
     // Automatically trigger specific stats when related events happen
@@ -480,56 +495,49 @@ export function AchievementsProvider({ children }) {
       }
     }
 
-    // Call server track if authenticated
-    if (isAuthenticated && token) {
-      try {
-        // Log the main activity
-        const res = await fetch('/api/badges/track', {
+    try {
+      const todayStr = getToday();
+      // Log the main activity
+      const res = await fetch('/api/badges/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ actionType, metadata, localDate: todayStr })
+      });
+      
+      let allNewlyUnlocked = [];
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.newlyUnlocked && data.newlyUnlocked.length > 0) {
+          allNewlyUnlocked.push(...data.newlyUnlocked);
+        }
+      }
+
+      // Log secondary events like sunrise or midnight journals
+      for (const evt of additionalEvents) {
+        const subRes = await fetch('/api/badges/track', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ actionType, metadata })
+          body: JSON.stringify({ actionType: evt, localDate: todayStr })
         });
-        
-        let allNewlyUnlocked = [];
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.newlyUnlocked && data.newlyUnlocked.length > 0) {
-            allNewlyUnlocked.push(...data.newlyUnlocked);
+        if (subRes.ok) {
+          const subData = await subRes.json();
+          if (subData.newlyUnlocked && subData.newlyUnlocked.length > 0) {
+            allNewlyUnlocked.push(...subData.newlyUnlocked);
           }
         }
-
-        // Log secondary events like sunrise or midnight journals
-        for (const evt of additionalEvents) {
-          const subRes = await fetch('/api/badges/track', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ actionType: evt })
-          });
-          if (subRes.ok) {
-            const subData = await subRes.json();
-            if (subData.newlyUnlocked && subData.newlyUnlocked.length > 0) {
-              allNewlyUnlocked.push(...subData.newlyUnlocked);
-            }
-          }
-        }
-
-        if (allNewlyUnlocked.length > 0) {
-          showUnlockPopups(allNewlyUnlocked);
-        }
-
-        await loadBadges();
-      } catch (err) {
-        console.error('Failed to log tracked action to server:', err);
       }
-    } else {
-      // Local tracking evaluation
-      evaluateLocalAchievements(actionType, metadata);
-      for (const evt of additionalEvents) {
-        evaluateLocalAchievements(evt);
+
+      if (allNewlyUnlocked.length > 0) {
+        setIsFreshUnlock(true);
+        showUnlockPopups(allNewlyUnlocked);
       }
+
+      await loadBadges();
+    } catch (err) {
+      console.error('Failed to log tracked action to server:', err);
     }
-  }, [isAuthenticated, token, evaluateLocalAchievements, loadBadges]);
+  }, [isAuthenticated, token, loadBadges]);
 
   return (
     <AchievementsContext.Provider value={{
@@ -538,6 +546,8 @@ export function AchievementsProvider({ children }) {
       setGalleryOpen,
       activeUnlockBadge,
       setActiveUnlockBadge,
+      isFreshUnlock,
+      setIsFreshUnlock,
       toasts,
       removeToast,
       trackEvent,

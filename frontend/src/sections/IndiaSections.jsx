@@ -46,7 +46,7 @@ export default function IndiaSections() {
       <div style={sectionStyles.glow(dark)} aria-hidden />
 
       <motion.div variants={fadeUp(0)} initial="hidden" whileInView="show" viewport={{ once: true }}>
-        <SectionHeading eyebrow="भारत का गौरव" title="India's" accent="ancient greatness." accentColor="#d97706" />
+        <SectionHeading eyebrow="विरासत" title="Timeless" accent="rhythms of rest." accentColor="#d97706" />
       </motion.div>
       <OrnateDivider symbol="🪔" />
 

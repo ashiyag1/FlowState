@@ -5,10 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tarang‑FlowState — Your Wellness Dashboard</title>
   <meta name="description" content="Track hydration, build habits, journal your journey. Your calm corner for living with intention." />
+
+  <!-- DNS prefetch for font CDNs -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+  <link rel="dns-prefetch" href="https://fonts.cdnfonts.com" />
+
+  <!-- Preconnect for faster TLS handshake -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Cinzel&display=swap" rel="stylesheet">
+
+  <!--
+    Single consolidated Google Fonts request — all families in one URL.
+    Replaces the three separate @import calls that were blocking rendering.
+  -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Lexend:wght@300;400;500;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+Devanagari:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@200;300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Samarkan (CDN Fonts) — was previously injected by Navbar.jsx at runtime -->
+  <link href="https://fonts.cdnfonts.com/css/samarkan" rel="stylesheet" />
+
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 </head>
 <body>

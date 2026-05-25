@@ -15,7 +15,7 @@ const SLIDES = [
   {
     tag: 'Yoga & Meditation',
     title: 'Still the mind,\nfree the soul',
-    body: '20 minutes of yoga daily lowers cortisol by 33%, rewires the brain for calm, and sharpens focus. India gave this 5,000-year gift to the world.',
+    body: 'Yoga daily lowers stress hormones, rewires the brain for focus, and helps you stay present. India\'s timeless wellness gift to the world.',
     stat: '5,000',
     statLabel: 'years of Indian yoga wisdom',
     image: chaiImage,
@@ -23,7 +23,7 @@ const SLIDES = [
   {
     tag: 'Water & Prana',
     title: 'Water is life.\nPrana is water.',
-    body: 'Charaka Samhita called water the first medicine. Your brain is 75% water - 2% dehydration visibly shrinks focus, mood, and memory.',
+    body: 'Charaka Samhita called water the first medicine. Just 2% dehydration drops focus and mood. Keep your system hydrated and clear.',
     stat: '75%',
     statLabel: 'of your brain is water',
     image: sitarImage,
@@ -31,7 +31,7 @@ const SLIDES = [
   {
     tag: 'Sleep & Ayurveda',
     title: "Sleep is\nBrahma's reset",
-    body: 'Ancient Ayurveda named sleep (Nidra) as one of the three pillars of health. 7-9 hours nightly repairs DNA and extends life by measurable years.',
+    body: 'Ayurveda names sleep (Nidra) as a main pillar of life. Rest restores brain health, heals the body, and prepares your mind for the next day.',
     stat: '3x',
     statLabel: 'more productive with quality sleep',
     image: flute,
@@ -39,7 +39,7 @@ const SLIDES = [
   {
     tag: 'Movement & Prana',
     title: 'Body in motion,\nsoul in flow',
-    body: 'India invented Surya Namaskar - a complete mind-body workout woven into devotion. 30 minutes of daily movement cuts depression risk by 30%.',
+    body: 'Surya Namaskar blends movement with quiet devotion. Even brief daily physical activity cuts anxiety and restores your biological rhythm.',
     stat: '30 min',
     statLabel: 'changes everything',
     image: jaipurImage,
@@ -47,7 +47,7 @@ const SLIDES = [
   {
     tag: 'Naam Jaap',
     title: 'The vibration\nthat heals',
-    body: 'Repeating a sacred name - Ram, Om, Hare Krishna - activates the vagus nerve, lowers blood pressure, and synchronises brainwaves into meditative alpha.',
+    body: 'Repeating a calming sound, like Om or Ram, stimulates the vagus nerve, slows your heart rate, and shifts your brain waves to a relaxed alpha state.',
     stat: '108x',
     statLabel: 'the sacred count of jaap',
     image: jasmineImage,

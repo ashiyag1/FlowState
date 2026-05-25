@@ -11,11 +11,36 @@ import ProtectedRoute from './components/ProtectedRoute'
 import BadgeModal from './components/achievements/BadgeModal'
 import BadgeGallery from './components/achievements/BadgeGallery'
 import BadgeToast from './components/achievements/BadgeToast'
+import RetentionNudge from './components/RetentionNudge'
 import './styles/globals.css'
 import './styles/animations.css'
 import './styles/dashboard.css'
 import './styles/cards.css'
 import './styles/wisdom.css'
+
+/* Lightweight shimmer shown while a lazy page chunk is loading */
+function PageLoader() {
+  return (
+    <div style={{
+      minHeight: '60vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      gap: 16,
+    }}>
+      <div style={{
+        width: 40,
+        height: 40,
+        borderRadius: '50%',
+        border: '2.5px solid rgba(201, 147, 58, 0.18)',
+        borderTopColor: '#c9933a',
+        animation: 'spin 0.7s linear infinite',
+      }}/>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
 
 const Home        = lazy(() => import('./pages/Home'))
 const Water       = lazy(() => import('./pages/Water'))
@@ -45,7 +70,7 @@ export default function App() {
                 <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                   <ScrollReset />
                   <Navbar />
-                  <Suspense fallback={null}>
+                  <Suspense fallback={<PageLoader />}>
                     <Routes>
                       <Route path="/"        element={<Home />} />
                       <Route path="/water"   element={<Water />} />
@@ -63,6 +88,7 @@ export default function App() {
                   <BadgeModal />
                   <BadgeGallery />
                   <BadgeToast />
+                  <RetentionNudge />
                 </BrowserRouter>
               </SoundEffectsProvider>
             </AchievementsProvider>

@@ -46,47 +46,71 @@ router.get('/', async (req, res) => {
 // POST /api/badges/track — Track client activity and run achievements evaluation
 router.post('/track', async (req, res) => {
   try {
-    const { actionType, metadata } = req.body;
+    const { actionType, metadata, localDate: clientLocalDate } = req.body;
     const user = await dbFindUserById(req.userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    const localDate = clientLocalDate || new Date().toISOString().slice(0, 10);
     const currentStats = user.stats || {
-      sankalpaCount: 0,
-      breathingCount: 0,
-      wisdomCount: 0,
+      sankalpaDates: [],
+      breathingDates: [],
+      wisdomDates: [],
       booksOpened: [],
-      sunriseActivities: 0,
-      midnightJournals: 0
+      sunriseDates: [],
+      midnightJournalDates: []
     };
+
+    const sankalpaDates = Array.isArray(currentStats.sankalpaDates) ? currentStats.sankalpaDates : [];
+    const breathingDates = Array.isArray(currentStats.breathingDates) ? currentStats.breathingDates : [];
+    const wisdomDates = Array.isArray(currentStats.wisdomDates) ? currentStats.wisdomDates : [];
+    const booksOpened = Array.isArray(currentStats.booksOpened) ? currentStats.booksOpened : [];
+    const sunriseDates = Array.isArray(currentStats.sunriseDates) ? currentStats.sunriseDates : [];
+    const midnightJournalDates = Array.isArray(currentStats.midnightJournalDates) ? currentStats.midnightJournalDates : [];
 
     const statsUpdates = {};
     let shouldUpdate = false;
 
     // Handle activity logging
     if (actionType === 'wisdom_read') {
-      statsUpdates.wisdomCount = (currentStats.wisdomCount || 0) + 1;
-      shouldUpdate = true;
+      if (!wisdomDates.includes(localDate)) {
+        wisdomDates.push(localDate);
+        statsUpdates.wisdomDates = wisdomDates;
+        shouldUpdate = true;
+      }
     } else if (actionType === 'breathing_completed') {
-      statsUpdates.breathingCount = (currentStats.breathingCount || 0) + 1;
-      shouldUpdate = true;
+      if (!breathingDates.includes(localDate)) {
+        breathingDates.push(localDate);
+        statsUpdates.breathingDates = breathingDates;
+        shouldUpdate = true;
+      }
     } else if (actionType === 'sankalpa_completed') {
-      statsUpdates.sankalpaCount = (currentStats.sankalpaCount || 0) + 1;
-      shouldUpdate = true;
-    } else if (actionType === 'book_opened' && metadata?.bookId) {
-      const opened = new Set(currentStats.booksOpened || []);
-      if (!opened.has(metadata.bookId)) {
-        opened.add(metadata.bookId);
-        statsUpdates.booksOpened = Array.from(opened);
+      if (!sankalpaDates.includes(localDate)) {
+        sankalpaDates.push(localDate);
+        statsUpdates.sankalpaDates = sankalpaDates;
+        shouldUpdate = true;
+      }
+    } else if (actionType === 'book_opened' && metadata?.bookId !== undefined) {
+      const bookId = String(metadata.bookId);
+      const normalizedBooks = booksOpened.map(String);
+      if (!normalizedBooks.includes(bookId)) {
+        booksOpened.push(bookId);
+        statsUpdates.booksOpened = booksOpened;
         shouldUpdate = true;
       }
     } else if (actionType === 'sunrise_activity') {
-      statsUpdates.sunriseActivities = (currentStats.sunriseActivities || 0) + 1;
-      shouldUpdate = true;
+      if (!sunriseDates.includes(localDate)) {
+        sunriseDates.push(localDate);
+        statsUpdates.sunriseDates = sunriseDates;
+        shouldUpdate = true;
+      }
     } else if (actionType === 'midnight_journal') {
-      statsUpdates.midnightJournals = (currentStats.midnightJournals || 0) + 1;
-      shouldUpdate = true;
+      if (!midnightJournalDates.includes(localDate)) {
+        midnightJournalDates.push(localDate);
+        statsUpdates.midnightJournalDates = midnightJournalDates;
+        shouldUpdate = true;
+      }
     }
 
     if (shouldUpdate) {

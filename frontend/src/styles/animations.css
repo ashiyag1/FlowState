@@ -34,19 +34,40 @@
   }
 }
 
+/* ── Navbar logo float (moved from Navbar.jsx runtime style injection) ── */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+
+.nb-float {
+  animation: floatY 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── GPU compositing hints ─────────────────────────────────────────────── */
+/*
+  Promoting animated elements to their own compositor layer prevents the
+  browser from repainting the rest of the page on every animation frame,
+  which is the main cause of scroll jank and animation stuttering.
+*/
+
 .fs-petal {
   position: absolute;
   pointer-events: none;
   border-radius: 60% 40% 60% 40% / 60% 60% 40% 40%;
   animation: petalFall linear infinite;
+  will-change: transform, opacity;
 }
 
 .fs-mandala-spin {
   animation: slowSpin 70s linear infinite;
+  will-change: transform;
 }
 
 .fs-glow {
   animation: glowPulse 2.8s ease-in-out infinite;
+  will-change: opacity;
 }
 
 @keyframes flameFlicker {
@@ -60,6 +81,7 @@
 .fs-diya-flicker {
   animation: flameFlicker 1.8s ease-in-out infinite;
   transform-origin: 29px 34px; /* matches center wick position in DiyaLamp.jsx */
+  will-change: transform, filter;
 }
 
 @keyframes breathExpand {
@@ -70,4 +92,21 @@
 
 .fs-breath-aura {
   animation: breathExpand 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
+  will-change: transform, opacity, box-shadow;
+}
+
+.fs-diya-flame-group {
+  transform-origin: 29px 34px;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), filter 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform, filter;
+}
+
+.fs-diya-lamp:hover .fs-diya-flame-group {
+  transform: scale(1.18);
+  filter: drop-shadow(0 0 10px rgba(255, 200, 80, 0.75)) brightness(1.15);
+}
+
+.fs-diya-lamp:hover .fs-diya-flicker {
+  animation-duration: 2.8s;
+}
+

@@ -11,6 +11,9 @@ import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useNotif } from '../components/NotificationPopup'
 import PageLayout from '../components/PageLayout'
 import { useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
+import { useWellness } from '../context/WellnessContext'
+import { computeArchetype, computeWellnessScore } from '../utils/soulArchetype'
 
 /* ── Animation Variants ── */
 const stagger = {
@@ -204,8 +207,34 @@ export default function ProfilePage() {
   const { user, setUser, updateProfile, updateAvatar, changePassword, deleteAccount, logout } = useAuth()
   const { dark, toggle } = useTheme()
   const { isMuted, toggleMute } = useSoundEffects()
+  const { journal, habitDone, habits, todayTotal, waterGoal } = useWellness()
   const notif = useNotif()
   const navigate = useNavigate()
+
+  // Archetype + wellness score
+  const { archetype } = useMemo(() => computeArchetype(journal), [journal])
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const habitsCompletedToday = Object.keys(habitDone[todayStr] || {}).length
+  const journalStreak = useMemo(() => {
+    const dates = [...new Set(journal.map(e => e.date))].sort().reverse()
+    let count = 0
+    const todayDate = new Date()
+    for (let i = 0; i < dates.length; i++) {
+      const d = new Date(todayDate)
+      d.setDate(d.getDate() - i)
+      if (dates[i] === d.toISOString().slice(0, 10)) count++
+      else break
+    }
+    return count
+  }, [journal])
+  const waterPct = waterGoal > 0 ? Math.min(todayTotal / waterGoal, 1) : 0
+  const wellnessScore = useMemo(() => computeWellnessScore({
+    journalStreak,
+    totalJournalEntries: journal.length,
+    habitsCompletedToday,
+    totalHabits: habits.length,
+    waterPct,
+  }), [journalStreak, journal.length, habitsCompletedToday, habits.length, waterPct])
 
   // Local form state
   const [editingName, setEditingName] = useState(false)
@@ -251,6 +280,16 @@ export default function ProfilePage() {
   const handleAvatarChange = useCallback(async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
+
+    // Validation for JPG, JPEG, and PNG formats
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+    const fileExt = file.name.split('.').pop().toLowerCase()
+    const allowedExts = ['jpg', 'jpeg', 'png']
+    if (!allowedTypes.includes(file.type) && !allowedExts.includes(fileExt)) {
+      notif('Only JPG, JPEG, and PNG files are allowed', 'error')
+      return
+    }
+
     if (file.size > 5 * 1024 * 1024) {
       notif('Image too large — max 5MB', 'error')
       return
@@ -269,6 +308,20 @@ export default function ProfilePage() {
     }
     reader.readAsDataURL(file)
   }, [updateAvatar, notif, setUser])
+
+  const handleRemoveAvatar = useCallback(async () => {
+    const oldAvatar = user?.avatar || ''
+    // Optimistic update
+    setUser(prev => ({ ...prev, avatar: '' }))
+    const res = await updateAvatar('')
+    if (res.success) {
+      notif('Avatar removed ✦', 'success')
+    } else {
+      notif(res.error || 'Failed to remove avatar', 'error')
+      // Revert on failure
+      setUser(prev => ({ ...prev, avatar: oldAvatar }))
+    }
+  }, [updateAvatar, notif, setUser, user?.avatar])
 
   const handleNameSave = useCallback(async () => {
     setEditingName(false)
@@ -435,10 +488,25 @@ export default function ProfilePage() {
                   }}
                 />
 
+                {user?.avatar && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleRemoveAvatar}
+                    className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-white dark:bg-[#1a0f06] border border-gold/30 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 shadow-md z-10 flex items-center justify-center cursor-pointer"
+                    title="Remove Photo"
+                  >
+                    <Trash2 size={13} />
+                  </motion.button>
+                )}
+
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/png, image/jpeg, image/jpg"
                   className="hidden"
                   onChange={handleAvatarChange}
                 />
@@ -506,6 +574,98 @@ export default function ProfilePage() {
                   className={`${inputBase} resize-none`}
                   style={{ fontFamily: "'Lora', serif", fontStyle: 'italic', lineHeight: 1.7 }}
                 />
+              </div>
+            </div>
+          </SectionCard>
+
+          <GoldDivider />
+
+          {/* ═══════════ SOUL ARCHETYPE + WELLNESS SCORE ═══════════ */}
+          <SectionCard>
+            <SectionTitle>Soul Identity</SectionTitle>
+            {/* Archetype display */}
+            <div style={{
+              padding: '1.1rem 1.4rem',
+              borderRadius: 16,
+              background: `linear-gradient(135deg, ${archetype.gradient.replace('linear-gradient(135deg,', '').replace(')', '')}20, transparent)`,
+              border: `1px solid ${archetype.color}30`,
+              marginBottom: '1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+            }}>
+              <motion.span
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ fontSize: 36, filter: `drop-shadow(0 0 12px ${archetype.glow})` }}
+              >
+                {archetype.emoji}
+              </motion.span>
+              <div style={{ flex: 1 }}>
+                <p className="text-[9px] text-gold/60 uppercase tracking-[0.16em] font-bold font-sans" style={{ marginBottom: 2 }}>Your Soul Type</p>
+                <p className="text-xl font-bold" style={{
+                  fontFamily: "'Playfair Display', serif",
+                  background: archetype.gradient,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}>{archetype.id}</p>
+                <p className="text-xs italic text-ink/60 dark:text-sand-lt/60" style={{ fontFamily: "'Lora', serif", marginTop: 2 }}>
+                  {archetype.tagline}
+                </p>
+                <p className="text-[10px] text-ink/50 dark:text-sand-lt/40 mt-1" style={{ fontFamily: "'Lora', serif", fontStyle: 'italic', lineHeight: 1.5 }}>
+                  {archetype.desc}
+                </p>
+              </div>
+            </div>
+
+            {/* Wellness Score */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <p className="text-[10px] text-gold/60 uppercase tracking-widest font-bold font-sans">Wellness Score</p>
+                <p style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '1.4rem',
+                  fontWeight: 700,
+                  background: wellnessScore >= 70 ? 'linear-gradient(90deg, #34d399, #10b981)'
+                    : wellnessScore >= 40 ? 'linear-gradient(90deg, #c9933a, #e8b96a)'
+                    : 'linear-gradient(90deg, #94a3b8, #64748b)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  margin: 0,
+                }}>{wellnessScore}<span style={{ fontSize: '0.65rem', opacity: 0.5 }}>/100</span></p>
+              </div>
+              <div style={{ height: 6, borderRadius: 999, background: 'rgba(201,168,76,0.1)', overflow: 'hidden' }}>
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${wellnessScore}%` }}
+                  transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
+                  style={{
+                    height: '100%', borderRadius: 999,
+                    background: wellnessScore >= 70 ? 'linear-gradient(90deg, #34d399, #10b981)'
+                      : wellnessScore >= 40 ? 'linear-gradient(90deg, #c9933a, #e8b96a)'
+                      : 'linear-gradient(90deg, #94a3b8, #64748b)',
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: 10, flexWrap: 'wrap' }}>
+                {[
+                  { label: '🔥 Streak', value: `${journalStreak}d` },
+                  { label: '📖 Entries', value: journal.length },
+                  { label: '🌿 Rituals', value: `${habitsCompletedToday}/${habits.length}` },
+                  { label: '💧 Hydration', value: `${Math.round(waterPct * 100)}%` },
+                ].map(stat => (
+                  <div key={stat.label} style={{
+                    flex: '1 1 60px',
+                    padding: '6px 10px',
+                    borderRadius: 10,
+                    background: 'rgba(201,168,76,0.06)',
+                    border: '1px solid rgba(201,168,76,0.12)',
+                    textAlign: 'center',
+                  }}>
+                    <p style={{ fontFamily: "'Cinzel', serif", fontSize: '0.58rem', color: 'rgba(201,168,76,0.6)', margin: 0, letterSpacing: '0.06em' }}>{stat.label}</p>
+                    <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '0.95rem', fontWeight: 700, margin: '2px 0 0', color: dark ? '#f5e6c8' : '#2d1f0e' }}>{stat.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </SectionCard>

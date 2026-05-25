@@ -14,6 +14,8 @@ import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useNavigate } from 'react-router-dom'
 import { useAchievements } from '../context/AchievementsContext'
 import { getHinduDetails, getScientificInsights } from '../utils/hinduCalendar'
+import { getEmotionalReflection } from '../utils/emotionalMemory'
+import { computeArchetype } from '../utils/soulArchetype'
 import LotusFlower from '../icons/LotusFlower'
 import DiyaLamp from '../icons/DiyaLamp'
 import PageLayout from '../components/PageLayout'
@@ -98,13 +100,14 @@ function MoonIllustration({ phasePercent }) {
 }
 
 export default function Journal() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, token } = useAuth()
   const navigate = useNavigate()
   const { dark } = useTheme()
   const notif = useNotif()
   const td = today()
-  const { journal: entries, addEntry: addWellnessEntry, deleteEntry: deleteWellnessEntry } = useWellness()
+  const { journal: entries, addEntry: addWellnessEntry, deleteEntry: deleteWellnessEntry, habitDone } = useWellness()
   const { trackEvent } = useAchievements()
+  const reflection = useMemo(() => getEmotionalReflection(entries, habitDone), [entries, habitDone])
   const { startWisdomAmbience, stopWisdomAmbience, isMuted } = useSoundEffects()
 
   const [text, setText] = useState('')
@@ -121,6 +124,19 @@ export default function Journal() {
   const [isBreathing, setIsBreathing] = useState(false)
   const [breathState, setBreathState] = useState('idle') 
   const [breathTimer, setBreathTimer] = useState(4)
+
+  // Mood trend data from backend
+  const [moodTrends, setMoodTrends] = useState(null)
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) return
+    fetch('/api/journal/mood-trends', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setMoodTrends(data) })
+      .catch(() => {})
+  }, [isAuthenticated, token, entries])
 
   const textareaRef = useRef(null)
 
@@ -387,6 +403,11 @@ export default function Journal() {
                 <p className="text-[10px] text-[#5c3b17]/50 dark:text-ivory/50 mt-1 font-light font-mono">
                   Tune into your heart. There is no right or wrong here.
                 </p>
+                <div className="mt-2.5 p-2.5 rounded-xl border border-gold/15 bg-white/25 dark:bg-black/20 text-left">
+                  <p className="text-[11px] font-serif italic text-sandalwood dark:text-gold-lt leading-relaxed">
+                    "{reflection.message}"
+                  </p>
+                </div>
 
                 {/* Mood selector pills */}
                 <div className="flex flex-wrap gap-1.5 mt-3.5 pb-2">
@@ -580,6 +601,176 @@ export default function Journal() {
           </div>
 
         </div>
+
+        {/* ── MOOD ANALYTICS SECTION ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-8 flex flex-col gap-5"
+        >
+          {/* Streak celebration banner */}
+          {streak >= 3 && (
+            <motion.div
+              initial={{ scale: 0.97, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="journal-glass p-4 border border-gold/30 flex items-center gap-4 relative overflow-hidden"
+            >
+              <div className="absolute inset-0 pointer-events-none" style={{
+                background: 'radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.08) 0%, transparent 60%)'
+              }} />
+              <motion.span
+                animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ fontSize: 28 }}
+              >🔥</motion.span>
+              <div>
+                <p className="font-display text-sm text-ivory font-bold">
+                  {streak}-Day Reflection Streak!
+                </p>
+                <p className="text-[11px] text-ivory/60 font-light mt-0.5">
+                  {streak >= 7 ? 'You\'re on fire. The mind remembers what you nurture.' :
+                   streak >= 5 ? 'Beautiful consistency — your inner world is listening.' :
+                   'Keep going — even 3 days changes the neural pattern.'}
+                </p>
+              </div>
+              <div className="ml-auto shrink-0 text-right">
+                <p className="text-[9px] text-gold/60 uppercase tracking-widest font-bold">Consecutive</p>
+                <p className="font-display text-2xl text-gold font-bold">{streak}</p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* 7-Day Mood Sparkline */}
+          {moodTrends && moodTrends.sevenDayMoods && (() => {
+            const MOOD_COLORS = {
+              Grateful: '#f472b6', Calm: '#60a5fa', Energized: '#fbbf24',
+              Reflective: '#a78bfa', Happy: '#34d399', Tired: '#9ca3af'
+            }
+            const days = moodTrends.sevenDayMoods
+            const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+            return (
+              <div className="journal-glass p-5 border border-gold/20">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-display text-sm text-ivory flex items-center gap-2 font-semibold">
+                    📊 7-Day Mood Pulse
+                  </h3>
+                  {moodTrends.topMood && (
+                    <span className="text-[9px] text-gold-lt/60 uppercase tracking-wider font-bold">
+                      Most felt: {moodTrends.topMood}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-end justify-between gap-1 h-16 px-2">
+                  {days.map((d, i) => {
+                    const color = d.mood ? (MOOD_COLORS[d.mood] || '#c9933a') : 'rgba(201,168,76,0.1)'
+                    const height = d.mood ? Math.max(30, 40 + (Object.keys(MOOD_COLORS).indexOf(d.mood) * 8)) : 10
+                    const dateObj = new Date(d.date)
+                    const label = dayLabels[dateObj.getDay()]
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-1.5 flex-1" title={d.mood || 'No entry'}>
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height }}
+                          transition={{ duration: 0.6, delay: i * 0.08, ease: 'easeOut' }}
+                          style={{ background: color, borderRadius: 4, width: '100%', minHeight: 4 }}
+                        />
+                        <span className="text-[8px] text-ivory/40 font-mono">{label}</span>
+                        {d.mood && (
+                          <span style={{ fontSize: 9, color, opacity: 0.8 }}>
+                            {d.mood === 'Grateful' ? '❤️' : d.mood === 'Calm' ? '🌊' :
+                             d.mood === 'Energized' ? '☀️' : d.mood === 'Reflective' ? '🌙' :
+                             d.mood === 'Happy' ? '🌸' : d.mood === 'Tired' ? '☁️' : '·'}
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* Mood Heatmap Calendar (last 28 days) */}
+          {moodTrends && moodTrends.heatmap && (() => {
+            const MOOD_COLORS = {
+              Grateful: '#f472b6', Calm: '#60a5fa', Energized: '#fbbf24',
+              Reflective: '#a78bfa', Happy: '#34d399', Tired: '#9ca3af', none: 'rgba(201,168,76,0.12)'
+            }
+            const cells = []
+            for (let i = 27; i >= 0; i--) {
+              const d = new Date()
+              d.setDate(d.getDate() - i)
+              const ds = d.toISOString().slice(0, 10)
+              const entry = moodTrends.heatmap[ds]
+              cells.push({ date: ds, mood: entry?.mood || null, count: entry?.count || 0 })
+            }
+            return (
+              <div className="journal-glass p-5 border border-gold/20">
+                <h3 className="font-display text-sm text-ivory font-semibold mb-4 flex items-center gap-2">
+                  🗓️ 28-Day Mood Map
+                  <span className="text-[9px] text-ivory/40 font-sans font-normal normal-case">hover for details</span>
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+                  {cells.map((c, i) => (
+                    <motion.div
+                      key={i}
+                      whileHover={{ scale: 1.2 }}
+                      title={c.mood ? `${c.date}: ${c.mood} (${c.count} entries)` : `${c.date}: No journal`}
+                      style={{
+                        aspectRatio: '1',
+                        borderRadius: 4,
+                        background: c.mood ? (MOOD_COLORS[c.mood] || 'rgba(201,168,76,0.15)') : 'rgba(255,255,255,0.04)',
+                        border: c.count > 0 ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.04)',
+                        opacity: c.count > 0 ? 0.85 : 0.35,
+                        cursor: c.count > 0 ? 'pointer' : 'default',
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {Object.entries(MOOD_COLORS).filter(([k]) => k !== 'none').map(([mood, color]) => (
+                    <div key={mood} className="flex items-center gap-1">
+                      <div style={{ width: 8, height: 8, borderRadius: 2, background: color, opacity: 0.8 }} />
+                      <span className="text-[9px] text-ivory/50">{mood}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* Emotional Pattern Insight */}
+          {moodTrends && moodTrends.topMood && (() => {
+            const { archetype } = computeArchetype(entries)
+            const insightMap = {
+              Reflective: 'You tend to sit with your thoughts more than most. That\'s not overthinking — that\'s depth.',
+              Tired: 'Your body is speaking. Rest isn\'t giving up — it\'s the most radical act of self-love.',
+              Calm: 'Stillness is your superpower. You carry peace that others are still searching for.',
+              Energized: 'Your energy is contagious. Channel it — you\'re capable of more than you realise.',
+              Grateful: 'Gratitude is rare. You\'ve trained your brain to notice what most people overlook.',
+              Happy: 'You let yourself feel joy — and that takes more courage than most admit.',
+            }
+            const insight = insightMap[moodTrends.topMood]
+            if (!insight) return null
+            return (
+              <div className="journal-glass p-5 border border-gold/20 flex items-start gap-4">
+                <span style={{ fontSize: 22, flexShrink: 0 }}>{archetype.emoji}</span>
+                <div>
+                  <p className="text-[9px] text-gold/60 uppercase tracking-widest font-bold font-sans mb-1.5">
+                    Emotional Pattern · {moodTrends.topMood} Soul
+                  </p>
+                  <p className="text-xs text-ivory/80 font-serif italic leading-relaxed">
+                    "{insight}"
+                  </p>
+                  <p className="text-[9px] text-ivory/40 mt-2 font-mono">
+                    Based on {moodTrends.totalEntries} journal entries
+                  </p>
+                </div>
+              </div>
+            )
+          })()}
+        </motion.div>
 
         {/* ── PAST JOURNAL ENTRIES LIST ── */}
         <motion.div

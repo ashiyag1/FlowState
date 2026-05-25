@@ -16,7 +16,7 @@ export default function HeroHeader({ searchQuery, setSearchQuery }) {
         >
           Wisdom & <em className="not-italic text-gold dark:text-gold/90" style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic' }}>Insights</em>
         </h1>
-        <p className="text-xs sm:text-sm text-mist-dark dark:text-ocean-lt/60 italic font-serif mt-1">
+        <p className="text-xs sm:text-sm text-mist-dark dark:text-sand-lt/70 italic font-serif mt-1">
           Explore scriptures, find counsel for life issues, and track your spiritual growth.
         </p>
       </div>
@@ -27,7 +27,7 @@ export default function HeroHeader({ searchQuery, setSearchQuery }) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search scriptures, issues, topics..."
-          className="bg-transparent border-none outline-none text-sm text-ink dark:text-ivory w-full placeholder:text-mist-dark/50 dark:placeholder:text-ocean-lt/30 font-medium"
+          className="bg-transparent border-none outline-none text-sm text-ink dark:text-ivory w-full placeholder:text-mist-dark/50 dark:placeholder:text-sand-lt/35 font-medium"
         />
         {searchQuery ? (
           <button
@@ -38,7 +38,7 @@ export default function HeroHeader({ searchQuery, setSearchQuery }) {
             ✕
           </button>
         ) : (
-          <span className="text-[9px] font-bold text-mist-dark/40 dark:text-ocean-lt/30 px-1.5 py-0.5 bg-black/5 dark:bg-white/5 rounded-md font-mono select-none">
+          <span className="text-[9px] font-bold text-mist-dark/40 dark:text-sand-lt/35 px-1.5 py-0.5 bg-black/5 dark:bg-white/5 rounded-md font-mono select-none">
             ⌘K
           </span>
         )}

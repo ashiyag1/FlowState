@@ -1,10 +1,12 @@
 import mongoose from 'mongoose'
 import fs from 'fs/promises'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 const MONGODB_URI = process.env.MONGODB_URI
-const IS_MONGO = !!MONGODB_URI
-const JSON_DB_PATH = path.join(process.cwd(), 'db.json')
+let IS_MONGO = !!MONGODB_URI
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const JSON_DB_PATH = path.join(__dirname, 'db.json')
 
 // ── HELPER: compute habit streak for a user ──────────────
 function computeStreakFromDone(done) {
@@ -52,12 +54,12 @@ const UserSchema = new mongoose.Schema({
     notificationsEnabled: { type: Boolean, default: true }
   },
   stats: {
-    sankalpaCount: { type: Number, default: 0 },
-    breathingCount: { type: Number, default: 0 },
-    wisdomCount: { type: Number, default: 0 },
+    sankalpaDates: { type: [String], default: [] },
+    breathingDates: { type: [String], default: [] },
+    wisdomDates: { type: [String], default: [] },
     booksOpened: { type: [String], default: [] },
-    sunriseActivities: { type: Number, default: 0 },
-    midnightJournals: { type: Number, default: 0 }
+    sunriseDates: { type: [String], default: [] },
+    midnightJournalDates: { type: [String], default: [] }
   }
 })
 
@@ -108,6 +110,8 @@ const UserBadgeSchema = new mongoose.Schema({
   unlockedAt: { type: Date }
 })
 UserBadgeSchema.index({ userId: 1, badgeId: 1 }, { unique: true })
+JournalEntrySchema.index({ userId: 1, createdAt: -1 })
+HabitSchema.index({ userId: 1 })
 
 let User, WaterLog, Habit, HabitDone, JournalEntry, Badge, UserBadge
 
@@ -137,7 +141,7 @@ const DEFAULT_BADGES = [
   {
     badgeId: "journalled_10_times",
     title: "Journalled 10 Times",
-    description: "Write 10 journal entries.",
+    description: "Write journal entries on 10 different days.",
     imageFilename: "journalled_10_times.png",
     category: "journaling",
     rarity: "Common",
@@ -155,11 +159,11 @@ const DEFAULT_BADGES = [
   {
     badgeId: "wisdom_seeker",
     title: "Wisdom Seeker",
-    description: "Read daily wisdom quotes 5 times.",
+    description: "Open and read from 3 different books in Wisdom Library.",
     imageFilename: "wisdom_seeker.png",
     category: "wisdom",
     rarity: "Common",
-    targetProgress: 5
+    targetProgress: 3
   },
   {
     badgeId: "cosmic_rhythm",
@@ -173,7 +177,7 @@ const DEFAULT_BADGES = [
   {
     badgeId: "sunrise_consistency",
     title: "Sunrise Consistency",
-    description: "Complete habit or breathing before 8 AM on 3 days.",
+    description: "Complete habit or breathing before 8 AM on 3 different days.",
     imageFilename: "sunrise_consistency.png",
     category: "rituals",
     rarity: "Uncommon",
@@ -182,11 +186,11 @@ const DEFAULT_BADGES = [
   {
     badgeId: "third_eye_open",
     title: "Third Eye Open",
-    description: "Open and read from 3 different books in Wisdom Library.",
+    description: "Read the wisdom section daily for 21 days.",
     imageFilename: "third_eye_open.png",
     category: "wisdom",
     rarity: "Rare",
-    targetProgress: 3
+    targetProgress: 21
   },
   {
     badgeId: "the_unshaken",
@@ -200,7 +204,7 @@ const DEFAULT_BADGES = [
   {
     badgeId: "Sankalpa_keeper",
     title: "Sankalpa Keeper",
-    description: "Commit to and fulfill Daily Sankalpa on 5 days.",
+    description: "Commit to and fulfill Daily Sankalpa on 5 different days.",
     imageFilename: "Sankalpa_keeper.png",
     category: "rituals",
     rarity: "Uncommon",
@@ -209,7 +213,7 @@ const DEFAULT_BADGES = [
   {
     badgeId: "calm_mind",
     title: "Calm Mind",
-    description: "Practice breathing exercises or meditation 5 times.",
+    description: "Practice breathing exercises or meditation on 5 different days.",
     imageFilename: "calm_mind.png",
     category: "wellness",
     rarity: "Common",
@@ -218,7 +222,7 @@ const DEFAULT_BADGES = [
   {
     badgeId: "daily_journaling_30_times",
     title: "Daily Reflection Sage",
-    description: "Write 30 daily journal entries.",
+    description: "Write daily journal entries on 30 different days.",
     imageFilename: "daily_journaling_30_times.png",
     category: "journaling",
     rarity: "Rare",
@@ -236,7 +240,7 @@ const DEFAULT_BADGES = [
   {
     badgeId: "focus_monk",
     title: "Focus Monk",
-    description: "Complete breathing portal sessions 10 times.",
+    description: "Complete breathing portal sessions on 10 different days.",
     imageFilename: "focus_monk.png",
     category: "wellness",
     rarity: "Uncommon",
@@ -245,7 +249,7 @@ const DEFAULT_BADGES = [
   {
     badgeId: "midnight_reflector",
     title: "Midnight Reflector",
-    description: "Log a night reflection journal entry (after 9 PM) on 3 days.",
+    description: "Log a night reflection journal entry (after 9 PM) on 3 different days.",
     imageFilename: "midnight_reflector.png",
     category: "journaling",
     rarity: "Uncommon",
@@ -255,6 +259,8 @@ const DEFAULT_BADGES = [
 export { DEFAULT_BADGES }
 
 // ── CONNECT FUNCTION ────────────────────────────────────
+let jsonDbInitialized = false
+
 export async function connectDB() {
   if (IS_MONGO) {
     if (mongoose.connection.readyState >= 1) return
@@ -262,35 +268,35 @@ export async function connectDB() {
       await mongoose.connect(MONGODB_URI)
       console.log('MongoDB connected successfully')
       
-      // Seed default badges
-      const count = await Badge.countDocuments()
-      if (count === 0) {
-        await Badge.insertMany(DEFAULT_BADGES)
-        console.log('Default badges seeded in MongoDB')
+      // Update/sync default badges in MongoDB
+      for (const badge of DEFAULT_BADGES) {
+        await Badge.findOneAndUpdate(
+          { badgeId: badge.badgeId },
+          { $set: badge },
+          { upsert: true }
+        )
       }
+      console.log('Default badges synchronized in MongoDB')
     } catch (err) {
-      console.error('MongoDB connection error:', err)
-      throw err
+      console.error('MongoDB connection error — falling back to JSON file database:', err)
+      IS_MONGO = false
+      // fall through to JSON file mode below
     }
-  } else {
+  }
+  if (!IS_MONGO) {
+    // JSON-based local DB — only initialize once per server process
+    if (jsonDbInitialized) return
+    jsonDbInitialized = true
+    let fileExists = false
     try {
       await fs.access(JSON_DB_PATH)
-      const data = await fs.readFile(JSON_DB_PATH, 'utf-8')
-      const db = JSON.parse(data)
-      let updated = false
-      if (!db.badges || db.badges.length === 0) {
-        db.badges = DEFAULT_BADGES
-        updated = true
-      }
-      if (!db.userBadges) {
-        db.userBadges = []
-        updated = true
-      }
-      if (updated) {
-        await fs.writeFile(JSON_DB_PATH, JSON.stringify(db, null, 2))
-        console.log('Local JSON database badges initialized')
-      }
+      fileExists = true
     } catch {
+      fileExists = false
+    }
+
+    if (!fileExists) {
+      // File does not exist — create fresh empty database
       const initialDb = {
         users: [],
         waterLogs: {},
@@ -303,6 +309,59 @@ export async function connectDB() {
       }
       await fs.writeFile(JSON_DB_PATH, JSON.stringify(initialDb, null, 2))
       console.log('Local JSON database initialized at:', JSON_DB_PATH)
+    } else {
+      // File exists — read, migrate schema, and sync badge definitions
+      try {
+        const data = await fs.readFile(JSON_DB_PATH, 'utf-8')
+        const db = JSON.parse(data)
+        let updated = false
+
+        // Always sync latest badge definitions (targets, descriptions)
+        db.badges = DEFAULT_BADGES
+        updated = true
+
+        if (!db.userBadges) { db.userBadges = []; updated = true }
+
+        // Migrate users with old number-based stats to new date-array schema
+        for (const user of (db.users || [])) {
+          if (!user.stats) {
+            user.stats = { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [] }
+            updated = true
+          } else {
+            let m = false
+            if (typeof user.stats.wisdomCount === 'number') { delete user.stats.wisdomCount; m = true }
+            if (typeof user.stats.breathingCount === 'number') { delete user.stats.breathingCount; m = true }
+            if (typeof user.stats.sankalpaCount === 'number') { delete user.stats.sankalpaCount; m = true }
+            if (typeof user.stats.sunriseActivities === 'number') { delete user.stats.sunriseActivities; m = true }
+            if (typeof user.stats.midnightJournals === 'number') { delete user.stats.midnightJournals; m = true }
+            if (!Array.isArray(user.stats.sankalpaDates)) { user.stats.sankalpaDates = []; m = true }
+            if (!Array.isArray(user.stats.breathingDates)) { user.stats.breathingDates = []; m = true }
+            if (!Array.isArray(user.stats.wisdomDates)) { user.stats.wisdomDates = []; m = true }
+            if (!Array.isArray(user.stats.booksOpened)) { user.stats.booksOpened = []; m = true }
+            if (!Array.isArray(user.stats.sunriseDates)) { user.stats.sunriseDates = []; m = true }
+            if (!Array.isArray(user.stats.midnightJournalDates)) { user.stats.midnightJournalDates = []; m = true }
+            if (m) updated = true
+          }
+        }
+
+        // Reset any userBadges that were unlocked with wrong targets
+        for (const ub of (db.userBadges || [])) {
+          if (ub.badgeId === 'third_eye_open' && ub.targetProgress !== 21) {
+            ub.targetProgress = 21; ub.progress = 0; ub.isUnlocked = false; delete ub.unlockedAt; updated = true
+          }
+          if (ub.badgeId === 'wisdom_seeker' && ub.targetProgress !== 3) {
+            ub.targetProgress = 3; ub.progress = 0; ub.isUnlocked = false; delete ub.unlockedAt; updated = true
+          }
+        }
+
+        if (updated) {
+          await fs.writeFile(JSON_DB_PATH, JSON.stringify(db, null, 2))
+          console.log('Local JSON database synced and migrated successfully')
+        }
+      } catch (parseErr) {
+        console.error('WARNING: db.json could not be parsed — file preserved as-is:', parseErr.message)
+        // Do NOT overwrite the file — preserve data for manual recovery
+      }
     }
   }
 }
@@ -339,7 +398,7 @@ export async function dbCreateUser(name, email, passwordHash) {
       location: '',
       joinedAt: new Date().toISOString(),
       preferences: { theme: 'light', soundEnabled: true, notificationsEnabled: true },
-      stats: { sankalpaCount: 0, breathingCount: 0, wisdomCount: 0, booksOpened: [], sunriseActivities: 0, midnightJournals: 0 }
+      stats: { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [] }
     }
     db.users.push(newUser)
     await writeJsonDB(db)
@@ -375,7 +434,14 @@ export async function dbFindUserById(id) {
       location: user.location || '',
       joinedAt: user.joinedAt || new Date().toISOString(),
       preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
-      stats: user.stats || { sankalpaCount: 0, breathingCount: 0, wisdomCount: 0, booksOpened: [], sunriseActivities: 0, midnightJournals: 0 }
+      stats: {
+        sankalpaDates: user.stats?.sankalpaDates || [],
+        breathingDates: user.stats?.breathingDates || [],
+        wisdomDates: user.stats?.wisdomDates || [],
+        booksOpened: user.stats?.booksOpened || [],
+        sunriseDates: user.stats?.sunriseDates || [],
+        midnightJournalDates: user.stats?.midnightJournalDates || []
+      }
     } : null
   }
 }
@@ -642,6 +708,72 @@ export async function dbDeleteJournalEntry(userId, entryId) {
   }
 }
 
+// ── MOOD TREND METHODS ────────────────────────────────────
+export async function dbGetMoodTrends(userId) {
+  await connectDB()
+  let entries = []
+  if (IS_MONGO) {
+    const raw = await JournalEntry.find({ userId }).sort({ createdAt: -1 }).lean()
+    entries = raw.map(e => ({ date: e.date, mood: e.mood || '' }))
+  } else {
+    const db = await readJsonDB()
+    entries = db.journalEntries
+      .filter(e => e.userId === userId)
+      .map(e => ({ date: e.date, mood: e.mood || '' }))
+  }
+
+  // Build mood counts
+  const moodCounts = {}
+  // Build per-day moods: { '2025-05-24': 'Calm', ... } (last mood of the day wins)
+  const dayMoods = {}
+  // Build calendar heatmap: last 60 days with mood/count
+  const heatmap = {}
+
+  for (const e of entries) {
+    if (!e.date) continue
+    // Mood counts
+    if (e.mood) {
+      moodCounts[e.mood] = (moodCounts[e.mood] || 0) + 1
+    }
+    // Day moods (last entry per day wins)
+    if (!dayMoods[e.date]) {
+      dayMoods[e.date] = e.mood || 'none'
+    }
+    // Heatmap entry
+    if (!heatmap[e.date]) {
+      heatmap[e.date] = { count: 0, mood: e.mood || 'none' }
+    }
+    heatmap[e.date].count++
+    if (e.mood) heatmap[e.date].mood = e.mood
+  }
+
+  // 7-day window: get moods for the last 7 days in order
+  const sevenDayMoods = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    const ds = d.toISOString().slice(0, 10)
+    sevenDayMoods.push({ date: ds, mood: dayMoods[ds] || null })
+  }
+
+  // Compute top mood
+  const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null
+
+  // Journal streak
+  const sortedDates = [...new Set(entries.map(e => e.date))].sort().reverse()
+  let streak = 0
+  const today = new Date()
+  for (let i = 0; i < sortedDates.length; i++) {
+    const d = new Date(today)
+    d.setDate(d.getDate() - i)
+    const expected = d.toISOString().slice(0, 10)
+    if (sortedDates[i] === expected) streak++
+    else break
+  }
+
+  return { moodCounts, dayMoods, heatmap, sevenDayMoods, topMood, streak, totalEntries: entries.length }
+}
+
 // ── COMMUNITY METHODS ────────────────────────────────────
 export async function dbGetAllUsers() {
   await connectDB()
@@ -654,7 +786,14 @@ export async function dbGetAllUsers() {
   }
 }
 
+let communityCache = null
+let communityCacheTime = 0
+
 export async function dbGetCommunityFeed() {
+  const now = Date.now()
+  if (communityCache && (now - communityCacheTime) < 60000) {
+    return communityCache
+  }
   await connectDB()
   const activities = []
   const users = await dbGetAllUsers()
@@ -740,6 +879,8 @@ export async function dbGetCommunityFeed() {
   }
 
   activities.sort((a, b) => b.streak - a.streak)
+  communityCache = activities
+  communityCacheTime = now
   return activities
 }
 
@@ -944,7 +1085,7 @@ export async function dbUpdateUserStats(userId, statsUpdates) {
     const db = await readJsonDB()
     const user = db.users.find(u => u.id === userId)
     if (!user) throw new Error('User not found')
-    user.stats = user.stats || { sankalpaCount: 0, breathingCount: 0, wisdomCount: 0, booksOpened: [], sunriseActivities: 0, midnightJournals: 0 }
+    user.stats = user.stats || { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [] }
     Object.assign(user.stats, statsUpdates)
     await writeJsonDB(db)
     return user

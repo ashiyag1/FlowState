@@ -116,7 +116,7 @@ export default function WisdomAmbientSound() {
               </span>
             </div>
 
-            <div className="flex items-center gap-2 px-2 py-1 text-[10px] text-mist-dark dark:text-ocean-lt/60">
+            <div className="flex items-center gap-2 px-2 py-1 text-[10px] text-mist-dark dark:text-sand-lt/70">
               <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
               <span>{isPlaying ? 'Playing' : isMuted ? 'Muted (global)' : 'Ready'}</span>
             </div>

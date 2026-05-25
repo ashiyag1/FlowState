@@ -1,8 +1,13 @@
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'flowstate_secret_key_108'
-
 export default function authMiddleware(req, res, next) {
+  // Read at call-time (after dotenv has loaded) — not at module-init time
+  const JWT_SECRET = process.env.JWT_SECRET
+  if (!JWT_SECRET) {
+    console.error('❌ JWT_SECRET is not set. Check your .env file.')
+    return res.status(500).json({ error: 'Server misconfiguration: auth not available.' })
+  }
+
   try {
     const authHeader = req.headers.authorization || req.headers.Authorization
     

@@ -22,15 +22,15 @@ const fadeUp = (delay = 0) => ({
 })
 
 const FEATURES = [
-  { to: '/water', title: 'Water Tracker', desc: 'Log every sip. Watch your progress fill beautifully through the day.', accent: '#7EC8E3' },
-  { to: '/habits', title: 'Habit Calendar', desc: 'Build rituals that stick. Track streaks on a beautiful grid calendar.', accent: '#2D6A4F' },
-  { to: '/journal', title: 'Daily Journal', desc: 'Capture thoughts, gratitude, and intentions in your calm private space.', accent: '#E87722' },
-  { to: '/quotes', title: 'Wisdom Quotes', desc: 'Fresh quotes from Chanakya, Vivekananda, Gita & Indian sages — daily.', accent: '#c9a84c' },
+  { to: '/journal', title: 'Set Something Down', desc: 'A private page for what still feels tender, unfinished, or too loud to carry.', accent: '#E87722' },
+  { to: '/quotes', title: 'Read One Steady Thought', desc: 'A small piece of wisdom for the moment you do not want more noise.', accent: '#c9a84c' },
+  { to: '/water', title: 'Return to the Body', desc: 'A simple sip, logged quietly, to bring attention back from the mind.', accent: '#7EC8E3' },
+  { to: '/habits', title: 'Keep a Gentle Ritual', desc: 'Small repeated promises, held without guilt when life gets heavy.', accent: '#2D6A4F' },
 ]
 
 function LotusDivider() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '2.8rem auto', maxWidth: 560 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '4.2rem auto', maxWidth: 560 }}>
       <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent)' }} />
       <img src={realLotusImg} alt="" aria-hidden style={{ width: 32, height: 32, objectFit: 'contain', opacity: 0.5 }} />
       <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent)' }} />
@@ -40,7 +40,7 @@ function LotusDivider() {
 
 function DiyaDivider() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '2.8rem auto', maxWidth: 480 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '4.2rem auto', maxWidth: 480 }}>
       <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.5), transparent)' }} />
       <div style={{ position: 'relative' }}>
         <div style={{
@@ -60,6 +60,10 @@ export default function DailyFlow() {
   const { waterGoal, todayTotal, habits, todayHabitDone } = useWellness()
   const waterPct = calcPct(todayTotal, waterGoal)
   const doneCount = habits.filter(h => todayHabitDone[h.id]).length
+
+  // Time detection for late-night visual adjustments
+  const currentHour = new Date().getHours()
+  const isNight = currentHour >= 21 || currentHour < 5
 
   return (
     <section>
@@ -82,7 +86,9 @@ export default function DailyFlow() {
           fontWeight: 500, color: dark ? '#e8d9b5' : '#5C3D1E', lineHeight: 1.3, maxWidth: 600,
           margin: '0 auto', fontStyle: 'italic', letterSpacing: '0.02em',
         }}>
-          A calm sacred space reflecting your inner rhythm.
+          {isNight 
+            ? "Let the night move slower around you."
+            : "A calm space that meets you where you are."}
         </h2>
       </motion.div>
 
@@ -94,6 +100,13 @@ export default function DailyFlow() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true }}
+        style={{
+          borderRadius: '24px',
+          boxShadow: isNight
+            ? (dark ? '0 0 24px rgba(201, 147, 58, 0.16)' : '0 0 20px rgba(201, 147, 58, 0.12)')
+            : 'none',
+          transition: 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)',
+        }}
       >
         <BreathingPortal />
       </motion.div>
@@ -104,7 +117,14 @@ export default function DailyFlow() {
         initial="hidden"
         whileInView="show"
         viewport={{ once: true }}
-        style={{ marginBottom: '2.8rem' }}
+        style={{
+          marginBottom: '2.8rem',
+          borderRadius: '24px',
+          boxShadow: isNight
+            ? (dark ? '0 0 24px rgba(201, 147, 58, 0.16)' : '0 0 20px rgba(201, 147, 58, 0.12)')
+            : 'none',
+          transition: 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)',
+        }}
       >
         <SankalpaCard />
       </motion.div>
@@ -125,6 +145,10 @@ export default function DailyFlow() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
+          style={{
+            filter: isNight ? 'saturate(0.75) opacity(0.8)' : 'none',
+            transition: 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)',
+          }}
         >
           <TambaaVessel
             todayTotal={todayTotal}
@@ -138,6 +162,10 @@ export default function DailyFlow() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
+          style={{
+            filter: isNight ? 'saturate(0.75) opacity(0.8)' : 'none',
+            transition: 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)',
+          }}
         >
           <StatCard
             type="habits"
@@ -170,13 +198,13 @@ export default function DailyFlow() {
           fontFamily: "'Cinzel', serif", fontSize: '0.68rem', letterSpacing: '0.28em',
           color: dark ? '#c9b080' : '#8B5E2F', textTransform: 'uppercase', marginBottom: 4,
         }}>
-          {'\u2726'} Explore Your Practice {'\u2726'}
+          {'\u2726'} Choose What Feels Gentle {'\u2726'}
         </p>
         <p style={{
           fontFamily: "'Lora', serif", fontSize: '0.85rem', fontStyle: 'italic',
           color: dark ? '#7a6a50' : '#a09070',
         }}>
-          Discover tools to nurture your wellness journey
+          No pressure to finish anything. Just follow the softest next step.
         </p>
       </motion.div>
 
@@ -233,11 +261,15 @@ export default function DailyFlow() {
         whileInView="show"
         viewport={{ once: true }}
         style={{
-          marginTop: '2.5rem',
-          padding: '2rem 0 0.5rem',
-          borderTop: dark
-            ? '1px solid rgba(201,168,76,0.08)'
-            : '1px solid rgba(201,168,76,0.16)',
+          marginTop: '4.2rem',
+          padding: '2.8rem 0 0.5rem',
+          borderTop: 'none',
+          backgroundImage: dark
+            ? 'radial-gradient(circle at center, rgba(201,168,76,0.14) 0%, transparent 70%)'
+            : 'radial-gradient(circle at center, rgba(201,168,76,0.25) 0%, transparent 70%)',
+          backgroundPosition: 'top center',
+          backgroundSize: '100% 1px',
+          backgroundRepeat: 'no-repeat',
         }}
       >
         <div style={{
@@ -259,7 +291,7 @@ export default function DailyFlow() {
             margin: 0,
             letterSpacing: '0.04em',
           }}>
-            "Peace flows when you do."
+            "Not every day needs fixing."
           </p>
         </div>
       </motion.div>

@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAchievements, getBadgeImageUrl } from '../../context/AchievementsContext';
-import { Sparkles, Award, Compass } from 'lucide-react';
+import { Sparkles, Award, Compass, X } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { fmtDate } from '../../utils';
 
 // Web Audio API synthesiser for a pure, meditative temple bell chime sound
 function playTempleChime() {
@@ -42,15 +43,15 @@ function playTempleChime() {
 }
 
 export default function BadgeModal() {
-  const { activeUnlockBadge, setActiveUnlockBadge } = useAchievements();
+  const { activeUnlockBadge, setActiveUnlockBadge, isFreshUnlock } = useAchievements();
   const { dark } = useTheme();
 
   // Play sound on mount when a new badge is unlocked
   useEffect(() => {
-    if (activeUnlockBadge) {
+    if (activeUnlockBadge && isFreshUnlock) {
       playTempleChime();
     }
-  }, [activeUnlockBadge]);
+  }, [activeUnlockBadge, isFreshUnlock]);
 
   // Generate fixed floating particles positioning
   const particles = useMemo(() => {
@@ -84,7 +85,7 @@ export default function BadgeModal() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
           transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-          className="relative max-w-sm w-full mx-4 rounded-3xl border p-8 text-center overflow-visible select-none shadow-2xl"
+          className="relative max-w-md w-full mx-4 rounded-3xl border p-8 text-center overflow-visible select-none shadow-2xl"
           style={{
             background: dark
               ? 'linear-gradient(180deg, #1d1208 0%, #100a04 100%)'
@@ -95,6 +96,14 @@ export default function BadgeModal() {
               : '0 30px 70px rgba(92, 61, 30, 0.15), 0 0 100px rgba(201, 147, 58, 0.1)',
           }}
         >
+          {/* Top-right close button */}
+          <button
+            onClick={() => setActiveUnlockBadge(null)}
+            className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gold/10 text-ink-soft/40 dark:text-ivory-soft/40 hover:text-ink dark:hover:text-ivory transition-colors cursor-pointer z-[110]"
+          >
+            <X size={18} />
+          </button>
+
           {/* Glowing auric circle background behind badge */}
           <div 
             className="absolute left-1/2 top-[35%] -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full pointer-events-none filter blur-[32px] opacity-40 animate-pulse"
@@ -130,11 +139,19 @@ export default function BadgeModal() {
 
           {/* Top category label */}
           <div className="flex items-center justify-center gap-1.5 text-gold font-display font-bold uppercase tracking-[0.25em] text-[10px] mb-4">
-            <Compass size={12} className="animate-spin-slow" /> SACRED ACHIEVEMENT
+            {isFreshUnlock ? (
+              <>
+                <Compass size={12} className="animate-spin-slow" /> SACRED ACHIEVEMENT
+              </>
+            ) : (
+              <>
+                <Award size={12} className="animate-pulse" /> COLLECTED MILESTONE
+              </>
+            )}
           </div>
 
-          {/* Centered Golden Badge Frame */}
-          <div className="relative w-36 h-36 mx-auto mb-6 flex items-center justify-center">
+          {/* Centered Golden Badge Frame (1.5x bigger) */}
+          <div className="relative w-56 h-56 mx-auto mb-6 flex items-center justify-center">
             {/* Spinning background mandala ring */}
             <motion.div
               animate={{ rotate: 360 }}
@@ -144,7 +161,7 @@ export default function BadgeModal() {
             <motion.div
               animate={{ rotate: -360 }}
               transition={{ duration: 35, repeat: Infinity, ease: 'linear' }}
-              className="absolute inset-2 rounded-full border border-dotted border-gold/30"
+              className="absolute inset-3 rounded-full border border-dotted border-gold/30"
             />
             
             {/* Badge Image */}
@@ -152,12 +169,12 @@ export default function BadgeModal() {
               initial={{ scale: 0.5, rotate: -15 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 0.15, type: 'spring', stiffness: 200, damping: 15 }}
-              className="relative z-10 w-28 h-28 flex items-center justify-center bg-gradient-to-b from-gold/15 to-saffron/5 rounded-full p-2 border border-gold/25"
+              className="relative z-10 w-44 h-44 flex items-center justify-center bg-gradient-to-b from-gold/15 to-saffron/5 rounded-full p-3 border border-gold/25"
             >
               <img
                 src={getBadgeImageUrl(activeUnlockBadge.imageFilename)}
                 alt={activeUnlockBadge.title}
-                className="w-24 h-24 object-contain filter drop-shadow(0 8px 16px rgba(0,0,0,0.3))"
+                className="w-36 h-36 object-contain filter drop-shadow(0 8px 16px rgba(0,0,0,0.3))"
               />
             </motion.div>
           </div>
@@ -175,9 +192,17 @@ export default function BadgeModal() {
           </span>
 
           {/* Titles & Descriptions */}
-          <h2 className="font-display font-bold text-2xl text-ink dark:text-ivory mb-2 tracking-wide leading-snug">
+          <h2 className="font-display font-bold text-2xl text-ink dark:text-ivory mb-1 tracking-wide leading-snug">
             {activeUnlockBadge.title}
           </h2>
+
+          {/* Unlock status/date */}
+          <p className="text-[10px] text-gold/85 font-semibold tracking-wider uppercase mb-3">
+            {isFreshUnlock 
+              ? '✦ Newly Unlocked! ✦'
+              : `✦ Earned ${activeUnlockBadge.unlockedAt ? fmtDate(activeUnlockBadge.unlockedAt.slice(0, 10)) : 'Recently'} ✦`
+            }
+          </p>
           
           <p className="font-serif text-sm italic text-ink-soft/80 dark:text-ivory-soft/75 px-4 mb-6 leading-relaxed">
             "{activeUnlockBadge.description}"
@@ -194,7 +219,7 @@ export default function BadgeModal() {
               border: '1px solid rgba(255,255,255,0.2)'
             }}
           >
-            Acknowledge ✦ Continue
+            {isFreshUnlock ? 'Acknowledge ✦ Continue' : 'Close Preview'}
           </motion.button>
         </motion.div>
       </div>

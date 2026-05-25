@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import realCalendarImg from '../../assets/dashboard/real-calendar.webp'
 import { useTheme } from '../../context/ThemeContext'
+import CalendarModal from './CalendarModal'
 
 export default function DateCard() {
   const { dark } = useTheme()
+  const [showCalendar, setShowCalendar] = useState(false)
   const now = new Date()
 
   const day = now.toLocaleDateString('en-IN', {
@@ -18,32 +21,46 @@ export default function DateCard() {
   })
 
   return (
-    <div 
-      className="fs-sandstone-tablet fs-gold-corner-card"
-      style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        padding: '1.4rem 1.4rem 1.1rem',
-        minHeight: '235px',
-        position: 'relative'
-      }}
-    >
-      <a
-        href="#"
-        style={{
-          position: 'absolute',
-          top: 16,
-          right: 18,
-          fontFamily: "'Lora', serif",
-          fontSize: '0.78rem',
-          color: '#e87722',
-          textDecoration: 'none',
-          fontWeight: 600,
+    <>
+      <CalendarModal open={showCalendar} onClose={() => setShowCalendar(false)} />
+      <div
+        onClick={() => setShowCalendar(true)}
+        className="fs-sandstone-tablet fs-gold-corner-card"
+        style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          padding: '1.4rem 1.4rem 1.1rem',
+          minHeight: '235px',
+          position: 'relative',
+          cursor: 'pointer',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)'
+          e.currentTarget.style.boxShadow = '0 8px 24px rgba(92,61,30,0.12)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)'
+          e.currentTarget.style.boxShadow = ''
         }}
       >
-        View &rarr;
-      </a>
-
+        <span
+          onClick={(e) => { e.stopPropagation(); setShowCalendar(true) }}
+          style={{
+            position: 'absolute',
+            top: 16,
+            right: 18,
+            fontFamily: "'Lora', serif",
+            fontSize: '0.78rem',
+            color: '#e87722',
+            textDecoration: 'none',
+            fontWeight: 600,
+            cursor: 'pointer',
+            zIndex: 2,
+          }}
+        >
+          View &rarr;
+        </span>
       {/* Calendar Icon - Copper base */}
       <div
         style={{
@@ -135,6 +152,7 @@ export default function DateCard() {
           Choose peace, choose progress.
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

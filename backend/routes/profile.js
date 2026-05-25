@@ -43,6 +43,18 @@ router.put('/avatar', async (req, res) => {
       return res.status(400).json({ error: 'Avatar data is required' })
     }
 
+    if (avatar !== '') {
+      const allowedPrefixes = [
+        'data:image/jpeg;base64,',
+        'data:image/png;base64,',
+        'data:image/jpg;base64,'
+      ]
+      const isValidFormat = allowedPrefixes.some(prefix => avatar.toLowerCase().startsWith(prefix))
+      if (!isValidFormat) {
+        return res.status(400).json({ error: 'Only JPG, JPEG, and PNG images are allowed' })
+      }
+    }
+
     const user = await dbUpdateUserAvatar(req.userId, avatar)
     return res.status(200).json({ user })
   } catch (err) {

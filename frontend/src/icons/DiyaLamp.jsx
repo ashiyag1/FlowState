@@ -6,7 +6,7 @@
      size – rendered height (width is proportionally 58/58),
             default 58
 ─────────────────────────────────────────────────────────────── */
-export default function DiyaLamp({ size = 58 }) {
+export default function DiyaLamp({ size = 58, className = "", progress = 1.0 }) {
   return (
     <svg
       width={size}
@@ -14,6 +14,7 @@ export default function DiyaLamp({ size = 58 }) {
       viewBox="0 0 58 58"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Diya oil lamp"
+      className={`fs-diya-lamp ${className}`}
     >
       <defs>
         <radialGradient id="dl-flameCore" cx="50%" cy="90%" r="60%">
@@ -46,28 +47,38 @@ export default function DiyaLamp({ size = 58 }) {
       </defs>
 
       {/* flickering flame group */}
-      <g className="fs-diya-flicker">
-        {/* ambient glow */}
-        <ellipse cx="29" cy="22" rx="14" ry="16" fill="url(#dl-glow)" />
-
-        {/* outer flame */}
-        <path
-          d="M29 36 Q22 28 24 18 Q26 12 29 8 Q32 12 34 18 Q36 28 29 36Z"
-          fill="url(#dl-flameOuter)"
-        />
-
-        {/* flame body */}
-        <path
-          d="M29 35 Q23 27 25 19 Q27 13 29 10 Q31 13 33 19 Q35 27 29 35Z"
-          fill="url(#dl-flameCore)"
-        />
-
-        {/* inner bright core */}
-        <path
-          d="M29 32 Q26 26 27 21 Q28 17 29 15 Q30 17 31 21 Q32 26 29 32Z"
-          fill="#fff8d0"
-          opacity="0.85"
-        />
+      <g 
+        className="fs-diya-flame-group"
+        style={{
+          transform: `scale(${0.55 + progress * 0.45})`,
+          transformOrigin: '29px 34px',
+          transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.8s ease',
+          filter: progress === 0 ? 'brightness(0.2) saturate(0.3)' : `brightness(${0.85 + progress * 0.3}) drop-shadow(0 0 ${4 + progress * 6}px rgba(255,200,80,${0.3 + progress * 0.5}))`,
+        }}
+      >
+        <g className="fs-diya-flicker">
+          {/* ambient glow */}
+          <ellipse cx="29" cy="22" rx="14" ry="16" fill="url(#dl-glow)" />
+  
+          {/* outer flame */}
+          <path
+            d="M29 36 Q22 28 24 18 Q26 12 29 8 Q32 12 34 18 Q36 28 29 36Z"
+            fill="url(#dl-flameOuter)"
+          />
+  
+          {/* flame body */}
+          <path
+            d="M29 35 Q23 27 25 19 Q27 13 29 10 Q31 13 33 19 Q35 27 29 35Z"
+            fill="url(#dl-flameCore)"
+          />
+  
+          {/* inner bright core */}
+          <path
+            d="M29 32 Q26 26 27 21 Q28 17 29 15 Q30 17 31 21 Q32 26 29 32Z"
+            fill="#fff8d0"
+            opacity="0.85"
+          />
+        </g>
       </g>
 
       {/* wick */}

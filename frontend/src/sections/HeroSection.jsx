@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import MandalaQuoteCard from '../components/MandalaQuoteCard'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import morningBg from '../assets/hero/morningBg.webp'
@@ -41,46 +41,83 @@ const TIME_CONFIG = {
     skyGradient:   'linear-gradient(180deg, rgba(253,211,77,0.42) 0%, rgba(232,119,34,0.55) 28%, rgba(252,176,100,0.30) 60%, transparent 100%)',
     celestialGlow: 'radial-gradient(ellipse at 50% 0%, rgba(255,200,80,0.48) 0%, rgba(232,119,34,0.22) 32%, transparent 58%)',
     sideVignette:  'linear-gradient(90deg, rgba(12,5,1,0.65) 0%, transparent 100%)',
-    tagline:       '✦ Your morning sanctuary ✦',
+    tagline:       '✦ your morning sanctuary ✦',
     badge:         'जल ही जीवन है',
     petalColors:   ['#D4607A', '#E87722', '#c9a84c'],
     stars: false,
     birds: true,
+    fontFamily:    "'Cormorant Garamond', serif",
+    subFontFamily: "'Lora', serif",
+    highlightColor:'#C9933A',
+    heading1:      'the alarms can wait.',
+    heading2:      'no performance here.',
+    heading3:      'just take a breath.',
+    subheading:    'Close the inbox, mute the notifications, and start the day at your own pace.',
+    fontSize:      'clamp(1.9rem, 5.0vw, 3.4rem)',
+    lineHeight:    1.02,
   },
   afternoon: {
     bgImage:       afternoonBg,
     skyGradient:   'linear-gradient(180deg, rgba(56,189,248,0.38) 0%, rgba(125,211,252,0.28) 35%, rgba(186,230,253,0.18) 65%, transparent 100%)',
-    celestialGlow: 'radial-gradient(ellipse at 50% 0%, rgba(253,224,71,0.44) 0%, rgba(56,189,248,0.18) 30%, transparent 56%)',
+    celestialGlow: 'radial-gradient(ellipse at 50% 0%, rgba(255,200,80,0.48) 0%, rgba(232,119,34,0.22) 32%, transparent 58%)',
     sideVignette:  'linear-gradient(90deg, rgba(8,30,50,0.45) 0%, transparent 100%)',
-    tagline:       '✦ Your afternoon anchor ✦',
+    tagline:       '✦ your afternoon pause ✦',
     badge:         'मन शांत, तन स्वस्थ',
     petalColors:   ['#60a5fa', '#e8c97a', '#7dd3fc'],
     stars: false,
     birds: false,
+    fontFamily:    "'Cormorant Garamond', serif",
+    subFontFamily: "'Lora', serif",
+    highlightColor:'#E8B96A',
+    heading1:      'unplug the screen.',
+    heading2:      'hustle guilt is fake.',
+    heading3:      'ground your thoughts.',
+    subheading:    'You’ve been staring at that window for hours. Close the laptop lid, stretch, and let your brain reset.',
+    fontSize:      'clamp(1.9rem, 5.0vw, 3.4rem)',
+    lineHeight:    1.02,
   },
   evening: {
     bgImage:       eveningBg,
     skyGradient:   'linear-gradient(180deg, rgba(124,58,237,0.50) 0%, rgba(194,65,12,0.55) 30%, rgba(234,88,12,0.45) 55%, rgba(251,191,36,0.28) 80%, transparent 100%)',
     celestialGlow: 'radial-gradient(ellipse at 50% 5%, rgba(249,115,22,0.52) 0%, rgba(124,58,237,0.28) 32%, transparent 58%)',
     sideVignette:  'linear-gradient(90deg, rgba(20,5,30,0.70) 0%, transparent 100%)',
-    tagline:       '✦ Your evening unwind ✦',
+    tagline:       '✦ your evening unwind ✦',
     badge:         'शाम का सुकून',
     petalColors:   ['#f472b6', '#fb923c', '#a78bfa'],
     stars: false,
     birds: true,
+    fontFamily:    "'Cormorant Garamond', serif",
+    subFontFamily: "'Lora', serif",
+    highlightColor:'#E87722',
+    heading1:      'the work day is over.',
+    heading2:      'you did enough today.',
+    heading3:      'drop the productivity guilt.',
+    subheading:    'Log off. You are not defined by how much you got done. Just exist here for a moment.',
+    fontSize:      'clamp(1.9rem, 5.0vw, 3.4rem)',
+    lineHeight:    1.02,
   },
   night: {
     bgImage:       nightBg,
     skyGradient:   'linear-gradient(180deg, rgba(15,23,42,0.78) 0%, rgba(30,27,75,0.72) 40%, rgba(49,46,129,0.50) 70%, transparent 100%)',
     celestialGlow: 'radial-gradient(ellipse at 50% 3%, rgba(165,180,252,0.38) 0%, rgba(99,102,241,0.20) 30%, transparent 55%)',
     sideVignette:  'linear-gradient(90deg, rgba(5,2,20,0.80) 0%, transparent 100%)',
-    tagline:       '✦ Your night refuge ✦',
+    tagline:       '✦ your night refuge ✦',
     badge:         'रात की शांति',
     petalColors:   ['#a78bfa', '#818cf8', '#c4b5fd'],
     stars: true,
     birds: false,
+    fontFamily:    "'Cormorant Garamond', serif",
+    subFontFamily: "'Lora', serif",
+    highlightColor:'#818CF8',
+    heading1:      'close the tabs.',
+    heading2:      'burnout isn\'t worth it.',
+    heading3:      'go offline.',
+    subheading:    'Turn off the alarms for a second, ignore the deadlines, and rest. You can figure it out tomorrow.',
+    fontSize:      'clamp(1.9rem, 5.0vw, 3.4rem)',
+    lineHeight:    1.02,
   },
 }
+
 
 /* ─────────────────────────────────────────────────────────────
    PETAL CONFIG  (colors injected from TIME_CONFIG at render)
@@ -207,84 +244,110 @@ function FloatingPetals({ colors }) {
 
 
 /* ─────────────────────────────────────────────────────────────
-   HERO TEXT BLOCK — now time-aware
+   HERO TEXT BLOCK — now time-aware & emotionally connected
 ───────────────────────────────────────────────────────────── */
-function HeroText({ tod, config }) {
+function HeroText({ tod, config, reflection }) {
   const { playHydrationSound, playWisdomSound } = useSoundEffects()
 
+  const returningUserNote = useMemo(() => {
+    if (!reflection) return "A gentle return is still a return."
+    if (reflection.isReturning) {
+      return "A gentle return is still a return."
+    }
+    if (reflection.lateNightPattern && tod === 'night') {
+      return "The quiet hours seem to suit you."
+    }
+    if (reflection.hasHeavyLogs) {
+      return "Rest your thoughts for now."
+    }
+    if (reflection.isConsistent) {
+      return "Your quiet practice is taking shape."
+    }
+    return reflection.message || "A gentle return is still a return."
+  }, [reflection, tod])
+
   const headingStyle = {
-    fontFamily: "'Cormorant Garamond', serif",
-    fontSize: 'clamp(2.8rem, 7.5vw, 5.2rem)',
+    fontFamily: config.fontFamily,
+    fontSize: config.fontSize,
     fontWeight: 600,
-    lineHeight: 0.95,
+    lineHeight: config.lineHeight,
     color: '#FDF6E3',
     textShadow: '0 4px 30px rgba(16,6,2,0.5)',
     letterSpacing: '-0.01em',
+    transition: 'all 0.5s ease',
   }
 
   return (
     <div style={{ flex: '1 1 320px', maxWidth: 580, textAlign: 'center' }}>
 
-      {/* Time-aware Hindi badge */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`badge-${tod}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.6 }}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '6px 18px', borderRadius: 999,
-            background: 'rgba(253,246,227,0.13)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(201,168,76,0.42)',
-            marginBottom: '1.5rem',
-          }}
-        >
-          <span style={{ color: '#e8c97a', fontSize: 11 }}>✦</span>
-          <span style={{
-            fontFamily: "'Cinzel', serif", fontSize: 10,
-            letterSpacing: '0.22em', textTransform: 'uppercase',
-            color: 'rgba(253,246,227,0.85)',
-          }}>
-            {config.badge}
-          </span>
-          <span style={{ color: '#e8c97a', fontSize: 11 }}>✦</span>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Main headline — static, timeless */}
+      {/* Main headline — dynamic per time of day */}
       <motion.div
-        initial={{ opacity: 0, y: 28 }}
+        key={`headline-${tod}`}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.08 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
       >
-        <div style={headingStyle}>Rooted in</div>
+        <div style={headingStyle}>{config.heading1}</div>
         <div style={{
-          ...headingStyle, fontWeight: 700, fontStyle: 'italic',
-          color: '#E87722', marginBottom: '0.25rem',
-          textShadow: '0 0 40px rgba(232,119,34,0.55), 0 4px 24px rgba(16,6,2,0.4)',
+          ...headingStyle,
+          fontWeight: 700,
+          fontStyle: 'italic',
+          color: config.highlightColor,
+          marginBottom: '0.25rem',
+          textShadow: `0 0 40px ${config.highlightColor}55, 0 4px 24px rgba(16,6,2,0.4)`,
         }}>
-          Ritual.
+          {config.heading2}
         </div>
-        <div style={{ ...headingStyle, marginBottom: '1.3rem' }}>Living in Flow.</div>
+        <div style={{ ...headingStyle, marginBottom: '1.3rem' }}>
+          {config.heading3}
+        </div>
       </motion.div>
 
       {/* Subheading */}
       <motion.p
+        key={`subheading-${tod}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.28 }}
+        transition={{ delay: 0.2 }}
         style={{
-          fontFamily: "'Lora', serif", fontStyle: 'italic',
-          fontSize: '1.05rem', color: 'rgba(253,246,227,0.7)',
-          lineHeight: 1.65, maxWidth: 460, margin: '0 auto 2rem',
+          fontFamily: config.subFontFamily,
+          fontStyle: 'italic',
+          fontSize: '1.02rem',
+          color: 'rgba(253,246,227,0.75)',
+          lineHeight: 1.6,
+          maxWidth: 460,
+          margin: '0 auto 2rem',
+          transition: 'all 0.5s ease',
         }}
       >
-        Ancient wisdom. Modern rhythm.<br />
-        Daily practices to heal your mind, body &amp; soul.
+        {config.subheading}
       </motion.p>
+
+      {/* Dynamic reflection pill */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '8px 20px', borderRadius: 999,
+          background: 'rgba(253,246,227,0.06)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(201,168,76,0.22)',
+          marginBottom: '2rem',
+        }}
+      >
+        <span style={{ fontSize: '0.9rem' }}>🪔</span>
+        <span style={{
+          fontFamily: config.subFontFamily,
+          fontSize: '0.82rem',
+          fontStyle: 'italic',
+          color: 'rgba(253,246,227,0.85)',
+          letterSpacing: '0.02em',
+        }}>
+          {returningUserNote}
+        </span>
+      </motion.div>
 
       {/* CTA buttons */}
       <motion.div
@@ -299,21 +362,21 @@ function HeroText({ tod, config }) {
           style={{ display: 'inline-block' }}
         >
           <Link
-            to="/water"
+            to="/journal"
             onClick={playHydrationSound}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '13px 28px', borderRadius: 999, textDecoration: 'none',
-              fontFamily: "'Cinzel', serif", fontSize: '0.78rem', fontWeight: 700,
-              color: 'white', letterSpacing: '0.12em',
-              background: 'linear-gradient(135deg, #E87722 0%, #c9a84c 100%)',
+              fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', fontWeight: 600,
+              color: 'white', letterSpacing: '0.06em',
+              background: 'linear-gradient(135deg, rgba(232, 119, 34, 0.45) 0%, rgba(201, 168, 76, 0.45) 100%)',
               border: '2px double #e8c97a',
-              boxShadow: '0 6px 20px rgba(232, 119, 34, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25)',
+              boxShadow: '0 6px 20px rgba(232, 119, 34, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
               textShadow: '0 1px 2px rgba(0,0,0,0.5)',
               transition: 'box-shadow 0.3s ease',
             }}
           >
-            💧 Track Water
+            JOURNAL YOUR FLOW
           </Link>
         </motion.div>
 
@@ -328,15 +391,15 @@ function HeroText({ tod, config }) {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '13px 28px', borderRadius: 999, textDecoration: 'none',
-              fontFamily: "'Cinzel', serif", fontSize: '0.78rem', fontWeight: 700,
-              color: '#ffeab8', letterSpacing: '0.12em',
-              background: 'linear-gradient(135deg, #2b1c0c 0%, #150a02 100%)',
-              border: '2px double rgba(201, 168, 76, 0.65)',
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', fontWeight: 600,
+              color: '#ffeab8', letterSpacing: '0.06em',
+              background: 'linear-gradient(135deg, rgba(43, 28, 12, 0.45) 0%, rgba(21, 10, 2, 0.45) 100%)',
+              border: '2px double rgba(201, 168, 76, 0.45)',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
               transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
             }}
           >
-            🕉️ Daily Wisdom
+            SEEK STEADY WISDOM
           </Link>
         </motion.div>
 
@@ -349,14 +412,17 @@ function HeroText({ tod, config }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.9, delay: 0.6 }}
+          transition={{ duration: 0.9, delay: 0.5 }}
           style={{
-            fontFamily: "'Lora', serif", fontStyle: 'italic',
-            fontSize: '0.78rem', color: 'rgba(253,246,227,0.38)',
-            letterSpacing: '0.1em', marginTop: '0.8rem',
+            fontFamily: config.subFontFamily,
+            fontStyle: 'italic',
+            fontSize: '0.78rem',
+            color: 'rgba(253,246,227,0.3)',
+            letterSpacing: '0.08em',
+            marginTop: '0.8rem',
           }}
         >
-          {config.tagline}
+          ✦ unplug the noise • return to your pace ✦
         </motion.p>
       </AnimatePresence>
     </div>
@@ -369,7 +435,7 @@ function HeroText({ tod, config }) {
    Drop-in replacement for the original HeroSection.
    No changes needed in Home.jsx.
 ───────────────────────────────────────────────────────────── */
-export default function HeroSection() {
+export default function HeroSection({ reflection }) {
   /* ── Hydration-safe time-of-day ──
      Start with a safe default, then set real time in useEffect.
      Prevents server/client render mismatch and avoids calling
@@ -515,7 +581,7 @@ export default function HeroSection() {
           alignItems: 'center', justifyContent: 'center',
           gap: '3rem',
         }}>
-          <HeroText tod={tod} config={config} />
+          <HeroText tod={tod} config={config} reflection={reflection} />
 
           {/* MandalaQuoteCard — unchanged, right side */}
           <motion.div

@@ -99,29 +99,73 @@ export function getHinduDetails(date) {
 }
 
 /**
- * Returns detailed insights explaining the genius of ancient Rishis in creating the Hindu Calendar
+ * Returns Gen Z-coded mind-blowing lunar science facts that make you go "whoa"
  */
 export function getScientificInsights() {
   return [
     {
-      title: 'Rishi Precision: The 12° Divine Measure',
-      desc: 'Centuries before any telescope, the Rishis divided the Moon\'s path into 30 Tithis of exactly 12° each — a precision modern astronomy only confirmed after Kepler\'s laws. Using only naked-eye observation and pure mathematics, they calculated the synodic month to an accuracy of 29.530588 days, matching today\'s atomic-clock measurements. This was not guesswork — it was the fruit of deep yogic insight into the cosmic order.',
-      icon: '🕉️'
+      title: '🌙 The Moon Is Doing MATH Every Second',
+      desc: 'A tithi isn\'t some ancient buzzword. It\'s literally the Moon moving exactly 12° away from the Sun — tracked across a perfect 360° celestial circle. Ancient Indians were basically running astronomical geometry before calculators existed. They turned the sky into a calendar.',
+      icon: '🌙',
+      stat: '12° precision',
+      vibe: 'The sky had better algorithms than your favorite app.',
+      tryThis: 'Step outside tonight. Look up. Ask: is this a build-up day or a release day for me?'
     },
     {
-      title: 'Yogic Gaze: The Rishis Knew the Body-Moon Connection',
-      desc: 'Long before modern chronobiology discovered melatonin fluctuations with lunar phases, the Rishis prescribed Ekadashi fasting, Purnima meditations, and Amavasya rituals perfectly aligned with the Moon\'s gravitational cycle. They understood that a 60%-water human body dances with the tides just as the oceans do. The Panchang is not just a calendar — it is a manual for living in harmony with cosmic rhythms.',
-      icon: '🧘'
+      title: '🌊 Your Body Is Literally Ocean Energy',
+      desc: 'The Moon controls Earth\'s tides. You are ~60% water. That means YOU have lunar tides flowing through your cells every single day — affecting your mood, sleep, hunger, focus. Ancient calendars weren\'t being \"spiritual.\" They were tracking BIOLOGY.',
+      icon: '🌊',
+      stat: '60% water = moon-powered',
+      vibe: 'Your chaotic energy days finally make sense.',
+      tryThis: 'Feeling off? Don\'t force a hero routine. Match the moon\'s energy, not society\'s hustle.'
     },
     {
-      title: 'Nakshatras: The Rishis\' Celestial Map of Consciousness',
-      desc: 'The Rishis mapped the night sky into 27 Nakshatras (13°20\' each), matching the Moon\'s 27.32-day sidereal orbit — a feat requiring generations of precise observation without any instrument. Each Nakshatra was given a name, a deity, and a quality that influences human consciousness. This shows the Rishis understood that the stars are not just distant suns but markers of energy that shape life on Earth.',
-      icon: '🌟'
+      title: '✨ There\'s a STAR MAP Hidden in Your Day',
+      desc: 'Every day the Moon crosses one of 27 nakshatras — ancient star zones that were basically cosmic GPS coordinates. Farmers, travelers, and ritual-makers used them like we use Google Maps, but written in starlight.',
+      icon: '✨',
+      stat: '27 sky zones',
+      vibe: 'People had a grid system in the sky before we had smartphones.',
+      tryThis: 'Treat today\'s nakshatra like a subtle mood filter, not a strict destiny reading.'
     },
     {
-      title: 'Paksha: Nature\'s Breath as the Rishis Saw It',
-      desc: 'The Rishis framed time as a living rhythm — Shukla (waxing) and Krishna (waning) are not just lunar phases but the inhalation and exhalation of the cosmos. They prescribed different rituals, foods, and practices for each Paksha, recognizing that the body\'s metabolism, mood, and spiritual receptivity shift with the lunar tide. This is not folk belief — it is an intuitive, experiential science verified by millennia of practice.',
-      icon: '🌗'
+      title: '🌓 Even the Moon Doesn\'t Grind 24/7',
+      desc: 'Shukla Paksha (waxing) = growth mode: start things, feel clarity, expand energy. Krishna Paksha (waning) = edit mode: cut clutter, rest, release. Two weeks each. The universe literally built a brake pedal into time.',
+      icon: '🌓',
+      stat: '15 days ON / 15 days OFF',
+      vibe: 'The Moon takes rest weeks. Why don\'t you?',
+      tryThis: 'Waxing = start something new. Waning = delete something draining.'
+    },
+    {
+      title: '🌕 Purnima Hits DIFFERENT and Science Knows Why',
+      desc: 'Full moon = maximum brightness + maximum emotional charge. Humans across every culture sensed it: gathered, sang, prayed, stayed up late. The night feels ELECTRIC. Not a myth — just lunar physics affecting human vibe.',
+      icon: '🌕',
+      stat: 'Peak lunar energy',
+      vibe: 'Main character energy, but make it sacred.',
+      tryThis: 'On full moons: journal hard, speak your truth, release what you\'ve been holding in.'
+    },
+    {
+      title: '🌑 Amavasya Is a FREE Reset Button',
+      desc: 'New moon = the Moon is hiding next to the Sun, so we see nothing. Ancient wisdom said: good. Use this dark slot as a SYSTEM RESET. No performance. No pressure. Just clearing cache and listening to the quiet.',
+      icon: '🌑',
+      stat: 'Cosmic reboot',
+      vibe: 'Sometimes the most productive thing is being unproductive.',
+      tryThis: 'Delete one mental tab today: a grudge, a guilt, a "should." Just let it go.'
+    },
+    {
+      title: '🕯️ You Have TWO Body Clocks, Not One',
+      desc: 'You know circadian rhythm (your 24-hour cycle). But ancient calendars stacked another layer: the lunar rhythm (~29.5 days). Together they don\'t ask "why aren\'t you consistent?" They ask "WHAT CYCLE ARE YOU IN?"',
+      icon: '🕯️',
+      stat: 'Daily + monthly = dual rhythm',
+      vibe: 'You\'re not broken. You\'re just in a different phase.',
+      tryThis: 'Notice your patterns: which moon phase makes you social? sleepy? focused? reflective?'
+    },
+    {
+      title: '🔥 Rituals Turn Time Into a FEELING',
+      desc: 'Why do Ekadashi, Purnima, and daily sadhana work so well? Because repeating an action on a meaningful date makes time STICKY emotionally. Your brain remembers a ritual way better than a random Tuesday.',
+      icon: '🔥',
+      stat: 'Emotional time-stamping',
+      vibe: 'A streak with a story hits way harder than a streak with just numbers.',
+      tryThis: 'Link one habit to the moon: journal on Purnima, declutter on Amavasya, dream on new moon.'
     }
   ];
 }
