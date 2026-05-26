@@ -7,8 +7,8 @@ import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useAchievements } from '../context/AchievementsContext'
 import { pct as calcPct } from '../utils'
-import PageLayout, { Container } from '../components/PageLayout'
-import WaterProgress from '../components/Waterprogress'
+import PageLayout, { Container } from '../components/ui/PageLayout'
+import WaterProgress from '../components/tracker/WaterProgress'
 import waterBg from '../assets/pages/water_bg.webp'
 
 const IS_DEBUG = typeof window !== 'undefined' && (
@@ -230,7 +230,7 @@ export default function Water() {
             <motion.div variants={sv(0.15)} initial="hidden" animate="show" className="md:col-span-3">
               <div className="card p-5 h-full flex flex-col">
                 <p className="eyebrow mb-3">⚡ Quick add</p>
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
                   {BOTTLES.map(b => (
                     <motion.button key={b.ml}
                       whileTap={{ scale: 0.88 }} whileHover={{ y: -3, scale: 1.03 }}

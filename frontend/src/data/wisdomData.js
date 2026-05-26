@@ -8,8 +8,8 @@ import img7 from '../assets/books/book_7.webp'
 import img8 from '../assets/books/book_8.webp'
 import img9 from '../assets/books/book_9.webp'
 import img10 from '../assets/books/book_10.webp'
-import img11 from '../assets/books/book_11.png'
-import img12 from '../assets/books/book_12.png'
+import img11 from '../assets/books/book_11.webp'
+import img12 from '../assets/books/book_12.webp'
 
 const BOOK_IMAGES = { 1: img1, 2: img2, 3: img3, 4: img4, 5: img5, 6: img6, 7: img7, 8: img8, 9: img9, 10: img10, 11: img11, 12: img12 }
 

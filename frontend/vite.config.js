@@ -34,8 +34,6 @@ export default defineConfig(({ mode }) => {
             'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
             'vendor-framer': ['framer-motion'],
             'vendor-icons':  ['lucide-react'],
-            'vendor-ai':     ['@google/generative-ai'],
-            'vendor-utils':  ['clsx', 'date-fns'],
           },
         },
       },
@@ -49,8 +47,6 @@ export default defineConfig(({ mode }) => {
         'react-router-dom',
         'framer-motion',
         'lucide-react',
-        'clsx',
-        'date-fns',
       ],
     },
 

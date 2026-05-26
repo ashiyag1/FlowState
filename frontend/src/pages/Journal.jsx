@@ -6,7 +6,7 @@ import {
   X, BookOpen, CalendarDays, Flame, Play, Pause, Volume2, Sparkles, BookText, Feather
 } from 'lucide-react'
 import { Store, today, fmtDate, uid } from '../utils'
-import { useNotif } from '../components/NotificationPopup'
+import { useNotif } from '../components/system/NotificationPopup'
 import { useTheme } from '../context/ThemeContext'
 import { useWellness } from '../context/WellnessContext'
 import { useAuth } from '../context/AuthContext'
@@ -18,8 +18,8 @@ import { getEmotionalReflection } from '../utils/emotionalMemory'
 import { computeArchetype } from '../utils/soulArchetype'
 import LotusFlower from '../icons/LotusFlower'
 import DiyaLamp from '../icons/DiyaLamp'
-import PageLayout from '../components/PageLayout'
-import journalBg from '../assets/pages/journal_bg.png'
+import PageLayout from '../components/ui/PageLayout'
+import journalBg from '../assets/pages/journal_bg.webp'
 
 const MOODS = [
   { label: 'Grateful',  moodIcon: Heart,   bg: 'bg-rose-100/70 hover:bg-rose-200/80 dark:bg-rose-950/20 dark:hover:bg-rose-900/30',   text: 'text-rose-700 dark:text-rose-300',   glow: 'rgba(244,114,182,0.12)',  tint: '#f472b6' },

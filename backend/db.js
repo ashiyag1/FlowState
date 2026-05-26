@@ -40,92 +40,16 @@ function timeAgo(dateStr) {
 }
 
 // ── MONGOOSE SCHEMAS & MODELS ───────────────────────────
-const UserSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  avatar: { type: String, default: '' },
-  bio: { type: String, default: '' },
-  location: { type: String, default: '' },
-  joinedAt: { type: Date, default: Date.now },
-  preferences: {
-    theme: { type: String, default: 'light' },
-    soundEnabled: { type: Boolean, default: true },
-    notificationsEnabled: { type: Boolean, default: true }
-  },
-  stats: {
-    sankalpaDates: { type: [String], default: [] },
-    breathingDates: { type: [String], default: [] },
-    wisdomDates: { type: [String], default: [] },
-    booksOpened: { type: [String], default: [] },
-    sunriseDates: { type: [String], default: [] },
-    midnightJournalDates: { type: [String], default: [] }
-  }
-})
-
-const WaterLogSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  waterGoal: { type: Number, default: 2500 },
-  logs: { type: Map, of: [{ id: String, ml: Number, label: String, time: String }], default: {} }
-})
-
-const HabitSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  name: { type: String, required: true },
-  icon: { type: String, required: true },
-  color: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-})
-
-const HabitDoneSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  done: { type: Map, of: { type: Map, of: String }, default: {} } // date -> { habitId: time }
-})
-
-const JournalEntrySchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  id: { type: String, required: true },
-  date: { type: String, required: true },
-  time: { type: String, required: true },
-  text: { type: String, required: true },
-  mood: { type: String, default: '' },
-  createdAt: { type: Date, default: Date.now }
-})
-
-const BadgeSchema = new mongoose.Schema({
-  badgeId: { type: String, required: true, unique: true },
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  imageFilename: { type: String, required: true },
-  category: { type: String, required: true }, // streaks, wisdom, journaling, rituals, wellness, legendary
-  rarity: { type: String, required: true }, // Common, Uncommon, Rare, Legendary
-  targetProgress: { type: Number, required: true }
-})
-
-const UserBadgeSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  badgeId: { type: String, required: true },
-  progress: { type: Number, default: 0 },
-  isUnlocked: { type: Boolean, default: false },
-  unlockedAt: { type: Date }
-})
-UserBadgeSchema.index({ userId: 1, badgeId: 1 }, { unique: true })
-JournalEntrySchema.index({ userId: 1, createdAt: -1 })
-HabitSchema.index({ userId: 1 })
-
-let User, WaterLog, Habit, HabitDone, JournalEntry, Badge, UserBadge
-
-if (IS_MONGO) {
-  User = mongoose.models.User || mongoose.model('User', UserSchema)
-  WaterLog = mongoose.models.WaterLog || mongoose.model('WaterLog', WaterLogSchema)
-  Habit = mongoose.models.Habit || mongoose.model('Habit', HabitSchema)
-  HabitDone = mongoose.models.HabitDone || mongoose.model('HabitDone', HabitDoneSchema)
-  JournalEntry = mongoose.models.JournalEntry || mongoose.model('JournalEntry', JournalEntrySchema)
-  Badge = mongoose.models.Badge || mongoose.model('Badge', BadgeSchema)
-  UserBadge = mongoose.models.UserBadge || mongoose.model('UserBadge', UserBadgeSchema)
-}
+import User from './models/User.js'
+import WaterLog from './models/WaterLog.js'
+import Habit from './models/Habit.js'
+import HabitDone from './models/HabitDone.js'
+import JournalEntry from './models/JournalEntry.js'
+import Badge from './models/Badge.js'
+import UserBadge from './models/UserBadge.js'
 
 export { User, WaterLog, Habit, HabitDone, JournalEntry, Badge, UserBadge }
+
 
 // ── DEFAULT BADGES SEED ──────────────────────────────────
 const DEFAULT_BADGES = [

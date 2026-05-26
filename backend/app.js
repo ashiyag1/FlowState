@@ -18,6 +18,9 @@ dotenv.config({ path: './backend/.env' })
 
 const app = express()
 
+// Trust Vercel's proxy so express-rate-limit can read the real client IP
+app.set('trust proxy', 1)
+
 // ── CORS ─────────────────────────────────────────────────────────────────────
 // Read allowed origins from .env — never use a wildcard in production.
 // Add your Vercel/production URL to ALLOWED_ORIGINS in backend/.env

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowState — Sanctuary Offline</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Lora:ital,wght@0,400;1,400&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ivory: #fbf6ee;
+      --gold: #c9933a;
+      --ink: #1c1208;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Lora', serif;
+      background: radial-gradient(circle at center, #1b1208 0%, #0f0a05 100%);
+      color: var(--ivory);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Soft ambient background spots */
+    .glow {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 147, 58, 0.08) 0%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .glow-top { top: -10%; left: 20%; }
+    .glow-bottom { bottom: -10%; right: 20%; }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 420px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    /* Breathing Lotus animation */
+    .lotus-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: breathe 5s ease-in-out infinite;
+    }
+
+    .lotus-glow-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 147, 58, 0.2) 0%, transparent 70%);
+      filter: blur(10px);
+      animation: pulseGlow 5s ease-in-out infinite;
+    }
+
+    .heading-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .eyebrow {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.85;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 400;
+      color: #fff;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      line-height: 1.25;
+    }
+
+    .message {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(251, 246, 238, 0.72);
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    .divider {
+      width: 120px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0.6;
+    }
+
+    .sub-msg {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(201, 147, 58, 0.6);
+      font-family: 'Cinzel', serif;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(0.94); }
+      50% { transform: scale(1.06); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.9; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow glow-top"></div>
+  <div class="glow glow-bottom"></div>
+  
+  <div class="container">
+    <div class="lotus-wrap">
+      <div class="lotus-glow-ring"></div>
+      <svg width="68" height="68" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 2 L23 11 C26 15 26 21 21 26 C18 29 14 29 11 26 C6 21 6 15 9 11 Z" stroke="#c9933a" strokeWidth="0.8" fill="none"/>
+        <path d="M16 6 L20 12 C22 15 22 19 19 22 C17 24 15 24 13 22 C10 19 10 15 12 12 Z" fill="#c9933a" opacity="0.6"/>
+        <circle cx="16" cy="16" r="3" fill="#fff" opacity="0.9"/>
+      </svg>
+    </div>
+
+    <div class="heading-wrap">
+      <p class="eyebrow">Still here with you</p>
+      <h1>Your space remains<br>quiet for now</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="message">
+      Take a breath, center your focus, and enjoy the screen-free pause. Your records are safe, and we will reconnect when you're ready.
+    </p>
+
+    <p class="sub-msg">✦ Return to Stillness ✦</p>
+  </div>
+</body>
+</html>

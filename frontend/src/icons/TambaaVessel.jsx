@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import StatCard from '../components/StatCard';
+import StatCard from '../components/ui/StatCard';
 import copperVesselImg from '../assets/dashboard/copper-vessel.webp';
 import { fadeUp } from '../animations';
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../context/ThemeContext'
+import ImmersiveFooter from '../sections/ImmersiveFooter'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import {
   ChevronRight, ArrowUpRight, Sparkles,
@@ -8,48 +9,22 @@ import {
 } from 'lucide-react'
 
 // Image imports
-import heroDark from '../assets/heritage/heritage_hero_dark.png'
-import heroLight from '../assets/heritage/heritage_hero_light.png'
-import heritageBg from '../assets/heritage/heritage_bg.jpg'
-import aryabhataPortrait from '../assets/heritage/aryabhata_portrait.png'
-import bhaskaraPortrait from '../assets/heritage/bhaskara_portrait.png'
-import lilavatiPortrait from '../assets/heritage/lilavati_portrait.png'
-import charakaPortrait from '../assets/heritage/charaka_portrait.png'
-import paniniPortrait from '../assets/heritage/panini_portrait.png'
-import sushrutaPortrait from '../assets/heritage/sushruta_portrait.png'
-import brahmaguptaPortrait from '../assets/heritage/brahmagupta_portrait.png'
-import madhavaPortrait from '../assets/heritage/madhava_portrait.png'
-import chanakyaPortrait from '../assets/heritage/chanakya_portrait.png'
-import patanjaliPortrait from '../assets/heritage/patanjali_portrait.png'
-import kanadaPortrait from '../assets/heritage/kanada_portrait.png'
-import gargiPortrait from '../assets/heritage/gargi_portrait.png'
-import khanaPortrait from '../assets/heritage/khana_portrait.png'
-
-function FlowSymbol({ size = 32, dark }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className="flow-symbol-svg">
-      <path d="M16 1 L31 16 L16 31 L1 16 Z" stroke="url(#sg-heritage)" strokeWidth="0.9" fill="none"/>
-      <path d="M16 4.5 L27.5 16 L16 27.5 L4.5 16 Z" stroke="url(#sg-heritage)" strokeWidth="0.55" fill="none" opacity="0.45"/>
-      {[0,45,90,135,180,225,270,315].map(d => (
-        <ellipse key={d} cx="16" cy="9.5" rx="1.6" ry="5.2"
-          fill="url(#sg-heritage)" opacity="0.55" transform={`rotate(${d} 16 16)`}/>
-      ))}
-      <circle cx="16" cy="16" r="5.5" stroke="url(#sg-heritage)" strokeWidth="0.55" fill="none" opacity="0.5"/>
-      <circle cx="16" cy="16" r="2.2" fill="url(#sg-heritage)" opacity="0.95"/>
-      <circle cx="16" cy="16" r="0.9" fill="white" opacity="0.9"/>
-      {[['16','1'],['31','16'],['16','31'],['1','16']].map(([cx,cy]) => (
-        <circle key={cx+cy} cx={cx} cy={cy} r="0.9" fill="url(#sg-heritage)" opacity="0.7"/>
-      ))}
-      <defs>
-        <linearGradient id="sg-heritage" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"  stopColor={dark ? "#e8c46a" : "#8a5a12"}/>
-          <stop offset="50%" stopColor={dark ? "#d4a82a" : "#c4911e"}/>
-          <stop offset="100%" stopColor={dark ? "#c8921a" : "#906211"}/>
-        </linearGradient>
-      </defs>
-    </svg>
-  )
-}
+import heroDark from '../assets/heritage/heritage_hero_dark.webp'
+import heroLight from '../assets/heritage/heritage_hero_light.webp'
+import heritageBg from '../assets/heritage/heritage_bg.webp'
+import aryabhataPortrait from '../assets/heritage/aryabhata_portrait.webp'
+import bhaskaraPortrait from '../assets/heritage/bhaskara_portrait.webp'
+import lilavatiPortrait from '../assets/heritage/lilavati_portrait.webp'
+import charakaPortrait from '../assets/heritage/charaka_portrait.webp'
+import paniniPortrait from '../assets/heritage/panini_portrait.webp'
+import sushrutaPortrait from '../assets/heritage/sushruta_portrait.webp'
+import brahmaguptaPortrait from '../assets/heritage/brahmagupta_portrait.webp'
+import madhavaPortrait from '../assets/heritage/madhava_portrait.webp'
+import chanakyaPortrait from '../assets/heritage/chanakya_portrait.webp'
+import patanjaliPortrait from '../assets/heritage/patanjali_portrait.webp'
+import kanadaPortrait from '../assets/heritage/kanada_portrait.webp'
+import gargiPortrait from '../assets/heritage/gargi_portrait.webp'
+import khanaPortrait from '../assets/heritage/khana_portrait.webp'
 
 const CONCEPT_STORIES = [
   {
@@ -113,6 +88,7 @@ const CURIOSITY_STORIES = [
     title: "Why Do Indian Kids Learn More About British Kings Than Their Own Emperors?",
     source: "Macaulay's Education System, 1835",
     tag: "the education question",
+    group: "colonial-hangover",
     paragraphs: [
       "Most Indian schoolchildren can name all six wives of Henry VIII. Ask them about the Gupta Empire or the Chola dynasty — silence. This isn't an accident. Macaulay's 1835 education system was designed to create Indians who admired British rule. Clerks who would serve the empire, not citizens who would question it.",
       "The curriculum prioritized English literature and British history. Indian mathematics, astronomy, medicine — barely mentioned. The system wasn't designed to make us proud. It was designed to make us grateful. Two centuries later, we're still using the same blueprint. When do we rewrite it?"
@@ -122,6 +98,7 @@ const CURIOSITY_STORIES = [
     title: "4,500 Years Ago, Someone Invented the Flush Toilet. Then the World Forgot How.",
     source: "Harappa & Mohenjo-Daro, Indus Valley",
     tag: "reset button",
+    group: "flexes",
     paragraphs: [
       "Every single house in Mohenjo-Daro had a private bathroom with a flushing toilet connected to an underground sewer system. Covered brick channels. Manholes for cleaning. This was 4,500 years ago. Then the civilization declined, and the world forgot. London didn't get proper sewers until the 19th century.",
       "Think about that. Humans once had something, lost it, and took 4,000 years to get it back. That's not a story about plumbing. That's a story about how fragile knowledge really is. One generation builds. The next forgets. The one after that has to rediscover everything from scratch. What else have we forgotten?"
@@ -131,6 +108,7 @@ const CURIOSITY_STORIES = [
     title: "The 'Fairness' Obsession: How Colonialism Changed What Beauty Means in India",
     source: "The Skin Deep Wound",
     tag: "internalized hierarchy",
+    group: "colonial-hangover",
     paragraphs: [
       "Walk into any Indian pharmacy and you'll see shelves of fairness creams. Billboards promise lighter skin as the shortcut to success. This didn't come from nowhere. British colonialism created a hierarchy where lighter skin meant power, access, respect. The darker you were, the further you were from the rulers. A hundred and fifty years later, that hierarchy still runs in our heads.",
       "We've turned the color of colonization into a multi-billion rupee industry. We lighten our skin for job interviews, for weddings, for confidence. We absorb the idea that lighter is better without asking where that idea came from. Decolonizing isn't just about politics. It's about looking in the mirror and unlearning what we were taught to see."
@@ -140,6 +118,7 @@ const CURIOSITY_STORIES = [
     title: "The Exam That Decides Everything: A System Designed to Produce Clerks",
     source: "British-Era Education Architecture",
     tag: "the education trap",
+    group: "colonial-hangover",
     paragraphs: [
       "Every year, millions of Indian teenagers sit for exams that decide their entire future — JEE, NEET, UPSC. The pressure destroys childhoods, mental health, and creativity. We've normalized this. But this system wasn't designed by Indians for Indians. It was inherited from the British, who created exams to train obedient civil servants — not thinkers, not innovators, not people who ask why.",
       "Rote learning. Memorization. Competition over curiosity. We've turned a colonial bureaucracy test into the gatekeeper of dreams. The system produces excellent clerks. But does it produce fulfilled humans? 200 years later, we're still studying for someone else's exam. What would an Indian education system look like if we designed it for ourselves?"
@@ -149,6 +128,7 @@ const CURIOSITY_STORIES = [
     title: "A Hollywood Movie About Mars Cost More Than India's Actual Trip to Mars",
     source: "Mangalyaan, ISRO, 2013",
     tag: "the ultimate flex",
+    group: "flexes",
     paragraphs: [
       "India's Mangalyaan mission to Mars had a budget of $74 million. The movie 'The Martian' cost $108 million to make. A Hollywood film about going to Mars cost more than India actually going to Mars. And here's the craziest part: India made it on the first attempt — something no other nation had ever done before.",
       "The mission was built with off-the-shelf components, improvised engineering, and a budget that NASA spends on coffee. While the world laughed at the idea of a developing country reaching Mars, ISRO just… did it. For less than the cost of a Hollywood blockbuster. That's not just smart. That's a country saying: we don't need your budget. We need your belief."
@@ -158,6 +138,7 @@ const CURIOSITY_STORIES = [
     title: "A God Dancing at the Edge of Physics",
     source: "Nataraja, The Cosmic Dance of Shiva",
     tag: "when myth meets math",
+    group: "pop-culture",
     paragraphs: [
       "Look at a statue of Nataraja — Shiva dancing within a ring of fire. One hand holds a drum (creation). Another holds fire (destruction). One foot is raised (liberation). The other crushes a demon (ignorance). The dance never stops. It is the rhythm of the universe — birth, death, rebirth, over and over.",
       "When physicists at CERN saw the Nataraja, they didn't see mythology. They saw a metaphor for what they observe in particle accelerators — subatomic particles appearing and vanishing, matter and energy constantly exchanging form. Feynman said the dance of Shiva was the best description of the quantum world he'd ever seen. Sometimes the deepest truths arrive not in equations but in stories, carved in stone, waiting centuries for science to catch up."
@@ -167,6 +148,7 @@ const CURIOSITY_STORIES = [
     title: "The Matrix Wasn't Inspired by the Future. It Was Inspired by a 5,000-Year-Old Text.",
     source: "The Bhagavad Gita meets The Matrix",
     tag: "pop culture & philosophy",
+    group: "pop-culture",
     paragraphs: [
       "The Wachowskis wanted Neo to feel like a reluctant hero. So they gave him the same dilemma Arjuna faced in the Bhagavad Gita — a warrior who doesn't want to fight but must see through the illusion of the world to find his purpose. The red pill isn't just a plot device. It's the concept of Maya: reality as we perceive it is a veil, and truth lies beyond it.",
       "Keanu Reeves has said the Gita shaped his entire approach to the role. 'There is no spoon' isn't just a cool line — it's the philosophy that the physical world is a construct and the mind is what's real. One of the most influential films of the 21st century didn't look to the future for inspiration. It looked 5,000 years into the past."
@@ -176,6 +158,7 @@ const CURIOSITY_STORIES = [
     title: "The Man Who Ended Worlds Found His Words in an Ancient Indian Scripture",
     source: "Oppenheimer & The Bhagavad Gita",
     tag: "history meets ancient wisdom",
+    group: "pop-culture",
     paragraphs: [
       "When Robert Oppenheimer watched the first nuclear bomb explode over New Mexico, a line from the Bhagavad Gita flashed through his mind: 'Now I am become Death, the destroyer of worlds.' He had learned Sanskrit to read the Gita in its original language. In the most defining moment of modern history, he reached for an ancient Indian text to make sense of it.",
       "He wasn't being dramatic. He genuinely believed the Gita contained the deepest truths about creation and destruction. When the 20th century needed words big enough for the atomic age, it found them in a book written thousands of years before."
@@ -185,6 +168,7 @@ const CURIOSITY_STORIES = [
     title: "Before Paris or Milan, India Ruled Global Fashion for 2,000 Years",
     source: "India's Textile Empire",
     tag: "forgotten history",
+    group: "flexes",
     paragraphs: [
       "Roman emperors paid fortunes for Indian muslin so fine it was called 'woven air.' A single bolt of Dhaka muslin could be pulled through a wedding ring. Indian cotton, silk, and calico dominated global markets from Rome to China. Long before Paris or Milan, the world's fashion capital was Bengal, Gujarat, and Tamil Nadu.",
       "Then colonial policies systematically dismantled the industry — tariffs, forced raw cotton exports, factory-made cloth flooding Indian markets. Millions of weavers lost their livelihoods. An entire global industry was erased so thoroughly that the world forgot India was once the center of everything we wear. But the threads are still there, woven into the fabric of fashion history."
@@ -194,6 +178,7 @@ const CURIOSITY_STORIES = [
     title: "The Most Powerful Weapon Colonizers Used Wasn't a Gun. It Was a Classroom.",
     source: "Macaulay's Minute on Education, 1835",
     tag: "the colonized mind",
+    group: "colonial-hangover",
     paragraphs: [
       "In 1835, Thomas Macaulay declared that 'a single shelf of a good European library was worth the whole native literature of India and Arabia.' This wasn't an opinion — it became British policy. English was made the language of power. Sanskrit, Persian, Hindi, Tamil — all pushed aside. Generations were taught their own languages weren't good enough for science or philosophy.",
       "That's the deepest scar of colonization — not the wealth stolen, but the identity erased. When you're raised believing your language is backward, your culture is primitive, your history is unimportant, you start believing it. The British left nearly 80 years ago. But the voice that says 'ours isn't good enough'? That voice takes generations to silence. Recognizing it is the first step."
@@ -203,6 +188,7 @@ const CURIOSITY_STORIES = [
     title: "In 10,000 Years of Civilization, India Never Invaded a Single Country",
     source: "A History Without Conquest",
     tag: "the quiet giant",
+    group: "flexes",
     paragraphs: [
       "Name one country India invaded to colonize. You can't. Because it never happened. In 10,000 years of continuous civilization, India never launched a war of aggression to take someone else's land. Its ideas — Buddhism, mathematics, philosophy — spread across Asia through teachers and traders, not soldiers and swords.",
       "Think about how rare that is. Almost every great civilization — Rome, Britain, Persia, Mongolia, China — built itself through conquest. India built itself through absorption. It welcomed invaders, absorbed their cultures, and outlasted them all. That's not weakness. That's a different kind of strength. The kind that doesn't need to dominate to matter."
@@ -212,11 +198,18 @@ const CURIOSITY_STORIES = [
     title: "The World's Persecuted Found a Home in India. Every Single Time.",
     source: "India's Legacy of Refuge",
     tag: "the open door",
+    group: "flexes",
     paragraphs: [
       "When Jews fled persecution 2,000 years ago, India welcomed them. They still live here peacefully. When the first Christians arrived with Thomas, India gave them space. When Parsees escaped religious genocide in Persia, India said: stay. When Tibetans fled China, India opened its borders. When Sri Lankans, Burmese, and Bangladeshis fled war, India didn't turn them away.",
       "There is no other country on Earth that can tell this story. India has been absorbing the world's refugees for millennia — not because it had to, but because its culture never learned to say no. The guest is God. Atithi Devo Bhava. That's not just a saying. It's the quietest, most beautiful revolution in human history."
     ]
   }
+]
+
+const CURIOSITY_GROUPS = [
+  { id: 'colonial-hangover', label: 'the colonial hangover', emoji: '🧠', desc: 'How 200 years of colonization rewired what we learn, how we see ourselves, and what success means.' },
+  { id: 'flexes', label: 'flexes that go hard', emoji: '🔥', desc: 'Mars missions on a shoestring, inventing the flush toilet millennia ahead of schedule — India didn\'t just show up, it showed out.' },
+  { id: 'pop-culture', label: 'pop culture rabbit holes', emoji: '🎬', desc: 'The Matrix, Oppenheimer, CERN — turns out the coolest modern references are all footnotes to ancient Indian texts.' },
 ]
 
 const SCHOLARS = [
@@ -457,8 +450,15 @@ function Heritage() {
   const [modalData, setModalData] = useState(null)
   const [showAllGrid, setShowAllGrid] = useState(false)
   const [introOpen, setIntroOpen] = useState(false)
+  const [expandedGroups, setExpandedGroups] = useState(['colonial-hangover'])
   const scrollRef = useRef(null)
   const [isPlayingSound, setIsPlayingSound] = useState(false)
+
+  const toggleGroup = (id) => {
+    setExpandedGroups(prev =>
+      prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]
+    )
+  }
 
   const handleWatchIntro = () => {
     setIntroOpen(true)
@@ -546,22 +546,22 @@ function Heritage() {
         }
 
         .heritage-page-container.dark-theme {
-          --heritage-bg: #030e14;
-          --heritage-bg-rgb: 3, 14, 20;
+          --heritage-bg: #120a05;
+          --heritage-bg-rgb: 18, 10, 5;
           --heritage-text: #f2ebd9;
-          --heritage-muted: #8a969b;
+          --heritage-muted: #9a8f82;
           --heritage-gold: #c9a84c;
           --heritage-gold-rgb: 201, 168, 76;
           --heritage-gold-hover: #e8c46a;
-          --heritage-card-bg: rgba(4, 20, 29, 0.85);
-          --heritage-card-border: rgba(201, 168, 76, 0.14);
-          --heritage-header-bg: rgba(3, 14, 20, 0.85);
+          --heritage-card-bg: rgba(26, 16, 8, 0.92);
+          --heritage-card-border: rgba(201, 168, 76, 0.16);
+          --heritage-header-bg: rgba(18, 10, 5, 0.88);
           --heritage-header-border: rgba(201, 168, 76, 0.08);
-          --heritage-category-bg: #05141e;
-          --heritage-category-border: rgba(201, 168, 76, 0.15);
+          --heritage-category-bg: #1c1008;
+          --heritage-category-border: rgba(201, 168, 76, 0.16);
           --heritage-category-active: #c9a84c;
-          --heritage-category-active-text: #030e14;
-          --heritage-footer-bg: #020b10;
+          --heritage-category-active-text: #120a05;
+          --heritage-footer-bg: #0d0703;
           --heritage-footer-border: rgba(201, 168, 76, 0.1);
         }
 
@@ -703,8 +703,8 @@ function Heritage() {
         }
 
         .dark-theme .hero-content {
-          background: rgba(3, 14, 20, 0.45);
-          border-color: rgba(201, 168, 76, 0.12);
+          background: rgba(18, 10, 5, 0.5);
+          border-color: rgba(201, 168, 76, 0.14);
           box-shadow: 
             0 20px 50px rgba(0, 0, 0, 0.35),
             inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -1319,16 +1319,23 @@ function Heritage() {
         .curiosity-container {
           max-width: 1280px;
           margin: 0 auto;
-          display: grid;
-          grid-template-columns: 0.32fr 0.68fr;
+          display: flex;
+          flex-direction: column;
           gap: 40px;
         }
 
-        .curiosity-left {
+        /* Header row — eyebrow + title on left, button on right, same as ideas-section */
+        .curiosity-header-row {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 24px;
+        }
+
+        .curiosity-header-left {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          justify-content: center;
         }
 
         .curiosity-left-desc {
@@ -1336,7 +1343,8 @@ function Heritage() {
           font-size: 0.95rem;
           line-height: 1.65;
           opacity: 0.8;
-          margin-bottom: 28px;
+          margin-bottom: 0;
+          max-width: 560px;
         }
 
         .curiosity-grid {
@@ -1345,37 +1353,213 @@ function Heritage() {
           gap: 20px;
         }
 
+        /* Curiosity card title inside the accordion cards */
         .curiosity-card-title {
           font-family: 'Cormorant Garamond', serif;
-          font-size: 1.35rem;
-          font-weight: 500;
-          line-height: 1.4;
-          margin: 0 0 16px;
+          font-size: 1.15rem;
+          font-weight: 600;
+          line-height: 1.45;
+          margin: 0 0 auto;
           color: var(--heritage-text);
           font-style: italic;
           z-index: 2;
+          flex: 1;
+        }
+
+        /* Tag line beneath the title */
+        .curiosity-card-tag {
+          font-family: 'Cinzel', serif;
+          font-size: 0.6rem;
+          font-weight: 700;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          color: var(--heritage-gold);
+          opacity: 0.85;
+          margin-bottom: 10px;
+          z-index: 2;
+        }
+
+        .curiosity-card-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 14px;
+          z-index: 2;
+        }
+
+        .curiosity-card-read {
+          font-family: 'Cinzel', serif;
+          font-size: 0.6rem;
+          font-weight: 700;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          color: var(--heritage-gold);
+          opacity: 0;
+          transition: opacity 0.25s;
+        }
+
+        .curiosity-grid-card:hover .curiosity-card-read {
+          opacity: 1;
         }
 
         .curiosity-card-btn {
-          align-self: flex-end;
           background: rgba(var(--heritage-gold-rgb), 0.1);
-          border: none;
+          border: 1px solid rgba(var(--heritage-gold-rgb), 0.2);
           color: var(--heritage-gold);
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 28px;
-          height: 28px;
+          width: 30px;
+          height: 30px;
           border-radius: 50%;
           transition: all 0.25s;
           z-index: 2;
+          flex-shrink: 0;
         }
 
         .curiosity-grid-card:hover .curiosity-card-btn {
           background-color: var(--heritage-gold);
           color: var(--heritage-bg);
+          border-color: var(--heritage-gold);
           transform: translateX(3px);
+        }
+
+        /* Collapsible Curiosity Groups */
+        .curiosity-groups {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .curiosity-group {
+          border-radius: 18px;
+          border: 1px solid var(--heritage-card-border);
+          background: var(--heritage-card-bg);
+          overflow: hidden;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .curiosity-group:hover {
+          border-color: rgba(var(--heritage-gold-rgb), 0.35);
+          box-shadow: 0 4px 20px rgba(var(--heritage-gold-rgb), 0.08);
+        }
+
+        .curiosity-group-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          width: 100%;
+          padding: 18px 20px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: var(--heritage-text);
+          font-family: 'Outfit', sans-serif;
+          font-size: 0.9rem;
+          font-weight: 600;
+          text-align: left;
+          transition: background 0.2s;
+        }
+
+        .curiosity-group-header:hover {
+          background: rgba(var(--heritage-gold-rgb), 0.05);
+        }
+
+        .curiosity-group-emoji {
+          font-size: 1.2rem;
+          line-height: 1;
+          flex-shrink: 0;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(var(--heritage-gold-rgb), 0.08);
+          border-radius: 8px;
+          border: 1px solid rgba(var(--heritage-gold-rgb), 0.15);
+        }
+
+        .curiosity-group-label {
+          flex: 1;
+          font-size: 0.92rem;
+        }
+
+        .curiosity-group-count {
+          font-size: 0.68rem;
+          font-weight: 600;
+          opacity: 0.5;
+          white-space: nowrap;
+          font-family: 'Cinzel', serif;
+          letter-spacing: 0.5px;
+          margin-right: 6px;
+          background: rgba(var(--heritage-gold-rgb), 0.08);
+          padding: 2px 8px;
+          border-radius: 99px;
+          border: 1px solid rgba(var(--heritage-gold-rgb), 0.12);
+        }
+
+        .curiosity-group-arrow {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+          color: var(--heritage-gold);
+          flex-shrink: 0;
+          background: rgba(var(--heritage-gold-rgb), 0.06);
+        }
+
+        .curiosity-group-arrow.open {
+          transform: rotate(90deg);
+        }
+
+        .curiosity-group-content {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+          opacity: 0;
+          overflow: hidden;
+        }
+        .curiosity-group-content.open {
+          grid-template-rows: 1fr;
+          opacity: 1;
+        }
+        .curiosity-group-content-inner {
+          min-height: 0;
+        }
+
+        .curiosity-group-desc {
+          font-family: 'Lora', serif;
+          font-size: 0.8rem;
+          line-height: 1.6;
+          opacity: 0.65;
+          padding: 0 20px 14px;
+          margin: 0;
+          border-bottom: 1px solid rgba(var(--heritage-gold-rgb), 0.08);
+          margin-bottom: 4px;
+        }
+
+        .curiosity-group-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 10px;
+          padding: 14px 16px 16px;
+        }
+
+        /* Override curiosity-grid-card inside accordion to be smaller/tighter */
+        .curiosity-group-grid .curiosity-grid-card {
+          padding: 20px 18px;
+          border-radius: 14px;
+          min-height: 140px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .curiosity-media-footer {
+          margin-top: 12px;
         }
 
         /* Press Play Media Card */
@@ -1579,109 +1763,6 @@ function Heritage() {
           justify-content: space-between;
         }
 
-        /* Page Footer */
-        .page-footer {
-          background-color: var(--heritage-footer-bg);
-          border-top: 1px solid var(--heritage-footer-border);
-          padding: 80px 48px;
-          position: relative;
-          z-index: 10;
-        }
-
-        .footer-container {
-          max-width: 1280px;
-          margin: 0 auto;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 60px;
-        }
-
-        .footer-left {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          max-width: 320px;
-        }
-
-        .footer-tagline {
-          font-size: 0.82rem;
-          line-height: 1.6;
-          opacity: 0.6;
-          font-weight: 300;
-        }
-
-        .footer-center {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          max-width: 440px;
-        }
-
-        .footer-quote {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 1.7rem;
-          font-weight: 500;
-          color: var(--heritage-gold);
-          margin: 0 0 10px;
-        }
-
-        .footer-quote-translation {
-          font-size: 0.88rem;
-          opacity: 0.7;
-          margin: 0;
-          font-weight: 300;
-        }
-
-        .footer-right {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 20px;
-        }
-
-        .social-row {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .social-link {
-          color: var(--heritage-text);
-          opacity: 0.65;
-          transition: opacity 0.2s, color 0.2s;
-        }
-
-        .social-link:hover {
-          opacity: 1;
-          color: var(--heritage-gold);
-        }
-
-        .footer-links-row {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-        }
-
-        .footer-links-row a {
-          text-decoration: none;
-          font-size: 0.78rem;
-          color: var(--heritage-text);
-          opacity: 0.6;
-          transition: opacity 0.2s;
-        }
-
-        .footer-links-row a:hover {
-          opacity: 1;
-        }
-
-        .footer-made-with {
-          font-size: 0.72rem;
-          opacity: 0.45;
-          margin-top: 10px;
-        }
-
         /* Responsiveness Styling */
         @media (max-width: 1024px) {
           .hero-container {
@@ -1690,22 +1771,18 @@ function Heritage() {
           .hero-content {
             align-items: center;
           }
-          .ideas-container, .curiosity-container {
+          .ideas-container {
             grid-template-columns: 1fr;
             gap: 40px;
           }
-          .ideas-left, .curiosity-left {
+          .ideas-left {
             align-items: center;
             text-align: center;
           }
-          .footer-container {
+          .curiosity-header-row {
             flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 40px;
-          }
-          .footer-right {
-            align-items: center;
+            align-items: flex-start;
+            gap: 20px;
           }
         }
 
@@ -1736,19 +1813,14 @@ function Heritage() {
           .ideas-section {
             padding: 40px 24px;
           }
-          .ideas-grid, .curiosity-grid {
+          .ideas-grid {
             grid-template-columns: 1fr;
           }
           .curiosity-section {
             padding: 40px 24px 80px;
           }
-          .page-footer {
-            padding: 60px 24px;
-          }
-          .footer-links-row {
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 16px;
+          .curiosity-group-grid {
+            grid-template-columns: 1fr;
           }
           .categories-bar {
             border-radius: 20px;
@@ -1861,7 +1933,7 @@ function Heritage() {
           position: fixed;
           inset: 0;
           z-index: 9999;
-          background-color: rgba(3, 14, 20, 0.85);
+          background-color: rgba(12, 7, 3, 0.88);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           display: flex;
@@ -2233,39 +2305,71 @@ function Heritage() {
         {/* ─── LATE NIGHT CURIOSITY SECTION ─── */}
         <section id="curiosity" className="curiosity-section">
           <div className="curiosity-container">
-            <div className="curiosity-left">
-              <span className="section-eyebrow">sit with this. 🌙</span>
-              <h2 className="section-title" style={{marginBottom: '20px'}}>Things That Don't Feel Real</h2>
-              <p className="curiosity-left-desc">Not history. Not facts. Just quiet mind-bending moments from a past that feels impossibly ahead of itself. A pillar that refuses to rust. A universe that hums. A recipe that vanished. Sit with these.</p>
-              <button className="btn-ideas-more" onClick={() => setModalData({
+
+            {/* Section header — full width, matching ideas-section style */}
+            <div className="curiosity-header-row">
+              <div className="curiosity-header-left">
+                <span className="section-eyebrow">sit with this. 🌙</span>
+                <h2 className="section-title" style={{marginBottom: '12px'}}>Things That Don't Feel Real</h2>
+                <p className="curiosity-left-desc">Not history. Not facts. Just quiet mind-bending moments from a past that feels impossibly ahead of itself. Click any story to sit with it.</p>
+              </div>
+              <button className="btn-ideas-more" style={{flexShrink: 0}} onClick={() => setModalData({
                 title: CURIOSITY_STORIES[0].title,
                 source: CURIOSITY_STORIES[0].source,
                 paragraphs: CURIOSITY_STORIES[0].paragraphs,
                 tag: CURIOSITY_STORIES[0].tag
-              })}>read stories <ArrowRight size={13} /></button>
+              })}>read a story <ArrowRight size={13} /></button>
             </div>
-            
-            <div className="curiosity-grid">
-              {CURIOSITY_STORIES.map((story, i) => (
-                <div 
-                  key={i} 
-                  className="curiosity-grid-card fs-gold-corner-card fs-sandstone-tablet" 
-                  onClick={() => setModalData({
-                    title: story.title,
-                    source: story.source,
-                    paragraphs: story.paragraphs,
-                    tag: story.tag
-                  })}
-                >
-                  <h3 className="curiosity-card-title">{story.title}</h3>
-                  <button className="curiosity-card-btn" aria-label="Read story">
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              ))}
+
+            {/* Accordion groups — full width */}
+            <div className="curiosity-groups">
+              {CURIOSITY_GROUPS.map(group => {
+                const isOpen = expandedGroups.includes(group.id)
+                const stories = CURIOSITY_STORIES.filter(s => s.group === group.id)
+                return (
+                  <div key={group.id} className="curiosity-group">
+                    <button className="curiosity-group-header" onClick={() => toggleGroup(group.id)}>
+                      <span className="curiosity-group-emoji">{group.emoji}</span>
+                      <span className="curiosity-group-label">{group.label}</span>
+                      <span className="curiosity-group-count">{stories.length} {stories.length === 1 ? 'story' : 'stories'}</span>
+                      <span className={`curiosity-group-arrow ${isOpen ? 'open' : ''}`}>
+                        <ChevronRight size={14} />
+                      </span>
+                    </button>
+                    <div className={`curiosity-group-content ${isOpen ? 'open' : ''}`}>
+                      <div className="curiosity-group-content-inner">
+                        <p className="curiosity-group-desc">{group.desc}</p>
+                        <div className="curiosity-group-grid">
+                          {stories.map((story, i) => (
+                            <div
+                              key={i}
+                              className="curiosity-grid-card fs-gold-corner-card fs-sandstone-tablet"
+                              onClick={() => setModalData({
+                                title: story.title,
+                                source: story.source,
+                                paragraphs: story.paragraphs,
+                                tag: story.tag
+                              })}
+                            >
+                              <span className="curiosity-card-tag">{story.tag}</span>
+                              <h3 className="curiosity-card-title">{story.title}</h3>
+                              <div className="curiosity-card-footer">
+                                <span className="curiosity-card-read">read story</span>
+                                <button className="curiosity-card-btn" aria-label="Read story">
+                                  <ArrowRight size={13} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
 
               {/* Reading Aid Meditative BGM Card */}
-              <div className="curiosity-grid-card media-card fs-gold-corner-card fs-sandstone-tablet">
+              <div className="curiosity-grid-card media-card fs-gold-corner-card fs-sandstone-tablet curiosity-media-footer">
                 <button className="play-btn-circle" onClick={togglePlaySound} aria-label={isPlayingSound ? "Pause sound" : "Play sound"}>
                   {isPlayingSound ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" style={{transform: 'translateX(2px)'}} />}
                 </button>
@@ -2287,50 +2391,7 @@ function Heritage() {
           </div>
         </section>
 
-        {/* ─── ELEGANT FOOTER ─── */}
-        <footer className="page-footer">
-          <div className="footer-container">
-            <div className="footer-left">
-              <div className="logo-group">
-                <FlowSymbol size={24} dark={dark} />
-                <div className="logo-text">
-                  <span className="logo-title">FLOWSTATE</span>
-                  <span className="logo-subtitle">धीरे धीरे रे मना</span>
-                </div>
-              </div>
-              <p className="footer-tagline">Listening to the voices that refused to be silenced by time. Their questions are still our questions.</p>
-            </div>
-
-            <div className="footer-center">
-              <p className="footer-quote">"विद्या विनयेन शोभते"</p>
-              <p className="footer-quote-translation">Knowledge is beautiful when it brings humility.</p>
-            </div>
-
-            <div className="footer-right">
-              <div className="social-row">
-                <a href="#" className="social-link" aria-label="Instagram">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37zM17.5 6.5h.01"/></svg>
-                </a>
-                <a href="#" className="social-link" aria-label="Pinterest">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="20"/><path d="M12 2C6.48 2 2 6.48 2 12c0 4.27 2.68 7.9 6.47 9.35-.08-.8-.16-2.03.03-2.9.18-.77 1.15-4.88 1.15-4.88s-.29-.59-.29-1.47c0-1.38.8-2.41 1.8-2.41.85 0 1.26.64 1.26 1.4 0 .85-.54 2.14-.82 3.32-.24 1 .5 1.8 1.48 1.8 1.77 0 3.13-1.87 3.13-4.57 0-2.39-1.72-4.06-4.17-4.06-2.84 0-4.51 2.13-4.51 4.33 0 .86.33 1.78.74 2.28a.3.3 0 0 1 .07.28c-.08.33-.26 1.07-.3 1.21-.05.21-.17.26-.39.15-1.46-.68-2.38-2.82-2.38-4.54 0-3.69 2.69-7.09 7.74-7.09 4.06 0 7.22 2.89 7.22 6.76 0 4.04-2.54 7.29-6.08 7.29-1.19 0-2.31-.62-2.69-1.35l-.73 2.8c-.27 1.02-1 2.3-1.49 3.09C10.08 21.91 11.02 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                </a>
-                <a href="#" className="social-link" aria-label="Spotify">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 11.5c2.5-1 5.5-1 8 0M9 15c2-.7 4-.7 6 0M7 8c3-1.5 7-1.5 10 0"/></svg>
-                </a>
-              </div>
-              
-              <div className="footer-links-row">
-                <a href="/about">about</a>
-                <a href="/blog">blog</a>
-                <a href="/contact">contact</a>
-                <a href="/careers">careers</a>
-                <a href="/privacy">privacy</a>
-              </div>
-              
-              <span className="footer-made-with">made with intention ♥</span>
-            </div>
-          </div>
-        </footer>
+        <ImmersiveFooter />
       </div>
 
       {/* ─── INTRO SANCTUARY MODAL ─── */}

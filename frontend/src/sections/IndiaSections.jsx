@@ -2,8 +2,8 @@ import { useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useTheme } from '../context/ThemeContext'
 import { INDIA_LEGACY } from '../utils'
-import SectionHeading from '../components/SectionHeading'
-import OrnateDivider from '../components/OrnateDivider'
+import SectionHeading from '../components/ui/SectionHeading'
+import OrnateDivider from '../components/ui/OrnateDivider'
 import DiyaLamp from '../icons/DiyaLamp'
 
 const fadeUp = (delay = 0) => ({

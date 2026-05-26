@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Send, Flame, Heart, Share2, Users, Check, MessageSquare, Compass, Award } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { useAuth } from '../context/AuthContext'
-import { useNotif } from '../components/NotificationPopup'
-import PageLayout from '../components/PageLayout'
+import { useNotif } from '../components/system/NotificationPopup'
+import PageLayout from '../components/ui/PageLayout'
 import LotusFlower from '../icons/LotusFlower'
 import DiyaLamp from '../icons/DiyaLamp'
-import communityBg from '../assets/community_bg.png'
+import communityBg from '../assets/community_bg.webp'
 
 const DUMMY_ACTIVITIES = [
   { id: 'act-1', name: 'Sneha Sharma', avatar: '🌸', habit: '🧘 Meditation & Sadhana', streak: 24, time: '20 minutes ago', text: 'Completed 15 minutes of Pranayama and morning meditation. Feeling deeply grounded today.', prana: 142, comments: 3, color: '#E8622A' },

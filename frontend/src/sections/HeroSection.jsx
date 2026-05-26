@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState, useMemo } from 'react'
-import MandalaQuoteCard from '../components/MandalaQuoteCard'
+import MandalaQuoteCard from '../components/ui/MandalaQuoteCard'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import morningBg from '../assets/hero/morningBg.webp'
 import afternoonBg from '../assets/hero/afternoonBg.webp'
@@ -583,12 +583,12 @@ export default function HeroSection({ reflection }) {
         }}>
           <HeroText tod={tod} config={config} reflection={reflection} />
 
-          {/* MandalaQuoteCard — unchanged, right side */}
+          {/* MandalaQuoteCard — responsive alignment */}
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5 }}
-            style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'center', marginLeft: '4.6rem' }}
+            className="flex-none flex justify-center ml-0 lg:ml-[4.6rem] mt-6 lg:mt-0"
           >
             <MandalaQuoteCard tod={tod} />
           </motion.div>

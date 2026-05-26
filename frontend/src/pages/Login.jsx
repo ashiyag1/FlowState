@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react'
-import { useNotif } from '../components/NotificationPopup'
+import { useNotif } from '../components/system/NotificationPopup'
 import { useAuth } from '../context/AuthContext'
-import PageLayout from '../components/PageLayout'
+import PageLayout from '../components/ui/PageLayout'
 
 const stagger = {
   initial: { opacity: 0 },
