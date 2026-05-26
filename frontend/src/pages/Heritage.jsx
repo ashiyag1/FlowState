@@ -165,6 +165,26 @@ const CURIOSITY_STORIES = [
     ]
   },
   {
+    title: "The Beatles Went to an Indian Ashram and Changed Music Forever",
+    source: "Rishikesh, 1968",
+    tag: "when the west tuned in",
+    group: "pop-culture",
+    paragraphs: [
+      "In 1968, The Beatles traveled to Rishikesh to study Transcendental Meditation with Maharishi Mahesh Yogi. They stayed in a simple ashram, woke up at 3 AM for meditation, and wrote 48 songs — nearly half of which ended up on the White Album. Something about the silence of the Himalayas unlocked a creative surge that the noise of London never could.",
+      "That trip didn't just change The Beatles. It changed music. George Harrison brought the sitar into Western pop. The idea of meditation entered the mainstream. 60,000 people a year started making the same pilgrimage to Rishikesh. A generation raised on rock 'n' roll discovered that the most profound sound they'd ever heard wasn't a guitar riff — it was silence."
+    ]
+  },
+  {
+    title: "Doctor Strange Walks Through a Multiverse That Ancient India Mapped Centuries Ago",
+    source: "Marvel Meets Vedanta",
+    tag: "the original multiverse",
+    group: "pop-culture",
+    paragraphs: [
+      "Doctor Strange travels through astral planes, bends reality, and opens a third eye to see beyond the physical world. Marvel calls it fiction. Ancient India called it Vedanta. The concept of multiple universes — lokas — has existed in Hindu cosmology for thousands of years. Astral projection, the third eye, the idea that reality is a construct shaped by consciousness — none of this is new.",
+      "The Ancient One tells Strange that 'we never lose our demons — we only learn to live above them.' That's not a superhero pep talk. That's the entire philosophy of the Bhagavad Gita. The multiverse isn't a Marvel invention. It's a very old Indian idea dressed in a cape. Strange didn't discover the multiverse. He just reminded us how much we forgot."
+    ]
+  },
+  {
     title: "Before Paris or Milan, India Ruled Global Fashion for 2,000 Years",
     source: "India's Textile Empire",
     tag: "forgotten history",
@@ -182,6 +202,16 @@ const CURIOSITY_STORIES = [
     paragraphs: [
       "In 1835, Thomas Macaulay declared that 'a single shelf of a good European library was worth the whole native literature of India and Arabia.' This wasn't an opinion — it became British policy. English was made the language of power. Sanskrit, Persian, Hindi, Tamil — all pushed aside. Generations were taught their own languages weren't good enough for science or philosophy.",
       "That's the deepest scar of colonization — not the wealth stolen, but the identity erased. When you're raised believing your language is backward, your culture is primitive, your history is unimportant, you start believing it. The British left nearly 80 years ago. But the voice that says 'ours isn't good enough'? That voice takes generations to silence. Recognizing it is the first step."
+    ]
+  },
+  {
+    title: "The Language You Speak Decides How Much the World Respects You",
+    source: "The English Class Divide",
+    tag: "the accent of power",
+    group: "colonial-hangover",
+    paragraphs: [
+      "India has more English speakers than the entire population of the UK. But here's the uncomfortable truth: the ones who speak it with a 'native' accent get called for the job interview. The ones who speak it with an Indian accent get told 'we'll keep your resume on file.' We've built a country where your mother tongue can determine your ceiling before you even start.",
+      "Macaulay wanted a class of interpreters — Indians who would bridge the gap between the rulers and the ruled. He created exactly that. Two centuries later, we still measure intelligence by fluency in a language we inherited, not one we chose. The irony? Sanskrit, Tamil, and Telugu are older than English will ever be. But colonialism taught us to hear our own languages as inferior."
     ]
   },
   {
