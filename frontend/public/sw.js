@@ -1,6 +1,6 @@
 // sw.js — service worker with push notifications & offline support
 
-const CACHE_NAME = 'flowstate-v1';
+const CACHE_NAME = 'flowstate-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
