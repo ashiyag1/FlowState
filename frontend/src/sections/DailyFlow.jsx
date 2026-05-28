@@ -1,12 +1,11 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Users, Landmark } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { useWellness } from '../context/WellnessContext'
 import { pct as calcPct } from '../utils'
 
 import SankalpaCard from '../components/dashboard/SankalpaCard'
-import DateCard from '../components/dashboard/DateCard'
 import StatCard from '../components/ui/StatCard'
 import LotusRow from '../components/tracker/LotusRow'
 import TambaaVessel from '../icons/TambaaVessel'
@@ -21,12 +20,7 @@ const fadeUp = (delay = 0) => ({
   show: { opacity: 1, y: 0, transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] } },
 })
 
-const FEATURES = [
-  { to: '/journal', title: 'Set Something Down', desc: 'A private page for what still feels tender, unfinished, or too loud to carry.', accent: '#E87722' },
-  { to: '/quotes', title: 'Read One Steady Thought', desc: 'A small piece of wisdom for the moment you do not want more noise.', accent: '#c9a84c' },
-  { to: '/water', title: 'Return to the Body', desc: 'A simple sip, logged quietly, to bring attention back from the mind.', accent: '#7EC8E3' },
-  { to: '/habits', title: 'Keep a Gentle Ritual', desc: 'Small repeated promises, held without guilt when life gets heavy.', accent: '#2D6A4F' },
-]
+
 
 function LotusDivider() {
   return (
@@ -60,6 +54,22 @@ export default function DailyFlow() {
   const { waterGoal, todayTotal, habits, todayHabitDone } = useWellness()
   const waterPct = calcPct(todayTotal, waterGoal)
   const doneCount = habits.filter(h => todayHabitDone[h.id]).length
+
+  // Journal streak
+  const { journal } = useWellness()
+  const journalStreak = (journal || []).length > 0 ? (() => {
+    const dates = [...new Set(journal.map(e => e.date))].sort().reverse()
+    let count = 0
+    const todayDate = new Date()
+    for (let i = 0; i < dates.length; i++) {
+      const d = new Date(todayDate)
+      d.setDate(d.getDate() - i)
+      const expected = d.toISOString().slice(0, 10)
+      if (dates[i] === expected) count++
+      else break
+    }
+    return count
+  })() : 0;
 
   // Time detection for late-night visual adjustments
   const currentHour = new Date().getHours()
@@ -137,7 +147,15 @@ export default function DailyFlow() {
           whileInView="show"
           viewport={{ once: true }}
         >
-          <DateCard />
+          <StatCard
+            type="streak"
+            emoji="🔥"
+            value={journalStreak}
+            unit="days"
+            label="Journal Streak"
+            sub={journalStreak >= 3 ? "You're on fire!" : "Write today to build momentum."}
+            to="/journal"
+          />
         </motion.div>
 
         <motion.div
@@ -184,75 +202,7 @@ export default function DailyFlow() {
         </motion.div>
       </div>
 
-      <DiyaDivider />
 
-      {/* ── EXPLORE (staggered editorial features) ── */}
-      <motion.div
-        variants={fadeUp(0)}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true }}
-        style={{ marginBottom: '1.8rem', textAlign: 'center' }}
-      >
-        <p style={{
-          fontFamily: "'Cinzel', serif", fontSize: '0.68rem', letterSpacing: '0.28em',
-          color: dark ? '#c9b080' : '#8B5E2F', textTransform: 'uppercase', marginBottom: 4,
-        }}>
-          {'\u2726'} Choose What Feels Gentle {'\u2726'}
-        </p>
-        <p style={{
-          fontFamily: "'Lora', serif", fontSize: '0.85rem', fontStyle: 'italic',
-          color: dark ? '#7a6a50' : '#a09070',
-        }}>
-          No pressure to finish anything. Just follow the softest next step.
-        </p>
-      </motion.div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {FEATURES.map((f, i) => (
-          <motion.div
-            key={f.to}
-            variants={fadeUp(i * 0.08)}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-          >
-            <Link to={f.to} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-              <div 
-                className="fs-gold-corner-card"
-                style={{
-                  position: 'relative',
-                  padding: '1.5rem 1.25rem',
-                  overflow: 'hidden',
-                  height: '100%',
-                }}
-              >
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-                  background: `linear-gradient(90deg, ${f.accent}, transparent)`,
-                }} />
-                <h3 style={{
-                  fontFamily: "'Cormorant Garamond', serif", fontSize: '1.22rem',
-                  fontWeight: 600, color: dark ? '#e8d9b5' : '#5C3D1E',
-                  margin: '0 0 0.4rem', lineHeight: 1.3,
-                }}>{f.title}</h3>
-                <p style={{
-                  fontFamily: "'Lora', serif", fontSize: '0.78rem',
-                  color: dark ? '#c9b080' : '#8B5E2F',
-                  lineHeight: 1.6, margin: '0 0 0.8rem',
-                }}>{f.desc}</p>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 4,
-                  fontFamily: "'Cinzel', serif", fontSize: '0.62rem',
-                  fontWeight: 700, color: f.accent, letterSpacing: '0.08em',
-                }}>
-                  Explore <ArrowRight size={10} />
-                </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
 
       {/* ── CLOSING: AFFIRMATION ── */}
       <motion.div

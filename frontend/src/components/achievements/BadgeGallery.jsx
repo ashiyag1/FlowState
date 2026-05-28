@@ -126,7 +126,7 @@ export default function BadgeGallery() {
               {filteredBadges.map(badge => {
                 const isLegendary = badge.rarity === 'Legendary';
                 const isLocked = !badge.isUnlocked;
-                const isHidden = isLegendary && isLocked;
+                const isHidden = false; // Legendary badges are visible in locked state like other badges
                 
                 const percentage = badge.targetProgress > 0 
                   ? Math.min((badge.progress / badge.targetProgress) * 100, 100)

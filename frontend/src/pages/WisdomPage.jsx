@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTheme } from '../context/ThemeContext'
-import { WisdomProvider, useWisdom } from '../context/WisdomContext'
+import { useWisdom } from '../context/WisdomContext'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useAchievements } from '../context/AchievementsContext'
@@ -15,7 +15,6 @@ import Sidebar from '../sections/wisdom/SideBar'
 import BookDetailModal from '../components/wisdom/BookDetailModal.jsx'
 import WisdomAmbientSound from '../components/wisdom/WisdomAmbientSound.jsx'
 import WisdomSparkles from '../components/wisdom/WisdomSparkles.jsx'
-import MandalaPortal from '../components/wisdom/MandalaPortal.jsx'
 import {
   FILTER_TOPICS, TOPIC_BOOKS, LIFE_ISSUES, TODAY_WISDOM,
 } from '../data/wisdomData'
@@ -27,7 +26,6 @@ function WisdomContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedBook, setSelectedBook] = useState(null)
   const [pendingBook, setPendingBook] = useState(null)
-  const [mandalaOpen, setMandalaOpen] = useState(false)
   const { dark } = useTheme()
   const { markStreakToday, openBook, getBookProgress } = useWisdom()
   const { trackEvent } = useAchievements()
@@ -68,18 +66,9 @@ function WisdomContent() {
       return
     }
     const resumeFrom = page ?? getBookProgress(book.id)
-    setPendingBook({ book, page: resumeFrom })
-    setMandalaOpen(true)
-  }
-
-  const handleMandalaComplete = () => {
-    if (pendingBook) {
-      const { book, page } = pendingBook
-      openBook(book, page)
-      setBookInitialPage(page)
-      setSelectedBook(book)
-    }
-    setMandalaOpen(false)
+    openBook(book, resumeFrom)
+    setBookInitialPage(resumeFrom)
+    setSelectedBook(book)
   }
 
   return (
@@ -137,12 +126,6 @@ function WisdomContent() {
           onClose={() => setSelectedBook(null)}
         />
       )}
-
-      <MandalaPortal 
-        isOpen={mandalaOpen}
-        book={pendingBook?.book}
-        onComplete={handleMandalaComplete}
-      />
     </div>
   )
 }
@@ -153,11 +136,7 @@ const LAYOUT = {
 }
 
 export default function WisdomPage() {
-  return (
-    <WisdomProvider>
-      <WisdomContent />
-    </WisdomProvider>
-  )
+  return <WisdomContent />
 }
 
 const styles = {

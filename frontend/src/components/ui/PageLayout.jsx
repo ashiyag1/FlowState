@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
 
 export default function PageLayout({ children, className = '' }) {
+  const hasPb = className.includes('pb-') || className.includes('py-') || className.includes('p-')
+  const defaultPadding = hasPb ? '' : 'pb-28 md:pb-12'
   return (
     <motion.main
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className={`min-h-screen pb-28 md:pb-12 dark:bg-ink ${className}`}
+      className={`min-h-screen dark:bg-ink ${defaultPadding} ${className}`}
     >
       {children}
     </motion.main>

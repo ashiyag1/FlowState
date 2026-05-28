@@ -356,53 +356,25 @@ function HeroText({ tod, config, reflection }) {
         transition={{ delay: 0.4 }}
         style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: '1rem' }}
       >
-        <motion.div
+        <motion.button
           whileHover={{ scale: 1.04, y: -2 }}
           whileTap={{ scale: 0.96 }}
-          style={{ display: 'inline-block' }}
+          onClick={() => window.scrollBy({ top: window.innerHeight - 80, behavior: 'smooth' })}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '13px 28px', borderRadius: 999, textDecoration: 'none',
+            fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', fontWeight: 600,
+            color: 'white', letterSpacing: '0.06em',
+            background: 'linear-gradient(135deg, rgba(232, 119, 34, 0.45) 0%, rgba(201, 168, 76, 0.45) 100%)',
+            border: '2px double #e8c97a',
+            boxShadow: '0 6px 20px rgba(232, 119, 34, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+            transition: 'box-shadow 0.3s ease',
+            cursor: 'pointer',
+          }}
         >
-          <Link
-            to="/journal"
-            onClick={playHydrationSound}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '13px 28px', borderRadius: 999, textDecoration: 'none',
-              fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', fontWeight: 600,
-              color: 'white', letterSpacing: '0.06em',
-              background: 'linear-gradient(135deg, rgba(232, 119, 34, 0.45) 0%, rgba(201, 168, 76, 0.45) 100%)',
-              border: '2px double #e8c97a',
-              boxShadow: '0 6px 20px rgba(232, 119, 34, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
-              textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-              transition: 'box-shadow 0.3s ease',
-            }}
-          >
-            JOURNAL YOUR FLOW
-          </Link>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.04, y: -2 }}
-          whileTap={{ scale: 0.96 }}
-          style={{ display: 'inline-block' }}
-        >
-          <Link
-            to="/quotes"
-            onClick={playWisdomSound}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '13px 28px', borderRadius: 999, textDecoration: 'none',
-              fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', fontWeight: 600,
-              color: '#ffeab8', letterSpacing: '0.06em',
-              background: 'linear-gradient(135deg, rgba(43, 28, 12, 0.45) 0%, rgba(21, 10, 2, 0.45) 100%)',
-              border: '2px double rgba(201, 168, 76, 0.45)',
-              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-              transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-            }}
-          >
-            SEEK STEADY WISDOM
-          </Link>
-        </motion.div>
-
+          SCROLL TO BEST UTILIZE THE SITE ⬇
+        </motion.button>
       </motion.div>
 
       {/* Time-aware tagline */}
@@ -574,7 +546,7 @@ export default function HeroSection({ reflection }) {
         position: 'relative',
         zIndex: 10,
         width: '100%', maxWidth: 1180,
-        margin: '0 auto', padding: '7rem 1.5rem 2rem',
+        margin: '0 auto', padding: 'clamp(4.5rem, 10vw, 7rem) clamp(1rem, 4vw, 1.5rem) 2rem',
       }}>
         <div style={{
           display: 'flex', flexWrap: 'wrap',
@@ -583,12 +555,12 @@ export default function HeroSection({ reflection }) {
         }}>
           <HeroText tod={tod} config={config} reflection={reflection} />
 
-          {/* MandalaQuoteCard — responsive alignment */}
+          {/* MandalaQuoteCard — hidden on mobile to prevent overflow */}
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="flex-none flex justify-center ml-0 lg:ml-[4.6rem] mt-6 lg:mt-0"
+            className="hidden md:flex flex-none justify-center ml-0 lg:ml-[4.6rem] mt-6 lg:mt-0"
           >
             <MandalaQuoteCard tod={tod} />
           </motion.div>

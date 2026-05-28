@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { lazy, Suspense, useEffect } from 'react'
 import { ThemeProvider }   from './context/ThemeContext'
-import { AuthProvider }    from './context/AuthContext'
+import { AuthProvider, useAuth }    from './context/AuthContext'
 import { WellnessProvider } from './context/WellnessContext'
 import { AchievementsProvider } from './context/AchievementsContext'
+import { WisdomProvider } from './context/WisdomContext'
 import { SoundEffectsProvider } from './context/SoundEffectsContext'
 import { NotificationProvider } from './components/system/NotificationPopup'
 import Navbar  from './components/ui/Navbar'
@@ -73,7 +74,6 @@ function PageLoader() {
 }
 
 const Home        = lazy(() => import('./pages/Home'))
-const Water       = lazy(() => import('./pages/Water'))
 const Habits      = lazy(() => import('./pages/Habits'))
 const Journal     = lazy(() => import('./pages/Journal'))
 const WisdomPage  = lazy(() => import('./pages/WisdomPage'))
@@ -82,11 +82,51 @@ const Community   = lazy(() => import('./pages/Community'))
 const Login       = lazy(() => import('./pages/Login'))
 const AIAssistant = lazy(() => import('./components/system/AIAssistant'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 
 function ScrollReset() {
   const { pathname } = useLocation()
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }) }, [pathname])
   return null
+}
+
+function AppContent() {
+  const { loading } = useAuth()
+  
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <PageLoader />
+      </div>
+    )
+  }
+
+  return (
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ScrollReset />
+      <Navbar />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/"        element={<Home />} />
+          <Route path="/habits"  element={<Habits />} />
+          <Route path="/journal" element={<Journal />} />
+          <Route path="/quotes"  element={<WisdomPage />} />
+          <Route path="/heritage" element={<Heritage />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/login"   element={<Login />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin"   element={<AdminDashboard />} />
+          <Route path="*"        element={<Home />} />
+        </Routes>
+      </Suspense>
+      <Suspense fallback={null}><AIAssistant /></Suspense>
+      <BadgeModal />
+      <BadgeGallery />
+      <BadgeToast />
+      <RetentionNudge />
+      <PwaInstallBanner />
+    </BrowserRouter>
+  )
 }
 
 export default function App() {
@@ -95,34 +135,13 @@ export default function App() {
       <NotificationProvider>
         <AuthProvider>
           <WellnessProvider>
-            <AchievementsProvider>
-              <SoundEffectsProvider>
-                <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-                  <ScrollReset />
-                  <Navbar />
-                  <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                      <Route path="/"        element={<Home />} />
-                      <Route path="/water"   element={<Water />} />
-                      <Route path="/habits"  element={<Habits />} />
-                      <Route path="/journal" element={<Journal />} />
-                      <Route path="/quotes"  element={<WisdomPage />} />
-                      <Route path="/heritage" element={<Heritage />} />
-                      <Route path="/community" element={<Community />} />
-                      <Route path="/login"   element={<Login />} />
-                      <Route path="/profile" element={<ProfilePage />} />
-                      <Route path="*"        element={<Home />} />
-                    </Routes>
-                  </Suspense>
-                  <Suspense fallback={null}><AIAssistant /></Suspense>
-                  <BadgeModal />
-                  <BadgeGallery />
-                  <BadgeToast />
-                  <RetentionNudge />
-                  <PwaInstallBanner />
-                </BrowserRouter>
-              </SoundEffectsProvider>
-            </AchievementsProvider>
+            <WisdomProvider>
+              <AchievementsProvider>
+                <SoundEffectsProvider>
+                  <AppContent />
+                </SoundEffectsProvider>
+              </AchievementsProvider>
+            </WisdomProvider>
           </WellnessProvider>
         </AuthProvider>
       </NotificationProvider>

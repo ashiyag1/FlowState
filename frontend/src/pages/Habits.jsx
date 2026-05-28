@@ -11,6 +11,8 @@ import PageLayout from '../components/ui/PageLayout'
 import HabitCheckbox from '../components/tracker/HabitCheckbox'
 import StreakFlame from '../components/tracker/StreakFlame'
 import ShimmerBar from '../components/tracker/ShimmerBar'
+import WaterWidget from '../components/tracker/WaterWidget'
+import DailyTasksWidget from '../components/tracker/DailyTasksWidget'
 import habitsBg from '../assets/pages/habits_bg.webp'
 import { getHinduDetails, getScientificInsights } from '../utils/hinduCalendar'
 import { fmtDate } from '../utils'
@@ -20,91 +22,14 @@ const ICONS = ['🏃','🧘','💧','📖','🌿','🍎','🏋️','✍️','�
 const HABIT_COLORS = ['#E8622A','#C9933A','#D4607A','#1A7A4E','#1B4FA8','#7B68AE','#1A8A7A','#E86060']
 
 const RITUAL_IDEAS = [
-  { category: '🧘 Yoga & Movement', items: [
+  { category: '🧘 Popular Rituals', items: [
     { name: 'Surya Namaskar', icon: '🧘' },
-    { name: 'Moon Salutations', icon: '🌙' },
-    { name: 'Morning Stretch Flow', icon: '🤸' },
-    { name: 'Sunset Yoga', icon: '🌅' },
-    { name: 'Neck & Shoulder Rolls', icon: '🦢' },
-    { name: 'Balance Poses', icon: '🦩' },
-    { name: 'Hip Openers', icon: '🦋' },
-  ]},
-  { category: '🌿 Meditation & Breath', items: [
-    { name: 'Anulom Vilom', icon: '🫁' },
-    { name: 'Box Breathing', icon: '⬛' },
-    { name: 'Body Scan Meditation', icon: '🔍' },
-    { name: 'Loving Kindness', icon: '💛' },
-    { name: 'Sitali Breath', icon: '❄️' },
-    { name: 'Trataka (Candle Gaze)', icon: '🕯️' },
-    { name: '5-Minute Silent Sit', icon: '🧘' },
-    { name: 'OM Chanting', icon: '🕉️' },
-  ]},
-  { category: '📖 Learning & Mind', items: [
-    { name: 'Read 10 Pages', icon: '📖' },
-    { name: 'Journal Entry', icon: '✍️' },
-    { name: 'Learn a Sanskrit Word', icon: '📜' },
-    { name: 'Gratitude List', icon: '🙏' },
-    { name: 'Affirmations', icon: '💫' },
-    { name: 'Write a Poem', icon: '🎭' },
-    { name: 'Study Bhagavad Gita', icon: '🪷' },
-  ]},
-  { category: '💪 Physical Wellness', items: [
-    { name: '10k Steps', icon: '🚶' },
-    { name: 'Drink 8 Glasses Water', icon: '💧' },
-    { name: 'Oil Pulling', icon: '🪥' },
-    { name: 'Tongue Scraping', icon: '👅' },
-    { name: 'Cold Shower', icon: '🧊' },
-    { name: 'Abhyanga (Self-Massage)', icon: '🛁' },
-    { name: 'Eye Palming', icon: '👁️' },
-  ]},
-  { category: '🎨 Creative Expression', items: [
-    { name: 'Draw or Doodle', icon: '🎨' },
-    { name: 'Play an Instrument', icon: '🎵' },
-    { name: 'Sing a Bhajan', icon: '🎤' },
-    { name: 'Dance Freely', icon: '💃' },
-    { name: 'Make a Vision Board', icon: '🌈' },
-    { name: 'Cook Mindfully', icon: '🍳' },
-  ]},
-  { category: '🌱 Nature & Grounding', items: [
-    { name: 'Walk Barefoot', icon: '🦶' },
-    { name: 'Sun Gazing', icon: '☀️' },
-    { name: 'Water Plants', icon: '🌻' },
-    { name: 'Sit Under a Tree', icon: '🌳' },
-    { name: 'Moon Bathing', icon: '🌕' },
-    { name: 'Feed Birds', icon: '🐦' },
-    { name: 'Deepika Lighting', icon: '🪔' },
-  ]},
-  { category: '🧹 Mindful Habits', items: [
-    { name: 'Make Your Bed', icon: '🛌' },
-    { name: 'Declutter 5 Mins', icon: '🧹' },
-    { name: 'Digital Detox', icon: '📵' },
-    { name: 'No Complaints Day', icon: '🤐' },
-    { name: 'Organize Your Desk', icon: '📦' },
-    { name: 'Plan Tomorrow', icon: '📋' },
-  ]},
-  { category: '📚 Study & Productivity', items: [
-    { name: 'Pomodoro 25-5', icon: '⏱️' },
-    { name: 'Active Recall Session', icon: '🧠' },
-    { name: 'Make Revision Notes', icon: '📝' },
-    { name: 'Study One Chapter', icon: '📘' },
-    { name: 'Spaced Repetition', icon: '🔄' },
-    { name: 'Teach Someone a Topic', icon: '👩‍🏫' },
-    { name: 'Focus Music Session', icon: '🎧' },
-    { name: 'Solve Practice Qs', icon: '✏️' },
-    { name: 'Make a Mind Map', icon: '🗺️' },
-    { name: 'Review Mistakes Log', icon: '📓' },
-    { name: 'Watch a Learning Video', icon: '▶️' },
-    { name: 'Set 3 Daily Goals', icon: '🎯' },
-  ]},
-  { category: '🙏 Spiritual Practice', items: [
-    { name: 'Puja / Aarti', icon: '🪷' },
-    { name: 'Mala Japa', icon: '📿' },
-    { name: 'Read a Stotram', icon: '📜' },
-    { name: 'Light a Diya', icon: '🪔' },
-    { name: 'Offer Water to Sun', icon: '☀️' },
-    { name: 'Tulsi Pradakshina', icon: '🌿' },
-    { name: 'Bhajan Session', icon: '🎶' },
-  ]},
+    { name: 'Meditation', icon: '🌿' },
+    { name: 'Studies / Focus', icon: '📚' },
+    { name: 'Hydration', icon: '💧' },
+    { name: 'Journaling', icon: '✍️' },
+    { name: 'Reading', icon: '📖' },
+  ]}
 ]
 
 const MOOD_DETAILS = {
@@ -163,6 +88,8 @@ export default function Habits() {
   const [name, setName] = useState('')
   const [icon, setIcon] = useState(ICONS[0])
   const [selColor, setSelColor] = useState(HABIT_COLORS[0])
+  const [cycleLength, setCycleLength] = useState(7)
+  const [relaxDay, setRelaxDay] = useState('Sunday')
   const [calDate, setCalDate] = useState(new Date())
   const [showAddForm, setShowAddForm] = useState(false)
   
@@ -200,10 +127,12 @@ export default function Habits() {
       return
     }
     if (!name.trim()) return
-    addHabit({ name: name.trim(), icon, color: selColor })
+    addHabit({ name: name.trim(), icon, color: selColor, cycleLength, relaxDay, streakFreezes: 3 })
     setName('')
     setIcon(ICONS[0])
     setSelColor(HABIT_COLORS[0])
+    setCycleLength(7)
+    setRelaxDay('Sunday')
     setShowAddForm(false)
   }
 
@@ -337,153 +266,24 @@ export default function Habits() {
           </h1>
         </motion.div>
 
-        {/* 1. TODAY'S RHYTHM & MOOD SELECTOR (Full Width) */}
-        <motion.div 
-          initial="hidden" 
-          animate="show" 
-          variants={fadeUp(0.04)} 
-          style={{
-            background: dark ? 'rgba(20, 15, 10, 0.45)' : 'rgba(255, 252, 246, 0.65)',
-            border: dark ? '1px solid rgba(201, 168, 76, 0.16)' : '1px solid rgba(201, 168, 76, 0.22)',
-            borderRadius: '24px',
-            padding: '1.5rem',
-            marginBottom: '1.8rem',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            boxShadow: dark ? '0 12px 36px rgba(0,0,0,0.25)' : '0 12px 36px rgba(139,111,76,0.06)',
-          }}
-        >
-          {/* Gregorian + Indian Lunar Calendar Title */}
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gold/10 pb-3 mb-4">
-            <div>
-              <span className="text-[9px] uppercase tracking-widest text-saffron font-bold">
-                Gregorian + Indian Lunar Calendar
-              </span>
-              <h2 className="font-display text-base text-ivory font-semibold mt-0.5" style={{ color: dark ? '#f3edd7' : '#3d250d' }}>
-                {new Date(selectedIso).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
-                <span className="text-gold/60 ml-2 font-normal text-xs">
-                  — {selectedHindu.moonSymbol} {selectedHindu.tithiEmoji} {selectedHindu.tithiName} ({selectedHindu.paksha})
-                </span>
-              </h2>
-            </div>
-            {/* Soft observations */}
-            <p style={{
-              fontFamily: "'Lora', serif",
-              fontStyle: 'italic',
-              fontSize: '0.82rem',
-              color: dark ? '#ffeab8' : '#6b4c12',
-              margin: 0,
-              opacity: 0.85,
-            }}>
-              {getSubtleObservation()}
-            </p>
-          </div>
-
-          {/* Moods row */}
-          <div className="mb-4">
-            <span className="text-[9px] uppercase tracking-wider text-gold font-bold block mb-2">
-              What is your spirit seeking today?
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {Object.keys(MOOD_DETAILS).map((m) => {
-                const active = activeMood === m
-                return (
-                  <motion.button
-                    key={m}
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      setActiveMood(m)
-                      localStorage.setItem('fwa_ritual_mood', m)
-                    }}
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: '999px',
-                      fontSize: '11px',
-                      fontFamily: "'Cinzel', serif",
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      border: active 
-                        ? '1px solid #c9a84c' 
-                        : (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)'),
-                      background: active 
-                        ? 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.05) 100%)' 
-                        : (dark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0,0,0,0.02)'),
-                      color: active 
-                        ? (dark ? '#ffe090' : '#8a5a12') 
-                        : (dark ? '#e8d5a8' : '#5c3d1e'),
-                      boxShadow: active ? '0 0 12px rgba(201,168,76,0.18)' : 'none',
-                      transition: 'all 0.3s ease',
-                    }}
-                  >
-                    <span className="mr-1">{MOOD_DETAILS[m].icon}</span> {m}
-                  </motion.button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Suggested daily practice */}
-          <div style={{
-            background: dark ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.35)',
-            border: '1px dashed rgba(201, 168, 76, 0.25)',
-            borderRadius: '16px',
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-          }}>
-            <div className="flex-1">
-              <span className="text-[8px] uppercase tracking-wider text-saffron font-bold block">
-                Suggested {activeMood} Practice
-              </span>
-              <p className="text-xs text-ivory/80 leading-relaxed font-light mt-1" style={{ color: dark ? '#e8ebd8' : '#3a2007' }}>
-                <strong>{MOOD_DETAILS[activeMood].icon} {MOOD_DETAILS[activeMood].suggestion}</strong>
-              </p>
-              <p className="text-[10px] text-ink-soft/50 dark:text-ivory/50 font-light mt-0.5 italic">
-                {MOOD_DETAILS[activeMood].reflection}
-              </p>
-            </div>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                const newStatus = !isSuggestedDone
-                const updated = { ...completedMoods, [activeMood]: newStatus }
-                setCompletedMoods(updated)
-                localStorage.setItem('fwa_completed_moods_' + todayStr, JSON.stringify(updated))
-                if (newStatus) {
-                  playHabitSound()
-                  trackEvent('suggested_ritual_done')
-                }
-              }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '999px',
-                fontSize: '10px',
-                fontFamily: "'Cinzel', serif",
-                fontWeight: 700,
-                cursor: 'pointer',
-                border: 'none',
-                background: isSuggestedDone 
-                  ? 'linear-gradient(135deg, #1A7A4E 0%, #2D6A4F 100%)' 
-                  : 'linear-gradient(135deg, #E8622A 0%, #C9933A 100%)',
-                color: 'white',
-                boxShadow: isSuggestedDone ? '0 4px 12px rgba(26,122,78,0.3)' : '0 4px 12px rgba(232,98,42,0.3)',
-              }}
-            >
-              {isSuggestedDone ? '✦ Completed' : 'Ignite Ritual'}
-            </motion.button>
-          </div>
+        {/* CYCLE TOOLTIP */}
+        <motion.div initial="hidden" animate="show" variants={fadeUp(0.02)} style={{
+          background: dark ? 'rgba(30,20,50,0.6)' : 'rgba(230,240,255,0.7)',
+          border: '1px solid rgba(129,140,248,0.3)',
+          borderRadius: 16, padding: '12px 20px', marginBottom: '1.5rem',
+          display: 'flex', alignItems: 'center', gap: 12, backdropFilter: 'blur(10px)'
+        }}>
+          <span className="text-xl">🌙</span>
+          <p style={{ fontFamily: "'Lora', serif", fontSize: '0.85rem', color: dark ? '#dbeafe' : '#1e3a8a', margin: 0, fontWeight: 500 }}>
+            <strong>Forgiving Cycles:</strong> Miss 1 day? It's your <strong>Relax Day</strong>. Miss 2 days? The cycle resets. Set your preferred cycle length (7 or 15 days) and custom Relax Day in your Settings. Be gentle with yourself.
+          </p>
         </motion.div>
 
-        {/* TWO-COLUMN LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* BENTO BOX LAYOUT */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           
-          {/* LEFT PANEL: Active Rituals Checklist (Main Flow Focus) */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
+          {/* LEFT PANEL: My Flow (Span 7) */}
+          <div className="lg:col-span-7 flex flex-col gap-5">
             
             {/* MY SADHANA RITUALS CARD */}
             <motion.div 
@@ -530,7 +330,7 @@ export default function Habits() {
                           placeholder="Type or pick an idea below →"
                           maxLength={35}
                           onChange={e => setName(e.target.value)}
-                          className="w-full rounded-xl border border-gold/20 bg-white/5 px-3 py-2 text-xs text-ink dark:text-ivory outline-none focus:border-gold"
+                          className="w-full rounded-xl border border-gold/20 bg-white/5 px-3 py-2 text-xs text-ink dark:text-ivory outline-none focus:border-gold shadow-inner"
                         />
                       </div>
                       
@@ -550,6 +350,37 @@ export default function Habits() {
                             />
                           ))}
                         </div>
+                      </div>
+
+                      {/* Forgiving Cycles Settings */}
+                      <div>
+                        <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Cycle Length</label>
+                        <select 
+                          value={cycleLength}
+                          onChange={(e) => setCycleLength(Number(e.target.value))}
+                          className="w-full rounded-xl border border-gold/20 bg-white/5 px-3 py-2 text-xs text-ink dark:text-ivory outline-none focus:border-gold"
+                        >
+                          <option value={7} className="bg-black/80">7 Days (Weekly Rhythm)</option>
+                          <option value={15} className="bg-black/80">15 Days (Paksha Cycle)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Relax Day</label>
+                        <select 
+                          value={relaxDay}
+                          onChange={(e) => setRelaxDay(e.target.value)}
+                          className="w-full rounded-xl border border-gold/20 bg-white/5 px-3 py-2 text-xs text-ink dark:text-ivory outline-none focus:border-gold"
+                        >
+                          <option value="None" className="bg-black/80">None</option>
+                          <option value="Monday" className="bg-black/80">Monday</option>
+                          <option value="Tuesday" className="bg-black/80">Tuesday</option>
+                          <option value="Wednesday" className="bg-black/80">Wednesday</option>
+                          <option value="Thursday" className="bg-black/80">Thursday</option>
+                          <option value="Friday" className="bg-black/80">Friday</option>
+                          <option value="Saturday" className="bg-black/80">Saturday</option>
+                          <option value="Sunday" className="bg-black/80">Sunday</option>
+                        </select>
                       </div>
                     </div>
 
@@ -599,6 +430,51 @@ export default function Habits() {
                     >
                       + Add New Sadhana
                     </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* DAILY QUEST CHEST ANIMATION */}
+              <AnimatePresence>
+                {allDoneToday && selectedIso === todayStr && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5, y: 50, rotateX: 45 }}
+                    animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                    transition={{ type: 'spring', damping: 15, stiffness: 200 }}
+                    className="flex flex-col items-center justify-center bg-gradient-to-br from-amber-600/20 via-gold/10 to-saffron/20 p-6 rounded-3xl border-2 border-gold/40 mb-6 overflow-hidden relative shadow-[0_0_40px_rgba(201,168,76,0.3)]"
+                    style={{ backdropFilter: 'blur(10px)' }}
+                  >
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                      className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,168,76,0.2)_0%,transparent_70%)] pointer-events-none"
+                    />
+                    <motion.div
+                      animate={{ 
+                        y: [0, -10, 0],
+                        scale: [1, 1.1, 1],
+                        filter: ['drop-shadow(0 0 10px rgba(201,168,76,0.5))', 'drop-shadow(0 0 25px rgba(255,215,0,0.8))', 'drop-shadow(0 0 10px rgba(201,168,76,0.5))']
+                      }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className="text-6xl relative z-10 mb-2"
+                    >
+                      🏺
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="text-center z-10"
+                    >
+                      <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold to-saffron tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif" }}>
+                        Ancient Vessel Unlocked
+                      </h3>
+                      <div className="mt-2 inline-flex items-center gap-1.5 bg-black/30 dark:bg-white/10 px-4 py-1.5 rounded-full border border-gold/30">
+                        <span className="text-xl">✨</span>
+                        <span className="text-sm font-extrabold text-white">+50 Prana Earned</span>
+                      </div>
+                    </motion.div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -669,10 +545,146 @@ export default function Habits() {
                 )}
               </div>
             </motion.div>
+
+            {/* DAILY TASKS WIDGET */}
+            <motion.div initial="hidden" animate="show" variants={fadeUp(0.08)}>
+              <DailyTasksWidget selectedIso={selectedIso} />
+            </motion.div>
+
+            {/* WATER TRACKER WIDGET */}
+            <motion.div initial="hidden" animate="show" variants={fadeUp(0.14)}>
+              <WaterWidget />
+            </motion.div>
           </div>
 
-          {/* RIGHT PANEL: Gregorian + Indian Lunar Calendar (Environmental layer) & Facts Carousel */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
+          {/* RIGHT PANEL: Analytics, Mood & Environment (Span 5) */}
+          <div className="lg:col-span-5 flex flex-col gap-5">
+            
+            {/* MOOD & SPIRIT BENTO BOX */}
+            <motion.div 
+              initial="hidden" 
+              animate="show" 
+              variants={fadeUp(0.04)} 
+              style={{
+                background: dark ? 'rgba(20, 15, 10, 0.45)' : 'rgba(255, 252, 246, 0.65)',
+                border: dark ? '1px solid rgba(201, 168, 76, 0.16)' : '1px solid rgba(201, 168, 76, 0.22)',
+                borderRadius: '24px',
+                padding: '1.25rem',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+              }}
+            >
+              {/* Gregorian + Indian Lunar Calendar Title */}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gold/10 pb-3 mb-4">
+                <div>
+                  <span className="text-[9px] uppercase tracking-widest text-saffron font-bold">
+                    Calendar & Stars
+                  </span>
+                  <h2 className="font-display text-base text-ivory font-semibold mt-0.5" style={{ color: dark ? '#f3edd7' : '#3d250d' }}>
+                    {new Date(selectedIso).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    <span className="text-gold/60 ml-2 font-normal text-xs">
+                      — {selectedHindu.moonSymbol} {selectedHindu.tithiEmoji}
+                    </span>
+                  </h2>
+                </div>
+              </div>
+
+              {/* Moods row */}
+              <div className="mb-4">
+                <span className="text-[9px] uppercase tracking-wider text-gold font-bold block mb-2">
+                  What is your spirit seeking?
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {Object.keys(MOOD_DETAILS).map((m) => {
+                    const active = activeMood === m
+                    return (
+                      <motion.button
+                        key={m}
+                        whileHover={{ scale: 1.04 }}
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => {
+                          setActiveMood(m)
+                          localStorage.setItem('fwa_ritual_mood', m)
+                        }}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '999px',
+                          fontSize: '11px',
+                          fontFamily: "'Cinzel', serif",
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          border: active 
+                            ? '1px solid #c9a84c' 
+                            : (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)'),
+                          background: active 
+                            ? 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.05) 100%)' 
+                            : (dark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0,0,0,0.02)'),
+                          color: active 
+                            ? (dark ? '#ffe090' : '#8a5a12') 
+                            : (dark ? '#e8d5a8' : '#5c3d1e'),
+                          boxShadow: active ? '0 0 12px rgba(201,168,76,0.18)' : 'none',
+                          transition: 'all 0.3s ease',
+                        }}
+                      >
+                        <span className="mr-1">{MOOD_DETAILS[m].icon}</span> {m}
+                      </motion.button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Suggested daily practice */}
+              <div style={{
+                background: dark ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.35)',
+                border: '1px dashed rgba(201, 168, 76, 0.25)',
+                borderRadius: '16px',
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+              }}>
+                <div className="flex-1">
+                  <span className="text-[8px] uppercase tracking-wider text-saffron font-bold block">
+                    {activeMood} Practice
+                  </span>
+                  <p className="text-xs text-ivory/80 leading-relaxed font-light mt-1" style={{ color: dark ? '#e8ebd8' : '#3a2007' }}>
+                    <strong>{MOOD_DETAILS[activeMood].icon} {MOOD_DETAILS[activeMood].suggestion}</strong>
+                  </p>
+                </div>
+                
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    const newStatus = !isSuggestedDone
+                    const updated = { ...completedMoods, [activeMood]: newStatus }
+                    setCompletedMoods(updated)
+                    localStorage.setItem('fwa_completed_moods_' + todayStr, JSON.stringify(updated))
+                    if (newStatus) {
+                      playHabitSound()
+                      trackEvent('suggested_ritual_done')
+                    }
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '999px',
+                    fontSize: '10px',
+                    fontFamily: "'Cinzel', serif",
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: 'none',
+                    background: isSuggestedDone 
+                      ? 'linear-gradient(135deg, #1A7A4E 0%, #2D6A4F 100%)' 
+                      : 'linear-gradient(135deg, #E8622A 0%, #C9933A 100%)',
+                    color: 'white',
+                    boxShadow: isSuggestedDone ? '0 4px 12px rgba(26,122,78,0.3)' : '0 4px 12px rgba(232,98,42,0.3)',
+                  }}
+                >
+                  {isSuggestedDone ? '✦ Done' : 'Ignite'}
+                </motion.button>
+              </div>
+            </motion.div>
             
             {/* MONTHLY CALENDAR GRID CARD */}
             <motion.div 
@@ -787,25 +799,26 @@ export default function Habits() {
                   let cellBorder = 'transparent'
                   let cellShadow = 'none'
 
+                  // LeetCode-style green dopamine loop heatmap
+                  let greenColor = 'transparent'
+                  if (!isFuture && hasProgress) {
+                    if (completionPct <= 30) greenColor = dark ? '#0e4429' : '#d6e685'
+                    else if (completionPct <= 60) greenColor = dark ? '#006d32' : '#8cc665'
+                    else if (completionPct < 100) greenColor = dark ? '#26a641' : '#44a340'
+                    else if (completionPct === 100) greenColor = dark ? '#39d353' : '#1e6823'
+                    
+                    cellBg = greenColor
+                  }
+
                   if (isSelected) {
-                    cellBg = dark ? 'rgba(201, 168, 76, 0.18)' : 'rgba(201, 168, 76, 0.22)'
-                    cellBorder = 'rgba(201, 168, 76, 0.5)'
+                    cellBorder = 'rgba(201, 168, 76, 0.8)'
+                    if (cellBg === 'transparent') cellBg = dark ? 'rgba(201, 168, 76, 0.18)' : 'rgba(201, 168, 76, 0.22)'
                   } else if (isToday) {
-                    cellBg = dark ? 'rgba(232, 98, 42, 0.08)' : 'rgba(232, 98, 42, 0.12)'
-                    cellBorder = 'rgba(232, 98, 42, 0.35)'
-                  } else if (!isFuture && isPerfect) {
-                    // Perfect Day! Glowing Gold to Saffron blend
-                    cellBg = dark 
-                      ? 'linear-gradient(135deg, rgba(201, 168, 76, 0.30) 0%, rgba(232, 98, 42, 0.22) 100%)' 
-                      : 'linear-gradient(135deg, rgba(251, 244, 228, 0.95) 0%, rgba(253, 240, 232, 0.95) 100%)'
-                    cellBorder = dark ? 'rgba(201, 168, 76, 0.5)' : 'rgba(201, 168, 76, 0.6)'
-                    cellShadow = dark ? '0 0 18px rgba(201, 168, 76, 0.34)' : '0 0 16px rgba(201, 168, 76, 0.22)'
-                  } else if (!isFuture && isPartial) {
-                    // Partial Day! Soft Silver/Bronze layer
-                    cellBg = dark 
-                      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(201, 168, 76, 0.06) 100%)' 
-                      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(201, 168, 76, 0.08) 100%)'
-                    cellBorder = dark ? 'rgba(201, 168, 76, 0.15)' : 'rgba(201, 168, 76, 0.25)'
+                    cellBorder = 'rgba(232, 98, 42, 0.5)'
+                    if (cellBg === 'transparent') cellBg = dark ? 'rgba(232, 98, 42, 0.08)' : 'rgba(232, 98, 42, 0.12)'
+                  }
+                  if (isPerfect) {
+                     cellShadow = `0 0 12px ${greenColor}80`
                   }
 
                   return (

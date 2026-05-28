@@ -28,6 +28,9 @@ export function WellnessProvider({ children }) {
   const [habits,    setHabits]    = useLocalState('habits_list', [])
   const [habitDone, setHabitDone] = useLocalState('habit_done',  {})
 
+  // ── DAILY TASKS ────────────────────────────────
+  const [dailyTasks, setDailyTasks] = useLocalState('daily_tasks', {})
+
   // ── JOURNAL ────────────────────────────────────
   const [journal, setJournal] = useLocalState('journal_entries', [])
 
@@ -54,7 +57,20 @@ export function WellnessProvider({ children }) {
         if (habitsRes.ok) {
           const habitsData = await habitsRes.json()
           setHabits(habitsData.habits || [])
-          setHabitDone(habitsData.habitDone || {})
+
+          // ── MERGE STRATEGY (prevents data loss) ──────────────────────────────
+          // Server is authoritative for all past dates.
+          // For TODAY: merge server + local so optimistic ticks are never wiped.
+          // This guards against server returning stale/partial data on re-fetch.
+          const serverDone = habitsData.habitDone || {}
+          const todayKey = new Date().toISOString().slice(0, 10)
+          setHabitDone(prev => {
+            const localToday = prev[todayKey] || {}
+            const serverToday = serverDone[todayKey] || {}
+            // Union: if it's ticked locally OR on server, keep it
+            const mergedToday = { ...localToday, ...serverToday }
+            return { ...serverDone, [todayKey]: mergedToday }
+          })
         }
 
         // Fetch journal entries
@@ -80,9 +96,10 @@ export function WellnessProvider({ children }) {
       setWaterLog(Store.get('water_log', {}))
       setHabits(Store.get('habits_list', []))
       setHabitDone(Store.get('habit_done', {}))
+      setDailyTasks(Store.get('daily_tasks', {}))
       setJournal(Store.get('journal_entries', []))
     }
-  }, [isAuthenticated, setWaterGoal, setWaterLog, setHabits, setHabitDone, setJournal])
+  }, [isAuthenticated, setWaterGoal, setWaterLog, setHabits, setHabitDone, setDailyTasks, setJournal])
 
   // ── WATER MUTATIONS ────────────────────────────
   const updateWaterGoal = useCallback(async (goal) => {
@@ -189,7 +206,14 @@ export function WellnessProvider({ children }) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ name: habit.name, icon: habit.icon, color: habit.color })
+          body: JSON.stringify({ 
+            name: habit.name, 
+            icon: habit.icon, 
+            color: habit.color,
+            cycleLength: habit.cycleLength || 7,
+            relaxDay: habit.relaxDay || 'None',
+            streakFreezes: habit.streakFreezes ?? 3
+          })
         })
         if (res.ok) {
           const savedHabit = await res.json()
@@ -223,7 +247,11 @@ export function WellnessProvider({ children }) {
   const toggleHabit = useCallback(async (id, dateKey = getToday()) => {
     const now = new Date()
     const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0')
-    
+
+    // Snapshot current state for rollback on API failure
+    const snapshotBefore = Store.get('habit_done', {})
+
+    // Optimistic UI update
     setHabitDone(prev => {
       const day = { ...(prev[dateKey] || {}) }
       if (day[id]) delete day[id]
@@ -233,7 +261,7 @@ export function WellnessProvider({ children }) {
 
     if (isAuthenticated && token) {
       try {
-        await fetch('/api/habits', {
+        const res = await fetch('/api/habits', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -241,25 +269,128 @@ export function WellnessProvider({ children }) {
           },
           body: JSON.stringify({ toggle: true, habitId: id, date: dateKey, time })
         })
+        // Rollback if server rejected the toggle
+        if (!res.ok) {
+          console.error('Habit toggle rejected by server — rolling back UI')
+          setHabitDone(snapshotBefore)
+        }
       } catch (err) {
-        console.error('Failed to sync habit toggle:', err)
+        // Rollback on network failure to prevent false ticks persisting
+        console.error('Habit toggle network error — rolling back UI:', err)
+        setHabitDone(snapshotBefore)
       }
     }
   }, [isAuthenticated, token, setHabitDone])
 
   const getStreak = useCallback((habitId) => {
+    const habit = habits.find(h => h.id === habitId)
+    if (!habit) return 0
+    
     let streak = 0
+    let freezesRemaining = habit.streakFreezes ?? 3
+    const relaxDay = habit.relaxDay
+    
     const d = new Date()
     for (let i = 0; i < 365; i++) {
       const iso = d.toISOString().slice(0,10)
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'long' })
       const day = habitDone[iso] || {}
-      if (day[habitId]) { streak++; d.setDate(d.getDate() - 1) }
-      else { if (i === 0) { d.setDate(d.getDate() - 1); continue } break }
+      
+      if (day[habitId]) { 
+        streak++
+        d.setDate(d.getDate() - 1)
+      } else { 
+        // If it's today and not done, it doesn't break the streak yet
+        if (i === 0) { 
+          d.setDate(d.getDate() - 1)
+          continue 
+        }
+        
+        // If it's a custom Relax Day, forgive it (no freeze consumed)
+        if (relaxDay && dayName === relaxDay) {
+          d.setDate(d.getDate() - 1)
+          continue
+        }
+
+        // Use a streak freeze if available
+        if (freezesRemaining > 0) {
+          freezesRemaining--
+          d.setDate(d.getDate() - 1)
+          continue
+        }
+
+        break 
+      }
     }
     return streak
-  }, [habitDone])
+  }, [habitDone, habits])
 
   const todayHabitDone = habitDone[td] || {}
+
+  // ── DAILY TASKS MUTATIONS ──────────────────────
+  const addDailyTask = useCallback((dateKey, task) => {
+    setDailyTasks(prev => {
+      const dayTasks = prev[dateKey] || []
+      return { ...prev, [dateKey]: [...dayTasks, { ...task, id: uid(), done: false, subtasks: [] }] }
+    })
+  }, [setDailyTasks])
+
+  const toggleDailyTask = useCallback((dateKey, taskId) => {
+    setDailyTasks(prev => {
+      const dayTasks = prev[dateKey] || []
+      const newTasks = dayTasks.map(t => t.id === taskId ? { ...t, done: !t.done } : t)
+      return { ...prev, [dateKey]: newTasks }
+    })
+  }, [setDailyTasks])
+
+  const deleteDailyTask = useCallback((dateKey, taskId) => {
+    setDailyTasks(prev => {
+      const dayTasks = prev[dateKey] || []
+      return { ...prev, [dateKey]: dayTasks.filter(t => t.id !== taskId) }
+    })
+  }, [setDailyTasks])
+
+  const addSubtask = useCallback((dateKey, taskId, subtaskName) => {
+    setDailyTasks(prev => {
+      const dayTasks = prev[dateKey] || []
+      const newTasks = dayTasks.map(t => {
+        if (t.id === taskId) {
+          return { ...t, subtasks: [...(t.subtasks || []), { id: uid(), name: subtaskName, done: false }] }
+        }
+        return t
+      })
+      return { ...prev, [dateKey]: newTasks }
+    })
+  }, [setDailyTasks])
+
+  const toggleSubtask = useCallback((dateKey, taskId, subtaskId) => {
+    setDailyTasks(prev => {
+      const dayTasks = prev[dateKey] || []
+      const newTasks = dayTasks.map(t => {
+        if (t.id === taskId) {
+          const newSubs = t.subtasks.map(st => st.id === subtaskId ? { ...st, done: !st.done } : st)
+          // If all subtasks are done, mark main task as done
+          const allSubsDone = newSubs.every(st => st.done)
+          return { ...t, subtasks: newSubs, done: allSubsDone }
+        }
+        return t
+      })
+      return { ...prev, [dateKey]: newTasks }
+    })
+  }, [setDailyTasks])
+
+  const deleteSubtask = useCallback((dateKey, taskId, subtaskId) => {
+    setDailyTasks(prev => {
+      const dayTasks = prev[dateKey] || []
+      const newTasks = dayTasks.map(t => {
+        if (t.id === taskId) {
+          return { ...t, subtasks: t.subtasks.filter(st => st.id !== subtaskId) }
+        }
+        return t
+      })
+      return { ...prev, [dateKey]: newTasks }
+    })
+  }, [setDailyTasks])
 
   // ── JOURNAL MUTATIONS ──────────────────────────
   const addEntry = useCallback(async (entry) => {
@@ -313,6 +444,9 @@ export function WellnessProvider({ children }) {
       // habits
       habits, addHabit, deleteHabit,
       habitDone, todayHabitDone, toggleHabit, getStreak,
+      // daily tasks
+      dailyTasks, addDailyTask, toggleDailyTask, deleteDailyTask,
+      addSubtask, toggleSubtask, deleteSubtask,
       // journal
       journal, addEntry, deleteEntry,
     }}>

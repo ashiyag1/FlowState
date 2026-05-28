@@ -9,12 +9,7 @@ import LotusFlower from '../icons/LotusFlower'
 import DiyaLamp from '../icons/DiyaLamp'
 import communityBg from '../assets/community_bg.webp'
 
-const DUMMY_ACTIVITIES = [
-  { id: 'act-1', name: 'Sneha Sharma', avatar: '🌸', habit: '🧘 Meditation & Sadhana', streak: 24, time: '20 minutes ago', text: 'Completed 15 minutes of Pranayama and morning meditation. Feeling deeply grounded today.', prana: 142, comments: 3, color: '#E8622A' },
-  { id: 'act-2', name: 'Ishaan Verma', avatar: '🏃', habit: '🏃 Run & Fitness', streak: 18, time: '1 hour ago', text: 'Chasing sunsets! Just finished a 5km run at twilight. Consistency beats perfection!', prana: 89, comments: 1, color: '#1B4FA8' },
-  { id: 'act-3', name: 'Kavya Rao', avatar: '🪷', habit: '💧 Hydration (Amrit)', streak: 31, time: '3 hours ago', text: 'Hit my 3-liter target of copper-vessel water before evening. Feels like cellular revival.', prana: 205, comments: 5, color: '#1A7A4E' },
-  { id: 'act-4', name: 'Kabir Mehta', avatar: '📖', habit: '📖 Study & Wisdom', streak: 9, time: '5 hours ago', text: 'Reading Swami Vivekananda\'s thoughts on the power of focus. Absolutely fires up the mind.', prana: 67, comments: 2, color: '#7B68AE' }
-]
+const DUMMY_ACTIVITIES = []
 const DUMMY_INTENTIONS = [
   { id: 'int-1', author: 'Aarav', text: 'To stay fully present in every conversation today.', time: 'Just now' },
   { id: 'int-2', author: 'Riya', text: 'To drink warm water from my copper vessel first thing in the morning.', time: '10m ago' },
@@ -277,139 +272,148 @@ export default function Community() {
 
             {/* ACTIVITIES STREAM */}
             <div className="flex flex-col gap-4">
-              {activities.map((act) => (
+              {activities.length > 0 ? activities.map((act, i) => (
                 <motion.div
                   key={act.id}
                   layout
-                  className="journal-glass-card p-5 relative overflow-hidden border-l-4"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * i }}
+                  className="journal-glass p-5 border border-gold/20 flex flex-col gap-3 relative overflow-hidden border-l-4"
                   style={{ borderLeftColor: act.color }}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    
+                  <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.03] pointer-events-none" style={{
+                    background: `radial-gradient(circle at top right, ${act.color || '#c9933a'}, transparent)`
+                  }} />
+                  
+                  <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/5 border border-gold/20 flex items-center justify-center text-xl shadow-inner">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg shadow-inner bg-white/5 border border-white/10 shrink-0">
                         {act.avatar}
                       </div>
                       <div>
-                        <h4 className="font-display text-sm font-semibold text-ivory flex items-center gap-1.5">
+                        <p className="font-display font-semibold text-sm text-ivory flex items-center gap-2">
                           {act.name}
-                          <span className="flex items-center gap-0.5 text-[10px] text-gold font-sans font-bold py-0.5 px-1.5 rounded-full bg-gold/10">
-                            <Flame size={10} fill="#c9933a" /> {act.streak}d
+                          <span className="text-[10px] text-ivory/40 font-mono font-normal">
+                            {act.time}
                           </span>
-                        </h4>
-                        <p className="text-[10px] text-gold-lt/70 mt-0.5 font-mono">
-                          {act.habit} • {act.time}
                         </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-ivory/70 border border-white/5 whitespace-nowrap">
+                            {act.habit}
+                          </span>
+                          {act.streak > 0 && (
+                            <span className="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+                              <Flame size={10} /> {act.streak} Days
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-
-                    <span className="text-[9px] text-ivory/40">Verified Sadhana ✓</span>
                   </div>
 
-                  <p className="text-xs md:text-sm text-ivory/80 leading-relaxed font-light mt-3">
-                    "{act.text}"
+                  <p className="text-sm text-ivory/90 leading-relaxed font-light mt-1">
+                    {act.text}
                   </p>
 
-                  <div className="flex items-center gap-4 mt-4 pt-3 border-t border-white/5">
-                    {/* Send Prana Button */}
+                  <div className="flex items-center gap-4 mt-2 pt-3 border-t border-gold/10">
                     <button
                       onClick={(e) => handleSendPrana(e, act.id)}
-                      className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold/10 hover:bg-gold/20 border border-gold/20 hover:border-gold/30 text-xs font-bold text-gold-lt tracking-wide transition-all select-none overflow-hidden active:scale-95"
+                      className="flex items-center gap-1.5 text-[11px] text-gold/70 hover:text-gold transition-colors font-semibold uppercase tracking-wider relative"
                     >
-                      <span>✦ Send Prana</span>
-                      <span className="font-mono text-gold px-1.5 py-0.5 rounded bg-gold/10">
-                        {act.prana}
-                      </span>
-
-                      {/* Click Particle Renderer */}
-                      <AnimatePresence>
-                        {particles.map((p) => (
-                          <motion.span
-                            key={p.id}
-                            initial={{ x: p.x, y: p.y, scale: 1, opacity: 1 }}
-                            animate={{
-                              x: p.x + Math.cos(p.angle) * p.distance,
-                              y: p.y + Math.sin(p.angle) * p.distance,
-                              scale: 0.2,
-                              opacity: 0,
-                            }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.6, ease: 'easeOut' }}
-                            className="absolute w-1.5 h-1.5 bg-gold rounded-full pointer-events-none"
-                          />
-                        ))}
-                      </AnimatePresence>
+                      <Heart size={14} className="hover:fill-gold/20" />
+                      {act.prana} Prana
                     </button>
-
-                    <div className="flex items-center gap-1.5 text-ivory/40 text-xs font-light">
+                    <button className="flex items-center gap-1.5 text-[11px] text-ivory/40 hover:text-ivory/70 transition-colors font-semibold uppercase tracking-wider">
                       <MessageSquare size={13} />
-                      <span>{act.comments} thoughts shared</span>
-                    </div>
+                      {act.comments}
+                    </button>
+                    <button className="flex items-center gap-1 text-[11px] text-ivory/40 hover:text-ivory/70 transition-colors font-semibold uppercase tracking-wider ml-auto">
+                      <Share2 size={13} /> Share
+                    </button>
                   </div>
                 </motion.div>
-              ))}
+              )) : (
+                <div className="journal-glass p-10 border border-gold/20 text-center flex flex-col items-center justify-center">
+                  <Compass size={32} className="text-gold/40 mb-3" />
+                  <h3 className="text-lg font-display text-ivory mb-2">The Sanctuary is Quiet</h3>
+                  <p className="text-sm text-ivory/60 italic max-w-md">Be the first to share your journey today and inspire others on the path.</p>
+                </div>
+              )}
             </div>
-
           </div>
 
           {/* RIGHT 5 COLUMNS: Intention Wall ("Sankalpa Wall") */}
           <div className="lg:col-span-5 flex flex-col gap-6">
             
-            {/* SANKALPA WALL CARD */}
+            {/* SANKALPA WALL (Gen-Z pastel bubble style) */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="journal-glass p-5 border border-gold/25"
+              className="relative p-5 rounded-3xl overflow-hidden shadow-xl"
+              style={{
+                background: dark 
+                  ? 'linear-gradient(135deg, rgba(20,15,30,0.6) 0%, rgba(30,20,45,0.8) 100%)'
+                  : 'linear-gradient(135deg, rgba(250,245,255,0.7) 0%, rgba(245,235,255,0.9) 100%)',
+                border: '1px solid rgba(167,139,250,0.3)',
+                backdropFilter: 'blur(20px)',
+              }}
             >
-              <div className="pb-3 border-b border-gold/15 mb-4">
-                <h3 className="font-display text-lg text-ivory flex items-center gap-2">
-                  📌 Sankalpa Wall
+              <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-purple-500/20 to-transparent rounded-bl-full pointer-events-none" />
+              
+              <div className="mb-4 flex items-center justify-between relative z-10">
+                <h3 className="font-display text-[15px] font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center gap-1.5">
+                  <Sparkles size={16} className="text-indigo-400" /> Sankalpa Wall
                 </h3>
-                <p className="text-[10px] text-ivory/50 font-light mt-0.5">
-                  Pin your positive energy or daily focus to the wall
-                </p>
+                <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-indigo-400/70">
+                  Shared Intentions
+                </span>
               </div>
 
-              {/* Input for new Intention */}
-              <div className="flex flex-col gap-2.5 mb-5">
+              {/* Input Area */}
+              <div className="mb-4 flex flex-col gap-2 relative z-10">
                 <textarea
                   value={newIntention}
                   onChange={(e) => setNewIntention(e.target.value)}
                   maxLength={100}
-                  placeholder="I set my intention to..."
+                  placeholder="i'm focusing on..."
                   rows={2}
-                  className="w-full rounded-xl border border-gold/20 bg-white/5 p-3 text-xs md:text-sm text-ivory leading-relaxed placeholder:text-gold/30 placeholder:italic resize-none focus:outline-none focus:border-gold/45 transition-all"
+                  className="w-full rounded-2xl border border-indigo-200/20 dark:border-indigo-900/40 bg-white/60 dark:bg-black/20 p-3 text-[13px] text-indigo-950 dark:text-indigo-50 leading-relaxed placeholder:text-indigo-900/40 dark:placeholder:text-indigo-100/40 resize-none focus:outline-none focus:ring-2 focus:ring-white/50 transition-all custom-scrollbar"
                 />
                 <button
                   onClick={handleAddIntention}
                   disabled={!newIntention.trim()}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-saffron to-gold text-white font-semibold text-xs tracking-wider shadow-md hover:shadow-lg hover:shadow-gold/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 transition-all active:scale-98"
+                  className="w-full py-2.5 rounded-[16px] bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-bold text-[11px] tracking-wide shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 transition-transform active:scale-95"
                 >
-                  <Send size={12} /> Pin Intention (+50 Vibe)
+                  <Send size={12} /> pin it to the wall
                 </button>
               </div>
 
-              {/* Intentions List */}
-              <div className="flex flex-col gap-3 max-h-[350px] overflow-y-auto pr-1">
+              {/* Intentions List (iMessage bubbles style) */}
+              <div className="flex flex-col gap-2.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar relative z-10">
                 <AnimatePresence initial={false}>
-                  {intentions.map((item) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: -15, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="p-3.5 rounded-xl bg-gradient-to-br from-amber-500/10 to-gold/5 border border-gold/20 shadow-sm relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 right-0 w-8 h-8 bg-gold/5 rounded-full blur-sm pointer-events-none" />
-                      <p className="text-xs text-ivory/90 leading-relaxed italic">
-                        "{item.text}"
-                      </p>
-                      <div className="flex justify-between items-center mt-2.5 text-[9px] text-gold-lt/70">
-                        <span className="font-semibold uppercase tracking-wider">✦ {item.author}</span>
-                        <span className="font-mono">{item.time}</span>
-                      </div>
-                    </motion.div>
-                  ))}
+                  {intentions.map((item, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                        className={`flex flex-col max-w-[85%] ${isEven ? 'self-end items-end' : 'self-start items-start'}`}
+                      >
+                        <div className={`p-3.5 rounded-[24px] ${isEven ? 'bg-indigo-500 text-white rounded-br-[8px]' : 'bg-white/80 dark:bg-black/30 text-indigo-950 dark:text-indigo-50 rounded-bl-[8px]'} shadow-sm`}>
+                          <p className="text-sm leading-snug">
+                            {item.text}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1 text-[9px] text-indigo-900/50 dark:text-indigo-100/50 px-2 font-medium">
+                          <span>{item.author}</span> • <span>{item.time}</span>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
                 </AnimatePresence>
               </div>
             </motion.div>
@@ -449,6 +453,70 @@ export default function Community() {
                   </div>
                 ))}
               </div>
+            </motion.div>
+
+            {/* FOUNDER'S LOG (BEHIND THE SCENES) */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="journal-glass p-5 border border-gold/20"
+            >
+              <div className="pb-2 border-b border-gold/10 mb-3 flex items-center justify-between">
+                <h4 className="font-display text-sm text-ivory flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-gold" /> Founder's Log
+                </h4>
+                <span className="text-[9px] text-gold-lt tracking-wider uppercase font-semibold">
+                  Behind the Scenes
+                </span>
+              </div>
+              <div className="flex flex-col gap-3">
+                <div className="relative rounded-lg overflow-hidden border border-white/10 group cursor-pointer">
+                  <img src="https://images.unsplash.com/photo-1542435503-956c469947f6?auto=format&fit=crop&q=80&w=600" alt="Building FlowState" className="w-full h-32 object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+                    <p className="text-xs text-ivory font-semibold mb-1">Building the new Chakra Portal 🧘‍♀️</p>
+                    <p className="text-[9px] text-ivory/60">It took 5 iterations to get the glowing aura right without slowing down the site! I really want this to feel like real pranayama. - Ashiya</p>
+                  </div>
+                </div>
+                <div className="relative rounded-lg overflow-hidden border border-white/10 group cursor-pointer">
+                  <img src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&q=80&w=600" alt="Sketching Ideas" className="w-full h-32 object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+                    <p className="text-xs text-ivory font-semibold mb-1">Why I ditched generic features</p>
+                    <p className="text-[9px] text-ivory/60">I realized today that people don't want perfection, they want connection. Rebuilding the community page to feel more human. Let me know what you think!</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* CO-BUILD WITH ASHIYA (FEEDBACK) */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-950/40 dark:to-amber-950/40 p-6 rounded-[32px] border border-orange-200/50 dark:border-orange-500/10 shadow-lg relative overflow-hidden"
+            >
+              <div className="absolute -top-10 -right-10 text-9xl opacity-[0.03] dark:opacity-[0.05] pointer-events-none">✨</div>
+              
+              <div className="flex items-center gap-3 mb-4 relative z-10">
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-orange-300 dark:border-orange-500/30">
+                  <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200" alt="Ashiya" className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <h4 className="font-display font-bold text-orange-950 dark:text-orange-100 text-lg">Co-build with Ashiya 🛠️</h4>
+                  <p className="text-[10px] text-orange-800/70 dark:text-orange-200/70 font-medium">help me make this sanctuary better for you</p>
+                </div>
+              </div>
+              <textarea
+                placeholder="what feature should I build next? what feels missing? tell me bestie..."
+                rows={3}
+                className="w-full rounded-[20px] border-none bg-white/60 dark:bg-black/20 p-4 text-xs text-orange-950 dark:text-orange-50 leading-relaxed placeholder:text-orange-900/40 dark:placeholder:text-orange-100/40 resize-none focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all mb-3 relative z-10 custom-scrollbar"
+              />
+              <button
+                className="w-full py-3 rounded-[16px] bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white font-bold text-[11px] tracking-wide shadow-md transition-transform active:scale-95 relative z-10"
+                onClick={() => notif("Feedback sent straight to Ashiya! 💌", "success")}
+              >
+                Send to Ashiya
+              </button>
             </motion.div>
 
           </div>

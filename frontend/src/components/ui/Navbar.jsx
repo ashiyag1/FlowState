@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Sun, Moon, LogIn, LogOut, Volume2, VolumeX, Menu, X, User, Award, Droplet, Flame, BookOpen, Compass } from 'lucide-react'
+import { Sun, Moon, LogIn, LogOut, Volume2, VolumeX, Menu, X, User, Award, Droplet, BookOpen, Compass, Flame, Download } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
 import { useSoundEffects } from '../../hooks/useSoundEffects'
 import { useAuth } from '../../context/AuthContext'
@@ -9,14 +9,18 @@ import NotificationsButton from '../system/NotificationsButton'
 import { useAchievements } from '../../context/AchievementsContext'
 import { useWellness } from '../../context/WellnessContext'
 
+const getLocalYYYYMMDD = (d = new Date()) => {
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const NAV = [
   { to: '/',        label: 'Home',      sub: 'Sanctuary' },
-  { to: '/water',   label: 'Water',     sub: 'Amrit'     },
-  { to: '/habits',  label: 'Ritual',    sub: 'Sadhana'   },
+  { to: '/habits',  label: 'Daily Flow',    sub: 'Sadhana'   },
   { to: '/journal', label: 'Journal',   sub: 'Chintan'   },
   { to: '/quotes',  label: 'Wisdom',    sub: 'Gyan'      },
-  { to: '/heritage', label: 'Legacy',   sub: 'Virasat'   },
-  { to: '/community', label: 'Community',  sub: 'Sangha' },
 ]
 
 const BRANDING_OPTIONS = {
@@ -355,24 +359,57 @@ export default function Navbar() {
     ? '0 12px 48px rgba(0,0,0,0.55), 0 0 80px rgba(212,168,42,0.06), inset 0 1px 0 rgba(232,199,122,0.05)'
     : '0 8px 32px rgba(0,0,0,0.4), 0 0 60px rgba(212,168,42,0.04), inset 0 1px 0 rgba(232,199,122,0.04)'
 
-  // Compute journal streak from local journal entries
-  const journalStreak = useMemo(() => {
-    const dates = [...new Set(journal.map(e => e.date))].sort().reverse()
+  // Compute journal cycle from local journal entries
+  const journalCycle = useMemo(() => {
+    const dateSet = new Set(journal.map(e => e.date))
     let count = 0
-    const todayDate = new Date()
-    for (let i = 0; i < dates.length; i++) {
-      const d = new Date(todayDate)
-      d.setDate(d.getDate() - i)
-      const expected = d.toISOString().slice(0, 10)
-      if (dates[i] === expected) count++
-      else break
+    const d = new Date()
+    let currentStr = getLocalYYYYMMDD(d)
+    
+    // Check today, then yesterday, then the day before (up to 1 rest day initially)
+    if (!dateSet.has(currentStr)) {
+      d.setDate(d.getDate() - 1)
+      currentStr = getLocalYYYYMMDD(d)
+      if (!dateSet.has(currentStr)) {
+        d.setDate(d.getDate() - 1)
+        currentStr = getLocalYYYYMMDD(d)
+      }
+    }
+    
+    if (dateSet.has(currentStr)) {
+      while (true) {
+        if (dateSet.has(currentStr)) {
+          count++
+          d.setDate(d.getDate() - 1)
+          currentStr = getLocalYYYYMMDD(d)
+        } else {
+          // Check if it's just a 1-day gap (Rest Day)
+          const tempD = new Date(d)
+          tempD.setDate(tempD.getDate() - 1)
+          const tempStr = getLocalYYYYMMDD(tempD)
+          if (dateSet.has(tempStr)) {
+            // Found an entry the day before the gap. Count the gap as a forgiven rest day.
+            d.setDate(d.getDate() - 1)
+            currentStr = getLocalYYYYMMDD(d)
+          } else {
+            break // 2-day gap breaks the cycle
+          }
+        }
+      }
     }
     return count
   }, [journal])
 
-  const todayStr = new Date().toISOString().slice(0, 10)
+  const todayStr = getLocalYYYYMMDD()
+  const dCheck = new Date()
+  dCheck.setDate(dCheck.getDate() - 1)
+  const yesterdayStr = getLocalYYYYMMDD(dCheck)
+  
   const journaledToday = journal.some(e => e.date === todayStr)
-  const streakAtRisk = journalStreak > 0 && !journaledToday
+  const journaledYesterday = journal.some(e => e.date === yesterdayStr)
+  
+  const cycleAtRisk = journalCycle > 0 && !journaledToday && !journaledYesterday
+  const isOnRestDay = journalCycle > 0 && !journaledToday && journaledYesterday
 
   return (
     <>
@@ -563,42 +600,48 @@ export default function Navbar() {
 
           {/* RIGHT — actions */}
           <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-            {/* Streak Pill */}
-            {journalStreak > 0 && (
+          {/* Cycle Pill */}
+            {journalCycle > 0 && (
               <motion.button
                 type="button"
-                onClick={() => navigate('/journal')}
-                title={streakAtRisk ? "Journal today to keep your streak alive!" : `${journalStreak}-day journal streak 🔥`}
-                animate={streakAtRisk ? { scale: [1, 1.06, 1] } : {}}
+                onClick={() => navigate('/quotes')}
+                title={cycleAtRisk ? "Read Wisdom today to continue your cycle." : isOnRestDay ? "Rest day active. You won't lose your cycle." : `${journalCycle}-day reflection cycle 🌕 (Click to read Wisdom)`}
+                animate={cycleAtRisk ? { scale: [1, 1.06, 1] } : {}}
                 transition={{ repeat: Infinity, duration: 1.6 }}
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 3,
-                  padding: '3px 8px 3px 6px',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  padding: '3px 10px 3px 8px',
                   borderRadius: 999,
-                  border: streakAtRisk
+                  border: cycleAtRisk
                     ? '1px solid rgba(251,146,60,0.5)'
-                    : '1px solid rgba(212,168,42,0.35)',
-                  background: streakAtRisk
+                    : isOnRestDay 
+                      ? '1px solid rgba(139, 111, 76, 0.35)'
+                      : '1px solid rgba(212,168,42,0.35)',
+                  background: cycleAtRisk
                     ? 'rgba(251,146,60,0.12)'
-                    : 'rgba(212,168,42,0.1)',
-                  boxShadow: streakAtRisk
+                    : isOnRestDay
+                      ? 'rgba(139, 111, 76, 0.1)'
+                      : 'rgba(212,168,42,0.1)',
+                  boxShadow: cycleAtRisk
                     ? '0 0 10px rgba(251,146,60,0.2)'
-                    : '0 0 10px rgba(212,168,42,0.12)',
+                    : isOnRestDay
+                      ? 'none'
+                      : '0 0 10px rgba(212,168,42,0.12)',
                   cursor: 'pointer',
                   transition: 'all 0.25s ease',
                 }}
               >
-                <span style={{ fontSize: 13 }}>🔥</span>
+                <span style={{ fontSize: 13 }}>{isOnRestDay ? '🌙' : '🌕'}</span>
                 <span style={{
                   fontFamily: "'Cinzel', serif",
-                  fontSize: '0.6rem',
+                  fontSize: '0.65rem',
                   fontWeight: 700,
                   letterSpacing: '0.04em',
-                  color: streakAtRisk ? '#fb923c' : (dark ? '#e8c46a' : '#8a5a12'),
+                  color: cycleAtRisk ? '#fb923c' : isOnRestDay ? (dark ? '#bda379' : '#8b6f4c') : (dark ? '#e8c46a' : '#8a5a12'),
                 }}>
-                  {journalStreak}
+                  {isOnRestDay ? 'Rest' : journalCycle}
                 </span>
               </motion.button>
             )}
@@ -731,6 +774,32 @@ export default function Navbar() {
                             color: dark ? '#e8d5a8' : '#5c3d1e',
                           }}>
                             View Profile
+                          </span>
+                        </motion.div>
+
+                        {/* Install PWA Button */}
+                        <motion.div
+                          whileHover={{ backgroundColor: dark ? 'rgba(87, 184, 214, 0.1)' : 'rgba(87, 184, 214, 0.08)' }}
+                          onClick={() => {
+                            setProfileOpen(false)
+                            alert("To install: Open browser menu (or share sheet on iOS) and tap 'Add to Home Screen'.")
+                          }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            padding: '10px 10px', borderRadius: 10,
+                            cursor: 'pointer', transition: 'background 0.15s',
+                            borderBottom: '1px solid rgba(212,168,42,0.1)'
+                          }}
+                        >
+                          <Download size={13} style={{ color: '#57B8D6', flexShrink: 0 }} />
+                          <span style={{
+                            fontFamily: "'Cinzel', serif",
+                            fontSize: '0.7rem',
+                            fontWeight: 500,
+                            letterSpacing: '0.06em',
+                            color: '#57B8D6',
+                          }}>
+                            Install App
                           </span>
                         </motion.div>
 
@@ -1143,7 +1212,6 @@ export default function Navbar() {
         pointerEvents: 'auto',
       }}>
         <BottomTab to="/" label="Sanctuary" icon={Compass} />
-        <BottomTab to="/water" label="Amrit" icon={Droplet} />
         <BottomTab to="/habits" label="Sadhana" icon={Flame} />
         <BottomTab to="/journal" label="Chintan" icon={BookOpen} />
         <button

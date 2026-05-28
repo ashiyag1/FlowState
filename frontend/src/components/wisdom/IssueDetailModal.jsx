@@ -1,8 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
+import { CheckCircle2, ChevronRight, X } from 'lucide-react'
 
 export default function IssueDetailModal({ issue, onClose }) {
   const { dark } = useTheme()
+  const [currentStep, setCurrentStep] = useState(0)
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -10,57 +13,127 @@ export default function IssueDetailModal({ issue, onClose }) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
+  const nextStep = () => {
+    if (currentStep < issue.steps.length - 1) {
+      setCurrentStep(s => s + 1)
+    } else {
+      onClose()
+    }
+  }
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(s => s - 1)
+    }
+  }
+
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal(dark)} onClick={(e) => e.stopPropagation()}>
-        <button style={styles.closeBtn(dark)} onClick={onClose}>✕</button>
-
-        <div style={styles.header}>
-          <div style={styles.iconWrap(dark, issue)}>
-            <span style={styles.emoji}>🌿</span>
-          </div>
-          <div>
-            <span style={{
-              ...styles.tag,
-              background: issue.color + '22',
-              color: issue.color,
-            }}>
-              {issue.tag}
-            </span>
-            <h2 style={styles.title(dark)}>{issue.title}</h2>
-            <p style={styles.summary(dark)}>{issue.summary}</p>
-          </div>
-        </div>
-
-        <div style={styles.approachRow}>
-          <span style={{
-            ...styles.approachBadge,
-            background: issue.color + '18',
-            color: issue.color,
-          }}>
-            {issue.approach}
-          </span>
-        </div>
-
-        <div style={styles.divider(dark)} />
-
-        <h3 style={styles.stepsTitle}>What to do</h3>
-        <div style={styles.stepsList}>
-          {issue.steps.map((step, i) => (
-            <div key={i} style={styles.step(dark)}>
-              <span style={styles.stepNum}>{i + 1}</span>
-              <span>{step}</span>
+    <div style={styles.overlay} className="backdrop-blur-xl">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        style={styles.modal(dark, issue.color)}
+        onClick={(e) => e.stopPropagation()}
+        className="shadow-2xl overflow-hidden flex flex-col"
+      >
+        {/* Top Progress Bars (Story style) */}
+        <div className="absolute top-0 left-0 right-0 p-4 flex gap-1.5 z-50">
+          {issue.steps.map((_, i) => (
+            <div key={i} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-white rounded-full"
+                initial={{ width: i < currentStep ? '100%' : '0%' }}
+                animate={{ width: i < currentStep ? '100%' : i === currentStep ? '100%' : '0%' }}
+                transition={{ duration: i === currentStep ? 0.3 : 0 }}
+              />
             </div>
           ))}
         </div>
 
-        {issue.tip && (
-          <div style={styles.tipBox(dark)}>
-            <span style={styles.tipLabel}>💡 Pro tip</span>
-            <p style={styles.tipText(dark)}>{issue.tip}</p>
-          </div>
-        )}
-      </div>
+        {/* Close Button */}
+        <button 
+          className="absolute top-8 right-4 z-50 p-2 rounded-full bg-black/20 text-white backdrop-blur-md hover:bg-black/40 transition-colors"
+          onClick={onClose}
+        >
+          <X size={20} />
+        </button>
+
+        {/* Header Area */}
+        <div className="pt-12 px-6 pb-6 relative z-10 flex flex-col items-center text-center">
+          <div className="text-4xl mb-3">{issue.emoji}</div>
+          <span className="text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full bg-white/20 text-white mb-2">
+            {issue.approach} • {issue.tag}
+          </span>
+          <h2 className="text-3xl font-serif font-bold text-white leading-tight mb-2">
+            {issue.title}
+          </h2>
+          <p className="text-white/80 text-sm italic font-serif">
+            {issue.summary}
+          </p>
+        </div>
+
+        {/* Swipeable Content Area */}
+        <div className="flex-1 relative bg-white dark:bg-[#110C06] rounded-t-3xl p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] flex flex-col justify-center items-center text-center">
+          
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={currentStep}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="max-w-sm w-full"
+            >
+              <div 
+                className="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-2xl font-bold mb-6 text-white"
+                style={{ background: `linear-gradient(135deg, ${issue.color}, ${issue.color}aa)` }}
+              >
+                {currentStep + 1}
+              </div>
+              
+              <h3 className="text-2xl font-serif font-bold text-ink dark:text-ivory mb-4 leading-snug">
+                {issue.steps[currentStep]}
+              </h3>
+
+              {currentStep === issue.steps.length - 1 && issue.tip && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                  className="mt-8 p-4 rounded-2xl bg-gold/5 border border-gold/20 text-left flex gap-3 items-start"
+                >
+                  <span className="text-xl">💡</span>
+                  <p className="text-sm font-serif italic text-mist-dark dark:text-sand-lt/80 leading-relaxed">
+                    <strong className="text-gold not-italic block mb-1">Ancient Tip:</strong>
+                    {issue.tip}
+                  </p>
+                </motion.div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+        </div>
+
+        {/* Navigation Area */}
+        <div className="bg-white dark:bg-[#110C06] p-6 pt-0 flex justify-between items-center relative z-10">
+          <button 
+            onClick={prevStep}
+            className={`font-bold tracking-wider uppercase text-xs px-4 py-3 rounded-full transition-opacity ${currentStep === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100 text-mist-dark dark:text-sand-lt hover:bg-black/5 dark:hover:bg-white/5'}`}
+          >
+            Back
+          </button>
+
+          <button 
+            onClick={nextStep}
+            className="flex items-center gap-2 font-bold tracking-wider uppercase text-xs px-6 py-3 rounded-full text-white shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
+            style={{ background: issue.color }}
+          >
+            {currentStep === issue.steps.length - 1 ? 'Done' : 'Next'}
+            <ChevronRight size={16} />
+          </button>
+        </div>
+
+      </motion.div>
     </div>
   )
 }
@@ -70,161 +143,19 @@ const styles = {
     position: 'fixed',
     inset: 0,
     zIndex: 9999,
-    background: 'rgba(0,0,0,0.4)',
+    background: 'rgba(0,0,0,0.6)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     padding: '1rem',
-    backdropFilter: 'blur(4px)',
   },
-  modal: (dark) => ({
-    position: 'relative',
+  modal: (dark, color) => ({
     width: '100%',
-    maxWidth: '480px',
-    maxHeight: '85vh',
-    overflowY: 'auto',
-    borderRadius: '16px',
-    padding: '1.75rem 1.5rem 1.5rem',
-    background: dark
-      ? 'linear-gradient(160deg, #1a1208, #221a0e)'
-      : 'linear-gradient(160deg, #FFFCF3, #FDF6E3)',
-    border: dark ? '1px solid rgba(201,168,76,0.1)' : '1px solid rgba(201,168,76,0.15)',
-    boxShadow: dark
-      ? '0 20px 60px rgba(0,0,0,0.4)'
-      : '0 20px 60px rgba(92,61,30,0.12)',
-  }),
-  closeBtn: (dark) => ({
-    position: 'absolute',
-    top: '12px',
-    right: '12px',
-    width: '28px',
-    height: '28px',
-    borderRadius: '50%',
-    border: dark ? '1px solid rgba(201,168,76,0.1)' : '1px solid rgba(201,168,76,0.15)',
-    background: dark ? 'rgba(40,30,15,0.3)' : 'rgba(255,255,255,0.5)',
-    color: dark ? '#a09070' : '#8a7a60',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.7rem',
-  }),
-  header: {
-    display: 'flex',
-    gap: '0.75rem',
-    marginBottom: '0.5rem',
-  },
-  iconWrap: (dark, issue) => ({
-    width: '44px',
-    height: '44px',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: dark ? issue.color + '15' : issue.color + '12',
-    flexShrink: 0,
-  }),
-  emoji: {
-    fontSize: '1.3rem',
-  },
-  tag: {
-    fontSize: '0.5rem',
-    padding: '0.08rem 0.35rem',
-    borderRadius: '6px',
-    fontWeight: 500,
-    display: 'inline-block',
-    letterSpacing: '0.02em',
-  },
-  title: (dark) => ({
-    margin: '0.2rem 0 0.1rem',
-    fontSize: '1.2rem',
-    fontFamily: '"Cormorant Garamond", serif',
-    fontWeight: 600,
-    color: dark ? '#e8d9b5' : '#3a2a10',
-    lineHeight: 1.2,
-  }),
-  summary: (dark) => ({
-    margin: 0,
-    fontSize: '0.78rem',
-    fontFamily: '"Lora", serif',
-    fontStyle: 'italic',
-    color: dark ? '#a09070' : '#7a6a50',
-  }),
-  approachRow: {
-    marginBottom: '0.35rem',
-  },
-  approachBadge: {
-    fontSize: '0.55rem',
-    padding: '0.12rem 0.4rem',
-    borderRadius: '6px',
-    fontWeight: 600,
-    letterSpacing: '0.04em',
-  },
-  divider: (dark) => ({
-    height: '1px',
-    margin: '0.6rem 0',
-    background: dark
-      ? 'linear-gradient(90deg, transparent, rgba(201,168,76,0.1), transparent)'
-      : 'linear-gradient(90deg, transparent, rgba(201,168,76,0.12), transparent)',
-  }),
-  stepsTitle: {
-    margin: '0 0 0.5rem',
-    fontSize: '0.85rem',
-    fontFamily: '"Cinzel", serif',
-    fontWeight: 600,
-    color: '#c9a84c',
-    letterSpacing: '0.04em',
-  },
-  stepsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.35rem',
-  },
-  step: (dark) => ({
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '0.5rem',
-    padding: '0.35rem 0',
-    fontSize: '0.78rem',
-    fontFamily: '"Lora", serif',
-    color: dark ? '#c9b080' : '#5a3d20',
-    lineHeight: 1.45,
-    borderBottom: dark ? '1px solid rgba(201,168,76,0.03)' : '1px solid rgba(201,168,76,0.06)',
-  }),
-  stepNum: {
-    width: '20px',
-    height: '20px',
-    borderRadius: '50%',
-    background: '#c9a84c',
-    color: '#fff',
-    fontSize: '0.6rem',
-    fontWeight: 700,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    marginTop: '1px',
-  },
-  tipBox: (dark) => ({
-    marginTop: '0.75rem',
-    padding: '0.65rem 0.75rem',
-    borderRadius: '10px',
-    background: dark ? 'rgba(201,168,76,0.04)' : 'rgba(201,168,76,0.05)',
-    border: dark ? '1px solid rgba(201,168,76,0.06)' : '1px solid rgba(201,168,76,0.08)',
-  }),
-  tipLabel: {
-    fontSize: '0.7rem',
-    fontWeight: 600,
-    color: '#c9a84c',
-    display: 'block',
-    marginBottom: '0.2rem',
-  },
-  tipText: (dark) => ({
-    margin: 0,
-    fontSize: '0.75rem',
-    fontFamily: '"Lora", serif',
-    color: dark ? '#b0a078' : '#6a5a40',
-    lineHeight: 1.4,
-    fontStyle: 'italic',
+    maxWidth: '420px',
+    height: '85vh',
+    maxHeight: '800px',
+    borderRadius: '32px',
+    background: `linear-gradient(160deg, ${color}, ${color}88)`,
+    position: 'relative',
   }),
 }

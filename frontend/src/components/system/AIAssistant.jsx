@@ -1,8 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import { X, Send, Sparkles } from 'lucide-react'
+import { X, Send, Sparkles, Trash2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWellness } from '../../context/WellnessContext'
 import { getEmotionalReflection } from '../../utils/emotionalMemory'
+
+const HISTORY_KEY = 'sahayak_chat_history'
+const MAX_STORED  = 20   // max messages persisted to localStorage
+const MAX_CONTEXT = 6    // max messages sent as conversation history to API
 
 /* ─────────────────────────────────────────────────────────────
    COZY CAMPFIRE FRIEND ICON (Sahayak's Friendly Mascot)
@@ -21,20 +25,49 @@ function CozyFriendIcon({ size = 20, style = {} }) {
 export default function AIAssistant() {
   const { journal, habitDone } = useWellness()
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState(() => {
+    // Load persisted history on mount
+    try {
+      const saved = localStorage.getItem(HISTORY_KEY)
+      return saved ? JSON.parse(saved) : []
+    } catch { return [] }
+  })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isFirstLoad, setIsFirstLoad] = useState(true)
   const listRef = useRef(null)
 
-  // Dynamically initialize greeting on mount/update based on time and reflection data
+  // Persist messages to localStorage whenever they change
   useEffect(() => {
+    if (messages.length === 0) return
+    try {
+      // Only store the last MAX_STORED messages
+      const toStore = messages.slice(-MAX_STORED)
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(toStore))
+    } catch { /* storage full — ignore */ }
+  }, [messages])
+
+  // Generate greeting only if no history exists yet
+  useEffect(() => {
+    if (!isFirstLoad) return
+    setIsFirstLoad(false)
+
+    // If we have saved messages, don't overwrite with a greeting
+    const saved = localStorage.getItem(HISTORY_KEY)
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.length > 0) return
+      } catch { /* fall through */ }
+    }
+
     const reflection = getEmotionalReflection(journal, habitDone)
     let greeting = "Namaste. I am here when you need stillness, clarity, or simply a quiet presence."
-    let suggestions = ["Write in my journal", "Guide me in breathing", "Read some wisdom"]
+    let suggestions = ["Write in my Mindspace", "Guide me in breathing", "Read some wisdom"]
     
     if (reflection.isReturning) {
       greeting = `Namaste. ${reflection.message} I am here when you are ready to slow down.`
-      suggestions = ["Start breathing exercise", "Write in journal", "Just chat"]
+      suggestions = ["Start breathing exercise", "Write in Mindspace", "Just chat"]
     } else if (reflection.tod === 'night') {
       greeting = "Namaste. Still awake? Let's quiet the noise a little."
       suggestions = ["Help me clear my mind", "Do a breathing exercise", "Read daily quotes"]
@@ -48,7 +81,7 @@ export default function AIAssistant() {
       text: greeting,
       suggestions: suggestions
     }])
-  }, [journal, habitDone])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (listRef.current) {
@@ -56,16 +89,38 @@ export default function AIAssistant() {
     }
   }, [messages])
 
+  const clearHistory = () => {
+    localStorage.removeItem(HISTORY_KEY)
+    const reflection = getEmotionalReflection(journal, habitDone)
+    setMessages([{
+      role: 'assistant',
+      text: "Our conversation starts fresh. I'm here — what's on your mind?",
+      suggestions: ["How are you feeling?", "Give me a breathing exercise", "Share some wisdom"]
+    }])
+  }
+
   async function sendMessage(text) {
     if (!text || loading) return
-    setMessages(prev => [...prev, { role: 'user', text, suggestions: [] }])
+    const userMsg = { role: 'user', text, suggestions: [] }
+    const updatedMessages = [...messages, userMsg]
+    setMessages(updatedMessages)
     setInput('')
     setLoading(true)
+
+    // Build conversation history for the API (last MAX_CONTEXT messages before this one)
+    const historyForApi = updatedMessages
+      .slice(-MAX_CONTEXT - 1, -1) // exclude the message we just added
+      .filter(m => m.role === 'user' || m.role === 'assistant')
+      .map(m => ({ role: m.role, content: m.text }))
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ 
+          message: text,
+          conversationHistory: historyForApi
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || `Status ${res.status}`)
@@ -146,15 +201,33 @@ export default function AIAssistant() {
                   }}>Your FlowState guide</div>
                 </div>
               </div>
-              <button type="button" onClick={() => setOpen(false)}
-                style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: 'none', cursor: 'pointer', background: 'transparent',
-                  color: '#8b7355', transition: 'all 0.2s',
-                }}>
-                <X size={14} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* Clear history button */}
+                <button
+                  type="button"
+                  onClick={clearHistory}
+                  title="Clear conversation"
+                  style={{
+                    width: 26, height: 26, borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: 'none', cursor: 'pointer', background: 'transparent',
+                    color: 'rgba(139,115,85,0.5)', transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#b45a3c'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(139,115,85,0.5)'}
+                >
+                  <Trash2 size={12} />
+                </button>
+                <button type="button" onClick={() => setOpen(false)}
+                  style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: 'none', cursor: 'pointer', background: 'transparent',
+                    color: '#8b7355', transition: 'all 0.2s',
+                  }}>
+                  <X size={14} />
+                </button>
+              </div>
             </div>
 
             <div ref={listRef} className="chat-scrollbar" style={{
@@ -226,7 +299,7 @@ export default function AIAssistant() {
               <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder="Ask about FlowState..."
+                placeholder="Ask Sahayak..."
                 style={{
                   flex: 1, padding: '9px 14px', borderRadius: 999,
                   border: '1px solid rgba(212,168,42,0.2)',

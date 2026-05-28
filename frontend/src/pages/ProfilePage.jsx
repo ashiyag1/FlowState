@@ -15,6 +15,13 @@ import { useMemo } from 'react'
 import { useWellness } from '../context/WellnessContext'
 import { computeArchetype, computeWellnessScore } from '../utils/soulArchetype'
 
+const getLocalYYYYMMDD = (d = new Date()) => {
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 /* ── Animation Variants ── */
 const stagger = {
   initial: { opacity: 0 },
@@ -213,28 +220,55 @@ export default function ProfilePage() {
 
   // Archetype + wellness score
   const { archetype } = useMemo(() => computeArchetype(journal), [journal])
-  const todayStr = new Date().toISOString().slice(0, 10)
+  const todayStr = getLocalYYYYMMDD()
   const habitsCompletedToday = Object.keys(habitDone[todayStr] || {}).length
-  const journalStreak = useMemo(() => {
+  const journalCycle = useMemo(() => {
     const dates = [...new Set(journal.map(e => e.date))].sort().reverse()
     let count = 0
-    const todayDate = new Date()
-    for (let i = 0; i < dates.length; i++) {
-      const d = new Date(todayDate)
+    let currentD = new Date()
+    let expectedDates = []
+    
+    // Create an array of all possible expected dates backwards from today up to the length of journal entries (plus some buffer)
+    for (let i = 0; i < dates.length * 2 + 2; i++) {
+      const d = new Date()
       d.setDate(d.getDate() - i)
-      if (dates[i] === d.toISOString().slice(0, 10)) count++
-      else break
+      expectedDates.push(getLocalYYYYMMDD(d))
+    }
+    
+    let expectedIdx = 0
+    // Check today, then yesterday, then day before
+    if (!dates.includes(expectedDates[expectedIdx])) {
+      expectedIdx++
+      if (!dates.includes(expectedDates[expectedIdx])) {
+        expectedIdx++
+      }
+    }
+    
+    if (dates.includes(expectedDates[expectedIdx])) {
+      while (true) {
+        if (dates.includes(expectedDates[expectedIdx])) {
+          count++
+          expectedIdx++
+        } else {
+          // Check for a 1-day gap
+          if (dates.includes(expectedDates[expectedIdx + 1])) {
+            expectedIdx++ // skip the rest day
+          } else {
+            break // 2-day gap breaks it
+          }
+        }
+      }
     }
     return count
   }, [journal])
   const waterPct = waterGoal > 0 ? Math.min(todayTotal / waterGoal, 1) : 0
   const wellnessScore = useMemo(() => computeWellnessScore({
-    journalStreak,
+    journalStreak: journalCycle,
     totalJournalEntries: journal.length,
     habitsCompletedToday,
     totalHabits: habits.length,
     waterPct,
-  }), [journalStreak, journal.length, habitsCompletedToday, habits.length, waterPct])
+  }), [journalCycle, journal.length, habitsCompletedToday, habits.length, waterPct])
 
   // Local form state
   const [editingName, setEditingName] = useState(false)
@@ -649,7 +683,7 @@ export default function ProfilePage() {
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: 10, flexWrap: 'wrap' }}>
                 {[
-                  { label: '🔥 Streak', value: `${journalStreak}d` },
+                  { label: '🌕 Cycle', value: `${journalCycle}d` },
                   { label: '📖 Entries', value: journal.length },
                   { label: '🌿 Rituals', value: `${habitsCompletedToday}/${habits.length}` },
                   { label: '💧 Hydration', value: `${Math.round(waterPct * 100)}%` },
@@ -707,6 +741,7 @@ export default function ProfilePage() {
           </SectionCard>
 
           <GoldDivider />
+
 
           {/* ═══════════ SECTION 3: Account Settings ═══════════ */}
           <SectionCard>

@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../context/ThemeContext'
+import { INDIA_LEGACY } from '../utils'
 import ImmersiveFooter from '../sections/ImmersiveFooter'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import {
-  ChevronRight, ArrowUpRight, Sparkles,
+  ChevronRight, ChevronDown, ArrowUpRight, Sparkles,
   Heart, X, BookOpen, Bookmark, ArrowRight, Play, Pause
 } from 'lucide-react'
 
@@ -474,31 +475,57 @@ function OrnateCorners({ dark }) {
 
 function Heritage() {
   const { dark } = useTheme()
-  const { startWisdomAmbience, stopWisdomAmbience, isMuted } = useSoundEffects()
-  const [activeCategory, setActiveCategory] = useState('all')
-  const [savedScholars, setSavedScholars] = useState([])
-  const [modalData, setModalData] = useState(null)
-  const [showAllGrid, setShowAllGrid] = useState(false)
-  const [introOpen, setIntroOpen] = useState(false)
-  const [expandedGroups, setExpandedGroups] = useState(['colonial-hangover'])
-  const scrollRef = useRef(null)
+  const { startWisdomAmbience, stopWisdomAmbience } = useSoundEffects()
   const [isPlayingSound, setIsPlayingSound] = useState(false)
 
-  const toggleGroup = (id) => {
-    setExpandedGroups(prev =>
-      prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]
-    )
-  }
+  // Flatten all stories into a single feed array, interleaved
+  const FEED = useMemo(() => {
+    const items = [
+      ...SCHOLARS.map(s => ({
+        id: 'scholar-' + s.id,
+        type: 'scholar',
+        image: s.img,
+        title: s.name,
+        subtitle: s.title,
+        body: s.desc,
+        accent: s.color,
+        readMore: s.story.paragraphs
+      })),
+      ...CONCEPT_STORIES.map((c, i) => ({
+        id: 'concept-' + i,
+        type: 'concept',
+        image: heritageBg,
+        title: c.title,
+        subtitle: c.source,
+        body: c.paragraphs[0],
+        accent: '#c9a84c',
+        readMore: c.paragraphs
+      })),
+      ...CURIOSITY_STORIES.map((c, i) => ({
+        id: 'curiosity-' + i,
+        type: 'curiosity',
+        image: heritageBg,
+        title: c.title,
+        subtitle: c.source,
+        body: c.paragraphs[0],
+        accent: '#e87722',
+        readMore: c.paragraphs
+      }))
+    ]
+    
+    // Deterministic shuffle
+    let m = items.length, t, i
+    const shuffled = [...items]
+    while (m) {
+      i = Math.floor(Math.random() * m--)
+      t = shuffled[m]
+      shuffled[m] = shuffled[i]
+      shuffled[i] = t
+    }
+    return shuffled
+  }, [])
 
-  const handleWatchIntro = () => {
-    setIntroOpen(true)
-    startWisdomAmbience('tibetanBowl')
-  }
-
-  const handleCloseIntro = () => {
-    setIntroOpen(false)
-    stopWisdomAmbience()
-  }
+  const [expandedId, setExpandedId] = useState(null)
 
   const togglePlaySound = () => {
     if (isPlayingSound) {
@@ -510,2061 +537,206 @@ function Heritage() {
     }
   }
 
-  // Ensure sound stops if page is unmounted
   useEffect(() => {
-    return () => {
-      stopWisdomAmbience()
-    }
+    return () => stopWisdomAmbience()
   }, [stopWisdomAmbience])
 
-  const toggleSave = (id, e) => {
-    e.stopPropagation()
-    setSavedScholars(prev =>
-      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
-    )
-  }
-
-  const scrollSlider = (direction) => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current
-      const offset = clientWidth * 0.6
-      const scrollTo = direction === 'left' ? scrollLeft - offset : scrollLeft + offset
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' })
-    }
-  }
-
-  const handleViewAllScholars = (e) => {
-    e.preventDefault()
-    setActiveCategory('all')
-    setShowAllGrid(true)
-    setTimeout(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' })
-      }
-    }, 50)
-  }
-
-  const filteredScholars = activeCategory === 'all'
-    ? SCHOLARS
-    : SCHOLARS.filter(s => s.field === activeCategory)
-
   return (
-    <div className={`heritage-page-container ${dark ? 'dark-theme' : 'light-theme'}`}>
-      {/* Load Fonts and Upgraded Ornate CSS */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Outfit:wght@200;300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@500;700&display=swap');
-
-        /* Theme Color Tokens */
-        .heritage-page-container {
-          --heritage-bg: #fdfaf4;
-          --heritage-bg-rgb: 253, 250, 244;
-          --heritage-text: #2b1b0c;
-          --heritage-muted: #6e6255;
-          --heritage-gold: #8b6f4c;
-          --heritage-gold-rgb: 139, 111, 76;
-          --heritage-gold-hover: #735a3c;
-          --heritage-card-bg: rgba(255, 252, 245, 0.95);
-          --heritage-card-border: rgba(139, 111, 76, 0.16);
-          --heritage-header-bg: rgba(253, 250, 244, 0.85);
-          --heritage-header-border: rgba(139, 111, 76, 0.08);
-          --heritage-category-bg: #ffffff;
-          --heritage-category-border: rgba(139, 111, 76, 0.15);
-          --heritage-category-active: #8b6f4c;
-          --heritage-category-active-text: #ffffff;
-          --heritage-footer-bg: #faf6ee;
-          --heritage-footer-border: rgba(139, 111, 76, 0.12);
-        }
-
-        .heritage-page-container.dark-theme {
-          --heritage-bg: #120a05;
-          --heritage-bg-rgb: 18, 10, 5;
-          --heritage-text: #f2ebd9;
-          --heritage-muted: #9a8f82;
-          --heritage-gold: #c9a84c;
-          --heritage-gold-rgb: 201, 168, 76;
-          --heritage-gold-hover: #e8c46a;
-          --heritage-card-bg: rgba(26, 16, 8, 0.92);
-          --heritage-card-border: rgba(201, 168, 76, 0.16);
-          --heritage-header-bg: rgba(18, 10, 5, 0.88);
-          --heritage-header-border: rgba(201, 168, 76, 0.08);
-          --heritage-category-bg: #1c1008;
-          --heritage-category-border: rgba(201, 168, 76, 0.16);
-          --heritage-category-active: #c9a84c;
-          --heritage-category-active-text: #120a05;
-          --heritage-footer-bg: #0d0703;
-          --heritage-footer-border: rgba(201, 168, 76, 0.1);
-        }
-
-        /* Basic Styles with background image texture blending */
-        .heritage-page-container {
-          min-height: 100vh;
-          background: 
-            linear-gradient(rgba(var(--heritage-bg-rgb), 0.94), rgba(var(--heritage-bg-rgb), 0.94)),
-            url(${heritageBg}) repeat;
-          background-color: var(--heritage-bg);
-          color: var(--heritage-text);
-          font-family: 'Outfit', sans-serif;
-          transition: background-color 0.4s ease, color 0.4s ease;
-          overflow-x: hidden;
-          position: relative;
-        }
-
-        .heritage-body-content {
-          position: relative;
-          z-index: 10;
-        }
-
-        /* Background Art / Grid Overlays */
-        .heritage-bg-grid {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background-image: radial-gradient(rgba(var(--heritage-gold-rgb), 0.04) 1px, transparent 1px);
-          background-size: 32px 32px;
-          opacity: 0.8;
-          z-index: 1;
-        }
-
-        .heritage-bg-glow {
-          position: absolute;
-          top: -200px;
-          right: -200px;
-          width: 800px;
-          height: 800px;
-          background: radial-gradient(circle, rgba(var(--heritage-gold-rgb), 0.05) 0%, transparent 70%);
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        /* Hero Section fixed to spread full bleed */
-        /* Hero Section full bleed below navbar */
-        .hero-section {
-          position: relative;
-          z-index: 10;
-          min-height: 95vh;
-          min-height: 95dvh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          box-sizing: border-box;
-          padding-top: 110px; /* Leave space for the floating navbar */
-          padding-bottom: 60px;
-          --hero-bg-shift: 90px;
-        }
-
-        .hero-bg {
-          position: absolute;
-          top: 0; /* Start backdrop container at the top of the viewport */
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 0;
-          overflow: hidden;
-        }
-
-        .hero-bg-img {
-          position: absolute;
-          top: var(--hero-bg-shift);
-          left: 0;
-          width: 100%;
-          height: calc(100% - var(--hero-bg-shift));
-          object-fit: cover;
-          display: block;
-          object-position: center top; /* Align top of image with top of its shifted box */
-        }
-
-        .hero-bg-overlay {
-          position: absolute;
-          inset: 0;
-          background: 
-            radial-gradient(circle at 50% 50%, rgba(var(--heritage-bg-rgb), 0.25) 0%, rgba(var(--heritage-bg-rgb), 0.1) 50%, rgba(var(--heritage-bg-rgb), 0) 85%),
-            linear-gradient(
-              360deg,
-              var(--heritage-bg) 0%,
-              rgba(var(--heritage-bg-rgb), 0.85) 15%,
-              transparent 45%
-            );
-          pointer-events: none;
-        }
-
-        .dark-theme .hero-bg-overlay {
-          background: 
-            radial-gradient(circle at 50% 50%, rgba(var(--heritage-bg-rgb), 0.3) 0%, rgba(var(--heritage-bg-rgb), 0.15) 50%, rgba(var(--heritage-bg-rgb), 0) 85%),
-            linear-gradient(
-              360deg,
-              var(--heritage-bg) 0%,
-              rgba(var(--heritage-bg-rgb), 0.85) 15%,
-              transparent 45%
-            );
-        }
-
-        .hero-container {
-          max-width: 900px;
-          margin: 0 auto;
-          position: relative;
-          z-index: 1;
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          padding: 0 48px;
-          box-sizing: border-box;
-        }
-
-        .hero-content {
-          background: rgba(255, 252, 245, 0.4);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.14);
-          border-radius: 28px;
-          padding: 36px 40px;
-          max-width: 480px; /* Constrain card to sit perfectly between Buddha and Lilavati */
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          box-shadow: 
-            0 16px 40px rgba(var(--heritage-gold-rgb), 0.04),
-            inset 0 1px 0 rgba(255, 255, 255, 0.5);
-          transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-          box-sizing: border-box;
-        }
-
-        .dark-theme .hero-content {
-          background: rgba(18, 10, 5, 0.5);
-          border-color: rgba(201, 168, 76, 0.14);
-          box-shadow: 
-            0 20px 50px rgba(0, 0, 0, 0.35),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-        }
-
-        .hero-eyebrow {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.72rem;
-          font-weight: 700;
-          letter-spacing: 3px;
-          color: var(--heritage-gold);
-          margin-bottom: 18px;
-          text-transform: uppercase;
-        }
-
-        .hero-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(2.4rem, 5.2vw, 4rem);
-          font-weight: 300;
-          line-height: 1.15;
-          margin: 0 0 18px;
-          letter-spacing: -0.01em;
-          color: var(--heritage-text);
-          text-shadow: 0 2px 10px rgba(var(--heritage-gold-rgb), 0.12);
-        }
-
-        .dark-theme .hero-title {
-          color: #FDF6E3;
-          text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-
-        .hero-title .italic-gold {
-          color: var(--heritage-gold);
-          font-style: italic;
-          font-weight: 400;
-        }
-
-        .hero-subtext {
-          font-size: 1.1rem;
-          line-height: 1.6;
-          color: var(--heritage-muted);
-          margin: 0 0 24px;
-          font-weight: 300;
-          max-width: 520px;
-        }
-
-        .dark-theme .hero-subtext {
-          color: rgba(253, 246, 227, 0.85);
-          text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        .hero-hindi-badge {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.35);
-          background-color: rgba(var(--heritage-gold-rgb), 0.08);
-          padding: 8px 20px;
-          border-radius: 99px;
-          font-size: 0.95rem;
-          color: var(--heritage-gold-hover);
-          font-style: italic;
-          font-family: 'Cormorant Garamond', serif;
-          margin-bottom: 28px;
-          backdrop-filter: blur(10px);
-        }
-
-        .dark-theme .hero-hindi-badge {
-          background-color: rgba(18, 10, 4, 0.5);
-          color: #ffe8a0;
-        }
-
-        .hero-actions {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          flex-wrap: wrap;
-          justify-content: center;
-        }
-
-        .btn-explore {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          background: linear-gradient(135deg, var(--heritage-gold), #b89048);
-          color: #1a1208;
-          border: 1px solid #ffe8a0;
-          padding: 13px 28px;
-          border-radius: 99px;
-          font-family: 'Cinzel', serif;
-          font-size: 0.78rem;
-          font-weight: 700;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.25s ease;
-          box-shadow: 0 6px 18px rgba(139, 111, 76, 0.3), inset 0 1px 0 rgba(255,255,255,0.25);
-        }
-
-        .btn-explore:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(139, 111, 76, 0.45);
-          filter: brightness(1.1);
-        }
-
-        .btn-watch {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          background: rgba(var(--heritage-gold-rgb), 0.05);
-          border: 1.5px solid var(--heritage-gold);
-          color: var(--heritage-text);
-          padding: 13px 26px;
-          border-radius: 99px;
-          font-family: 'Cinzel', serif;
-          font-size: 0.78rem;
-          font-weight: 600;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          cursor: pointer;
-          backdrop-filter: blur(8px);
-          transition: all 0.25s;
-        }
-
-        .dark-theme .btn-watch {
-          background: rgba(255,255,255,0.08);
-          color: #fcf6e8;
-        }
-
-        .btn-watch:hover {
-          background-color: rgba(var(--heritage-gold-rgb), 0.25);
-          border-color: var(--heritage-gold);
-          transform: translateY(-2px);
-        }
-
-        .play-icon-wrap {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          border: 1px solid currentColor;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        /* Categories Section */
-        .categories-section {
-          padding: 0 48px 40px;
-          position: relative;
-          z-index: 10;
-        }
-
-        .categories-bar {
-          max-width: 1280px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color: var(--heritage-category-bg);
-          border: 1px solid var(--heritage-category-border);
-          border-radius: 99px;
-          padding: 8px 16px;
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-          transition: background-color 0.3s, border-color 0.3s;
-        }
-
-        .categories-scroll {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          overflow-x: auto;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-
-        .categories-scroll::-webkit-scrollbar {
-          display: none;
-        }
-
-        .category-pill {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 10px 20px;
-          border-radius: 99px;
-          font-size: 0.82rem;
-          font-weight: 600;
-          color: var(--heritage-text);
-          opacity: 0.7;
-          transition: all 0.25s ease;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          white-space: nowrap;
-        }
-
-        .category-pill:hover {
-          opacity: 1;
-          background-color: rgba(var(--heritage-gold-rgb), 0.08);
-        }
-
-        .category-pill.active {
-          opacity: 1;
-          background-color: var(--heritage-category-active);
-          color: var(--heritage-category-active-text);
-          box-shadow: 0 4px 12px rgba(var(--heritage-gold-rgb), 0.25);
-        }
-
-        /* Generic Section Headers */
-        .section-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          margin-bottom: 40px;
-          max-width: 1280px;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        .section-eyebrow {
-          font-size: 0.72rem;
-          font-weight: 700;
-          letter-spacing: 3px;
-          color: var(--heritage-gold);
-          text-transform: uppercase;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin-bottom: 8px;
-        }
-
-        .section-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 2.4rem;
-          font-weight: 400;
-          margin: 0;
-          letter-spacing: -0.01em;
-        }
-
-        .view-all-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          text-decoration: none;
-          color: var(--heritage-gold);
-          font-size: 0.84rem;
-          font-weight: 600;
-          transition: color 0.2s;
-          border-bottom: 1.5px solid transparent;
-          padding-bottom: 2px;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        .view-all-link:hover {
-          color: var(--heritage-gold-hover);
-          border-color: var(--heritage-gold-hover);
-        }
-
-        /* Minds Section and Slider */
-        .minds-section {
-          padding: 60px 48px;
-          position: relative;
-          z-index: 10;
-        }
-
-        .minds-header-wrap {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          max-width: 1280px;
-          margin: 0 auto 40px;
-        }
-
-        .slider-controls {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .slider-btn {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          border: 1px solid var(--heritage-card-border);
-          background-color: var(--heritage-card-bg);
-          color: var(--heritage-text);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.25s;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .slider-btn:hover {
-          background-color: var(--heritage-gold);
-          color: var(--heritage-bg);
-          border-color: var(--heritage-gold);
-        }
-
-        .slider-track-wrap {
-          max-width: 1280px;
-          margin: 0 auto;
-          overflow-x: auto;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          padding: 8px 0 24px;
-        }
-
-        .slider-track-wrap::-webkit-scrollbar {
-          display: none;
-        }
-
-        .slider-track {
-          display: flex;
-          gap: 24px;
-          min-width: min-content;
-        }
-
-        /* Scholar Card Upgraded to Arched Glass style */
-        .scholar-card {
-          width: 310px;
-          background-color: var(--heritage-card-bg);
-          border: 1px solid var(--heritage-card-border);
-          border-radius: 24px;
-          overflow: hidden;
-          position: relative;
-          cursor: pointer;
-          transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-          display: flex;
-          flex-direction: column;
-        }
-
-        .dark-theme .scholar-card {
-          box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
-        }
-
-        .scholar-card::before {
-          content: '';
-          position: absolute;
-          inset: 6px;
-          border: 1px dashed rgba(var(--heritage-gold-rgb), 0.2);
-          border-radius: 18px;
-          pointer-events: none;
-          z-index: 2;
-        }
-
-        .scholar-card:hover {
-          transform: translateY(-6px);
-          border-color: var(--heritage-gold);
-          box-shadow: 0 16px 40px rgba(var(--heritage-gold-rgb), 0.15);
-        }
-
-        .card-bookmark {
-          position: absolute;
-          top: 18px;
-          right: 18px;
-          background: rgba(0,0,0,0.4);
-          backdrop-filter: blur(4px);
-          border: 1px solid rgba(255,255,255,0.15);
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          cursor: pointer;
-          color: #ffe8a0;
-          z-index: 10;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.25s;
-        }
-
-        .card-bookmark:hover {
-          transform: scale(1.1);
-          background: rgba(0,0,0,0.6);
-        }
-
-        .card-bookmark.saved {
-          color: #d4607a;
-          border-color: rgba(212, 96, 122, 0.3);
-        }
-
-        .card-image-wrap {
-          width: calc(100% - 24px);
-          height: 280px;
-          margin: 12px 12px 0;
-          overflow: hidden;
-          position: relative;
-          border-radius: 16px 16px 4px 4px;
-          clip-path: ellipse(90% 100% at 50% 100%);
-          border: 1.5px solid rgba(var(--heritage-gold-rgb), 0.3);
-          background-color: rgba(var(--heritage-gold-rgb), 0.05);
-        }
-
-        .card-image-wrap img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .scholar-card:hover .card-image-wrap img {
-          transform: scale(1.04);
-        }
-
-        .card-gradient-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(180deg, transparent 40%, rgba(var(--heritage-gold-rgb), 0.12) 100%);
-        }
-
-        .card-info {
-          padding: 20px 24px 24px;
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          flex-grow: 1;
-        }
-
-        .scholar-name {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 1.6rem;
-          font-weight: 600;
-          margin: 0 0 2px;
-          color: var(--heritage-text);
-        }
-
-        .scholar-period {
-          font-family: 'Cinzel', serif;
-          font-size: 0.65rem;
-          font-weight: 700;
-          letter-spacing: 1.5px;
-          color: var(--heritage-gold);
-          margin-bottom: 12px;
-          text-transform: uppercase;
-        }
-
-        .scholar-desc-text {
-          font-family: 'Lora', serif;
-          font-size: 0.8rem;
-          line-height: 1.55;
-          opacity: 0.78;
-          margin: 0 0 16px;
-        }
-
-        .card-circle-arrow {
-          position: absolute;
-          bottom: 24px;
-          right: 24px;
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.4);
-          background: none;
-          color: var(--heritage-gold);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.25s;
-        }
-
-        .scholar-card:hover .card-circle-arrow {
-          background: var(--heritage-gold);
-          color: var(--heritage-bg);
-          border-color: var(--heritage-gold);
-          transform: translateX(2px);
-        }
-
-        /* Ideas section responsive layout */
-        .ideas-section {
-          padding: 60px 48px;
-          position: relative;
-          z-index: 10;
-        }
-
-        .ideas-container {
-          max-width: 1280px;
-          margin: 0 auto;
-          display: grid;
-          grid-template-columns: 0.32fr 0.68fr;
-          gap: 40px;
-        }
-
-        .ideas-left {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          justify-content: center;
-        }
-
-        .ideas-left-desc {
-          font-family: 'Lora', serif;
-          font-size: 0.95rem;
-          line-height: 1.65;
-          opacity: 0.8;
-          margin-bottom: 28px;
-        }
-
-        .ideas-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 20px;
-        }
-
-        /* Upgraded Idea Card - Sandstone Tablet look */
-        .idea-grid-card, .curiosity-grid-card {
-          padding: 28px 24px;
-          border-radius: 20px;
-          transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          cursor: pointer;
-          height: 100%;
-          position: relative;
-          background: 
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
-            linear-gradient(155deg, #f7ebd3 0%, #edd89a 100%);
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.35);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.3);
-        }
-        .dark-theme .idea-grid-card, .dark-theme .curiosity-grid-card {
-          background: 
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E"),
-            linear-gradient(155deg, #1d140a 0%, #120b04 100%);
-          border-color: rgba(var(--heritage-gold-rgb), 0.22);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.05);
-        }
-        .idea-grid-card:hover, .curiosity-grid-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 14px 35px rgba(var(--heritage-gold-rgb), 0.15);
-          border-color: var(--heritage-gold);
-        }
-        .dark-theme .idea-grid-card:hover, .dark-theme .curiosity-grid-card:hover {
-          box-shadow: 0 14px 35px rgba(0, 0, 0, 0.55);
-        }
-
-        .idea-icon-wrap {
-          color: var(--heritage-gold);
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(var(--heritage-gold-rgb), 0.08);
-          width: 44px;
-          height: 44px;
-          border-radius: 10px;
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.15);
-          z-index: 2;
-        }
-
-        .idea-sanskrit {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 1.5rem;
-          font-weight: 600;
-          margin: 0 0 2px;
-          color: var(--heritage-text);
-          z-index: 2;
-        }
-
-        .idea-sanskrit-sub {
-          font-family: 'Cinzel', serif;
-          font-size: 0.65rem;
-          font-weight: 700;
-          opacity: 0.7;
-          letter-spacing: 1px;
-          margin-bottom: 12px;
-          color: var(--heritage-gold);
-          text-transform: uppercase;
-          z-index: 2;
-        }
-
-        .idea-description {
-          font-family: 'Lora', serif;
-          font-size: 0.8rem;
-          line-height: 1.55;
-          opacity: 0.8;
-          margin: 0;
-          z-index: 2;
-        }
-
-        .idea-card-arrow {
-          position: absolute;
-          bottom: 24px;
-          right: 24px;
-          color: var(--heritage-gold);
-          opacity: 0;
-          transform: translateX(-4px);
-          transition: all 0.25s;
-          z-index: 2;
-        }
-
-        .idea-grid-card:hover .idea-card-arrow {
-          opacity: 0.85;
-          transform: translateX(0);
-        }
-
-        /* Late Night Curiosity Section layout */
-        .curiosity-section {
-          padding: 60px 48px 120px;
-          position: relative;
-          z-index: 10;
-        }
-
-        .curiosity-container {
-          max-width: 1280px;
-          margin: 0 auto;
-          display: flex;
-          flex-direction: column;
-          gap: 40px;
-        }
-
-        /* Header row — eyebrow + title on left, button on right, same as ideas-section */
-        .curiosity-header-row {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 24px;
-        }
-
-        .curiosity-header-left {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        .curiosity-left-desc {
-          font-family: 'Lora', serif;
-          font-size: 0.95rem;
-          line-height: 1.65;
-          opacity: 0.8;
-          margin-bottom: 0;
-          max-width: 560px;
-        }
-
-        .curiosity-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 20px;
-        }
-
-        /* Curiosity card title inside the accordion cards */
-        .curiosity-card-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 1.15rem;
-          font-weight: 600;
-          line-height: 1.45;
-          margin: 0 0 auto;
-          color: var(--heritage-text);
-          font-style: italic;
-          z-index: 2;
-          flex: 1;
-        }
-
-        /* Tag line beneath the title */
-        .curiosity-card-tag {
-          font-family: 'Cinzel', serif;
-          font-size: 0.6rem;
-          font-weight: 700;
-          letter-spacing: 1.2px;
-          text-transform: uppercase;
-          color: var(--heritage-gold);
-          opacity: 0.85;
-          margin-bottom: 10px;
-          z-index: 2;
-        }
-
-        .curiosity-card-footer {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-top: 14px;
-          z-index: 2;
-        }
-
-        .curiosity-card-read {
-          font-family: 'Cinzel', serif;
-          font-size: 0.6rem;
-          font-weight: 700;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          color: var(--heritage-gold);
-          opacity: 0;
-          transition: opacity 0.25s;
-        }
-
-        .curiosity-grid-card:hover .curiosity-card-read {
-          opacity: 1;
-        }
-
-        .curiosity-card-btn {
-          background: rgba(var(--heritage-gold-rgb), 0.1);
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.2);
-          color: var(--heritage-gold);
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          transition: all 0.25s;
-          z-index: 2;
-          flex-shrink: 0;
-        }
-
-        .curiosity-grid-card:hover .curiosity-card-btn {
-          background-color: var(--heritage-gold);
-          color: var(--heritage-bg);
-          border-color: var(--heritage-gold);
-          transform: translateX(3px);
-        }
-
-        /* Collapsible Curiosity Groups */
-        .curiosity-groups {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .curiosity-group {
-          border-radius: 18px;
-          border: 1px solid var(--heritage-card-border);
-          background: var(--heritage-card-bg);
-          overflow: hidden;
-          transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .curiosity-group:hover {
-          border-color: rgba(var(--heritage-gold-rgb), 0.35);
-          box-shadow: 0 4px 20px rgba(var(--heritage-gold-rgb), 0.08);
-        }
-
-        .curiosity-group-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          width: 100%;
-          padding: 18px 20px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: var(--heritage-text);
-          font-family: 'Outfit', sans-serif;
-          font-size: 0.9rem;
-          font-weight: 600;
-          text-align: left;
-          transition: background 0.2s;
-        }
-
-        .curiosity-group-header:hover {
-          background: rgba(var(--heritage-gold-rgb), 0.05);
-        }
-
-        .curiosity-group-emoji {
-          font-size: 1.2rem;
-          line-height: 1;
-          flex-shrink: 0;
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(var(--heritage-gold-rgb), 0.08);
-          border-radius: 8px;
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.15);
-        }
-
-        .curiosity-group-label {
-          flex: 1;
-          font-size: 0.92rem;
-        }
-
-        .curiosity-group-count {
-          font-size: 0.68rem;
-          font-weight: 600;
-          opacity: 0.5;
-          white-space: nowrap;
-          font-family: 'Cinzel', serif;
-          letter-spacing: 0.5px;
-          margin-right: 6px;
-          background: rgba(var(--heritage-gold-rgb), 0.08);
-          padding: 2px 8px;
-          border-radius: 99px;
-          border: 1px solid rgba(var(--heritage-gold-rgb), 0.12);
-        }
-
-        .curiosity-group-arrow {
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-          color: var(--heritage-gold);
-          flex-shrink: 0;
-          background: rgba(var(--heritage-gold-rgb), 0.06);
-        }
-
-        .curiosity-group-arrow.open {
-          transform: rotate(90deg);
-        }
-
-        .curiosity-group-content {
-          display: grid;
-          grid-template-rows: 0fr;
-          transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
-          opacity: 0;
-          overflow: hidden;
-        }
-        .curiosity-group-content.open {
-          grid-template-rows: 1fr;
-          opacity: 1;
-        }
-        .curiosity-group-content-inner {
-          min-height: 0;
-        }
-
-        .curiosity-group-desc {
-          font-family: 'Lora', serif;
-          font-size: 0.8rem;
-          line-height: 1.6;
-          opacity: 0.65;
-          padding: 0 20px 14px;
-          margin: 0;
-          border-bottom: 1px solid rgba(var(--heritage-gold-rgb), 0.08);
-          margin-bottom: 4px;
-        }
-
-        .curiosity-group-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-          gap: 10px;
-          padding: 14px 16px 16px;
-        }
-
-        /* Override curiosity-grid-card inside accordion to be smaller/tighter */
-        .curiosity-group-grid .curiosity-grid-card {
-          padding: 20px 18px;
-          border-radius: 14px;
-          min-height: 140px;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .curiosity-media-footer {
-          margin-top: 12px;
-        }
-
-        /* Press Play Media Card */
-        .curiosity-grid-card.media-card {
-          background: linear-gradient(135deg, rgba(var(--heritage-gold-rgb), 0.12) 0%, rgba(var(--heritage-gold-rgb), 0.04) 100%);
-          border-color: rgba(var(--heritage-gold-rgb), 0.3);
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          gap: 20px;
-          justify-content: flex-start;
-          padding: 24px;
-        }
-
-        .media-card:hover {
-          border-color: var(--heritage-gold);
-        }
-
-        .play-btn-circle {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, var(--heritage-gold), #b89048);
-          color: #1a1208;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.25s ease;
-          border: 1px solid #ffe8a0;
-          box-shadow: 0 4px 12px rgba(var(--heritage-gold-rgb), 0.3);
-          flex-shrink: 0;
-        }
-
-        .play-btn-circle:hover {
-          transform: scale(1.06);
-          box-shadow: 0 6px 16px rgba(var(--heritage-gold-rgb), 0.45);
-        }
-
-        .media-text-wrap {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .media-title {
-          font-family: 'Cinzel', serif;
-          font-size: 0.65rem;
-          font-weight: 700;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          color: var(--heritage-gold);
-        }
-
-        .media-subtitle {
-          font-family: 'Lora', serif;
-          font-size: 0.88rem;
-          font-style: italic;
-          opacity: 0.8;
-          line-height: 1.35;
-          margin: 0;
-        }
-
-        /* Sound wave animation */
-        .sound-wave-container {
-          display: flex;
-          align-items: flex-end;
-          gap: 3px;
-          height: 12px;
-          margin-top: 6px;
-        }
-
-        .sound-wave-bar {
-          width: 2px;
-          background-color: var(--heritage-gold);
-          border-radius: 1px;
-          animation: wave 1.2s ease-in-out infinite alternate;
-        }
-
-        .sound-wave-bar:nth-child(2) { animation-delay: 0.15s; }
-        .sound-wave-bar:nth-child(3) { animation-delay: 0.3s; }
-        .sound-wave-bar:nth-child(4) { animation-delay: 0.45s; }
-        .sound-wave-bar:nth-child(5) { animation-delay: 0.6s; }
-
-        @keyframes wave {
-          0% { height: 3px; }
-          100% { height: 12px; }
-        }
-
-        /* Story Modal Overlay & Tactile Manuscript Box */
-        .story-modal-overlay {
-          position: fixed;
-          inset: 0;
-          z-index: 10000;
-          background-color: rgba(6, 4, 2, 0.72);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 24px;
-        }
-
-        .story-modal-box {
-          max-width: 620px;
-          width: 100%;
-          max-height: 85vh;
-          background: 
-            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
-            linear-gradient(to right, #ebd7b3 0%, #f7ebd3 8%, #fbf5e6 50%, #f7ebd3 92%, #e5cfaa 100%);
-          border: 3px double #8a5a2b;
-          border-radius: 12px;
-          box-shadow: 
-            0 25px 60px rgba(0, 0, 0, 0.55),
-            inset 0 0 40px rgba(139, 94, 30, 0.18);
-          display: flex;
-          flex-direction: column;
-          color: #3d2e1a;
-          font-family: 'Lora', serif;
-          position: relative;
-          animation: modalAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .story-modal-header {
-          padding: 24px 36px 14px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1.5px solid rgba(139, 94, 30, 0.14);
-        }
-
-        .story-modal-tag {
-          font-family: 'Cinzel', serif;
-          font-size: 0.68rem;
-          font-weight: 700;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          color: #8a5a2b;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .btn-modal-close {
-          background: rgba(139, 94, 30, 0.08);
-          border: 1px solid rgba(139, 94, 30, 0.18);
-          color: #573512;
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .btn-modal-close:hover {
-          background-color: #8a5a2b;
-          color: #f7ebd3;
-          transform: scale(1.05);
-        }
-
-        .story-modal-body {
-          padding: 36px 40px;
-          overflow-y: auto;
-          background-image: linear-gradient(rgba(139, 94, 30, 0.075) 1px, transparent 1px);
-          background-size: 100% 28px;
-          line-height: 28px;
-        }
-
-        .story-modal-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 1.85rem;
-          line-height: 1.35;
-          font-weight: 600;
-          margin: 0 0 20px;
-          color: #573512;
-          font-style: italic;
-        }
-
-        .story-modal-paragraph {
-          font-size: 0.95rem;
-          line-height: 28px;
-          color: #3d2e1a;
-          margin: 0 0 28px;
-          text-indent: 15px;
-        }
-
-        .story-modal-paragraph:last-child {
-          margin-bottom: 0;
-        }
-
-        .story-modal-footer {
-          padding: 16px 36px 24px;
-          font-size: 0.72rem;
-          color: rgba(87, 53, 18, 0.75);
-          border-top: 1.5px solid rgba(139, 94, 30, 0.1);
-          font-style: italic;
-          display: flex;
-          justify-content: space-between;
-        }
-
-        /* Responsiveness Styling */
-        @media (max-width: 1024px) {
-          .hero-container {
-            text-align: center;
-          }
-          .hero-content {
-            align-items: center;
-          }
-          .ideas-container {
-            grid-template-columns: 1fr;
-            gap: 40px;
-          }
-          .ideas-left {
-            align-items: center;
-            text-align: center;
-          }
-          .curiosity-header-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 20px;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .hero-section {
-            margin-top: 60px; /* Offset for smaller floating navbar on mobile */
-            padding: 40px 0;
-            min-height: 70vh;
-            min-height: 70dvh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            --hero-bg-shift: 0px;
-          }
-          .hero-container {
-            padding: 0 20px;
-          }
-          .hero-content {
-            padding: 32px 24px;
-            border-radius: 20px;
-          }
-          .categories-section {
-            padding: 0 24px 30px;
-          }
-          .minds-section {
-            padding: 40px 24px;
-          }
-          .ideas-section {
-            padding: 40px 24px;
-          }
-          .ideas-grid {
-            grid-template-columns: 1fr;
-          }
-          .curiosity-section {
-            padding: 40px 24px 80px;
-          }
-          .curiosity-group-grid {
-            grid-template-columns: 1fr;
-          }
-          .categories-bar {
-            border-radius: 20px;
-            flex-direction: column;
-            gap: 12px;
-            padding: 12px;
-          }
-        }
-
-        /* Ornate details & buttons */
-        .btn-ideas-more {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          background: linear-gradient(135deg, var(--heritage-gold) 0%, rgba(var(--heritage-gold-rgb), 0.7) 100%);
-          color: var(--heritage-bg);
-          border: 2px double var(--heritage-gold-hover);
-          padding: 10px 22px;
-          border-radius: 99px;
-          font-family: 'Cinzel', serif;
-          font-size: 0.72rem;
-          font-weight: 700;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.25s ease;
-          box-shadow: 0 4px 12px rgba(var(--heritage-gold-rgb), 0.15);
-        }
-        .btn-ideas-more:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(var(--heritage-gold-rgb), 0.3);
-          filter: brightness(1.1);
-        }
-
-        /* Manuscript scroll styling */
-        .scroll-top-roller {
-          height: 18px;
-          background: linear-gradient(90deg, #3d220a 0%, #6e421c 25%, #8c582f 50%, #6e421c 75%, #3d220a 100%);
-          border-radius: 6px;
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-          margin: -24px -36px 16px;
-          position: relative;
-          z-index: 15;
-          border: 1px solid #221204;
-        }
-        .scroll-top-roller::before, .scroll-top-roller::after {
-          content: '';
-          position: absolute;
-          top: -3px;
-          width: 10px;
-          height: 24px;
-          background: linear-gradient(to bottom, #d4a72a, #8b6e22, #d4a72a);
-          border: 1px solid #5c4511;
-          border-radius: 2px;
-        }
-        .scroll-top-roller::before { left: -10px; }
-        .scroll-top-roller::after { right: -10px; }
-
-        .scroll-bottom-roller {
-          height: 18px;
-          background: linear-gradient(90deg, #3d220a 0%, #6e421c 25%, #8c582f 50%, #6e421c 75%, #3d220a 100%);
-          border-radius: 6px;
-          box-shadow: 0 -4px 8px rgba(0,0,0,0.3);
-          margin: 16px -36px -24px;
-          position: relative;
-          z-index: 15;
-          border: 1px solid #221204;
-        }
-        .scroll-bottom-roller::before, .scroll-bottom-roller::after {
-          content: '';
-          position: absolute;
-          top: -3px;
-          width: 10px;
-          height: 24px;
-          background: linear-gradient(to bottom, #d4a72a, #8b6e22, #d4a72a);
-          border: 1px solid #5c4511;
-          border-radius: 2px;
-        }
-        .scroll-bottom-roller::before { left: -10px; }
-        .scroll-bottom-roller::after { right: -10px; }
-
-        .story-modal-body {
-          padding: 36px 48px;
-          overflow-y: auto;
-          background: 
-            linear-gradient(rgba(139, 94, 30, 0.075) 1px, transparent 1px) 0 0 / 100% 28px,
-            linear-gradient(90deg, transparent 40px, #a33b3b 40px, #a33b3b 41px, transparent 42px, transparent calc(100% - 42px), #a33b3b calc(100% - 42px), #a33b3b calc(100% - 41px), transparent calc(100% - 40px));
-          line-height: 28px;
-          position: relative;
-        }
-
-        .story-drop-cap {
-          float: left;
-          font-family: 'Cinzel', serif;
-          font-size: 3.2rem;
-          font-weight: 700;
-          line-height: 0.85;
-          color: #a33b3b;
-          margin-right: 12px;
-          margin-top: 4px;
-          padding: 6px 10px;
-          border: 1px double #8a5a2b;
-          background: rgba(139, 94, 30, 0.08);
-          border-radius: 4px;
-          box-shadow: inset 0 0 8px rgba(139, 94, 30, 0.15);
-        }
-
-        /* Scholars Grid Modal Overlay */
-        .scholars-grid-overlay {
-          position: fixed;
-          inset: 0;
-          z-index: 9999;
-          background-color: rgba(12, 7, 3, 0.88);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 40px 24px;
-        }
-
-        .scholars-grid-container {
-          max-width: 1100px;
-          width: 100%;
-          max-height: 90vh;
-          background-color: var(--heritage-bg);
-          border: 1px solid var(--heritage-card-border);
-          border-radius: 28px;
-          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          animation: modalAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .scholars-grid-header {
-          padding: 24px 40px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid var(--heritage-card-border);
-          background-color: rgba(var(--heritage-gold-rgb), 0.03);
-        }
-
-        .scholars-grid-title {
-          font-family: 'Cinzel', serif;
-          font-size: 1.4rem;
-          color: var(--heritage-gold);
-          margin: 0;
-          letter-spacing: 1px;
-        }
-
-        .scholars-grid-close {
-          background: rgba(var(--heritage-gold-rgb), 0.08);
-          border: 1px solid var(--heritage-card-border);
-          color: var(--heritage-text);
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .scholars-grid-close:hover {
-          background-color: var(--heritage-gold);
-          color: var(--heritage-bg);
-          transform: scale(1.05);
-        }
-
-        .scholars-grid-body {
-          padding: 40px;
-          overflow-y: auto;
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 32px;
-          justify-items: center;
-        }
-      `}</style>
-
-      {/* Grid and Glow Overlays */}
-      <div className="heritage-bg-grid" />
-      <div className="heritage-bg-glow" />
-
-      {/* ─── HERO SECTION (Spread and Full-Bleed) ─── */}
-      <section className="hero-section">
-        <div className="hero-bg">
-          <img src={dark ? heroDark : heroLight} alt="Indian Heritage Backdrop" className="hero-bg-img" />
-          <div className="hero-bg-overlay" />
+    <div style={{ height: '100dvh', width: '100vw', background: dark ? '#050301' : '#1a1005', overflow: 'hidden' }}>
+      {/* Absolute top navbar area overlay */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50,
+        padding: '4.5rem 1.5rem 1.5rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%)',
+        pointerEvents: 'none'
+      }}>
+        <div style={{ fontFamily: 'Cinzel, serif', color: '#fff', fontSize: '1.3rem', fontWeight: 'bold', letterSpacing: '0.1em', pointerEvents: 'auto' }}>
+          Heritage <span style={{ color: '#c9a84c' }}>Feed</span>
         </div>
-        <div className="hero-container">
-          <div className="hero-content">
-            <div className="hero-eyebrow">
-              <span>OUR HERITAGE</span>
-              <span className="badge-star">✦</span>
-            </div>
-            <h1 className="hero-title">
-              minds that<br />
-              <span className="italic-gold">never really left.</span>
-            </h1>
-            <p className="hero-subtext">
-              They were not gods. They were humans —<br />
-              curious, restless, brilliant. Their questions still echo in everything we build today.
-            </p>
-            <div className="hero-hindi-badge">
-              <span>जिज्ञासा ही ज्ञान का पहला द्वार है।</span>
-              <span className="badge-star">✦</span>
-            </div>
-            <div className="hero-actions">
-              <button className="btn-explore" onClick={() => document.getElementById('scholars')?.scrollIntoView({ behavior: 'smooth' })}>
-                explore our heritage <ArrowRight size={14} className="arrow-icon" />
-              </button>
-              <button className="btn-watch" onClick={handleWatchIntro}>
-                <span className="play-icon-wrap"><Play size={10} fill="currentColor" /></span>
-                <span>watch intro</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── PARCHMENT BODY CONTENT WRAPPER ─── */}
-      <div className="heritage-body-content">
-        {/* ─── CATEGORY SECTION ─── */}
-        <section className="categories-section">
-          <div className="categories-bar">
-            <div className="categories-scroll">
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat.id}
-                  className={`category-pill ${activeCategory === cat.id ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(cat.id)}
-                >
-                  {cat.icon}
-                  <span>{cat.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ─── MINDS THAT SHAPED TIME ─── */}
-        <section id="scholars" className="minds-section">
-          <div className="minds-header-wrap">
-            <div className="section-title-wrap">
-              <span className="section-eyebrow">minds that shaped time <Sparkles size={11} /></span>
-              <h2 className="section-title">The Great Scholars</h2>
-            </div>
-            <div className="slider-controls">
-              <a href="#" className="view-all-link" onClick={handleViewAllScholars}>
-                view all <ArrowUpRight size={13} />
-              </a>
-              <button className="slider-btn prev-btn" onClick={() => scrollSlider('left')} aria-label="Scroll left">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <button className="slider-btn next-btn" onClick={() => scrollSlider('right')} aria-label="Scroll right">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <div className="slider-track-wrap" ref={scrollRef}>
-            <div className="slider-track">
-              <AnimatePresence mode="popLayout">
-                {filteredScholars.map((scholar) => (
-                  <motion.div
-                    key={scholar.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.35 }}
-                    className="scholar-card"
-                    onClick={() => setModalData({
-                      title: scholar.story.title,
-                      source: scholar.story.source,
-                      paragraphs: scholar.story.paragraphs,
-                      tag: `${scholar.name} manuscript`
-                    })}
-                  >
-                    <button
-                      className={`card-bookmark ${savedScholars.includes(scholar.id) ? 'saved' : ''}`}
-                      onClick={(e) => toggleSave(scholar.id, e)}
-                      aria-label="Save scholar"
-                    >
-                      <Heart size={15} fill={savedScholars.includes(scholar.id) ? "currentColor" : "none"} />
-                    </button>
-                    <div className="card-image-wrap">
-                      <img src={scholar.img} alt={`Portrait of ${scholar.name}`} />
-                      <div className="card-gradient-overlay" />
-                    </div>
-                    <div className="card-info">
-                      <h3 className="scholar-name">{scholar.name}</h3>
-                      <span className="scholar-period">{scholar.period}</span>
-                      <p className="scholar-desc-text">{scholar.title}</p>
-                      <button className="card-circle-arrow" aria-label="Read more">
-                        <ArrowRight size={13} />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── IDEAS THAT CHANGED EVERYTHING ─── */}
-        <section className="ideas-section">
-          <div className="ideas-container">
-            <div className="ideas-left">
-              <span className="section-eyebrow">first. by centuries. <span style={{fontSize: '11px'}}>∞</span></span>
-              <h2 className="section-title" style={{marginBottom: '20px'}}>Things the Rest of the World Discovered Later</h2>
-              <p className="ideas-left-desc">Binary code. Chess. The decimal system. Pure zinc. A university with 10,000 students — 1,500 years ago. These aren't the stories you already know. Click. Let your jaw drop.</p>
-              <button className="btn-ideas-more" onClick={() => document.getElementById('curiosity')?.scrollIntoView({ behavior: 'smooth' })}>
-                explore more <ArrowRight size={13} />
-              </button>
-            </div>
-            
-            <div className="ideas-grid">
-              {/* Card 1: Binary (Pingala) */}
-              <div 
-                className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
-                style={{position: 'relative'}}
-                onClick={() => setModalData({
-                  title: CONCEPT_STORIES[0].title,
-                  source: CONCEPT_STORIES[0].source,
-                  paragraphs: CONCEPT_STORIES[0].paragraphs,
-                  tag: CONCEPT_STORIES[0].tag
-                })}
-              >
-                <OrnateCorners dark={dark} />
-                <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="4" y="6" width="6" height="12" rx="1" />
-                    <rect x="14" y="6" width="6" height="12" rx="1" />
-                    <text x="5" y="15" fontSize="8" fontWeight="bold" fill="currentColor">0</text>
-                    <text x="15" y="15" fontSize="8" fontWeight="bold" fill="currentColor">1</text>
-                  </svg>
-                </div>
-                <h3 className="idea-sanskrit">द्वि-आधारी</h3>
-                <span className="idea-sanskrit-sub">pingala's binary code</span>
-                <p className="idea-description">2,000 years before computers, a poet mapped Sanskrit rhythms with 0s and 1s. Binary wasn't born in a lab — it was born in verse.</p>
-                <ArrowRight size={14} className="idea-card-arrow" />
-              </div>
-
-              {/* Card 2: Chess (Chaturanga) */}
-              <div 
-                className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
-                style={{position: 'relative'}}
-                onClick={() => setModalData({
-                  title: CONCEPT_STORIES[1].title,
-                  source: CONCEPT_STORIES[1].source,
-                  paragraphs: CONCEPT_STORIES[1].paragraphs,
-                  tag: CONCEPT_STORIES[1].tag
-                })}
-              >
-                <OrnateCorners dark={dark} />
-                <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="6" y="6" width="12" height="12" rx="1" />
-                    <line x1="6" y1="10" x2="18" y2="10" />
-                    <line x1="6" y1="14" x2="18" y2="14" />
-                    <line x1="10" y1="6" x2="10" y2="18" />
-                    <line x1="14" y1="6" x2="14" y2="18" />
-                    <circle cx="12" cy="12" r="2" fill="currentColor" opacity="0.3" />
-                  </svg>
-                </div>
-                <h3 className="idea-sanskrit">चतुरङ्ग</h3>
-                <span className="idea-sanskrit-sub">the birth of chess</span>
-                <p className="idea-description">1,500 years ago, a battlefield simulation became the world's greatest strategy game. Every chess match begins in ancient India.</p>
-                <ArrowRight size={14} className="idea-card-arrow" />
-              </div>
-
-              {/* Card 3: Nalanda University */}
-              <div 
-                className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
-                style={{position: 'relative'}}
-                onClick={() => setModalData({
-                  title: CONCEPT_STORIES[2].title,
-                  source: CONCEPT_STORIES[2].source,
-                  paragraphs: CONCEPT_STORIES[2].paragraphs,
-                  tag: CONCEPT_STORIES[2].tag
-                })}
-              >
-                <OrnateCorners dark={dark} />
-                <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <rect x="5" y="8" width="14" height="12" rx="2" />
-                    <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    <line x1="12" y1="12" x2="12" y2="16" />
-                    <line x1="9" y1="14" x2="15" y2="14" />
-                  </svg>
-                </div>
-                <h3 className="idea-sanskrit">नालन्दा</h3>
-                <span className="idea-sanskrit-sub">the first great university</span>
-                <p className="idea-description">10,000 students from across Asia. 2,000 teachers. 9 stories of manuscripts. Oxford is 800 years old. Nalanda was 1,600.</p>
-                <ArrowRight size={14} className="idea-card-arrow" />
-              </div>
-
-              {/* Card 4: Zinc */}
-              <div 
-                className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
-                style={{position: 'relative'}}
-                onClick={() => setModalData({
-                  title: CONCEPT_STORIES[3].title,
-                  source: CONCEPT_STORIES[3].source,
-                  paragraphs: CONCEPT_STORIES[3].paragraphs,
-                  tag: CONCEPT_STORIES[3].tag
-                })}
-              >
-                <OrnateCorners dark={dark} />
-                <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <path d="M6 20L10 8h8l4 12" />
-                    <path d="M8 16h8" />
-                    <circle cx="14" cy="5" r="2" fill="currentColor" opacity="0.3" />
-                  </svg>
-                </div>
-                <h3 className="idea-sanskrit">यशद</h3>
-                <span className="idea-sanskrit-sub">pure zinc distillation</span>
-                <p className="idea-description">India was producing pure zinc 500 years before Europe cracked it. The process was so advanced it became a lost art — then rediscovered.</p>
-                <ArrowRight size={14} className="idea-card-arrow" />
-              </div>
-
-              {/* Card 5: Decimal System */}
-              <div 
-                className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
-                style={{position: 'relative'}}
-                onClick={() => setModalData({
-                  title: CONCEPT_STORIES[4].title,
-                  source: CONCEPT_STORIES[4].source,
-                  paragraphs: CONCEPT_STORIES[4].paragraphs,
-                  tag: CONCEPT_STORIES[4].tag
-                })}
-              >
-                <OrnateCorners dark={dark} />
-                <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                    <text x="5" y="16" fontSize="12" fontWeight="bold" fill="currentColor">1</text>
-                    <text x="11" y="16" fontSize="12" fontWeight="bold" fill="currentColor">0</text>
-                    <text x="9" y="8" fontSize="8" fill="currentColor" opacity="0.6">1</text>
-                    <text x="9" y="20" fontSize="8" fill="currentColor" opacity="0.6">0</text>
-                  </svg>
-                </div>
-                <h3 className="idea-sanskrit">दशमलव</h3>
-                <span className="idea-sanskrit-sub">the decimal system</span>
-                <p className="idea-description">The way you write numbers — ones, tens, hundreds — was an Indian breakthrough. Before this, multiplication needed specialists. Now you just move a dot.</p>
-                <ArrowRight size={14} className="idea-card-arrow" />
-              </div>
-
-              {/* Card 6: Cosmic Numbers */}
-              <div 
-                className="idea-grid-card fs-sandstone-tablet fs-gold-corner-card" 
-                style={{position: 'relative'}}
-                onClick={() => setModalData({
-                  title: CONCEPT_STORIES[5].title,
-                  source: CONCEPT_STORIES[5].source,
-                  paragraphs: CONCEPT_STORIES[5].paragraphs,
-                  tag: CONCEPT_STORIES[5].tag
-                })}
-              >
-                <OrnateCorners dark={dark} />
-                <div className="idea-icon-wrap">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" opacity="0.3" />
-                    <path d="M12 2c3 3 3 9 3 12s0 9-3 12" />
-                    <path d="M12 2c-3 3-3 9-3 12s0 9 3 12" />
-                    <circle cx="12" cy="12" r="2" fill="currentColor" opacity="0.5" />
-                  </svg>
-                </div>
-                <h3 className="idea-sanskrit">असङ्ख्य</h3>
-                <span className="idea-sanskrit-sub">naming the countless</span>
-                <p className="idea-description">Ancient Indians named numbers up to 10^53 — a 1 with 53 zeros. They measured time in billions of years when everyone else counted in thousands.</p>
-                <ArrowRight size={14} className="idea-card-arrow" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── LATE NIGHT CURIOSITY SECTION ─── */}
-        <section id="curiosity" className="curiosity-section">
-          <div className="curiosity-container">
-
-            {/* Section header — full width, matching ideas-section style */}
-            <div className="curiosity-header-row">
-              <div className="curiosity-header-left">
-                <span className="section-eyebrow">sit with this. 🌙</span>
-                <h2 className="section-title" style={{marginBottom: '12px'}}>Things That Don't Feel Real</h2>
-                <p className="curiosity-left-desc">Not history. Not facts. Just quiet mind-bending moments from a past that feels impossibly ahead of itself. Click any story to sit with it.</p>
-              </div>
-              <button className="btn-ideas-more" style={{flexShrink: 0}} onClick={() => setModalData({
-                title: CURIOSITY_STORIES[0].title,
-                source: CURIOSITY_STORIES[0].source,
-                paragraphs: CURIOSITY_STORIES[0].paragraphs,
-                tag: CURIOSITY_STORIES[0].tag
-              })}>read a story <ArrowRight size={13} /></button>
-            </div>
-
-            {/* Accordion groups — full width */}
-            <div className="curiosity-groups">
-              {CURIOSITY_GROUPS.map(group => {
-                const isOpen = expandedGroups.includes(group.id)
-                const stories = CURIOSITY_STORIES.filter(s => s.group === group.id)
-                return (
-                  <div key={group.id} className="curiosity-group">
-                    <button className="curiosity-group-header" onClick={() => toggleGroup(group.id)}>
-                      <span className="curiosity-group-emoji">{group.emoji}</span>
-                      <span className="curiosity-group-label">{group.label}</span>
-                      <span className="curiosity-group-count">{stories.length} {stories.length === 1 ? 'story' : 'stories'}</span>
-                      <span className={`curiosity-group-arrow ${isOpen ? 'open' : ''}`}>
-                        <ChevronRight size={14} />
-                      </span>
-                    </button>
-                    <div className={`curiosity-group-content ${isOpen ? 'open' : ''}`}>
-                      <div className="curiosity-group-content-inner">
-                        <p className="curiosity-group-desc">{group.desc}</p>
-                        <div className="curiosity-group-grid">
-                          {stories.map((story, i) => (
-                            <div
-                              key={i}
-                              className="curiosity-grid-card fs-gold-corner-card fs-sandstone-tablet"
-                              onClick={() => setModalData({
-                                title: story.title,
-                                source: story.source,
-                                paragraphs: story.paragraphs,
-                                tag: story.tag
-                              })}
-                            >
-                              <span className="curiosity-card-tag">{story.tag}</span>
-                              <h3 className="curiosity-card-title">{story.title}</h3>
-                              <div className="curiosity-card-footer">
-                                <span className="curiosity-card-read">read story</span>
-                                <button className="curiosity-card-btn" aria-label="Read story">
-                                  <ArrowRight size={13} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-
-              {/* Reading Aid Meditative BGM Card */}
-              <div className="curiosity-grid-card media-card fs-gold-corner-card fs-sandstone-tablet curiosity-media-footer">
-                <button className="play-btn-circle" onClick={togglePlaySound} aria-label={isPlayingSound ? "Pause sound" : "Play sound"}>
-                  {isPlayingSound ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" style={{transform: 'translateX(2px)'}} />}
-                </button>
-                <div className="media-text-wrap">
-                  <span className="media-title">Contemplation Reading Aid BGM</span>
-                  <h3 className="media-subtitle">{isPlayingSound ? "Playing Sitar & Tanpura..." : "play ambient sitar for focused reading"}</h3>
-                  {isPlayingSound && (
-                    <div className="sound-wave-container">
-                      <div className="sound-wave-bar" />
-                      <div className="sound-wave-bar" />
-                      <div className="sound-wave-bar" />
-                      <div className="sound-wave-bar" />
-                      <div className="sound-wave-bar" />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <ImmersiveFooter />
+        <button onClick={togglePlaySound} style={{ color: '#fff', padding: 10, background: 'rgba(255,255,255,0.15)', borderRadius: '50%', backdropFilter: 'blur(10px)', pointerEvents: 'auto', border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer' }}>
+          {isPlayingSound ? <Pause size={20} /> : <Play size={20} />}
+        </button>
       </div>
 
-      {/* ─── INTRO SANCTUARY MODAL ─── */}
-      <AnimatePresence>
-        {introOpen && (
-          <div className="story-modal-overlay" onClick={handleCloseIntro}>
-            <div className="story-modal-box" style={{ maxWidth: '580px' }} onClick={(e) => e.stopPropagation()}>
-              <div className="story-modal-header">
-                <div className="story-modal-tag">
-                  <Sparkles size={14} />
-                  <span>Sanctuary Intro</span>
+      {/* Snap Scroll Container */}
+      <div style={{
+        height: '100dvh',
+        overflowY: 'scroll',
+        scrollSnapType: 'y mandatory',
+        scrollBehavior: 'smooth',
+      }} className="hide-scrollbar">
+        {FEED.map((item, index) => (
+          <div key={item.id} style={{
+            height: '100dvh',
+            width: '100%',
+            scrollSnapAlign: 'start',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end'
+          }}>
+            {/* Background Image */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: 'url(' + item.image + ')',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: item.type === 'scholar' ? 'brightness(0.7) contrast(1.1)' : 'brightness(0.3) saturate(1.2)'
+            }} />
+            
+            {/* Gradient Overlay for Text Readability */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(0deg, rgba(5,3,1,1) 0%, rgba(5,3,1,0.85) 30%, rgba(5,3,1,0.3) 60%, transparent 100%)'
+            }} />
+
+            {/* Content Area */}
+            <div style={{
+              position: 'relative', zIndex: 10,
+              padding: '2rem 1.5rem 7rem 1.5rem', // Bottom padding accounts for mobile nav
+              color: '#fff',
+              maxWidth: '800px',
+              margin: '0 auto',
+              width: '100%'
+            }}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-20%' }}
+                transition={{ duration: 0.6 }}
+              >
+                <div style={{
+                  display: 'inline-block',
+                  padding: '6px 14px',
+                  borderRadius: '999px',
+                  background: 'linear-gradient(135deg, ' + item.accent + ', ' + item.accent + '88)',
+                  color: '#fff',
+                  fontFamily: 'Cinzel, serif',
+                  fontSize: '0.65rem',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  marginBottom: '1.2rem',
+                  boxShadow: '0 4px 12px ' + item.accent + '44'
+                }}>
+                  {item.type}
                 </div>
-                <button className="btn-modal-close" onClick={handleCloseIntro} aria-label="Close modal">
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="story-modal-body" style={{ textAlign: 'center', background: 'none' }}>
-                <span className="text-3xl mb-4 block">🕉️</span>
-                <h3 className="story-modal-title" style={{ fontFamily: "'Cinzel', serif", fontSize: '1.5rem', color: '#573512' }}>
-                  Flowstate Heritage Sanctuary
-                </h3>
-                <p className="story-modal-paragraph font-serif italic text-base leading-relaxed" style={{ textIndent: 0 }}>
-                  "जिज्ञासा ही ज्ञान का पहला द्वार है।"
-                </p>
-                <p className="story-modal-paragraph text-sm opacity-85 leading-relaxed" style={{ textIndent: 0 }}>
-                  This is not a history lesson. It is a meeting — with minds who lived centuries before us, but whose questions still shape our world. Step quietly. Think deeply.
-                </p>
-                <p className="story-modal-paragraph text-sm opacity-85 leading-relaxed" style={{ textIndent: 0 }}>
-                  Tibetan singing bowl tones are active, creating space for quiet reflection as you journey through time.
-                </p>
-                <button
-                  onClick={handleCloseIntro}
-                  className="btn-explore mt-4"
-                  style={{ display: 'inline-flex' }}
-                >
-                  Enter Sanctuary
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </AnimatePresence>
 
-      {/* ─── SCHOLARS VIEW ALL GRID MODAL ─── */}
-      <AnimatePresence>
-        {showAllGrid && (
-          <div className="scholars-grid-overlay" onClick={() => setShowAllGrid(false)}>
-            <div className="scholars-grid-container" onClick={(e) => e.stopPropagation()}>
-              <div className="scholars-grid-header">
-                <h2 className="scholars-grid-title">All Minds, One Conversation</h2>
-                <button className="scholars-grid-close" onClick={() => setShowAllGrid(false)} aria-label="Close grid modal">
-                  <X size={18} />
-                </button>
-              </div>
-              <div className="scholars-grid-body">
-                {SCHOLARS.map((scholar) => (
-                  <div
-                    key={scholar.id}
-                    className="scholar-card"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => {
-                      setModalData({
-                        title: scholar.story.title,
-                        source: scholar.story.source,
-                        paragraphs: scholar.story.paragraphs,
-                        tag: `${scholar.name} manuscript`
-                      })
-                      setShowAllGrid(false)
-                    }}
-                  >
-                    <button
-                      className={`card-bookmark ${savedScholars.includes(scholar.id) ? 'saved' : ''}`}
-                      onClick={(e) => toggleSave(scholar.id, e)}
-                      aria-label="Save scholar"
-                    >
-                      <Heart size={15} fill={savedScholars.includes(scholar.id) ? "currentColor" : "none"} />
-                    </button>
-                    <div className="card-image-wrap">
-                      <img src={scholar.img} alt={`Portrait of ${scholar.name}`} />
-                      <div className="card-gradient-overlay" />
-                    </div>
-                    <div className="card-info">
-                      <h3 className="scholar-name">{scholar.name}</h3>
-                      <span className="scholar-period">{scholar.period}</span>
-                      <p className="scholar-desc-text">{scholar.title}</p>
-                      <button className="card-circle-arrow" aria-label="Read more">
-                        <ArrowRight size={13} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* ─── STORY MODAL (Manuscript Lined Parchment Style) ─── */}
-      <AnimatePresence>
-        {modalData && (
-          <div className="story-modal-overlay" onClick={() => setModalData(null)}>
-            <div className="story-modal-box" onClick={(e) => e.stopPropagation()}>
-              <div className="scroll-top-roller" />
-              <div className="story-modal-header">
-                <div className="story-modal-tag">
-                  <BookOpen size={14} />
-                  <span>{modalData.tag || 'ancient manuscript'}</span>
-                </div>
-                <button className="btn-modal-close" onClick={() => setModalData(null)} aria-label="Close modal">
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="story-modal-body">
-                {/* Small Sanskrit design decoration */}
-                <div className="text-center opacity-40 text-xs mb-3 font-serif">ॐ · ✦ · ॐ</div>
-                <h2 className="story-modal-title">
-                  {modalData.title}
+                <h2 style={{
+                  fontFamily: 'Cormorant Garamond, serif',
+                  fontSize: 'clamp(2rem, 6vw, 3rem)',
+                  lineHeight: '1.05',
+                  fontWeight: '600',
+                  marginBottom: '0.75rem',
+                  textShadow: '0 2px 8px rgba(0,0,0,0.8)',
+                  color: '#fff'
+                }}>
+                  {item.title}
                 </h2>
-                <div style={{ width: '60px', height: '1px', backgroundColor: '#8a5a2b', margin: '0 auto 28px' }} />
-                {modalData.paragraphs.map((p, i) => (
-                  <p key={i} className="story-modal-paragraph">
-                    {i === 0 ? (
-                      <span className="story-drop-cap">
-                        {p.charAt(0)}
-                      </span>
-                    ) : null}
-                    {i === 0 ? p.slice(1) : p}
-                  </p>
-                ))}
-              </div>
+                
+                <p style={{
+                  fontFamily: 'Outfit, sans-serif',
+                  fontSize: '0.85rem',
+                  color: 'rgba(255,255,255,0.7)',
+                  marginBottom: '1.2rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  fontWeight: '500'
+                }}>
+                  {item.subtitle}
+                </p>
 
-              <div className="story-modal-footer">
-                <span>Source: {modalData.source}</span>
-                <span className="opacity-60">Flowstate Archive</span>
-              </div>
-              <div className="scroll-bottom-roller" />
+                <p style={{
+                  fontFamily: 'Lora, serif',
+                  fontSize: '1.1rem',
+                  lineHeight: '1.6',
+                  color: 'rgba(255,255,255,0.95)',
+                  marginBottom: '1.5rem',
+                  display: expandedId === item.id ? 'block' : '-webkit-box',
+                  WebkitLineClamp: expandedId === item.id ? 'unset' : 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                }}>
+                  {item.body}
+                </p>
+
+                {expandedId === item.id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    style={{ marginBottom: '1.5rem' }}
+                  >
+                    {item.readMore.slice(item.type === 'scholar' ? 0 : 1).map((p, i) => (
+                      <p key={i} style={{
+                        fontFamily: 'Lora, serif',
+                        fontSize: '1.1rem',
+                        lineHeight: '1.6',
+                        color: 'rgba(255,255,255,0.95)',
+                        marginBottom: '1rem',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                      }}>{p}</p>
+                    ))}
+                  </motion.div>
+                )}
+
+                <button
+                  onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    fontFamily: 'Outfit, sans-serif',
+                    fontSize: '0.95rem',
+                    fontWeight: '700',
+                    color: item.accent,
+                    background: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid ' + item.accent + '66',
+                    padding: '10px 20px',
+                    borderRadius: '999px',
+                    cursor: 'pointer',
+                    transition: '0.2s',
+                  }}
+                  onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                  onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                >
+                  {expandedId === item.id ? 'Show Less' : 'Read Full Story'} 
+                  <ChevronRight size={18} style={{ transform: expandedId === item.id ? 'rotate(-90deg)' : 'none', transition: '0.3s' }} />
+                </button>
+              </motion.div>
             </div>
+            {index === 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, y: [0, 10, 0] }}
+                transition={{ delay: 2, duration: 2, repeat: Infinity }}
+                style={{
+                  position: 'absolute',
+                  bottom: '2rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  zIndex: 20,
+                  color: 'rgba(255,255,255,0.7)'
+                }}
+              >
+                <ChevronDown size={32} />
+              </motion.div>
+            )}
           </div>
-        )}
-      </AnimatePresence>
+        ))}
+      </div>
+      
+      {/* Hide scrollbar styles */}
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   )
 }
 
-export default Heritage
+export default Heritage;

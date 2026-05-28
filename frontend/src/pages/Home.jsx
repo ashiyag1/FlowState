@@ -6,8 +6,9 @@ import TopBorder from '../components/ui/TopBorder'
 import HeroSection from '../sections/HeroSection'
 import WisdomCarousel from '../sections/WisdomCarousel'
 import DailyFlow from '../sections/DailyFlow'
-import IndiaSections from '../sections/IndiaSections'
+import ExploreSection from '../sections/ExploreSection'
 import ImmersiveFooter from '../sections/ImmersiveFooter'
+import FounderLetterModal from '../components/ui/FounderLetterModal'
 import homeBg from '../assets/home_bg.webp'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useTheme } from '../context/ThemeContext'
@@ -15,7 +16,45 @@ import { useWellness } from '../context/WellnessContext'
 import { getEmotionalReflection } from '../utils/emotionalMemory'
 import { computeArchetype } from '../utils/soulArchetype'
 import LotusFlower from '../icons/LotusFlower'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import WisdomStreak from '../components/wisdom/WisdomStreak'
+
+function StepWrapper({ number, title, description, children, dark }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.7 }}
+      style={{
+        position: 'relative',
+        padding: '3rem 2rem',
+        marginBottom: '3rem',
+        borderRadius: '24px',
+        background: dark ? 'rgba(15,10,4,0.6)' : 'rgba(255,252,240,0.6)',
+        border: '1px solid ' + (dark ? 'rgba(201,168,76,0.15)' : 'rgba(201,168,76,0.25)'),
+        backdropFilter: 'blur(20px)',
+      }}
+    >
+      <div style={{
+        position: 'absolute', top: '-24px', left: '50%', transform: 'translateX(-50%)',
+        width: '48px', height: '48px', borderRadius: '50%',
+        background: 'linear-gradient(135deg, #c9933a, #e8b96a)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: 'Cinzel, serif', fontSize: '1.2rem', fontWeight: 'bold', color: '#fff',
+        boxShadow: '0 8px 20px rgba(201,147,58,0.4)',
+        border: '4px solid ' + (dark ? '#110b05' : '#fdf6e3')
+      }}>
+        {number}
+      </div>
+      <div style={{ textAlign: 'center', marginBottom: '2rem', marginTop: '1rem' }}>
+        <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', color: dark ? '#f5e6c8' : '#2d1f0e', marginBottom: '0.5rem' }}>{title}</h3>
+        <p style={{ fontFamily: 'Lora, serif', fontStyle: 'italic', color: dark ? 'rgba(245,230,200,0.6)' : 'rgba(45,31,14,0.6)' }}>{description}</p>
+      </div>
+      {children}
+    </motion.div>
+  )
+}
 
 // Rotating daily micro-challenges — overthinker & Gen Z friendly
 const DAILY_CHALLENGES = [
@@ -50,6 +89,7 @@ export default function Home() {
   const [activeSound, setActiveSound] = useState(null)
   const [soundPanelOpen, setSoundPanelOpen] = useState(false)
   const [challengeDone, setChallengeDone] = useState(false)
+  const [letterOpen, setLetterOpen] = useState(false)
 
   // Track user session active days in local storage for re-entry checks
   useEffect(() => {
@@ -452,11 +492,77 @@ export default function Home() {
               </AnimatePresence>
             </motion.div>
 
-            <DailyFlow />
-            <SoftSectionDivider dark={dark} />
-            <WisdomCarousel />
-            <SoftSectionDivider dark={dark} />
-            <IndiaSections />
+            <div style={{ textAlign: 'center', margin: '4rem 0 3rem' }}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setLetterOpen(true)}
+                className="mb-8 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400 text-white text-sm font-bold transition-all shadow-[0_8px_20px_rgba(236,72,153,0.3)]"
+                style={{ fontFamily: "'Outfit', sans-serif", letterSpacing: '0.05em' }}
+              >
+                💌 Ashiya's letter for you
+              </motion.button>
+              <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: '1.8rem', color: '#c9933a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                The Daily Flow
+              </h2>
+              <p style={{ fontFamily: 'Lora, serif', fontStyle: 'italic', color: dark ? 'rgba(245,230,200,0.7)' : 'rgba(78,51,24,0.7)' }}>
+                A step-by-step path to ground yourself today.
+              </p>
+            </div>
+
+            <StepWrapper number="1" title="The Awakening" description="Start with a moment of ancient wisdom." dark={dark}>
+              <WisdomCarousel />
+              <div style={{ marginTop: '2rem', padding: '0 1rem' }}>
+                <WisdomStreak />
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                <Link to="/habits" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  padding: '12px 24px', borderRadius: '999px',
+                  background: dark ? 'rgba(201,168,76,0.1)' : 'rgba(201,168,76,0.15)',
+                  border: '1px solid rgba(201,168,76,0.3)',
+                  color: dark ? '#e8c97a' : '#8a5a12',
+                  fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem', fontWeight: '600', textDecoration: 'none',
+                  transition: 'all 0.3s'
+                }}>
+                  Discover ancient solutions for modern problems ➔
+                </Link>
+              </div>
+            </StepWrapper>
+
+            <StepWrapper number="2" title="Ground Your Rituals" description="Nourish your body and track your daily sadhana." dark={dark}>
+              <DailyFlow />
+              <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                <Link to="/habits" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  padding: '12px 24px', borderRadius: '999px',
+                  background: dark ? 'rgba(201,168,76,0.1)' : 'rgba(201,168,76,0.15)',
+                  border: '1px solid rgba(201,168,76,0.3)',
+                  color: dark ? '#e8c97a' : '#8a5a12',
+                  fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem', fontWeight: '600', textDecoration: 'none',
+                  transition: 'all 0.3s'
+                }}>
+                  Enter Your Sanctuary ➔
+                </Link>
+              </div>
+            </StepWrapper>
+
+            <StepWrapper number="3" title="Explore & Connect" description="Dive into curated practices, your heritage, and the Sangha." dark={dark}>
+              <ExploreSection dark={dark} />
+              <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                <Link to="/heritage" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  padding: '12px 24px', borderRadius: '999px',
+                  background: dark ? 'rgba(201,168,76,0.1)' : 'rgba(201,168,76,0.15)',
+                  border: '1px solid rgba(201,168,76,0.3)',
+                  color: dark ? '#e8c97a' : '#8a5a12',
+                  fontFamily: 'Outfit, sans-serif', fontSize: '0.9rem', fontWeight: '600', textDecoration: 'none',
+                  transition: 'all 0.3s'
+                }}>
+                  Swipe through forgotten history ➔
+                </Link>
+              </div>
+            </StepWrapper>
           </div>
 
           <ImmersiveFooter />
@@ -524,6 +630,8 @@ export default function Home() {
           )}
         </motion.button>
       </div>
+
+      <FounderLetterModal open={letterOpen} onClose={() => setLetterOpen(false)} dark={dark} />
     </>
   )
 }

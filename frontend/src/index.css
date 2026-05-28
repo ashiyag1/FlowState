@@ -163,9 +163,17 @@ body {
 .journal-page {
   background-size: cover;
   background-repeat: no-repeat;
-  background-attachment: fixed;
+  /* iOS Safari does not support background-attachment: fixed correctly.
+     Use scroll on mobile, parallax only on desktop. */
+  background-attachment: scroll;
   background-color: #120904;
   min-height: 100vh;
+}
+
+@media (min-width: 769px) {
+  .journal-page {
+    background-attachment: fixed;
+  }
 }
 
 @media (min-width: 641px) {

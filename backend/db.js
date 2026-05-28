@@ -57,7 +57,7 @@ const DEFAULT_BADGES = [
     badgeId: "3_day_streak",
     title: "3 Day Streak",
     description: "Maintain a habit streak of 3 days.",
-    imageFilename: "3_day_streak.png",
+    imageFilename: "3_day_streak.webp",
     category: "streaks",
     rarity: "Common",
     targetProgress: 3
@@ -66,7 +66,7 @@ const DEFAULT_BADGES = [
     badgeId: "journalled_10_times",
     title: "Journalled 10 Times",
     description: "Write journal entries on 10 different days.",
-    imageFilename: "journalled_10_times.png",
+    imageFilename: "journalled_10_times.webp",
     category: "journaling",
     rarity: "Common",
     targetProgress: 10
@@ -75,7 +75,7 @@ const DEFAULT_BADGES = [
     badgeId: "hydration_sage",
     title: "Hydration Sage",
     description: "Meet your water goals on 5 different days.",
-    imageFilename: "hydration_sage.png",
+    imageFilename: "hydration_sage.webp",
     category: "wellness",
     rarity: "Common",
     targetProgress: 5
@@ -84,7 +84,7 @@ const DEFAULT_BADGES = [
     badgeId: "wisdom_seeker",
     title: "Wisdom Seeker",
     description: "Open and read from 3 different books in Wisdom Library.",
-    imageFilename: "wisdom_seeker.png",
+    imageFilename: "wisdom_seeker.webp",
     category: "wisdom",
     rarity: "Common",
     targetProgress: 3
@@ -93,7 +93,7 @@ const DEFAULT_BADGES = [
     badgeId: "cosmic_rhythm",
     title: "Cosmic Rhythm",
     description: "Log wellness activity for 7 consecutive days.",
-    imageFilename: "cosmic_rhythm.png",
+    imageFilename: "cosmic_rhythm.webp",
     category: "wellness",
     rarity: "Uncommon",
     targetProgress: 7
@@ -102,7 +102,7 @@ const DEFAULT_BADGES = [
     badgeId: "sunrise_consistency",
     title: "Sunrise Consistency",
     description: "Complete habit or breathing before 8 AM on 3 different days.",
-    imageFilename: "sunrise_consistency.png",
+    imageFilename: "sunrise_consistency.webp",
     category: "rituals",
     rarity: "Uncommon",
     targetProgress: 3
@@ -111,7 +111,7 @@ const DEFAULT_BADGES = [
     badgeId: "third_eye_open",
     title: "Third Eye Open",
     description: "Read the wisdom section daily for 21 days.",
-    imageFilename: "third_eye_open.png",
+    imageFilename: "third_eye_open.webp",
     category: "wisdom",
     rarity: "Rare",
     targetProgress: 21
@@ -120,7 +120,7 @@ const DEFAULT_BADGES = [
     badgeId: "the_unshaken",
     title: "The Unshaken",
     description: "Maintain a habit streak of 10 days.",
-    imageFilename: "the_unshaken.png",
+    imageFilename: "the_unshaken.webp",
     category: "legendary",
     rarity: "Legendary",
     targetProgress: 10
@@ -129,7 +129,7 @@ const DEFAULT_BADGES = [
     badgeId: "Sankalpa_keeper",
     title: "Sankalpa Keeper",
     description: "Commit to and fulfill Daily Sankalpa on 5 different days.",
-    imageFilename: "Sankalpa_keeper.png",
+    imageFilename: "Sankalpa_keeper.webp",
     category: "rituals",
     rarity: "Uncommon",
     targetProgress: 5
@@ -138,7 +138,7 @@ const DEFAULT_BADGES = [
     badgeId: "calm_mind",
     title: "Calm Mind",
     description: "Practice breathing exercises or meditation on 5 different days.",
-    imageFilename: "calm_mind.png",
+    imageFilename: "calm_mind.webp",
     category: "wellness",
     rarity: "Common",
     targetProgress: 5
@@ -147,7 +147,7 @@ const DEFAULT_BADGES = [
     badgeId: "daily_journaling_30_times",
     title: "Daily Reflection Sage",
     description: "Write daily journal entries on 30 different days.",
-    imageFilename: "daily_journaling_30_times.png",
+    imageFilename: "daily_journaling_30_times.webp",
     category: "journaling",
     rarity: "Rare",
     targetProgress: 30
@@ -156,7 +156,7 @@ const DEFAULT_BADGES = [
     badgeId: "discipline_builder",
     title: "Discipline Builder",
     description: "Complete at least 5 habits in a single day.",
-    imageFilename: "discipline_builder.png",
+    imageFilename: "discipline_builder.webp",
     category: "streaks",
     rarity: "Uncommon",
     targetProgress: 5
@@ -165,7 +165,7 @@ const DEFAULT_BADGES = [
     badgeId: "focus_monk",
     title: "Focus Monk",
     description: "Complete breathing portal sessions on 10 different days.",
-    imageFilename: "focus_monk.png",
+    imageFilename: "focus_monk.webp",
     category: "wellness",
     rarity: "Uncommon",
     targetProgress: 10
@@ -174,7 +174,7 @@ const DEFAULT_BADGES = [
     badgeId: "midnight_reflector",
     title: "Midnight Reflector",
     description: "Log a night reflection journal entry (after 9 PM) on 3 different days.",
-    imageFilename: "midnight_reflector.png",
+    imageFilename: "midnight_reflector.webp",
     category: "journaling",
     rarity: "Uncommon",
     targetProgress: 3
@@ -714,98 +714,14 @@ let communityCache = null
 let communityCacheTime = 0
 
 export async function dbGetCommunityFeed() {
-  const now = Date.now()
-  if (communityCache && (now - communityCacheTime) < 60000) {
-    return communityCache
-  }
-  await connectDB()
-  const activities = []
-  const users = await dbGetAllUsers()
-
-  for (const user of users) {
-    const userId = user.id
-
-    if (IS_MONGO) {
-      const latestEntry = await JournalEntry.findOne({ userId }).sort({ createdAt: -1 }).lean()
-      const habits = await Habit.find({ userId }).lean()
-      const doneDoc = await HabitDone.findOne({ userId }).lean()
-
-      if (!latestEntry && habits.length === 0) continue
-
-      const done = doneDoc ? Object.fromEntries(
-        Object.entries(doneDoc.done || {}).map(([k, v]) => [k, Object.fromEntries(v)])
-      ) : {}
-
-      let bestHabit = null, bestStreak = 0
-      for (const h of habits) {
-        let streak = 0
-        const today = new Date()
-        for (let i = 0; i < 366; i++) {
-          const d = new Date(today); d.setDate(d.getDate() - i)
-          const ds = d.toISOString().slice(0, 10)
-          const dayDone = done[ds]
-          if (dayDone && dayDone[h._id.toString()]) {
-            streak++
-          } else if (i > 0) { break }
-        }
-        if (streak > bestStreak) { bestStreak = streak; bestHabit = h }
-      }
-
-      activities.push({
-        id: `act-${userId}`,
-        name: user.name,
-        avatar: bestHabit ? bestHabit.icon : '🪷',
-        habit: bestHabit ? `${bestHabit.icon} ${bestHabit.name}` : '🌿 Wellness Journey',
-        streak: bestStreak,
-        time: timeAgo(latestEntry?.createdAt),
-        text: latestEntry ? latestEntry.text : 'Joined the sangha!',
-        prana: 0, comments: 0,
-        color: bestHabit ? bestHabit.color : '#c9933a'
-      })
-    } else {
-      const db = await readJsonDB()
-      const userEntries = db.journalEntries
-        .filter(e => e.userId === userId)
-        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-      const userHabits = db.habits.filter(h => h.userId === userId)
-      const userDone = db.habitDone[userId] || {}
-
-      if (userEntries.length === 0 && userHabits.length === 0) continue
-
-      let bestHabit = null, bestStreak = 0
-      for (const h of userHabits) {
-        let streak = 0
-        const today = new Date()
-        for (let i = 0; i < 366; i++) {
-          const d = new Date(today); d.setDate(d.getDate() - i)
-          const ds = d.toISOString().slice(0, 10)
-          const dayDone = userDone[ds]
-          if (dayDone && dayDone[h.id]) {
-            streak++
-          } else if (i > 0) { break }
-        }
-        if (streak > bestStreak) { bestStreak = streak; bestHabit = h }
-      }
-
-      const latest = userEntries[0]
-      activities.push({
-        id: `act-${userId}`,
-        name: user.name,
-        avatar: bestHabit ? bestHabit.icon : '🪷',
-        habit: bestHabit ? `${bestHabit.icon} ${bestHabit.name}` : '🌿 Wellness Journey',
-        streak: bestStreak,
-        time: timeAgo(latest?.createdAt),
-        text: latest ? latest.text : 'Joined the sangha!',
-        prana: 0, comments: 0,
-        color: bestHabit ? bestHabit.color : '#c9933a'
-      })
-    }
-  }
-
-  activities.sort((a, b) => b.streak - a.streak)
-  communityCache = activities
-  communityCacheTime = now
-  return activities
+  // Mock data for the community feed to prevent leaking personal journal entries
+  return [
+    { id: 'act-1', name: 'Diya Kapoor', avatar: '🌸', habit: '🧘 Meditation & Sadhana', streak: 24, time: '20 minutes ago', text: 'Completed 15 minutes of Pranayama and morning meditation. Feeling deeply grounded today.', prana: 142, comments: 3, color: '#E8622A' },
+    { id: 'act-2', name: 'Ishaan Verma', avatar: '🏃', habit: '🏃 Run & Fitness', streak: 18, time: '1 hour ago', text: 'Chasing sunsets! Just finished a 5km run at twilight. Consistency beats perfection!', prana: 89, comments: 1, color: '#1B4FA8' },
+    { id: 'act-3', name: 'Kavya Rao', avatar: '🪷', habit: '💧 Hydration (Amrit)', streak: 31, time: '3 hours ago', text: 'Hit my 3-liter target of copper-vessel water before evening. Feels like cellular revival.', prana: 205, comments: 5, color: '#1A7A4E' },
+    { id: 'act-4', name: 'Kabir Mehta', avatar: '📖', habit: '📖 Study & Wisdom', streak: 9, time: '5 hours ago', text: 'Reading Swami Vivekananda\'s thoughts on the power of focus. Absolutely fires up the mind.', prana: 67, comments: 2, color: '#7B68AE' },
+    { id: 'act-5', name: 'Sneha Sharma', avatar: '🌿', habit: '🌿 Nature Walk', streak: 14, time: '8 hours ago', text: 'Spent an hour in the garden today. Connecting with the earth brings such clarity.', prana: 120, comments: 4, color: '#C9933A' }
+  ]
 }
 
 export async function dbGetIntentions() {

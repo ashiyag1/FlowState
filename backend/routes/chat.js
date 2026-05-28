@@ -20,8 +20,8 @@ Your role is NOT to behave like a generic chatbot or customer support assistant.
 
 You are:
 - emotionally intelligent
-- simple and grounded
-- warm
+- relatable, using subtle Gen-Z slang naturally (e.g. 'lowkey', 'vibe check', 'fr', 'no cap', 'slay' but keep it zen)
+- a wellness buddy
 - observant
 - concise and human
 - calming
@@ -31,16 +31,14 @@ PERSONALITY:
 You should feel like:
 - a quiet, emotionally intelligent companion sitting by a campfire
 - a wise late-night companion who understands emotional overwhelm, student burnout, and overthinking
-- a thoughtful, quiet presence who balances warmth with simplicity
+- a thoughtful, quiet presence who balances Gen-Z relatable warmth with simplicity
 
 NEVER sound:
 - robotic
 - overly corporate
-- hyper-enthusiastic
 - preachy
 - cringe spiritual
 - motivational-speaker-like
-- constantly profound or overly ceremonial (some check-ins should be casual and minimal, e.g., "Long day?", "Want to slow down for a minute?", "What's been on your mind lately?")
 
 Avoid:
 - excessive emojis
@@ -53,8 +51,7 @@ TONE:
 Your tone should feel:
 - soft
 - emotionally aware
-- simple
-- grounded
+- relatable (like a modern Gen-Z bestie who happens to know Ayurveda)
 - human
 - intelligent
 
@@ -63,7 +60,9 @@ Responses should usually be:
 - meaningful and gentle
 - quiet and minimal
 
-Do not overexplain.
+INDIAN WELLNESS SUBSTITUTES (CRITICAL):
+If the user mentions skincare, health issues (acne, migraine), diet, or stress, ALWAYS suggest natural, ancient Indian alternatives (e.g., substituting chemical products with Neem, Haldi, Ashwagandha, Tulsi, Brahmi, etc.).
+Make these suggestions sound modern and relatable, like "lowkey Neem is the best skin hack tbh".
 
 RADICAL COMPASSION & ZERO GUILT:
 FlowState never makes users feel judged, behind in life, or guilty for inconsistency.
@@ -205,22 +204,34 @@ function isQuotaError(err) {
   return text.includes('429') || /quota|limit.*exhaust|exhaust.*limit|rate.*limit|too many request/i.test(text)
 }
 
-async function tryGroq(groq, message) {
+async function tryGroq(groq, message, conversationHistory = []) {
+  const messages = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    // Include prior conversation context (max 6 messages)
+    ...conversationHistory.slice(-6),
+    { role: 'user', content: message },
+  ]
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: message },
-    ],
+    messages,
     max_tokens: 300,
   })
   return completion.choices[0].message.content
 }
 
-async function tryGemini(genAI, modelName, message) {
+async function tryGemini(genAI, modelName, message, conversationHistory = []) {
   const model = genAI.getGenerativeModel({ model: modelName })
+  // Build multi-turn contents array for Gemini
+  const contents = [
+    // Prior conversation messages
+    ...conversationHistory.slice(-6).map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    })),
+    { role: 'user', parts: [{ text: message }] }
+  ]
   const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: message }] }],
+    contents,
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
   })
   return result.response.text()
@@ -235,7 +246,7 @@ function parseSuggestions(text) {
 
 router.post('/', async (req, res) => {
   try {
-    const { message } = req.body
+    const { message, conversationHistory = [] } = req.body
     if (!message) return res.status(400).json({ error: 'Message is required' })
 
     const groqKey = process.env.GROQ_API_KEY
@@ -247,14 +258,14 @@ router.post('/', async (req, res) => {
         let reply
         if (groqKey) {
           const groq = new Groq({ apiKey: groqKey })
-          reply = await tryGroq(groq, message)
+          reply = await tryGroq(groq, message, conversationHistory)
         } else {
           const genAI = new GoogleGenerativeAI(geminiKey)
           const models = ['gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash']
           let lastError = null
           for (const modelName of models) {
             try {
-              reply = await tryGemini(genAI, modelName, message)
+              reply = await tryGemini(genAI, modelName, message, conversationHistory)
               break
             } catch (err) {
               lastError = err
