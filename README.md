@@ -40,12 +40,12 @@ User's Browser (React SPA)
             └──────────────────────┘
 
   AI Features:
-  Frontend → /api/chat → Gemini API (primary) / Groq SDK (fallback)
+  Frontend → /api/chat → Gemini API(fallback)  / Groq SDK (primary)
 ```
 
 ---
 
-## Request Flow (Interview Answer)
+## Request Flow 
 
 **1. Frontend (React + Vite):** User interacts with the SPA. On any action (login, log water, write journal), the frontend calls relative `/api/*` endpoints using native `fetch()`.
 
