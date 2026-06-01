@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 import compression from 'compression'
 import rateLimit from 'express-rate-limit'
-import dotenv from 'dotenv'
 import authRoutes from './routes/auth.js'
 import waterRoutes from './routes/water.js'
 import habitsRoutes from './routes/habits.js'
@@ -11,10 +10,6 @@ import chatRoutes from './routes/chat.js'
 import communityRoutes from './routes/community.js'
 import profileRoutes from './routes/profile.js'
 import badgesRoutes from './routes/badges.js'
-
-// Load environment variables
-dotenv.config()
-dotenv.config({ path: './backend/.env' })
 
 const app = express()
 

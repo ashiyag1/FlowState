@@ -1,6 +1,6 @@
-import cluster from 'cluster'
-import os from 'os'
-import app from './app.js'
+import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Rejection — server will continue running:', reason)
@@ -10,23 +10,17 @@ process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception — server will continue running:', err)
 })
 
+// Load .env BEFORE any module that depends on it (ESM hoists static imports)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: path.join(__dirname, '.env') })
+
+// Local dev: use JSON file, not MongoDB (on Vercel, api/index.js imports app.js directly)
+process.env.MONGODB_URI = ''
+
+const app = (await import('./app.js')).default
+
 const PORT = process.env.PORT || 5000
 
-if (cluster.isPrimary) {
-  const numCPUs = os.cpus().length
-  console.log(`Primary process ${process.pid} is running`)
-  console.log(`Forking ${numCPUs} workers...`)
-
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork()
-  }
-
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker ${worker.process.pid} died (code: ${code}, signal: ${signal}). Restarting...`)
-    cluster.fork()
-  })
-} else {
-  app.listen(PORT, () => {
-    console.log(`Worker process ${process.pid} listening on port ${PORT}`)
-  })
-}
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`)
+})

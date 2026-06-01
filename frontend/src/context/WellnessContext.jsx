@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
 import { Store, today as getToday, uid } from '../utils'
 import { useAuth } from './AuthContext'
 
@@ -191,6 +191,8 @@ export function WellnessProvider({ children }) {
   const todayTotal   = todayEntries.reduce((s, e) => s + e.ml, 0)
 
   // ── HABITS MUTATIONS ───────────────────────────
+  const toggleVersion = useRef(0)
+
   const addHabit = useCallback(async (habit) => {
     const tempId = uid()
     const createdAt = new Date().toISOString()
@@ -247,6 +249,7 @@ export function WellnessProvider({ children }) {
   const toggleHabit = useCallback(async (id, dateKey = getToday()) => {
     const now = new Date()
     const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0')
+    const version = ++toggleVersion.current
 
     // Snapshot current state for rollback on API failure
     const snapshotBefore = Store.get('habit_done', {})
@@ -263,10 +266,7 @@ export function WellnessProvider({ children }) {
       try {
         const res = await fetch('/api/habits', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ toggle: true, habitId: id, date: dateKey, time })
         })
         // Rollback if server rejected the toggle
@@ -275,7 +275,7 @@ export function WellnessProvider({ children }) {
           setHabitDone(snapshotBefore)
         } else {
           const data = await res.json()
-          if (data.user) {
+          if (data.user && version === toggleVersion.current) {
             setUser(prev => ({ ...prev, ...data.user }))
           }
         }

@@ -28,24 +28,8 @@ router.post('/', async (req, res) => {
       }
       const isDone = await dbToggleHabit(req.userId, date, habitId, time)
       
-      const { habits, habitDone } = await dbGetHabits(req.userId)
-      const todayDone = habitDone[date] || {}
-      
-      const completedCount = habits.filter(h => todayDone[h.id]).length
-      const totalCount = habits.length
-      
       let xpDiff = isDone ? 25 : -25
-      let pranaDiff = 0
-      
-      if (isDone) {
-        if (totalCount > 0 && completedCount === totalCount) {
-          pranaDiff = 10
-        }
-      } else {
-        if (totalCount > 0 && completedCount === totalCount - 1) {
-          pranaDiff = -10
-        }
-      }
+      let pranaDiff = isDone ? 2 : -2
       
       const user = await dbAdjustUserPoints(req.userId, xpDiff, pranaDiff)
       

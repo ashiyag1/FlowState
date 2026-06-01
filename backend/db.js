@@ -3,7 +3,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-const MONGODB_URI = process.env.MONGODB_URI
+let MONGODB_URI = process.env.MONGODB_URI || ''
 let IS_MONGO = !!MONGODB_URI
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const JSON_DB_PATH = path.join(__dirname, 'db.json')
@@ -222,6 +222,11 @@ export { DEFAULT_BADGES }
 let jsonDbInitialized = false
 
 export async function connectDB() {
+  // Lazy env detection — safety net in case module-level code ran before dotenv loaded
+  if (!MONGODB_URI && process.env.MONGODB_URI) {
+    MONGODB_URI = process.env.MONGODB_URI
+    IS_MONGO = true
+  }
   if (IS_MONGO) {
     if (mongoose.connection.readyState >= 1) return
     try {
@@ -333,7 +338,14 @@ export async function connectDB() {
 async function readJsonDB() {
   await connectDB()
   const data = await fs.readFile(JSON_DB_PATH, 'utf-8')
-  return JSON.parse(data)
+  try {
+    return JSON.parse(data)
+  } catch (parseErr) {
+    console.error('Corrupted db.json — resetting to empty database:', parseErr.message)
+    const fresh = { users: [], waterLogs: {}, habits: [], habitDone: {}, journalEntries: [], intentions: [], badges: DEFAULT_BADGES, userBadges: [] }
+    await fs.writeFile(JSON_DB_PATH, JSON.stringify(fresh, null, 2))
+    return fresh
+  }
 }
 
 async function writeJsonDB(db) {

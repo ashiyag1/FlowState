@@ -122,6 +122,7 @@ export default function Journal() {
   const [expanded, setExpanded] = useState(null)
   const [inkSplash, setInkSplash] = useState(false)
   const [activePreset, setActivePreset] = useState(null)
+  const [xpToast, setXpToast] = useState(null)
   
   // Prompt states
   const [catIndex, setCatIndex] = useState(0)
@@ -261,6 +262,8 @@ export default function Journal() {
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
     setInkSplash(true)
     setTimeout(() => setInkSplash(false), 800)
+    setXpToast('+25 XP')
+    setTimeout(() => setXpToast(null), 1500)
     notif('Reflections sealed & saved ✦', 'success')
   }
 
@@ -1131,6 +1134,38 @@ export default function Journal() {
         </motion.div>
 
       </div>
+
+      {/* XP Toast */}
+      <AnimatePresence>
+        {xpToast && (
+          <motion.div
+            key="xp-toast"
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed', bottom: '30%', left: '50%', transform: 'translateX(-50%)',
+              zIndex: 9999,
+              background: 'linear-gradient(135deg, #c9933a, #e8a62a)',
+              color: '#1a0f00',
+              padding: '10px 24px',
+              borderRadius: '999px',
+              fontWeight: 700,
+              fontSize: '14px',
+              fontFamily: "'DM Sans', sans-serif",
+              boxShadow: '0 8px 32px rgba(201,147,58,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              pointerEvents: 'none',
+            }}
+          >
+            <Sparkles size={16} />
+            {xpToast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PageLayout>
   )
 }

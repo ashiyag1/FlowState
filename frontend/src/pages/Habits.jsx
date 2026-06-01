@@ -412,7 +412,7 @@ export default function Habits() {
                     <h3 className="text-xs font-bold text-[#c9933a] tracking-widest uppercase font-display">
                       Ancient Vessel Unlocked
                     </h3>
-                    <span className="text-[10px] text-ink dark:text-white mt-1">+10 Prana Earned</span>
+                    <span className="text-[10px] text-ink dark:text-white mt-1">+{habits.length * 2} Prana Earned</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -916,6 +916,20 @@ export default function Habits() {
                   >
                     <p className="text-[9px] leading-relaxed m-0" style={{ color: '#c8a96e' }}>
                       <strong>Why it slaps:</strong> "{currentInsight.vibe}"
+                    </p>
+                  </div>
+
+                  <div
+                    style={{
+                      borderRadius: 12,
+                      padding: '6px 10px',
+                      background: 'rgba(201,168,76,0.08)',
+                      border: '1px solid rgba(201,168,76,0.15)',
+                      marginTop: '4px'
+                    }}
+                  >
+                    <p className="text-[9px] leading-relaxed m-0" style={{ color: '#c8a96ebb' }}>
+                      <strong>What you should do:</strong> {currentInsight.tryThis}
                     </p>
                   </div>
                 </motion.div>
