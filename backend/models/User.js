@@ -8,6 +8,8 @@ const UserSchema = new mongoose.Schema({
   bio: { type: String, default: '' },
   location: { type: String, default: '' },
   joinedAt: { type: Date, default: Date.now },
+  xp: { type: Number, default: 0 },
+  pranaPoints: { type: Number, default: 0 },
   preferences: {
     theme: { type: String, default: 'light' },
     soundEnabled: { type: Boolean, default: true },
@@ -19,7 +21,8 @@ const UserSchema = new mongoose.Schema({
     wisdomDates: { type: [String], default: [] },
     booksOpened: { type: [String], default: [] },
     sunriseDates: { type: [String], default: [] },
-    midnightJournalDates: { type: [String], default: [] }
+    midnightJournalDates: { type: [String], default: [] },
+    pagesRead: { type: [String], default: [] }
   }
 })
 

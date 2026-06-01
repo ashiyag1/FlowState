@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom'
 import { Bell } from 'lucide-react'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
 
+import { useTheme } from '../../context/ThemeContext'
+
 const ITEMS = [
   { key: 'journal',  emoji: '📓', label: 'Journal Reminder',  desc: 'Reflect & write', defaultTime: '09:00' },
   { key: 'habit',    emoji: '✅', label: 'Habit Check',        desc: 'Evening review', defaultTime: '20:00' },
@@ -21,6 +23,7 @@ export default function NotificationsButton() {
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const { schedule, updateSchedule, requestPermission } = usePushNotifications()
+  const { dark } = useTheme()
 
   useEffect(() => {
     if (!open) return
@@ -56,20 +59,25 @@ export default function NotificationsButton() {
     <>
       <button onClick={() => setOpen(true)}
         style={{
-          display: 'inline-flex', alignItems: 'center', gap: 5,
-          padding: '5px 12px', borderRadius: 999,
-          fontFamily: "'Cinzel',serif", fontSize: '0.64rem',
-          fontWeight: 600, letterSpacing: '0.08em',
-          color: anyOn ? G : BR,
-          textTransform: 'uppercase',
-          background: anyOn ? 'rgba(200,151,58,0.12)' : 'rgba(255,255,255,0.4)',
+          width: 30,
+          height: 30,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           border: '1px solid rgba(212,168,42,0.22)',
-          cursor: 'pointer', transition: 'all 0.25s ease',
-          whiteSpace: 'nowrap',
+          background: anyOn
+            ? (dark ? 'rgba(200,151,58,0.15)' : 'rgba(200,151,58,0.12)')
+            : (dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)'),
+          color: anyOn ? G : (dark ? '#d9b96a' : '#6b4c12'),
+          cursor: 'pointer',
+          transition: 'all 0.25s ease',
+          boxShadow: '0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
         }}
+        title="Notification Settings"
+        aria-label="Notifications"
       >
-        <Bell size={11} />
-        Notifications
+        <Bell size={13} />
       </button>
 
       {open && createPortal(

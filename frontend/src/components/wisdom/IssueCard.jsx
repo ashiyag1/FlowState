@@ -15,7 +15,7 @@ export default function IssueCard({ issue, dark, onClick }) {
       whileHover={{ y: -6, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="relative flex flex-col justify-end p-5 rounded-3xl cursor-pointer shadow-lg hover:shadow-2xl h-[320px] w-full box-border overflow-hidden group backdrop-blur-md"
+      className="relative flex flex-col justify-end p-5 rounded-3xl cursor-pointer shadow-lg h-[320px] w-full box-border overflow-hidden group backdrop-blur-md"
       style={{
         backgroundColor: dark ? 'rgba(20, 15, 10, 0.85)' : 'rgba(255, 252, 245, 0.85)',
         ...glowStyle,
@@ -27,6 +27,14 @@ export default function IssueCard({ issue, dark, onClick }) {
       <div 
         className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-40 transition-transform duration-700 group-hover:scale-150"
         style={{ backgroundColor: issue.color, transform: 'translate(20%, -20%)' }}
+      />
+
+      {/* Pulsing border glow on hover */}
+      <motion.div
+        className="absolute inset-0 rounded-3xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          boxShadow: `0 0 0 2px ${issue.color}50, 0 0 24px ${issue.color}30`,
+        }}
       />
 
       <div className="relative z-10 flex flex-col h-full">
@@ -58,6 +66,13 @@ export default function IssueCard({ issue, dark, onClick }) {
           <p className="text-sm text-mist-dark dark:text-sand-lt/80 leading-relaxed line-clamp-2">
             {issue.summary}
           </p>
+          {/* CTA hint */}
+          <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: issue.color }}>
+              Read Ancient Guide
+            </span>
+            <span className="text-[10px]" style={{ color: issue.color }}>→</span>
+          </div>
         </div>
       </div>
     </motion.div>

@@ -70,6 +70,10 @@ const ERA_COLORS = {
 export function QuoteScroll({ sankalpa }) {
   const [quoteIdx, setQuoteIdx] = useState(0)
 
+  useEffect(() => {
+    setQuoteIdx(0)
+  }, [sankalpa])
+
   const handleRefresh = () => {
     if (sankalpa?.wisdomOptions) {
       setQuoteIdx((prev) => (prev + 1) % sankalpa.wisdomOptions.length)

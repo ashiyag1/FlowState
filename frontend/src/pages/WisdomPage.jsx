@@ -7,19 +7,54 @@ import { useAchievements } from '../context/AchievementsContext'
 import wisdomBg from '../assets/pages/wisdom_bg.webp'
 import HeroHeader from '../sections/wisdom/HeroHeader'
 import TopicFilterBar from '../sections/wisdom/TopicFilterBar'
-import TodaysWisdom from '../components/wisdom/TodaysWisdom.jsx'
-import WisdomCarousel from '../sections/WisdomCarousel.jsx'
-import { SANKALPAS } from './Home.jsx'
 import ExploreByTopic from '../sections/wisdom/ExploreByTopic'
 import LifeIssuesGrid from '../sections/wisdom/LifeIssuesGrid'
-import QuoteBanner from '../sections/wisdom/QuoteBanner'
+import WeeklyChallenge from '../sections/wisdom/WeeklyChallenge'
 import Sidebar from '../sections/wisdom/SideBar'
 import BookDetailModal from '../components/wisdom/BookDetailModal.jsx'
 import WisdomAmbientSound from '../components/wisdom/WisdomAmbientSound.jsx'
 import WisdomSparkles from '../components/wisdom/WisdomSparkles.jsx'
 import {
-  FILTER_TOPICS, TOPIC_BOOKS, LIFE_ISSUES, TODAY_WISDOM,
+  FILTER_TOPICS, TOPIC_BOOKS, LIFE_ISSUES,
 } from '../data/wisdomData'
+
+// Mandala SVG — memoised so it never causes rerender flicker
+function MandalaWatermark({ dark }) {
+  return (
+    <>
+      <div
+        aria-hidden
+        className="fixed pointer-events-none select-none"
+        style={{
+          top: '50%', left: '50%',
+          width: '70vmin', height: '70vmin',
+          opacity: dark ? 0.022 : 0.035,
+          zIndex: 0,
+          animation: 'mw-spin 90s linear infinite',
+          transform: 'translate(-50%,-50%)',
+        }}
+      >
+        <svg viewBox="0 0 200 200" fill="none" stroke="#c9a84c" strokeWidth="0.6" className="w-full h-full">
+          <circle cx="100" cy="100" r="95" />
+          <circle cx="100" cy="100" r="72" />
+          <circle cx="100" cy="100" r="50" />
+          <circle cx="100" cy="100" r="28" />
+          {Array.from({ length: 16 }).map((_, i) => {
+            const a = (i * 360) / 16, r = (a * Math.PI) / 180
+            return <line key={i} x1={100 + Math.cos(r)*28} y1={100 + Math.sin(r)*28} x2={100 + Math.cos(r)*95} y2={100 + Math.sin(r)*95} />
+          })}
+          {Array.from({ length: 8 }).map((_, i) => (
+            <g key={i} transform={`rotate(${i*45} 100 100)`}>
+              <ellipse cx="100" cy="54" rx="7" ry="18" />
+              <ellipse cx="100" cy="146" rx="7" ry="18" />
+            </g>
+          ))}
+        </svg>
+      </div>
+      <style>{`@keyframes mw-spin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}`}</style>
+    </>
+  )
+}
 
 function WisdomContent() {
   const { isAuthenticated, user } = useAuth()
@@ -27,49 +62,42 @@ function WisdomContent() {
   const [activeTopic, setActiveTopic] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedBook, setSelectedBook] = useState(null)
-  const [pendingBook, setPendingBook] = useState(null)
   const { dark } = useTheme()
   const { markStreakToday, openBook, getBookProgress } = useWisdom()
   const { trackEvent } = useAchievements()
   const [bookInitialPage, setBookInitialPage] = useState(0)
 
-  useEffect(() => { 
+  useEffect(() => {
     markStreakToday()
     trackEvent('wisdom_read')
   }, [markStreakToday, trackEvent])
 
-  const activeSankalpa = user?.activeSankalpa || 'discipline'
-  const currentSankalpa = SANKALPAS[activeSankalpa]
-
-  // Filter books by active topic and search query
   const filteredBooks = TOPIC_BOOKS.filter(book => {
-    const matchesTopic = activeTopic === 'All' || book.title.toLowerCase().includes(activeTopic.toLowerCase());
-    const matchesSearch = !searchQuery || 
+    const matchesTopic = activeTopic === 'All' || 
+      book.title.toLowerCase().includes(activeTopic.toLowerCase()) ||
+      (book.scripture && book.scripture.toLowerCase().includes(activeTopic.toLowerCase()))
+    const matchesSearch = !searchQuery ||
       book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.scripture.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (book.subtitle && book.subtitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (book.pages && book.pages.some(p => 
-        p.heading.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (book.pages && book.pages.some(p =>
+        p.heading.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.text.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
-    return matchesTopic && matchesSearch;
+      ))
+    return matchesTopic && matchesSearch
   })
 
-  // Filter issues by search query
-  const filteredIssues = LIFE_ISSUES.filter(issue => {
-    return !searchQuery ||
-      issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      issue.approach.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (issue.steps && issue.steps.some(step => step.toLowerCase().includes(searchQuery.toLowerCase())));
-  })
+  const filteredIssues = LIFE_ISSUES.filter(issue =>
+    !searchQuery ||
+    issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    issue.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    issue.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    issue.approach.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (issue.steps && issue.steps.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())))
+  )
 
   const handleBookOpen = (book, page) => {
-    if (!isAuthenticated) {
-      navigate('/login')
-      return
-    }
+    if (!isAuthenticated) { navigate('/login'); return }
     const resumeFrom = page ?? getBookProgress(book.id)
     openBook(book, resumeFrom)
     setBookInitialPage(resumeFrom)
@@ -77,53 +105,56 @@ function WisdomContent() {
   }
 
   return (
-    <div style={styles.page(dark)}>
-      <div style={styles.backdropOverlay(dark)} />
+    <div style={pageStyle(dark)}>
+      {/* Background layers */}
+      <div style={overlayStyle(dark)} aria-hidden />
+      <MandalaWatermark dark={dark} />
       <WisdomSparkles />
       <WisdomAmbientSound />
-      <div style={styles.container}>
+
+      {/* ═══ MAIN SCROLLABLE CONTENT ═══ */}
+      <div style={containerStyle}>
+
+        {/* ── HERO HEADER ───────────────────── */}
         <HeroHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-        <TopicFilterBar
-          topics={FILTER_TOPICS}
-          active={activeTopic}
-          onChange={setActiveTopic}
-        />
+        {/* ── WEEKLY CHALLENGE — prominent card ─ */}
+        <WeeklyChallenge />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 flex-1 mt-4 pb-8">
-          <div className="lg:col-span-3 flex flex-col gap-9 overflow-hidden min-w-0">
-            <WisdomCarousel sankalpa={currentSankalpa} />
-            
+        {/* ── TOPIC FILTER BAR ──────────────── */}
+        <TopicFilterBar topics={FILTER_TOPICS} active={activeTopic} onChange={setActiveTopic} />
+
+        {/* ── MAIN CONTENT + SIDEBAR ────────── */}
+        <div style={columnsStyle} className="wisdom-columns-grid">
+
+          {/* LEFT: main feed */}
+          <main style={mainStyle}>
+
             {filteredBooks.length > 0 ? (
-              <ExploreByTopic
-                books={filteredBooks}
-                onBookOpen={handleBookOpen}
-              />
+              <ExploreByTopic books={filteredBooks} onBookOpen={handleBookOpen} />
             ) : (
-              <div className="text-center py-10 bg-white/5 dark:bg-white/[0.02] border border-gold/10 rounded-2xl">
-                <span className="text-2xl block mb-2">📚</span>
-                <p className="text-sm text-mist-dark dark:text-sand-lt/70">No books match your search.</p>
-              </div>
+              <EmptyState emoji="📚" msg="No scriptures match your search." />
             )}
 
             {filteredIssues.length > 0 ? (
               <LifeIssuesGrid issues={filteredIssues} />
             ) : (
-              <div className="text-center py-10 bg-white/5 dark:bg-white/[0.02] border border-gold/10 rounded-2xl">
-                <span className="text-2xl block mb-2">🌿</span>
-                <p className="text-sm text-mist-dark dark:text-sand-lt/70">No issues match your search.</p>
-              </div>
+              <EmptyState emoji="🌿" msg="No life guides match your search." />
             )}
-          </div>
 
-          <aside className="lg:col-span-1 lg:sticky lg:top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto w-full pb-8 pr-1 scrollbar-thin">
+            {/* Bottom spacer */}
+            <div style={{ height: '3rem' }} />
+          </main>
+
+          {/* RIGHT: sticky sidebar */}
+          <aside style={sidebarStyle} className="wisdom-sidebar-sticky">
             <Sidebar onBookOpen={handleBookOpen} />
           </aside>
+
         </div>
       </div>
 
-      <QuoteBanner />
-
+      {/* Book modal */}
       {selectedBook && (
         <BookDetailModal
           book={selectedBook}
@@ -135,71 +166,70 @@ function WisdomContent() {
   )
 }
 
-const LAYOUT = {
-  pageGap: '2rem',
-  sectionGap: '2.25rem',
+function EmptyState({ emoji, msg }) {
+  return (
+    <div className="text-center py-10 bg-white/5 dark:bg-white/[0.02] border border-gold/10 rounded-2xl">
+      <span className="text-2xl block mb-2">{emoji}</span>
+      <p className="text-sm text-mist-dark dark:text-sand-lt/70">{msg}</p>
+    </div>
+  )
 }
 
 export default function WisdomPage() {
   return <WisdomContent />
 }
 
-const styles = {
-  backdropOverlay: (dark) => ({
-    position: 'absolute',
-    inset: 0,
-    background: dark
-      ? 'rgba(18,12,4,0.3)'
-      : 'rgba(255,252,245,0.3)',
-    pointerEvents: 'none',
-  }),
-  page: (dark) => ({
-    minHeight: '100vh',
-    paddingTop: '4.75rem',
-    background: dark
-      ? 'linear-gradient(175deg, #120c04 0%, #1a1208 40%, #221a0e 100%)'
-      : 'linear-gradient(175deg, #FEFCF5 0%, #FDF6E3 40%, #F5EDD8 100%)',
-    backgroundImage: dark
-      ? `linear-gradient(175deg, rgba(18,12,4,0.7) 0%, rgba(26,18,8,0.6) 40%, rgba(34,26,14,0.7) 100%), url(${wisdomBg})`
-      : `url(${wisdomBg}), linear-gradient(175deg, rgba(254,252,245,0.8) 0%, rgba(253,246,227,0.75) 40%, rgba(245,237,216,0.8) 100%)`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundBlendMode: dark ? 'normal' : 'multiply',
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-  }),
-  container: {
-    maxWidth: '1200px',
-    width: '100%',
-    margin: '0 auto',
-    padding: '1.5rem 1.5rem 0',
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  columns: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 240px',
-    gap: '2rem',
-    flex: 1,
-    minHeight: 0,
-    marginTop: '1rem',
-    paddingBottom: '2rem',
-  },
-  main: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2.25rem',
-    overflow: 'hidden',
-    minWidth: 0,
-  },
-  sidebar: {
-    position: 'sticky',
-    top: '1.5rem',
-    alignSelf: 'start',
-    maxHeight: 'calc(100vh - 10rem)',
-    overflowY: 'auto',
-    scrollbarWidth: 'thin',
-  },
+// ── Styles ─────────────────────────────────────────────
+
+const pageStyle = (dark) => ({
+  minHeight: '100vh',
+  paddingTop: '4.75rem',
+  background: dark
+    ? 'linear-gradient(175deg,#120c04 0%,#1a1208 40%,#221a0e 100%)'
+    : 'linear-gradient(175deg,#FEFCF5 0%,#FDF6E3 40%,#F5EDD8 100%)',
+  backgroundImage: dark
+    ? `linear-gradient(175deg,rgba(18,12,4,0.7) 0%,rgba(26,18,8,0.6) 40%,rgba(34,26,14,0.7) 100%), url(${wisdomBg})`
+    : `url(${wisdomBg}), linear-gradient(175deg,rgba(254,252,245,0.8) 0%,rgba(253,246,227,0.75) 40%,rgba(245,237,216,0.8) 100%)`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  backgroundBlendMode: dark ? 'normal' : 'multiply',
+  position: 'relative',
+})
+
+const overlayStyle = (dark) => ({
+  position: 'fixed',
+  inset: 0,
+  background: dark ? 'rgba(18,12,4,0.25)' : 'rgba(255,252,245,0.2)',
+  pointerEvents: 'none',
+  zIndex: 0,
+})
+
+const containerStyle = {
+  maxWidth: '1240px',
+  width: '100%',
+  margin: '0 auto',
+  // Horizontal padding + vertical top/bottom padding
+  padding: '1.75rem 1.5rem 0',
+  position: 'relative',
+  zIndex: 1,
+}
+
+const columnsStyle = {
+  display: 'grid',
+  // 3fr main + 256px sidebar. On small screens the @media override in index.css handles stacking.
+  gridTemplateColumns: 'minmax(0,1fr) 256px',
+  gap: '1.75rem',
+  alignItems: 'start',
+  marginTop: '0.5rem',
+}
+
+const mainStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2rem',
+  minWidth: 0,   // prevents grid blowout — keeps content inside its column
+}
+
+const sidebarStyle = {
+  paddingBottom: '2rem',
 }

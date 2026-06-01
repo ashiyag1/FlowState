@@ -17,7 +17,7 @@ function useLocalState(key, initial) {
 }
 
 export function WellnessProvider({ children }) {
-  const { token, isAuthenticated } = useAuth()
+  const { token, isAuthenticated, adjustPoints, setUser } = useAuth()
   const td = getToday()
 
   // ── WATER ──────────────────────────────────────
@@ -273,6 +273,11 @@ export function WellnessProvider({ children }) {
         if (!res.ok) {
           console.error('Habit toggle rejected by server — rolling back UI')
           setHabitDone(snapshotBefore)
+        } else {
+          const data = await res.json()
+          if (data.user) {
+            setUser(prev => ({ ...prev, ...data.user }))
+          }
         }
       } catch (err) {
         // Rollback on network failure to prevent false ticks persisting
@@ -280,7 +285,7 @@ export function WellnessProvider({ children }) {
         setHabitDone(snapshotBefore)
       }
     }
-  }, [isAuthenticated, token, setHabitDone])
+  }, [isAuthenticated, token, setHabitDone, setUser])
 
   const getStreak = useCallback((habitId) => {
     const habit = habits.find(h => h.id === habitId)
@@ -336,19 +341,37 @@ export function WellnessProvider({ children }) {
   }, [setDailyTasks])
 
   const toggleDailyTask = useCallback((dateKey, taskId) => {
+    const dayTasks = dailyTasks[dateKey] || []
+    const task = dayTasks.find(t => t.id === taskId)
+    if (!task) return
+
+    const isDoneNow = !task.done
     setDailyTasks(prev => {
-      const dayTasks = prev[dateKey] || []
-      const newTasks = dayTasks.map(t => t.id === taskId ? { ...t, done: !t.done } : t)
-      return { ...prev, [dateKey]: newTasks }
+      const currentTasks = prev[dateKey] || []
+      return {
+        ...prev,
+        [dateKey]: currentTasks.map(t => t.id === taskId ? { ...t, done: isDoneNow } : t)
+      }
     })
-  }, [setDailyTasks])
+    adjustPoints(isDoneNow ? 10 : -10, 0)
+  }, [dailyTasks, setDailyTasks, adjustPoints])
 
   const deleteDailyTask = useCallback((dateKey, taskId) => {
+    const dayTasks = dailyTasks[dateKey] || []
+    const task = dayTasks.find(t => t.id === taskId)
+    if (!task) return
+
     setDailyTasks(prev => {
-      const dayTasks = prev[dateKey] || []
-      return { ...prev, [dateKey]: dayTasks.filter(t => t.id !== taskId) }
+      const currentTasks = prev[dateKey] || []
+      return {
+        ...prev,
+        [dateKey]: currentTasks.filter(t => t.id !== taskId)
+      }
     })
-  }, [setDailyTasks])
+    if (task.done) {
+      adjustPoints(-10, 0)
+    }
+  }, [dailyTasks, setDailyTasks, adjustPoints])
 
   const addSubtask = useCallback((dateKey, taskId, subtaskName) => {
     setDailyTasks(prev => {
@@ -364,20 +387,32 @@ export function WellnessProvider({ children }) {
   }, [setDailyTasks])
 
   const toggleSubtask = useCallback((dateKey, taskId, subtaskId) => {
+    const dayTasks = dailyTasks[dateKey] || []
+    const task = dayTasks.find(t => t.id === taskId)
+    if (!task) return
+
+    const newSubs = (task.subtasks || []).map(st => st.id === subtaskId ? { ...st, done: !st.done } : st)
+    const allSubsDone = newSubs.every(st => st.done)
+    const wasDone = task.done
+    const isDoneNow = allSubsDone
+
     setDailyTasks(prev => {
-      const dayTasks = prev[dateKey] || []
-      const newTasks = dayTasks.map(t => {
-        if (t.id === taskId) {
-          const newSubs = t.subtasks.map(st => st.id === subtaskId ? { ...st, done: !st.done } : st)
-          // If all subtasks are done, mark main task as done
-          const allSubsDone = newSubs.every(st => st.done)
-          return { ...t, subtasks: newSubs, done: allSubsDone }
-        }
-        return t
-      })
-      return { ...prev, [dateKey]: newTasks }
+      const currentTasks = prev[dateKey] || []
+      return {
+        ...prev,
+        [dateKey]: currentTasks.map(t => {
+          if (t.id === taskId) {
+            return { ...t, subtasks: newSubs, done: allSubsDone }
+          }
+          return t
+        })
+      }
     })
-  }, [setDailyTasks])
+
+    if (wasDone !== isDoneNow) {
+      adjustPoints(isDoneNow ? 10 : -10, 0)
+    }
+  }, [dailyTasks, setDailyTasks, adjustPoints])
 
   const deleteSubtask = useCallback((dateKey, taskId, subtaskId) => {
     setDailyTasks(prev => {
@@ -399,6 +434,7 @@ export function WellnessProvider({ children }) {
     const fullEntry = { ...entry, id: tempId, createdAt }
     
     setJournal(prev => [fullEntry, ...prev])
+    adjustPoints(25, 0)
 
     if (isAuthenticated && token) {
       try {
@@ -414,10 +450,14 @@ export function WellnessProvider({ children }) {
         console.error('Failed to sync journal entry addition:', err)
       }
     }
-  }, [isAuthenticated, token, setJournal])
+  }, [isAuthenticated, token, setJournal, adjustPoints])
 
   const deleteEntry = useCallback(async (id) => {
+    const entry = journal.find(e => e.id === id)
     setJournal(prev => prev.filter(e => e.id !== id))
+    if (entry) {
+      adjustPoints(-25, 0)
+    }
 
     if (isAuthenticated && token) {
       try {
@@ -433,7 +473,7 @@ export function WellnessProvider({ children }) {
         console.error('Failed to sync journal entry deletion:', err)
       }
     }
-  }, [isAuthenticated, token, setJournal])
+  }, [isAuthenticated, token, setJournal, adjustPoints, journal])
 
   return (
     <WellnessContext.Provider value={{

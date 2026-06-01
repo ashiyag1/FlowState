@@ -9,6 +9,7 @@ import DailyFlow from '../sections/DailyFlow'
 import ExploreSection from '../sections/ExploreSection'
 import ImmersiveFooter from '../sections/ImmersiveFooter'
 import FounderLetterModal from '../components/ui/FounderLetterModal'
+import OnboardingWizardModal from '../components/ui/OnboardingWizardModal'
 import homeBg from '../assets/home_bg.webp'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useTheme } from '../context/ThemeContext'
@@ -20,59 +21,146 @@ import { useNavigate, Link } from 'react-router-dom'
 import WisdomStreak from '../components/wisdom/WisdomStreak'
 import { useNotif } from '../components/system/NotificationPopup'
 import { useAuth } from '../context/AuthContext'
-import { ALL_HERITAGE_STORIES as FEATURED_STORIES } from './Heritage'
+import lotusImg from '../assets/dashboard/lotus.png'
+
 export const SANKALPAS = {
   calm: {
     msg: 'Calm chosen · breathing space and rest shape your day',
     emoji: '🧘',
     label: 'Calm',
+    suggestedRituals: [
+      {
+        name: 'Bhramari Buzz (Humming Bee Breath)',
+        time: '2',
+        desc: 'Reset your vibe and quiet the mind. Cover your ears with your hands and make a steady humming sound as you exhale.'
+      },
+      {
+        name: 'Vibe Check Breathwork (Nadi Shodhana)',
+        time: '3',
+        desc: 'Take 5 rounds of alternate nostril breathing to balance your energy, quiet chaos, and soothe your nervous system.'
+      }
+    ],
     wisdomOptions: [
-      { wis: '"The mind is everything. What you think you become."', src: 'Dhammapada', ref: '— on inner stillness' },
-      { wis: '"Stillness is the flower of virtue."', src: 'Lao Tzu', ref: '— on finding peace within' }
+      { wis: '"As a lamp in a windless place does not flicker, so is the mind of a yogi absorbed in the Self."', src: 'Bhagavad Gita', ref: '— on inner stillness' },
+      { wis: '"When the five senses and the mind are still, and the intellect does not waver, that is the highest state."', src: 'Katha Upanishad', ref: '— on finding peace within' }
     ]
   },
   focus: {
     msg: 'Focus chosen · sharp intent and single tasks',
     emoji: '🎯',
     label: 'Focus',
+    suggestedRituals: [
+      {
+        name: 'Deep Om Resonance (Mantra Japa)',
+        time: '2',
+        desc: 'Clear the clutter. Take a deep breath and chant a slow "A-U-M" to lock in focus and calm your thoughts.'
+      },
+      {
+        name: 'Mandala Breath Trace (Prana Trace)',
+        time: '2',
+        desc: 'Trace a circle in the air with your finger. Inhale as you trace up, and exhale as you trace down to lock in focus.'
+      }
+    ],
     wisdomOptions: [
-      { wis: '"Concentration is the secret of strength."', src: 'Ralph Waldo Emerson', ref: '— on mental clarity' },
-      { wis: '"Focus on the root, not the branches."', src: 'Zen Proverb', ref: '— on essential simplicity' }
+      { wis: '"Yoga is the calming of the fluctuations of the mind."', src: 'Patanjali Yoga Sutras', ref: '— on mental clarity' },
+      { wis: '"By restraining the senses and focusing the mind, one gains supreme strength."', src: 'Bhagavad Gita', ref: '— on single-pointed awareness' }
     ]
   },
   heal: {
     msg: 'Heal chosen · gentle recovery and listening to the body',
     emoji: '🌿',
     label: 'Heal',
+    suggestedRituals: [
+      {
+        name: 'Temple Rub (Karna Mardana)',
+        time: '2',
+        desc: 'Ground your energy. Gently massage your earlobes and temples for a minute to release sensory tension.'
+      },
+      {
+        name: 'Warm Water Sip (Tambaa Sip)',
+        time: '1',
+        desc: 'Slowly sip warm water. Ayurveda calls warm water the first medicine to cleanse digestion and hydrate your cells.'
+      }
+    ],
     wisdomOptions: [
-      { wis: '"The natural healing force within each of us is the greatest force in getting well."', src: 'Hippocrates', ref: '— on innate wellness' }
+      { wis: '"Health is the state where the three doshas, tissues, and wastes are in balance, and the soul and mind are full of bliss."', src: 'Sushruta Samhita', ref: '— on holistic wellness' },
+      { wis: '"When diet is correct, medicine is of no need. When diet is wrong, medicine is of no use."', src: 'Ayurvedic Proverb', ref: '— on natural recovery' }
     ]
   },
   grow: {
     msg: 'Grow chosen · seeking discomfort and rising stronger',
     emoji: '🌱',
     label: 'Grow',
+    suggestedRituals: [
+      {
+        name: 'Sun Salutes (Tadasana Stretch)',
+        time: '2',
+        desc: 'Level up your posture. Interlock your fingers, flip your palms up, and stretch tall on your tiptoes to release physical tension.'
+      },
+      {
+        name: 'Warrior Pose (Veerabhadrasana)',
+        time: '2',
+        desc: 'Hold a wide warrior stance for 5 deep breaths on each side to build daily full-body strength and posture.'
+      }
+    ],
     wisdomOptions: [
-      { wis: '"He who has a why to live can bear almost any how."', src: 'Nietzsche', ref: '— on purposeful struggle' }
+      { wis: '"You are what your deep, driving desire is. As your desire is, so is your deed; so is your destiny."', src: 'Brihadaranyaka Upanishad', ref: '— on purposeful growth' },
+      { wis: '"Arise! Awake! Approach the great ones and learn from them."', src: 'Katha Upanishad', ref: '— on rising stronger' }
     ]
   },
   discipline: {
     msg: 'Discipline chosen · simple rules, repeated daily',
     emoji: '⚔️',
     label: 'Discipline',
+    suggestedRituals: [
+      {
+        name: 'Face Splash (Sheetala Snana)',
+        time: '1',
+        desc: 'Snap out of brain fog. Splash cold water on your face and eyes 5 times to reboot your nervous system and build instant discipline.'
+      },
+      {
+        name: 'Spine Align (Dandasana)',
+        time: '2',
+        desc: 'Sit straight on the floor with legs extended forward for 2 minutes to settle scattered thoughts and build core willpower.'
+      }
+    ],
     wisdomOptions: [
-      { wis: '"Discipline is the bridge between goals and accomplishment."', src: 'Jim Rohn', ref: '— on consistency' }
+      { wis: '"Tapas (discipline) burns away impurities and unlocks the powers of body and mind."', src: 'Patanjali Yoga Sutras', ref: '— on willpower' },
+      { wis: '"A person is disciplined when they have control over their senses and act with wisdom, not impulse."', src: 'Bhagavad Gita', ref: '— on consistency' }
     ]
   },
   gratitude: {
     msg: 'Gratitude chosen · acknowledging the abundance around you',
     emoji: '🌸',
     label: 'Gratitude',
+    suggestedRituals: [
+      {
+        name: 'Contentment Smile (Santosha Smile)',
+        time: '1',
+        desc: 'Shift from FOMO to JOMO. Close your eyes, smile gently, and take 3 deep breaths while appreciating the present moment.'
+      },
+      {
+        name: 'Earth Touch (Bhoomi Vandana)',
+        time: '1',
+        desc: 'Touch the ground with your palm to say thank you to the earth for carrying you and offering a safe foundation.'
+      }
+    ],
     wisdomOptions: [
-      { wis: '"He is a wise man who does not grieve for the things which he has not, but rejoices for those which he has."', src: 'Epictetus', ref: '— on contentment' }
+      { wis: '"Contentment (Santosha) brings supreme joy and is the source of ultimate happiness."', src: 'Patanjali Yoga Sutras', ref: '— on contentment' },
+      { wis: '"Let us be grateful to the earth that carries us, the water that sustains us, and the air that lets us breathe."', src: 'Rig Veda', ref: '— on appreciating abundance' }
     ]
   }
 }
+
+export const getTodayRitual = (sankalpaObj) => {
+  if (!sankalpaObj || !sankalpaObj.suggestedRituals) return null
+  const day = new Date().getDate() // 1 to 31
+  const idx = day % sankalpaObj.suggestedRituals.length
+  return sankalpaObj.suggestedRituals[idx]
+}
+
+
+
 
 // Micro-challenges
 const DAILY_CHALLENGES = [
@@ -125,18 +213,34 @@ function StepWrapper({ number, title, description, children, dark }) {
 }
 
 export default function Home() {
-  const { startWisdomAmbience, stopWisdomAmbience, isMuted, toggleMute, playHabitSound } = useSoundEffects()
+  const { startWisdomAmbience, stopWisdomAmbience, isMuted, toggleMute, playHabitSound, playHydrationSound } = useSoundEffects()
   const { dark } = useTheme()
-  const { journal, habitDone, habits, todayTotal, waterGoal, getStreak } = useWellness()
-  const { user } = useAuth()
-  const userName = user?.name?.split(' ')[0] || localStorage.getItem('fwa_guest_name') || 'Seeker'
+  const { journal, habitDone, habits, todayTotal, waterGoal, getStreak, addWater, addEntry, deleteEntry, waterLog, todayEntries } = useWellness()
+  const { user, updateProfile } = useAuth()
+  const [userName, setUserName] = useState(() => {
+    return user?.name?.split(' ')[0] || localStorage.getItem('fwa_guest_name') || 'Seeker'
+  })
   const navigate = useNavigate()
   const notif = useNotif()
+
+  useEffect(() => {
+    if (user?.name) {
+      setUserName(user.name.split(' ')[0])
+    } else {
+      setUserName(localStorage.getItem('fwa_guest_name') || 'Seeker')
+    }
+  }, [user])
 
   const [activeSound, setActiveSound] = useState(null)
   const [soundPanelOpen, setSoundPanelOpen] = useState(false)
   const [letterOpen, setLetterOpen] = useState(false)
+  const [hasReadLetter, setHasReadLetter] = useState(() => {
+    return localStorage.getItem('fwa_mockup_letter_read') === 'true'
+  })
   const [sankalpaPanelOpen, setSankalpaPanelOpen] = useState(false)
+  const [onboardingOpen, setOnboardingOpen] = useState(() => {
+    return !localStorage.getItem('fwa_onboarding_completed')
+  })
   const [wisdomRead, setWisdomRead] = useState(() => {
     const todayKey = new Date().toISOString().slice(0, 10)
     return localStorage.getItem('fwa_wisdom_read') === todayKey
@@ -147,7 +251,26 @@ export default function Home() {
     return localStorage.getItem('fwa_mockup_sankalpa') || 'calm'
   })
 
+  const handleOnboardingComplete = async ({ name, sankalpa }) => {
+    localStorage.setItem('fwa_guest_name', name)
+    localStorage.setItem('fwa_mockup_sankalpa', sankalpa)
+    localStorage.setItem('fwa_onboarding_completed', 'true')
+    setUserName(name)
+    setSelectedSankalpa(sankalpa)
+    setOnboardingOpen(false)
+
+    if (user) {
+      try {
+        await updateProfile({ name, activeSankalpa: sankalpa })
+      } catch (err) {
+        console.error('Failed to sync onboarding to profile:', err)
+      }
+    }
+    notif(`Welcome Seeker! Intention set to ${SANKALPAS[sankalpa]?.label || 'Calm'} 🪷`, 'success')
+  }
+
   const currentSankalpa = SANKALPAS[selectedSankalpa] || SANKALPAS.calm
+  const todayRitual = getTodayRitual(currentSankalpa) || { name: 'Sadhana Practice', time: '5', desc: 'Align with your Sankalpa for today through breath.' }
 
   // Active Ritual completion state
   const [ritualDone, setRitualDone] = useState(() => {
@@ -164,9 +287,6 @@ export default function Home() {
   const [activePractice, setActivePractice] = useState(null)
   const [timerSeconds, setTimerSeconds] = useState(0)
   const [timerActive, setTimerActive] = useState(false)
-
-  // Heritage story index (Randomized on load)
-  const [storyIdx] = useState(() => Math.floor(Math.random() * FEATURED_STORIES.length))
 
   // Complete a ritual
   const handleCompleteRitual = () => {
@@ -248,8 +368,53 @@ export default function Home() {
 
   // Combined daily progress
   const journalToday = journal.some(e => e.date === todayStr)
-  const dailyProgress = [ritualDone, todayTotal > 0, journalToday, wisdomRead].filter(Boolean).length
+  const waterGoalMet = todayTotal >= waterGoal
+  const dailyProgress = [ritualDone, waterGoalMet, journalToday, wisdomRead].filter(Boolean).length
   const allDoneToday = dailyProgress === 4
+
+  // Falling lotus petals state for 100% completion celebration (active for 5 seconds)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [petals, setPetals] = useState([])
+  useEffect(() => {
+    if (allDoneToday) {
+      setShowCelebration(true)
+      const newPetals = Array.from({ length: 45 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        size: 12 + Math.random() * 14,
+        delay: Math.random() * 1.8,
+        duration: 2.5 + Math.random() * 3,
+        rotation: Math.random() * 360,
+        drift: -15 + Math.random() * 30
+      }))
+      setPetals(newPetals)
+
+      // Stop the celebration after 5 seconds
+      const timer = setTimeout(() => {
+        setShowCelebration(false)
+      }, 5000)
+
+      return () => clearTimeout(timer)
+    } else {
+      setShowCelebration(false)
+      setPetals([])
+    }
+  }, [allDoneToday])
+
+  // Calculate dynamic default drink size from user's last logged water entry
+  const lastDrinkMl = useMemo(() => {
+    if (todayEntries && todayEntries.length > 0) {
+      return todayEntries[todayEntries.length - 1].ml
+    }
+    const dates = Object.keys(waterLog || {}).sort().reverse()
+    for (const date of dates) {
+      const dayLogs = waterLog[date] || []
+      if (dayLogs.length > 0) {
+        return dayLogs[dayLogs.length - 1].ml
+      }
+    }
+    return 250 // fallback default
+  }, [waterLog, todayEntries])
 
   const handleSetSankalpa = (key) => {
     setSelectedSankalpa(key)
@@ -268,9 +433,9 @@ export default function Home() {
   }
 
   const handleBeginActivePractice = () => {
-    const currentRitual = { rname: 'Sankalpa Breathwork', rtime: '5' }
+    const currentRitual = { rname: todayRitual.name, rtime: todayRitual.time }
     setActivePractice(currentRitual)
-    setTimerSeconds(5 * 60)
+    setTimerSeconds(Number(todayRitual.time) * 60)
     setTimerActive(true)
     notif(`Sadhana activated · starting ${currentRitual.rname} ✦`, 'info')
   }
@@ -452,43 +617,65 @@ export default function Home() {
                 transition: 'background 1s ease',
               }} />
 
-              {allDoneToday ? (
-                /* Celebration state */
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center', position: 'relative', zIndex: 1 }}
-                >
+              {/* Falling Lotus Petals Celebration */}
+              <AnimatePresence>
+                {showCelebration && petals.map((p) => (
                   <motion.div
-                    animate={{ scale: [1, 1.15, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{ fontSize: '40px', lineHeight: 1 }}
-                  >🪷</motion.div>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '24px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 700, margin: 0 }}>
-                    Beautifully done
-                  </h3>
-                  <p style={{ fontSize: '12px', color: dark ? 'rgba(245,230,200,0.7)' : '#5c4322', margin: 0, fontFamily: 'sans-serif' }}>
-                    All 4 daily pillars completed · streak updated to {habitStreak || 1} days!
-                  </p>
-                </motion.div>
-              ) : (
-                /* Normal progress tracker state */
-                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
+                    key={p.id}
+                    initial={{ top: '-10%', left: `${p.x}%`, rotate: p.rotation, opacity: 0 }}
+                    animate={{
+                      top: '110%',
+                      left: `${p.x + p.drift}%`,
+                      rotate: p.rotation + 360,
+                      opacity: [0, 1, 1, 0]
+                    }}
+                    exit={{ opacity: 0, transition: { duration: 0.8 } }}
+                    transition={{
+                      duration: p.duration,
+                      delay: p.delay,
+                      ease: 'linear',
+                      repeat: Infinity
+                    }}
+                    style={{
+                      position: 'absolute',
+                      pointerEvents: 'none',
+                      zIndex: 10,
+                      fontSize: `${p.size}px`,
+                      userSelect: 'none'
+                    }}
+                  >
+                    🌸
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {/* Always display the progress tracker state */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
                   {/* Streak displays on left */}
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                    <div style={{ position: 'relative' }}>
-                      <motion.div
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                        style={{ fontSize: '38px', lineHeight: 1, color: '#e8622a' }}
-                      >🔥</motion.div>
-                      <div style={{
-                        position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -40%)',
-                        fontFamily: "'Lexend', sans-serif", fontSize: '20px', fontWeight: 800, color: '#fff',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.4)'
-                      }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <motion.img
+                        src={lotusImg}
+                        alt="Streak Lotus"
+                        initial={{ scale: 0.2, rotate: -30, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        whileHover={{ scale: 1.2, rotate: 15 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 160,
+                          damping: 10
+                        }}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          objectFit: 'contain',
+                          filter: 'drop-shadow(0 2px 6px rgba(232, 98, 42, 0.15))'
+                        }}
+                      />
+                      <span className="font-display text-2xl font-bold" style={{ color: dark ? '#ffeab8' : '#8B6914' }}>
                         {habitStreak || 0}
-                      </div>
+                      </span>
                     </div>
                     <span style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.08em', color: dark ? '#c8a96e' : '#8b7355', fontWeight: 700, marginTop: '4px', fontFamily: 'sans-serif' }}>
                       DAY STREAK
@@ -501,13 +688,59 @@ export default function Home() {
                   <div style={{ flex: 1, display: 'flex', justifyContent: 'space-around', alignItems: 'center', minWidth: '240px' }}>
                     {[
                       { label: 'PRACTICE', done: ritualDone, emoji: '🧘', desc: 'Sadhana' },
-                      { label: 'WATER', done: todayTotal > 0, emoji: '💧', desc: 'Hydration' },
+                      { label: 'WATER', done: waterGoalMet, emoji: '💧', desc: 'Hydration' },
                       { label: 'JOURNAL', done: journalToday, emoji: '✍️', desc: 'Reflection' },
                       { label: 'WISDOM', done: wisdomRead, emoji: '📖', desc: 'Awakening' }
                     ].map((item, idx) => (
                       <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
                         <motion.div
-                          whileTap={{ scale: 0.9 }}
+                          whileHover={{ scale: 1.1, cursor: 'pointer' }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            if (item.label === 'PRACTICE') {
+                              if (!ritualDone) {
+                                setRitualDone(true)
+                                localStorage.setItem('fwa_mockup_ritual_done', 'true')
+                                playHabitSound()
+                                notif(`Sadhana complete: "${todayRitual.name}" logged 🧘`, 'success')
+                              } else {
+                                setRitualDone(false)
+                                localStorage.removeItem('fwa_mockup_ritual_done')
+                                notif(`Sadhana reset: "${todayRitual.name}" marked incomplete`, 'info')
+                              }
+                            } else if (item.label === 'WATER') {
+                              addWater(lastDrinkMl)
+                              playHydrationSound()
+                              notif(`Logged ${lastDrinkMl}ml water 💧`, 'success')
+                            } else if (item.label === 'JOURNAL') {
+                              if (!journalToday) {
+                                addEntry({
+                                  date: todayStr,
+                                  time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                                  text: 'Quick reflection logged from home dashboard.',
+                                  mood: 'Stillness'
+                                })
+                                playHabitSound()
+                                notif('Daily reflection completed ✍️', 'success')
+                              } else {
+                                const todayEntry = journal.find(e => e.date === todayStr)
+                                if (todayEntry) {
+                                  deleteEntry(todayEntry.id)
+                                  notif('Journal reflection reset', 'info')
+                                }
+                              }
+                            } else if (item.label === 'WISDOM') {
+                              if (!wisdomRead) {
+                                handleWisdomRead()
+                                const el = document.getElementById('wisdom-scroll-section')
+                                if (el) el.scrollIntoView({ behavior: 'smooth' })
+                              } else {
+                                setWisdomRead(false)
+                                localStorage.removeItem('fwa_wisdom_read')
+                                notif('Wisdom read state reset', 'info')
+                              }
+                            }
+                          }}
                           style={{
                             width: '42px',
                             height: '42px',
@@ -531,15 +764,65 @@ export default function Home() {
                         <span style={{ fontSize: '9px', fontWeight: 600, color: item.done ? '#c8a96e' : (dark ? 'rgba(245,230,200,0.4)' : '#8b7355'), fontFamily: 'sans-serif' }}>
                           {item.label}
                         </span>
+                        {item.label === 'WATER' && (
+                          <span style={{ fontSize: '9px', color: item.done ? '#c8a96e' : (dark ? 'rgba(245,230,200,0.5)' : '#8b7355'), fontFamily: 'sans-serif', marginTop: '2px' }}>
+                            {todayTotal}/{waterGoal}ml
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
+
+                {/* Bottom dynamic status bar */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginTop: '4px',
+                  fontSize: '11px',
+                  color: allDoneToday
+                    ? (dark ? '#ffeab8' : '#3d2600')
+                    : (dark ? 'rgba(245,230,200,0.5)' : '#8b7355'),
+                  fontFamily: 'sans-serif',
+                  borderTop: '1px solid rgba(200,169,110,0.1)',
+                  paddingTop: '12px',
+                  fontWeight: allDoneToday ? 600 : 400,
+                  textAlign: 'center',
+                }}>
+                  {allDoneToday ? (
+                    <span>✨ Beautifully done! All 4 daily pillars completed · streak updated to {habitStreak || 1} days! 🪷</span>
+                  ) : (
+                    <span>💡 Complete these 4 daily pillars to maintain your streak. Click any circle to log progress.</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom Progress Line */}
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '4px',
+                background: dark ? 'rgba(200, 169, 110, 0.12)' : 'rgba(200, 169, 110, 0.2)',
+              }}>
+                <motion.div
+                  initial={{ width: '0%' }}
+                  animate={{ width: `${(dailyProgress / 4) * 100}%` }}
+                  transition={{ type: 'spring', stiffness: 70, damping: 15 }}
+                  style={{
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #c9933a 0%, #e8622a 100%)',
+                    boxShadow: '0 0 6px rgba(232, 98, 42, 0.4)'
+                  }}
+                />
+              </div>
             </motion.div>
 
             {/* Collapsible Sankalpa badge panel */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '-12px', gap: '8px' }}>
               <div style={{
                 ...glassCardStyle,
                 borderRadius: '99px',
@@ -562,6 +845,18 @@ export default function Home() {
                   {sankalpaPanelOpen ? 'close' : 'change'}
                 </button>
               </div>
+              <p style={{
+                fontSize: '11px',
+                color: dark ? 'rgba(245,230,200,0.55)' : 'rgba(45,31,14,0.55)',
+                fontStyle: 'italic',
+                margin: 0,
+                textAlign: 'center',
+                fontFamily: 'sans-serif',
+                maxWidth: '440px',
+                lineHeight: 1.4
+              }}>
+                We've set your daily Sankalpa (intention) to <strong>{currentSankalpa.label}</strong>. You can change this anytime to suit your state of mind.
+              </p>
             </div>
 
             {/* Expandable selection tray */}
@@ -618,7 +913,7 @@ export default function Home() {
             {/* Primary Action — Ritual suggester */}
             <div style={{ borderRadius: '24px', padding: '24px', ...glassCardStyle }}>
               <div style={secLabelStyle}>
-                <span>{viewMode === 'morning' ? "Morning Sadhana" : "Evening Reflection"}</span>
+                <span>{viewMode === 'morning' ? "Suggested Sadhana" : "Evening Reflection"}</span>
                 <div style={{ flex: 1, height: '0.5px', background: 'rgba(200,169,110,0.2)' }} />
               </div>
 
@@ -653,12 +948,12 @@ export default function Home() {
                 <div>
                   {viewMode === 'morning' ? (
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-                      <div>
+                      <div style={{ flex: 1, minWidth: '200px' }}>
                         <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 600, margin: 0 }}>
-                          Morning Sadhana Practice
+                          {todayRitual.name}
                         </h3>
                         <p style={{ fontSize: '13px', color: dark ? 'rgba(245,230,200,0.7)' : '#5c4322', margin: '4px 0 0', fontFamily: 'sans-serif' }}>
-                          Align with your Sankalpa for today through breath.
+                          {todayRitual.desc}
                         </p>
                       </div>
                       <button
@@ -669,7 +964,7 @@ export default function Home() {
                           boxShadow: '0 4px 15px rgba(200,169,110,0.3)'
                         }}
                       >
-                        Start 5m Breathing
+                        Start {todayRitual.time}m Practice
                       </button>
                     </div>
                   ) : (
@@ -699,7 +994,7 @@ export default function Home() {
             </div>
 
             {/* Wisdom card scroll */}
-            <section style={{ display: 'flex', flexDirection: 'column' }}>
+            <section id="wisdom-scroll-section" style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={secLabelStyle}>
                 <span>Daily Wisdom Scroll</span>
                 <div style={{ flex: 1, height: '0.5px', background: 'rgba(200,169,110,0.2)' }} />
@@ -729,13 +1024,13 @@ export default function Home() {
               {/* Heritage column */}
               <div style={{ ...glassCardStyle, borderRadius: '20px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <span style={{ fontSize: '10px', color: '#c8a96e', fontWeight: 700, fontFamily: 'sans-serif', letterSpacing: '0.1em' }}>
-                  HERITAGE HISTORY
+                  ANCIENT HERITAGE
                 </span>
-                <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '18px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 600, margin: 0 }}>
-                  {FEATURED_STORIES[storyIdx].title}
+                <h4 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '20px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 600, margin: 0 }}>
+                  Reconnect with Your Roots
                 </h4>
-                <p style={{ fontSize: '12px', color: dark ? 'rgba(245,230,200,0.7)' : '#5c4322', margin: 0, fontFamily: 'sans-serif', lineHeight: 1.5 }}>
-                  {FEATURED_STORIES[storyIdx].desc}
+                <p style={{ fontSize: '12.5px', color: dark ? 'rgba(245,230,200,0.75)' : '#5c4322', margin: 0, fontFamily: 'sans-serif', lineHeight: 1.5 }}>
+                  How well do you know the wisdom that shaped our world? Journey beyond modern paths to explore the pioneering science, mathematics, and profound philosophy of ancient India.
                 </p>
                 <Link
                   to="/heritage"
@@ -766,44 +1061,108 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Founder vision letter */}
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <button
-                onClick={() => setLetterOpen(true)}
-                style={{
-                  ...glassCardStyle,
-                  borderRadius: '99px',
-                  padding: '8px 18px',
-                  border: '1px solid rgba(200, 169, 110, 0.25)',
-                  fontSize: '11px',
-                  color: '#c8a96e',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  fontFamily: 'sans-serif'
-                }}
-              >
-                Vision letter 💌
-              </button>
-            </div>
-
-            {/* viewmode switch for development */}
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', opacity: 0.4 }}>
-              {['morning', 'evening'].map(m => (
+            {/* Founder vision letter card */}
+            {hasReadLetter ? (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', marginBottom: '10px' }}>
                 <button
-                  key={m}
-                  onClick={() => setViewMode(m)}
+                  onClick={() => setLetterOpen(true)}
                   style={{
-                    padding: '4px 10px', borderRadius: '99px', fontSize: '9px', cursor: 'pointer',
-                    background: viewMode === m ? 'rgba(200,169,110,0.15)' : 'transparent',
-                    border: '0.5px solid rgba(200,169,110,0.3)',
+                    background: 'transparent',
+                    border: 'none',
                     color: '#c8a96e',
-                    fontFamily: 'sans-serif'
+                    fontSize: '11.5px',
+                    cursor: 'pointer',
+                    fontFamily: 'sans-serif',
+                    textDecoration: 'underline',
+                    opacity: 0.75,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
                   }}
                 >
-                  {m.toUpperCase()}
+                  <span>💌</span> Read Ashiya's Vision Letter
                 </button>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                onClick={() => {
+                  setLetterOpen(true)
+                  setHasReadLetter(true)
+                  localStorage.setItem('fwa_mockup_letter_read', 'true')
+                }}
+                style={{
+                  ...glassCardStyle,
+                  borderRadius: '24px',
+                  padding: '24px',
+                  border: dark ? '1px dashed rgba(200, 169, 110, 0.3)' : '1px dashed rgba(200, 169, 110, 0.5)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  background: dark ? 'rgba(30, 20, 25, 0.45)' : 'rgba(255, 240, 245, 0.55)',
+                }}
+              >
+                {/* Decorative elements */}
+                <div style={{ position: 'absolute', top: '12px', right: '16px', fontSize: '14px', opacity: 0.6 }}>✨</div>
+                <div style={{ position: 'absolute', bottom: '12px', left: '16px', fontSize: '14px', opacity: 0.6 }}>💖</div>
+
+                <div style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 15px rgba(236,72,153,0.3)',
+                }}>
+                  <span style={{ fontSize: '20px' }}>💌</span>
+                </div>
+
+                <div>
+                  <h4 style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: '20px',
+                    fontWeight: 700,
+                    color: dark ? '#ffeab8' : '#3d2600',
+                    margin: '0 0 4px 0'
+                  }}>
+                    A Note from the Founder
+                  </h4>
+                  <p style={{
+                    fontSize: '12.5px',
+                    color: dark ? 'rgba(245,230,200,0.65)' : '#5c4322',
+                    margin: 0,
+                    fontFamily: 'sans-serif',
+                    lineHeight: 1.4,
+                    maxWidth: '420px',
+                    fontStyle: 'italic'
+                  }}>
+                    "FlowState is basically a piece of my own healing journey... where we don't have to be perfect, just present."
+                  </p>
+                </div>
+
+                <span style={{
+                  fontSize: '11px',
+                  color: '#e8622a',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  fontFamily: 'sans-serif',
+                  marginTop: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  Read Ashiya's Vision Letter →
+                </span>
+              </motion.div>
+            )}
 
           </div>
 
@@ -875,6 +1234,12 @@ export default function Home() {
       </div>
 
       <FounderLetterModal open={letterOpen} onClose={() => setLetterOpen(false)} dark={dark} />
+      <OnboardingWizardModal
+        open={onboardingOpen}
+        onClose={() => setOnboardingOpen(false)}
+        dark={dark}
+        onComplete={handleOnboardingComplete}
+      />
     </>
   )
 }

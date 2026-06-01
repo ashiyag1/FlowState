@@ -2,8 +2,126 @@
 
 A mindful wellness app to track hydration, build habits, journal, explore wisdom, and connect with community — wrapped in a warm Indian-spiritual aesthetic.
 
-**Brand variants:** Saanjh (Twilight Sanctuary) · Antara (Inner Space & Rhythm)  
-**AI Companion:** Sahayak — a calm, emotionally-intelligent persona rooted in Indian wellness philosophy
+---
+
+## Architecture Overview
+
+```
+User's Browser (React SPA)
+       │
+       │  (localhost:5173 dev / Vercel prod)
+       │
+       ▼
+  ┌──────────────────────────────────────────────────┐
+  │  Vite Dev Server (dev) / Vercel (prod)           │
+  │  - Proxies /api/* → backend (dev)                │
+  │  - Serves static build (prod)                    │
+  └──────────────┬───────────────────────────────────┘
+                 │  /api/* requests
+                 ▼
+  ┌──────────────────────────────────────────────────┐
+  │  Express.js Backend (port 5000)                  │
+  │  - Cluster mode (1 process per CPU core)         │
+  │  - Rate limited (100 req/15min global)           │
+  │  - Compression (gzip)                            │
+  └──┬──────────┬──────────┬──────────┬──────────────┘
+     │          │          │          │
+     ▼          ▼          ▼          ▼
+  Auth    Wellness   Community   Achievements
+ Routes    Routes     Routes       Routes
+     │          │          │          │
+     └──────────┴──────────┴──────────┘
+                        │
+                        ▼
+            ┌──────────────────────┐
+            │  Database Layer      │
+            │  - MongoDB (if URI)  │
+            │  - db.json fallback  │
+            └──────────────────────┘
+
+  AI Features:
+  Frontend → /api/chat → Gemini API (primary) / Groq SDK (fallback)
+```
+
+---
+
+## Request Flow (Interview Answer)
+
+**1. Frontend (React + Vite):** User interacts with the SPA. On any action (login, log water, write journal), the frontend calls relative `/api/*` endpoints using native `fetch()`.
+
+**2. Dev Proxy / Production:** In development, Vite's dev server proxies `/api/*` to `localhost:5000`. In production on Vercel, `vercel.json` rewrites `/api/(.*)` to the serverless function at `api/index.js`.
+
+**3. Backend (Express.js):** The request hits `backend/app.js` which:
+- Validates CORS (whitelist from `ALLOWED_ORIGINS`)
+- Applies rate limiting (100/15min global, 10/15min on auth)
+- Routes to the correct route handler (`/api/auth`, `/api/water`, etc.)
+- JWT middleware (`backend/middleware/auth.js`) protects most routes
+
+**4. Database Layer (`backend/db.js`):** Each route calls db helper functions. If `MONGODB_URI` is set, it uses Mongoose (MongoDB). Otherwise, it falls back to a local `db.json` file. Same API interface regardless of backend.
+
+**5. Response** flows back through the same path.
+
+**6. AI Chat:** Frontend sends message to `/api/chat`, backend forwards to **Groq SDK (Llama-3.3-70B)** as primary AI provider, falls back to **Google Gemini**, then to local keyword-based replies if both APIs are unavailable.
+
+---
+
+## Features
+
+| Category | Features |
+|----------|----------|
+| **Tracking** | Water intake (daily goal, progress ring, 7-day history), Habits/Rituals (streak tracking, monthly calendar, Hindu calendar integration), Journal (7 mood tags, heatmap, streak) |
+| **Wisdom** | Daily quotes, 14 topics × 12 books, book reader with progress/bookmarks/notes, wisdom streak |
+| **Heritage** | 13 Indian scholars, ancient texts, interactive map, audio narration |
+| **Community** | Activity feed, intentions board, search, prana (karma) counter |
+| **Profile** | Avatar upload (base64), bio/location, password change, account deletion, theme/sound/notification toggles |
+| **Achievements** | 23 badges across 4 categories (Streaks, Journaling, Wellness, Wisdom), auto-unlocked via `AchievementEngine` |
+| **Soul Archetype** | Computes Dreamer/Warrior/Seeker/Restorer from journal + habits |
+| **AI** | Floating "Sahayak" chat (Gemini + Groq fallback), in-memory conversation cache (5 msg/user, 1h TTL) |
+| **UX** | JWT auth, dark mode with glass-morphism, 7 ambient sound presets, PWA support, time-adaptive UI |
+
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 18, Vite 5, React Router v6, Tailwind CSS 3, Framer Motion, Lucide React |
+| **Backend** | Node.js, Express.js, Mongoose (MongoDB) / JSON file fallback |
+| **Auth** | JWT (jsonwebtoken), bcryptjs |
+| **AI** | Groq SDK (primary, Llama-3.3-70B), Google Generative AI (Gemini, fallback) |
+| **Hosting** | Vercel (frontend + serverless API functions) |
+| **Monitoring** | @vercel/analytics, @vercel/speed-insights |
+| **Performance** | Compression (gzip), cluster mode (multi-core), rate limiting |
+
+---
+
+## Project Structure
+
+```
+tarang-flowstate/
+├── api/index.js           # Vercel serverless entry (imports Express app)
+├── backend/
+│   ├── app.js             # Express app setup (CORS, rate-limit, routes)
+│   ├── server.js          # Cluster-mode startup (forks per CPU)
+│   ├── db.js              # Database layer (MongoDB + JSON fallback)
+│   ├── db.json            # Fallback JSON database
+│   ├── middleware/auth.js # JWT authentication middleware
+│   ├── routes/            # auth.js, water.js, habits.js, journal.js,
+│   │                      # chat.js, community.js, profile.js, badges.js
+│   ├── models/            # Mongoose schemas (User, WaterLog, Habit, etc.)
+│   └── services/AchievementEngine.js
+├── frontend/
+│   ├── public/            # PWA assets (sw.js, manifest, icons)
+│   └── src/
+│       ├── pages/         # 10 route pages (Dashboard, Water, Habits, etc.)
+│       ├── components/    # Reusable UI components
+│       ├── context/       # AuthContext, WellnessContext, AchievementsContext (7)
+│       ├── hooks/         # 4 custom hooks
+│       ├── data/          # Static wisdom content
+│       └── utils/         # emotionalMemory, soulArchetype, hinduCalendar
+├── vercel.json            # Vercel deployment config
+└── package.json           # Monorepo root scripts
+```
 
 ---
 
@@ -12,7 +130,7 @@ A mindful wellness app to track hydration, build habits, journal, explore wisdom
 ```bash
 git clone <repo>
 npm run install-all
-# Set JWT_SECRET in backend/.env (MONGODB_URI and GEMINI_API_KEY optional)
+# Set JWT_SECRET in backend/.env (MONGODB_URI & GEMINI_API_KEY optional)
 npm run dev
 ```
 
@@ -20,191 +138,12 @@ Frontend → `:5173` · Backend → `:5000`
 
 ---
 
-## Features
-
-### Wellness Tracking
-| Feature | Description |
-|---------|-------------|
-| **Water Tracker** | Daily intake with quick-add bottle sizes (100ml–2000ml), custom amounts, animated progress ring, goal slider, 7-day history, ambient water particles |
-| **Habits / Rituals** | Create daily rituals with icons & accent colors. Monthly calendar, streak tracking, daily check-in, completion stats. Hindu calendar integration (Tithi, Paksha, Nakshatra, Moon phase). Scientific insights panel |
-| **Journal** | 7 mood tags, word count, emotional reflection analysis, entry history with delete, journal streak, mood trends heatmap & chart |
-
-### Wisdom & Heritage
-| Feature | Description |
-|---------|-------------|
-| **Wisdom Page** | Daily quotes, 14 topics with 12 books, life issues grid with detail modals, book reader with reading progress, bookmarks & notes, wisdom streak, ambient sound, sparkles, mandala portal |
-| **Heritage** | 13 Indian scholars, ancient texts, interactive map, audio narration, flowing animated symbols |
-
-### Community
-| Feature | Description |
-|---------|-------------|
-| **Community** | Activity feed, dummy posts, intentions board with search, prana (karma) counter, share functionality |
-
-### Personalization & Growth
-| Feature | Description |
-|---------|-------------|
-| **Profile & Account** | Avatar upload (base64), name/bio/location editing, password change, account deletion, soul archetype card, theme/sound/notification toggles |
-| **Achievements & Badges** | 23 badges (Streaks, Journaling, Wellness, Wisdom). Automatic unlock via `AchievementEngine`. Badge gallery, modal, toast notifications |
-| **Soul Archetype** | Computes your archetype — Dreamer, Warrior, Seeker, or Restorer — from journal history & habits, with a wellness score |
-| **Daily Sankalpa** | Set a daily intention from the dashboard |
-| **Breathing Portal** | Guided breathing exercise with animated lotus & calming audio |
-
-### AI & Assistant
-| Feature | Description |
-|---------|-------------|
-| **AI Assistant** | Floating Sahayak chat powered by Google Gemini with Groq SDK fallback. In-memory conversation cache (5 msg/user, 1h TTL) |
-
-### Platform & UX
-| Feature | Description |
-|---------|-------------|
-| **Login / Signup** | JWT-based auth with email/password, resilient localStorage session |
-| **Dark Mode** | Full dark theme with glass-morphism & adjustable color palettes |
-| **Notifications & Reminders** | In-app toasts, browser push notifications, reminder settings, retention nudge |
-| **Sound Effects** | 7 ambient presets (flute, om, sitar, rain, tibetan bowl, wind chimes) + interaction sounds |
-| **PWA Support** | Service worker, offline fallback, maskable icons, manifest, install banner |
-| **Time-Adaptive UI** | Hero adapts backgrounds & greetings by time-of-day with celestial glow effects |
-
----
-
-## Tech Stack
-
-| Layer | Tools |
-|-------|-------|
-| **Frontend** | React 18 · Vite 5 · React Router v6 · Tailwind CSS 3 · Framer Motion · Lucide React · date-fns · clsx · html2canvas |
-| **AI** | Google Generative AI (Gemini) · Groq SDK |
-| **Backend** | Node.js · Express · Mongoose · MongoDB (JSON file fallback) · JWT · bcryptjs · Sharp · compression · express-rate-limit |
-| **Monitoring** | @vercel/analytics · @vercel/speed-insights |
-| **Hosting** | Vercel (frontend + serverless API) |
-
----
-
-## Routes
-
-| Path | Page |
-|------|------|
-| `/` | Dashboard (daily flow, sankalpa, stats, wisdom carousel, heritage) |
-| `/water` | Water intake tracker |
-| `/habits` | Habit & ritual tracker |
-| `/journal` | Journal with mood trends |
-| `/quotes` | Wisdom explorer & books |
-| `/heritage` | Heritage exploration |
-| `/community` | Feed & intentions board |
-| `/profile` | Profile management & settings |
-| `/badges` | Achievement badge gallery |
-| `/login` | Login / signup |
-
----
-
-## API Endpoints
-
-### Auth
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| POST | `/api/auth/signup` | Register |
-| POST | `/api/auth/login` | Login |
-| GET | `/api/auth/me` | Current user |
-
-### Wellness
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET/POST/DELETE | `/api/water` | Water intake |
-| GET/POST/DELETE | `/api/habits` | Habits |
-| GET/POST/DELETE | `/api/journal` | Journal entries |
-| GET | `/api/journal/mood-trends` | Mood heatmap data |
-
-### Community
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/community/feed` | Activity feed |
-| GET/POST | `/api/community/intentions` | Intentions board |
-
-### Profile
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| PUT | `/api/profile` | Update profile |
-| PUT | `/api/profile/avatar` | Upload avatar |
-| PUT | `/api/profile/password` | Change password |
-| DELETE | `/api/profile` | Delete account |
-
-### Achievements
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| GET | `/api/badges` | Badges + progress |
-| POST | `/api/badges/track` | Track activity & evaluate |
-
-### AI
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| POST | `/api/chat` | AI companion chat |
-
----
-
-## Project Structure
-
-```
-tarang-flowstate/
-├── api/                          # Vercel serverless entry
-├── backend/
-│   ├── middleware/auth.js        # JWT auth
-│   ├── routes/                   # auth, water, habits, journal,
-│   │                             # chat, community, profile, badges
-│   ├── services/AchievementEngine.js  # Badge evaluation
-│   ├── app.js                    # Express setup
-│   ├── db.js                     # MongoDB + JSON fallback
-│   └── server.js                 # Cluster-mode startup
-├── frontend/
-│   ├── public/                   # sw.js, offline.html, manifest, icons
-│   └── src/
-│       ├── components/           # dashboard/, achievements/, wisdom/,
-│       │                         # DailySankalpa/, Navbar, AIAssistant,
-│       │                         # BreathingPortal, Notification*, etc.
-│       ├── context/              # 7 context providers (Auth, Theme,
-│       │                         # Wellness, Achievements, Wisdom, etc.)
-│       ├── hooks/                # 4 custom hooks
-│       ├── pages/                # 10 route pages
-│       ├── sections/             # HeroSection, DailyFlow, etc.
-│       ├── data/wisdomData.js    # 14 topics, 12 books, life issues
-│       ├── styles/               # globals.css, animations.css, etc.
-│       ├── utils/                # emotionalMemory, soulArchetype,
-│       │                         # hinduCalendar, helpers
-│       ├── icons/                # DiyaLamp, LotusFlower, TambaaVessel
-│       └── assets/               # hero/, heritage/, books/, badges/,
-│                                 # wisdom_music/, pages/
-├── package.json
-├── db.json                       # JSON fallback DB
-└── vercel.json
-```
-
----
-
-## Badge System
-
-23 badges across 4 categories, automatically tracked:
-
-| Category | Badges |
-|----------|--------|
-| **Streaks** | 3d · 7d · 14d · 21d · 30d · 60d · 100d |
-| **Journaling** | Journalled 10× · 30 daily · Midnight Reflector |
-| **Wellness** | Hydration Sage · Calm Mind · Discipline Builder · Focus Monk · Sankalpa Keeper · Sunrise Consistency · Cosmic Rhythm |
-| **Wisdom** | Wisdom Seeker · Third Eye Open · The Unshaken |
-
----
-
-## Design
-
-**Palette:** saffron · gold · sand · ocean blue · ink · ivory  
-**Fonts:** Cormorant Garamond (headings) · Cinzel (display) · DM Sans (body)  
-**Motifs:** Om · lotus · diya lamps · mandala  
-**Style:** Glass-morphism cards, warm gradients, subtle borders
-
----
-
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `JWT_SECRET` | Yes | — | Secret for signing tokens |
-| `MONGODB_URI` | No | — | MongoDB connection string (JSON fallback if absent) |
-| `GEMINI_API_KEY` | No | — | Google Gemini API key for AI chat |
-| `ALLOWED_ORIGINS` | No | `http://localhost:5173` | CORS origins (comma-separated) |
-| `PORT` | No | `5000` | Backend server port |
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| `JWT_SECRET` | Yes | — | Token signing secret |
+| `MONGODB_URI` | No | — | MongoDB connection (uses db.json if absent) |
+| `GEMINI_API_KEY` | No | — | Google Gemini for AI chat |
+| `ALLOWED_ORIGINS` | No | `http://localhost:5173` | CORS whitelist (comma-separated) |
+| `PORT` | No | `5000` | Backend port |

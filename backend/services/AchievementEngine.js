@@ -51,7 +51,8 @@ export async function evaluateAchievements(userId) {
     wisdomDates: [],
     booksOpened: [],
     sunriseDates: [],
-    midnightJournalDates: []
+    midnightJournalDates: [],
+    pagesRead: []
   };
 
   const sankalpaDates = Array.isArray(stats.sankalpaDates) ? stats.sankalpaDates : [];
@@ -60,6 +61,7 @@ export async function evaluateAchievements(userId) {
   const booksOpened = Array.isArray(stats.booksOpened) ? stats.booksOpened : [];
   const sunriseDates = Array.isArray(stats.sunriseDates) ? stats.sunriseDates : [];
   const midnightJournalDates = Array.isArray(stats.midnightJournalDates) ? stats.midnightJournalDates : [];
+  const pagesRead = Array.isArray(stats.pagesRead) ? stats.pagesRead : [];
 
   // 2. Fetch water logs
   const waterData = await dbGetWater(userId);
@@ -133,7 +135,11 @@ export async function evaluateAchievements(userId) {
     "daily_journaling_30_times": journalCount,
     "discipline_builder": maxHabitsInADay,
     "focus_monk": breathingDates.length,
-    "midnight_reflector": midnightJournalDates.length
+    "midnight_reflector": midnightJournalDates.length,
+    "first_water_logged": waterDates.size,
+    "first_ritual_logged": habitDates.size,
+    "first_journal_logged": journalCount,
+    "first_page_read": pagesRead.length
   };
 
   // 7. Get existing badges & evaluate
@@ -154,7 +160,11 @@ export async function evaluateAchievements(userId) {
     { id: "daily_journaling_30_times", target: 30 },
     { id: "discipline_builder", target: 5 },
     { id: "focus_monk", target: 10 },
-    { id: "midnight_reflector", target: 3 }
+    { id: "midnight_reflector", target: 3 },
+    { id: "first_water_logged", target: 1 },
+    { id: "first_ritual_logged", target: 1 },
+    { id: "first_journal_logged", target: 1 },
+    { id: "first_page_read", target: 1 }
   ];
 
   const newlyUnlocked = [];

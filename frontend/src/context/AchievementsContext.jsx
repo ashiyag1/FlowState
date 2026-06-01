@@ -131,6 +131,42 @@ const FRONTEND_DEFAULT_BADGES = [
     category: "journaling",
     rarity: "Uncommon",
     targetProgress: 3
+  },
+  {
+    badgeId: "first_water_logged",
+    title: "Jal Hi Jeevan Hai (No Cap)",
+    description: "Logged your first water entry. Stay hydrated, no cap.",
+    imageFilename: "first_water_logged.png",
+    category: "wellness",
+    rarity: "Common",
+    targetProgress: 1
+  },
+  {
+    badgeId: "first_ritual_logged",
+    title: "No Dard, Only Sadhana",
+    description: "Completed your first habit/ritual. No pain, only alignment.",
+    imageFilename: "first_ritual_logged.png",
+    category: "rituals",
+    rarity: "Common",
+    targetProgress: 1
+  },
+  {
+    badgeId: "first_journal_logged",
+    title: "Spilling the Inner Tea",
+    description: "Poured your heart out in your first journal entry.",
+    imageFilename: "first_journal_logged.png",
+    category: "journaling",
+    rarity: "Common",
+    targetProgress: 1
+  },
+  {
+    badgeId: "first_page_read",
+    title: "Shastri Tiger",
+    description: "Read your first page in the Wisdom Library.",
+    imageFilename: "first_page_read.png",
+    category: "wisdom",
+    rarity: "Common",
+    targetProgress: 1
   }
 ];
 
@@ -330,7 +366,8 @@ export function AchievementsProvider({ children }) {
       wisdomDates: [],
       booksOpened: [],
       sunriseActivities: 0,
-      midnightJournals: 0
+      midnightJournals: 0,
+      pagesRead: []
     });
 
     const now = new Date();
@@ -355,6 +392,10 @@ export function AchievementsProvider({ children }) {
       stats.sunriseActivities = (stats.sunriseActivities || 0) + 1;
     } else if (actionType === 'midnight_journal') {
       stats.midnightJournals = (stats.midnightJournals || 0) + 1;
+    } else if (actionType === 'page_read' && metadata.bookId !== undefined && metadata.page !== undefined) {
+      const pages = new Set(stats.pagesRead || []);
+      pages.add(`${metadata.bookId}_${metadata.page}`);
+      stats.pagesRead = Array.from(pages);
     }
     
     Store.set('fwa_local_stats', stats);
@@ -415,7 +456,11 @@ export function AchievementsProvider({ children }) {
       "daily_journaling_30_times": journalCount,
       "discipline_builder": maxHabitsInADay,
       "focus_monk": stats.breathingCount,
-      "midnight_reflector": stats.midnightJournals
+      "midnight_reflector": stats.midnightJournals,
+      "first_water_logged": waterDates.size,
+      "first_ritual_logged": habitDates.size,
+      "first_journal_logged": journalCount,
+      "first_page_read": (stats.pagesRead || []).length
     };
 
     const localBadgesProgress = Store.get('fwa_local_badges', {});
@@ -435,7 +480,11 @@ export function AchievementsProvider({ children }) {
       { id: "daily_journaling_30_times", target: 30 },
       { id: "discipline_builder", target: 5 },
       { id: "focus_monk", target: 10 },
-      { id: "midnight_reflector", target: 3 }
+      { id: "midnight_reflector", target: 3 },
+      { id: "first_water_logged", target: 1 },
+      { id: "first_ritual_logged", target: 1 },
+      { id: "first_journal_logged", target: 1 },
+      { id: "first_page_read", target: 1 }
     ];
 
     badgeDefinitions.forEach(badgeDef => {

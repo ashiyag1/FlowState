@@ -68,6 +68,7 @@ router.post('/track', async (req, res) => {
     const booksOpened = Array.isArray(currentStats.booksOpened) ? currentStats.booksOpened : [];
     const sunriseDates = Array.isArray(currentStats.sunriseDates) ? currentStats.sunriseDates : [];
     const midnightJournalDates = Array.isArray(currentStats.midnightJournalDates) ? currentStats.midnightJournalDates : [];
+    const pagesRead = Array.isArray(currentStats.pagesRead) ? currentStats.pagesRead : [];
 
     const statsUpdates = {};
     let shouldUpdate = false;
@@ -109,6 +110,13 @@ router.post('/track', async (req, res) => {
       if (!midnightJournalDates.includes(localDate)) {
         midnightJournalDates.push(localDate);
         statsUpdates.midnightJournalDates = midnightJournalDates;
+        shouldUpdate = true;
+      }
+    } else if (actionType === 'page_read' && metadata?.bookId !== undefined && metadata?.page !== undefined) {
+      const pageKey = `${metadata.bookId}_${metadata.page}`;
+      if (!pagesRead.includes(pageKey)) {
+        pagesRead.push(pageKey);
+        statsUpdates.pagesRead = pagesRead;
         shouldUpdate = true;
       }
     }

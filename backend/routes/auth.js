@@ -43,7 +43,9 @@ router.post('/signup', async (req, res) => {
         bio: user.bio || '',
         location: user.location || '',
         joinedAt: user.joinedAt || new Date().toISOString(),
-        preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+        preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+        xp: user.xp || 0,
+        pranaPoints: user.pranaPoints || 0
       }
     })
   } catch (err) {
@@ -84,7 +86,9 @@ router.post('/login', async (req, res) => {
         bio: user.bio || '',
         location: user.location || '',
         joinedAt: user.joinedAt || new Date().toISOString(),
-        preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+        preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+        xp: user.xp || 0,
+        pranaPoints: user.pranaPoints || 0
       }
     })
   } catch (err) {
@@ -112,7 +116,9 @@ router.get('/me', authMiddleware, async (req, res) => {
         bio: user.bio || '',
         location: user.location || '',
         joinedAt: user.joinedAt || new Date().toISOString(),
-        preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+        preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+        xp: user.xp || 0,
+        pranaPoints: user.pranaPoints || 0
       }
     })
   } catch (err) {
@@ -151,7 +157,18 @@ router.post('/google', async (req, res) => {
 
     return res.status(200).json({
       token,
-      user: { id: userId, name: user.name, email: user.email }
+      user: {
+        id: userId,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar || '',
+        bio: user.bio || '',
+        location: user.location || '',
+        joinedAt: user.joinedAt || new Date().toISOString(),
+        preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+        xp: user.xp || 0,
+        pranaPoints: user.pranaPoints || 0
+      }
     })
   } catch (err) {
     console.error('Google OAuth error:', err)

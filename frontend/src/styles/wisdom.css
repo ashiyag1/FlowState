@@ -273,3 +273,16 @@
 }
 
 .wisdom-quote-diya { font-size: 3rem; }
+
+/* ── RESPONSIVE: stack sidebar below main on tablet/mobile ── */
+@media (max-width: 1024px) {
+  /* The WisdomPage inline-style grid becomes single column */
+  .wisdom-columns-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .wisdom-sidebar-sticky {
+    position: static !important;
+    max-height: none !important;
+  }
+}
+

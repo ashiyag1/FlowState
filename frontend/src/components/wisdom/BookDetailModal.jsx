@@ -1,9 +1,37 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
 import { useWisdom } from '../../context/WisdomContext'
 import { useAchievements } from '../../context/AchievementsContext'
+import { useAuth } from '../../context/AuthContext'
+import { logPageReadToday } from '../../utils/wisdomTracking'
 import html2canvas from 'html2canvas'
 import pageBg from '../../assets/page.webp'
+import RosePetals from './RosePetals'
+
+// XP float popup component
+function XPFloat({ id, onDone }) {
+  return (
+    <motion.div
+      key={id}
+      initial={{ opacity: 1, y: 0, scale: 1 }}
+      animate={{ opacity: 0, y: -50, scale: 1.2 }}
+      transition={{ duration: 1.1, ease: 'easeOut' }}
+      onAnimationComplete={onDone}
+      style={{
+        position: 'absolute', top: '40%', left: '50%', transform: 'translateX(-50%)',
+        zIndex: 100, pointerEvents: 'none',
+        fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: '1rem',
+        background: 'linear-gradient(135deg, #C9933A, #E8B96A)',
+        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+        filter: 'drop-shadow(0 2px 6px rgba(201,147,58,0.5))',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      +10 XP ✨
+    </motion.div>
+  )
+}
 
 const easeBack = (t) => {
   const c1 = 1.70158
@@ -15,9 +43,14 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const { dark } = useTheme()
   const { updateBookProgress, savePage, removeSavedPage, isPageSaved, addNote, removeNote, getPageNotes } = useWisdom()
   const { trackEvent } = useAchievements()
+  const { adjustPoints } = useAuth()
   const [liked, setLiked] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFemale, setIsFemale] = useState(true)
+  const [xpFloats, setXpFloats] = useState([])
+  const [showRosePetals, setShowRosePetals] = useState(false)
+  const [showCompletion, setShowCompletion] = useState(false)
+  const prevIdxRef = useRef(initialPage)
   const [showShare, setShowShare] = useState(false)
   const [previewImage, setPreviewImage] = useState(null)
   const [previewBlob, setPreviewBlob] = useState(null)
@@ -106,9 +139,50 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   // clean up raf
   useEffect(() => () => { if (rafId.current) cancelAnimationFrame(rafId.current) }, [])
 
+  // 1. Update book progress and check for completion celebration on page change
   useEffect(() => {
     updateBookProgress(book.id, idx)
-  }, [idx, book.id, updateBookProgress])
+    if (prevIdxRef.current !== idx) {
+      prevIdxRef.current = idx
+      // Book completion celebration on turning to last page
+      if (idx === (book.pages?.length ?? 0) - 1) {
+        setTimeout(() => {
+          setShowRosePetals(true)
+          setShowCompletion(true)
+          setTimeout(() => setShowRosePetals(false), 5500)
+        }, 400)
+      }
+    }
+  }, [idx, book.id, updateBookProgress, book.pages?.length])
+
+  // 2. Reading timer for XP award (6 seconds)
+  const [awardedPages, setAwardedPages] = useState(new Set())
+  const [readingTimerActive, setReadingTimerActive] = useState(false)
+  const wisdomAbsorbed = awardedPages.has(idx)
+
+  useEffect(() => {
+    if (awardedPages.has(idx)) {
+      setReadingTimerActive(false)
+      return
+    }
+
+    setReadingTimerActive(true)
+    const timer = setTimeout(() => {
+      adjustPoints(10, 0)
+      setXpFloats(prev => [...prev, Date.now()])
+      trackEvent('page_read', { bookId: book.id, page: idx })
+      logPageReadToday(book.id, idx)
+      window.dispatchEvent(new Event('wisdom_progress_updated'))
+      setAwardedPages(prev => {
+        const next = new Set(prev)
+        next.add(idx)
+        return next
+      })
+      setReadingTimerActive(false)
+    }, 6000) // 6 seconds contemplation timer
+
+    return () => clearTimeout(timer)
+  }, [idx, awardedPages, adjustPoints, trackEvent, book.id])
 
   const goTo = useCallback((nextIdx) => {
     setIdx(nextIdx)
@@ -292,6 +366,75 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
 
   return (
     <div style={s.overlay} onClick={onClose}>
+      {/* Rose petals celebration */}
+      <RosePetals trigger={showRosePetals} count={40} />
+
+      {/* Book completion modal */}
+      <AnimatePresence>
+        {showCompletion && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 280 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 9999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              pointerEvents: 'none',
+            }}
+          >
+            <div style={{
+              background: dark ? 'rgba(26,18,8,0.96)' : 'rgba(254,252,245,0.97)',
+              border: '1px solid rgba(201,168,76,0.35)',
+              borderRadius: '24px', padding: '2rem 2.5rem',
+              textAlign: 'center', maxWidth: '320px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+              pointerEvents: 'auto',
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🌸</div>
+              <h3 style={{
+                fontFamily: "'Cinzel', serif", fontSize: '1.1rem', fontWeight: 700,
+                color: dark ? '#E8C97A' : '#6B4A18', marginBottom: '0.5rem',
+              }}>
+                Wisdom Absorbed!
+              </h3>
+              <p style={{
+                fontFamily: "'Lora', serif", fontStyle: 'italic', fontSize: '0.85rem',
+                color: dark ? 'rgba(252,246,232,0.7)' : 'rgba(92,61,30,0.7)',
+                lineHeight: 1.5, marginBottom: '1.25rem',
+              }}>
+                You've completed <strong style={{ color: dark ? '#C9933A' : '#8B5E2F' }}>{book.title}</strong>. The wisdom of the ancients now lives in you. 🪷
+              </p>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                <button
+                  onClick={() => setShowCompletion(false)}
+                  style={{
+                    padding: '0.5rem 1.25rem', borderRadius: '999px', border: 'none',
+                    background: 'linear-gradient(135deg, #C9933A, #E8B96A)',
+                    color: '#1a1208', fontWeight: 700, fontSize: '0.8rem',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  Continue Reading 📜
+                </button>
+                <button
+                  onClick={() => { setShowCompletion(false); onClose() }}
+                  style={{
+                    padding: '0.5rem 1.25rem', borderRadius: '999px',
+                    border: `1px solid ${dark ? 'rgba(201,168,76,0.3)' : 'rgba(201,168,76,0.4)'}`,
+                    background: 'transparent',
+                    color: dark ? '#C9933A' : '#8B5E2F', fontWeight: 600, fontSize: '0.8rem',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div style={s.modal} onClick={e => e.stopPropagation()}>
         <button style={s.closeBtn} onClick={onClose}>✕</button>
 
@@ -339,6 +482,24 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
                 <span style={{ fontSize: '0.5rem', fontWeight: 700, marginLeft: '1px', color: '#c9a84c' }}>{isFemale ? 'F' : 'M'}</span>
               </button>
               <span style={s.actionsLabel}>{cur.heading}</span>
+              {readingTimerActive && (
+                <motion.span
+                  animate={{ opacity: [0.4, 0.9, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                  style={{ fontSize: '0.65rem', color: '#c9a84c', fontStyle: 'italic', marginLeft: '0.5rem', whiteSpace: 'nowrap' }}
+                >
+                  🧘 Contemplating...
+                </motion.span>
+              )}
+              {wisdomAbsorbed && (
+                <motion.span
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  style={{ fontSize: '0.65rem', color: dark ? '#2ecc71' : '#27ae60', fontWeight: 600, marginLeft: '0.5rem', whiteSpace: 'nowrap' }}
+                >
+                  ✨ Absorbed (+10 XP)
+                </motion.span>
+              )}
             </div>
             <div style={s.actionsGroup}>
               <button
@@ -548,12 +709,22 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
           </div>
         )}
 
-        <div ref={bookEl} style={s.bookArea}
+        <div ref={bookEl} style={{ ...s.bookArea, position: 'relative' }}
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
           onPointerCancel={onCancel}
         >
+          {/* XP Float animations */}
+          <AnimatePresence>
+            {xpFloats.map(id => (
+              <XPFloat
+                key={id}
+                id={id}
+                onDone={() => setXpFloats(prev => prev.filter(x => x !== id))}
+              />
+            ))}
+          </AnimatePresence>
           {/* Page thickness stack on right edge */}
           {pages.length - idx > 1 && !isTurning && (
             <div style={s.thicknessStack}>

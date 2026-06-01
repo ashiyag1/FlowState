@@ -212,6 +212,30 @@ export function AuthProvider({ children }) {
     }
   }, [token, logout])
 
+  // Adjust points
+  const adjustPoints = useCallback(async (xpDiff, pranaDiff = 0) => {
+    if (!isAuthenticated || !token) return
+    try {
+      const res = await fetch('/api/profile/adjust-points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ xpDiff, pranaDiff })
+      })
+      if (res.ok) {
+        const result = await res.json()
+        if (result.user) {
+          setUser(prev => ({ ...prev, ...result.user }))
+          return { success: true, user: result.user }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to adjust points:', err)
+    }
+  }, [isAuthenticated, token])
+
   return (
     <AuthContext.Provider value={{
       token,
@@ -226,7 +250,8 @@ export function AuthProvider({ children }) {
       updateProfile,
       updateAvatar,
       changePassword,
-      deleteAccount
+      deleteAccount,
+      adjustPoints
     }}>
       {children}
     </AuthContext.Provider>

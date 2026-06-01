@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
-import { CheckCircle2, ChevronRight, X } from 'lucide-react'
+import { CheckCircle2, ChevronRight, X, Share2 } from 'lucide-react'
+import RosePetals from './RosePetals'
 
 export default function IssueDetailModal({ issue, onClose }) {
   const { dark } = useTheme()
   const [currentStep, setCurrentStep] = useState(0)
+  const [showPetals, setShowPetals] = useState(false)
+  const [showShare, setShowShare] = useState(false)
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -17,6 +20,9 @@ export default function IssueDetailModal({ issue, onClose }) {
     if (currentStep < issue.steps.length - 1) {
       setCurrentStep(s => s + 1)
     } else {
+      // Completion!
+      setShowPetals(true)
+      setTimeout(() => setShowPetals(false), 5500)
       onClose()
     }
   }
@@ -27,8 +33,20 @@ export default function IssueDetailModal({ issue, onClose }) {
     }
   }
 
+  const handleShare = () => {
+    const tip = issue.tip || issue.steps[issue.steps.length - 1]
+    const text = `🌿 ${issue.title}\n\n"${tip}"\n\n— Ancient wisdom from ${issue.approach}\n\nvia Tarang \u2728`
+    if (navigator.share) {
+      navigator.share({ title: issue.title, text })
+    } else {
+      navigator.clipboard.writeText(text)
+      alert('Wisdom copied to clipboard! Share it 🌸')
+    }
+  }
+
   return (
     <div style={styles.overlay} className="backdrop-blur-xl">
+      <RosePetals trigger={showPetals} count={30} />
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -123,15 +141,37 @@ export default function IssueDetailModal({ issue, onClose }) {
             Back
           </button>
 
-          <button 
-            onClick={nextStep}
-            className="flex items-center gap-2 font-bold tracking-wider uppercase text-xs px-6 py-3 rounded-full text-white shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
-            style={{ background: issue.color }}
-          >
-            {currentStep === issue.steps.length - 1 ? 'Done' : 'Next'}
-            <ChevronRight size={16} />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Share button on final step */}
+            {currentStep === issue.steps.length - 1 && (
+              <motion.button
+                onClick={handleShare}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="flex items-center gap-1.5 font-bold tracking-wider uppercase text-xs px-4 py-3 rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                style={{
+                  border: `1.5px solid ${issue.color}60`,
+                  color: issue.color,
+                  background: `${issue.color}15`,
+                }}
+              >
+                <Share2 size={13} />
+                Share
+              </motion.button>
+            )}
+
+            <button 
+              onClick={nextStep}
+              className="flex items-center gap-2 font-bold tracking-wider uppercase text-xs px-6 py-3 rounded-full text-white shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
+              style={{ background: issue.color }}
+            >
+              {currentStep === issue.steps.length - 1 ? 'Done 🌸' : 'Next'}
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
+
 
       </motion.div>
     </div>

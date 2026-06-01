@@ -178,6 +178,42 @@ const DEFAULT_BADGES = [
     category: "journaling",
     rarity: "Uncommon",
     targetProgress: 3
+  },
+  {
+    badgeId: "first_water_logged",
+    title: "Jal Hi Jeevan Hai (No Cap)",
+    description: "Logged your first water entry. Stay hydrated, no cap.",
+    imageFilename: "first_water_logged.png",
+    category: "wellness",
+    rarity: "Common",
+    targetProgress: 1
+  },
+  {
+    badgeId: "first_ritual_logged",
+    title: "No Dard, Only Sadhana",
+    description: "Completed your first habit/ritual. No pain, only alignment.",
+    imageFilename: "first_ritual_logged.png",
+    category: "rituals",
+    rarity: "Common",
+    targetProgress: 1
+  },
+  {
+    badgeId: "first_journal_logged",
+    title: "Spilling the Inner Tea",
+    description: "Poured your heart out in your first journal entry.",
+    imageFilename: "first_journal_logged.png",
+    category: "journaling",
+    rarity: "Common",
+    targetProgress: 1
+  },
+  {
+    badgeId: "first_page_read",
+    title: "Shastri Tiger",
+    description: "Read your first page in the Wisdom Library.",
+    imageFilename: "first_page_read.png",
+    category: "wisdom",
+    rarity: "Common",
+    targetProgress: 1
   }
 ]
 export { DEFAULT_BADGES }
@@ -248,8 +284,10 @@ export async function connectDB() {
 
         // Migrate users with old number-based stats to new date-array schema
         for (const user of (db.users || [])) {
+          if (user.xp === undefined) { user.xp = 0; updated = true }
+          if (user.pranaPoints === undefined) { user.pranaPoints = 0; updated = true }
           if (!user.stats) {
-            user.stats = { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [] }
+            user.stats = { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [], pagesRead: [] }
             updated = true
           } else {
             let m = false
@@ -264,6 +302,7 @@ export async function connectDB() {
             if (!Array.isArray(user.stats.booksOpened)) { user.stats.booksOpened = []; m = true }
             if (!Array.isArray(user.stats.sunriseDates)) { user.stats.sunriseDates = []; m = true }
             if (!Array.isArray(user.stats.midnightJournalDates)) { user.stats.midnightJournalDates = []; m = true }
+            if (!Array.isArray(user.stats.pagesRead)) { user.stats.pagesRead = []; m = true }
             if (m) updated = true
           }
         }
@@ -321,8 +360,10 @@ export async function dbCreateUser(name, email, passwordHash) {
       bio: '',
       location: '',
       joinedAt: new Date().toISOString(),
+      xp: 0,
+      pranaPoints: 0,
       preferences: { theme: 'light', soundEnabled: true, notificationsEnabled: true },
-      stats: { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [] }
+      stats: { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [], pagesRead: [] }
     }
     db.users.push(newUser)
     await writeJsonDB(db)
@@ -357,6 +398,8 @@ export async function dbFindUserById(id) {
       bio: user.bio || '',
       location: user.location || '',
       joinedAt: user.joinedAt || new Date().toISOString(),
+      xp: user.xp || 0,
+      pranaPoints: user.pranaPoints || 0,
       preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
       stats: {
         sankalpaDates: user.stats?.sankalpaDates || [],
@@ -364,7 +407,8 @@ export async function dbFindUserById(id) {
         wisdomDates: user.stats?.wisdomDates || [],
         booksOpened: user.stats?.booksOpened || [],
         sunriseDates: user.stats?.sunriseDates || [],
-        midnightJournalDates: user.stats?.midnightJournalDates || []
+        midnightJournalDates: user.stats?.midnightJournalDates || [],
+        pagesRead: user.stats?.pagesRead || []
       }
     } : null
   }
@@ -543,6 +587,7 @@ export async function dbDeleteHabit(userId, habitId) {
 
 export async function dbToggleHabit(userId, date, habitId, time) {
   await connectDB()
+  let isDoneNow = false
   if (IS_MONGO) {
     let doc = await HabitDone.findOne({ userId })
     if (!doc) doc = new HabitDone({ userId, done: {} })
@@ -550,8 +595,10 @@ export async function dbToggleHabit(userId, date, habitId, time) {
     const day = doc.done.get(date) || {}
     if (day[habitId]) {
       delete day[habitId]
+      isDoneNow = false
     } else {
       day[habitId] = time
+      isDoneNow = true
     }
     doc.done.set(date, day)
     await doc.save()
@@ -563,11 +610,14 @@ export async function dbToggleHabit(userId, date, habitId, time) {
     const day = db.habitDone[userId][date]
     if (day[habitId]) {
       delete day[habitId]
+      isDoneNow = false
     } else {
       day[habitId] = time
+      isDoneNow = true
     }
     await writeJsonDB(db)
   }
+  return isDoneNow
 }
 
 // ── JOURNAL METHODS ────────────────────────────────────
@@ -771,7 +821,9 @@ export async function dbUpdateUserProfile(userId, updates) {
       bio: user.bio || '',
       location: user.location || '',
       joinedAt: user.joinedAt,
-      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      xp: user.xp || 0,
+      pranaPoints: user.pranaPoints || 0
     }
   } else {
     const db = await readJsonDB()
@@ -787,7 +839,9 @@ export async function dbUpdateUserProfile(userId, updates) {
       bio: user.bio || '',
       location: user.location || '',
       joinedAt: user.joinedAt || new Date().toISOString(),
-      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      xp: user.xp || 0,
+      pranaPoints: user.pranaPoints || 0
     }
   }
 }
@@ -805,7 +859,9 @@ export async function dbUpdateUserAvatar(userId, avatar) {
       bio: user.bio || '',
       location: user.location || '',
       joinedAt: user.joinedAt,
-      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      xp: user.xp || 0,
+      pranaPoints: user.pranaPoints || 0
     }
   } else {
     const db = await readJsonDB()
@@ -821,7 +877,9 @@ export async function dbUpdateUserAvatar(userId, avatar) {
       bio: user.bio || '',
       location: user.location || '',
       joinedAt: user.joinedAt || new Date().toISOString(),
-      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      xp: user.xp || 0,
+      pranaPoints: user.pranaPoints || 0
     }
   }
 }
@@ -860,6 +918,52 @@ export async function dbDeleteUser(userId) {
       db.userBadges = db.userBadges.filter(ub => ub.userId !== userId)
     }
     await writeJsonDB(db)
+  }
+}
+
+export async function dbAdjustUserPoints(userId, xpDiff, pranaDiff = 0) {
+  await connectDB()
+  if (IS_MONGO) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $inc: { xp: xpDiff, pranaPoints: pranaDiff } },
+      { new: true }
+    ).lean()
+    if (!user) throw new Error('User not found')
+    return {
+      _id: user._id.toString(),
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar || '',
+      bio: user.bio || '',
+      location: user.location || '',
+      joinedAt: user.joinedAt,
+      xp: user.xp || 0,
+      pranaPoints: user.pranaPoints || 0,
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+    }
+  } else {
+    const db = await readJsonDB()
+    const user = db.users.find(u => u.id === userId)
+    if (!user) throw new Error('User not found')
+    user.xp = Math.max(0, (user.xp || 0) + xpDiff)
+    user.pranaPoints = Math.max(0, (user.pranaPoints || 0) + pranaDiff)
+    await writeJsonDB(db)
+    return {
+      _id: user.id,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar || '',
+      bio: user.bio || '',
+      location: user.location || '',
+      joinedAt: user.joinedAt || new Date().toISOString(),
+      xp: user.xp,
+      pranaPoints: user.pranaPoints,
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      stats: user.stats || {}
+    }
   }
 }
 
@@ -918,7 +1022,7 @@ export async function dbUpdateUserStats(userId, statsUpdates) {
     const db = await readJsonDB()
     const user = db.users.find(u => u.id === userId)
     if (!user) throw new Error('User not found')
-    user.stats = user.stats || { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [] }
+    user.stats = user.stats || { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [], pagesRead: [] }
     Object.assign(user.stats, statsUpdates)
     await writeJsonDB(db)
     return user

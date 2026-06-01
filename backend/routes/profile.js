@@ -6,7 +6,8 @@ import {
   dbUpdateUserProfile,
   dbUpdateUserAvatar,
   dbChangePassword,
-  dbDeleteUser
+  dbDeleteUser,
+  dbAdjustUserPoints
 } from '../db.js'
 
 const router = express.Router()
@@ -108,6 +109,21 @@ router.delete('/', async (req, res) => {
   } catch (err) {
     console.error('Delete account error:', err)
     return res.status(500).json({ error: 'Failed to delete account' })
+  }
+})
+
+// POST /adjust-points — Adjust user XP or pranaPoints
+router.post('/adjust-points', async (req, res) => {
+  try {
+    const { xpDiff, pranaDiff } = req.body
+    if (xpDiff === undefined && pranaDiff === undefined) {
+      return res.status(400).json({ error: 'xpDiff or pranaDiff is required' })
+    }
+    const user = await dbAdjustUserPoints(req.userId, xpDiff || 0, pranaDiff || 0)
+    return res.status(200).json({ user })
+  } catch (err) {
+    console.error('Adjust points error:', err)
+    return res.status(500).json({ error: 'Failed to adjust points' })
   }
 })
 

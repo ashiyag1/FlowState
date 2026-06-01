@@ -1,68 +1,158 @@
 import { useTheme } from '../../context/ThemeContext'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
+
+const MORPHING_WORDS = [
+  { text: 'ज्ञान',   script: 'Sanskrit' },
+  { text: 'Gyaan',   script: 'Hindi'    },
+  { text: 'Wisdom',  script: 'English'  },
+  { text: 'Jnana',   script: 'Vedic'    },
+  { text: 'प्रज्ञा', script: 'Sanskrit' },
+]
+
+// Fixed pixel width wide enough for the longest word so the layout NEVER shifts
+const WORD_WIDTH = '240px'
 
 export default function HeroHeader({ searchQuery, setSearchQuery }) {
   const { dark } = useTheme()
+  const [wordIdx, setWordIdx] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setWordIdx(prev => (prev + 1) % MORPHING_WORDS.length)
+    }, 2800)
+    return () => clearInterval(timer)
+  }, [])
+
+  const currentWord = MORPHING_WORDS[wordIdx]
 
   return (
-    <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-8 pb-8 border-b border-gold/15 mb-8">
-      <div className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
-      
-      <div className="relative z-10 flex-1">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+    <div className="relative pb-6 border-b border-gold/15 mb-6">
+      {/* Ambient glow — pointer-events off, aria-hidden */}
+      <div aria-hidden className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
+
+      {/* ── Label row ─────────────────────────────── */}
+      <div className="flex items-center gap-3 mb-5">
+        <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-saffron flex items-center gap-2">
+          <span className="w-8 h-px bg-saffron/50" />
+          Ancient Archives
+        </p>
+        <span
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-bold uppercase tracking-wider"
+          style={{
+            background:   dark ? 'rgba(201,147,58,0.08)' : 'rgba(201,147,58,0.06)',
+            borderColor:  dark ? 'rgba(201,147,58,0.2)'  : 'rgba(201,147,58,0.18)',
+            color:        dark ? '#C9933A' : '#8B5E2F',
+          }}
         >
-          <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-saffron mb-3 flex items-center gap-2">
-            <span className="w-8 h-px bg-saffron/50"></span>
-            Ancient Archives
-          </p>
-          <h1 className="leading-[1.1] text-ink dark:text-ivory mb-4"
-            style={{
-              fontFamily: "'Cormorant Garamond', 'Lora', serif",
-              fontSize: 'clamp(38px, 6vw, 64px)',
-              fontWeight: 400
-            }}
-          >
-            Timeless <em className="not-italic text-transparent bg-clip-text bg-gradient-to-r from-gold to-saffron" style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', paddingRight: '10px' }}>Wisdom</em>
-          </h1>
-          <p className="text-sm sm:text-base text-mist-dark dark:text-sand-lt/80 font-serif italic max-w-xl leading-relaxed">
-            "Knowledge is learned, but wisdom is remembered." Explore sacred scriptures, find gentle counsel for modern struggles, and nurture your soul's growth.
-          </p>
-        </motion.div>
+          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+          12 scriptures
+        </span>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-        className="relative z-10 w-full md:max-w-md"
-      >
-        <div className="relative flex items-center bg-white/40 dark:bg-[#15100a]/80 backdrop-blur-xl rounded-2xl px-5 py-4 border border-gold/20 dark:border-gold/15 focus-within:border-saffron/50 focus-within:ring-4 focus-within:ring-saffron/10 transition-all w-full shadow-xl shadow-gold/5 group">
-          <div className="absolute inset-0 bg-gradient-to-r from-gold/0 via-gold/5 to-gold/0 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
-          <span className="text-lg mr-3 opacity-60 text-gold drop-shadow-md">✨</span>
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Seek wisdom, scriptures, or guidance..."
-            className="bg-transparent border-none outline-none text-base text-ink dark:text-ivory w-full placeholder:text-ink/40 dark:placeholder:text-sand-lt/40 font-medium font-serif"
-          />
-          {searchQuery ? (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="ml-2 text-xs text-mist-dark/60 hover:text-red-400 bg-black/5 dark:bg-white/5 w-6 h-6 rounded-full flex items-center justify-center transition-colors border-none cursor-pointer"
-              title="Clear search"
-            >
-              ✕
-            </button>
-          ) : (
-            <span className="ml-2 text-[10px] font-bold text-mist-dark/40 dark:text-sand-lt/40 px-2 py-1 bg-black/5 dark:bg-white/5 rounded-md font-mono select-none border border-black/5 dark:border-white/5">
-              ⌘K
-            </span>
-          )}
+      {/* ── Two-column hero row ────────────────────── */}
+      <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+
+        {/* LEFT: Title + search */}
+        <div className="flex-1 min-w-0">
+          {/*
+            The morphing word lives in a block of FIXED height + FIXED width
+            so it NEVER causes reflow in surrounding content.
+          */}
+          <div
+            className="mb-3"
+            style={{ height: 'clamp(52px, 7vw, 80px)' }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={currentWord.text}
+                initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+                exit={{   opacity: 0, y: -12, filter: 'blur(8px)' }}
+                transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-saffron to-gold block leading-none"
+                style={{
+                  fontFamily: "'Playfair Display', 'Noto Serif Devanagari', serif",
+                  fontStyle: 'italic',
+                  fontSize: 'clamp(42px, 7vw, 80px)',
+                  fontWeight: 700,
+                }}
+              >
+                {currentWord.text}
+              </motion.span>
+            </AnimatePresence>
+          </div>
+
+          {/* Static subtitle — never moves */}
+          <p
+            className="text-ink dark:text-ivory mb-1 leading-tight"
+            style={{
+              fontFamily: "'Cormorant Garamond', 'Lora', serif",
+              fontSize: 'clamp(18px, 2.2vw, 26px)',
+              fontWeight: 400,
+              letterSpacing: '-0.01em',
+            }}
+          >
+            for the Modern Soul
+          </p>
+
+          {/* Script label — fixed height so it doesn't shift either */}
+          <div style={{ height: '18px' }}>
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={currentWord.script}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="text-[9px] uppercase tracking-[0.28em] font-bold"
+                style={{ color: dark ? 'rgba(201,147,58,0.4)' : 'rgba(139,94,47,0.4)' }}
+              >
+                {currentWord.script}
+              </motion.span>
+            </AnimatePresence>
+          </div>
         </div>
-      </motion.div>
+
+        {/* RIGHT: Search bar */}
+        <div className="w-full md:w-[360px] shrink-0">
+          <label className="sr-only" htmlFor="wisdom-search">Search wisdom</label>
+          <div
+            className="relative flex items-center backdrop-blur-xl rounded-2xl px-5 py-3.5 border transition-all shadow-lg group"
+            style={{
+              background:   dark ? 'rgba(21,16,10,0.8)' : 'rgba(255,255,255,0.55)',
+              borderColor:  dark ? 'rgba(201,168,76,0.15)' : 'rgba(201,168,76,0.22)',
+              boxShadow: dark
+                ? '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)'
+                : '0 8px 32px rgba(201,168,76,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
+            }}
+          >
+            <span className="text-base mr-3 text-gold/70 shrink-0">✨</span>
+            <input
+              id="wisdom-search"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search scriptures, topics, guidance…"
+              className="bg-transparent border-none outline-none text-sm text-ink dark:text-ivory w-full placeholder:text-ink/35 dark:placeholder:text-sand-lt/35 font-serif"
+            />
+            {searchQuery ? (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="ml-2 shrink-0 text-xs text-mist-dark/60 hover:text-red-400 bg-black/5 dark:bg-white/8 w-5 h-5 rounded-full flex items-center justify-center transition-colors border-none cursor-pointer"
+              >
+                ✕
+              </button>
+            ) : (
+              <span className="ml-2 shrink-0 text-[9px] font-bold text-mist-dark/35 dark:text-sand-lt/35 px-1.5 py-0.5 bg-black/5 dark:bg-white/5 rounded font-mono select-none border border-black/5 dark:border-white/5">
+                ⌘K
+              </span>
+            )}
+          </div>
+          <p className="text-[9px] mt-2 text-center font-serif italic" style={{ color: dark ? 'rgba(201,147,58,0.35)' : 'rgba(139,94,47,0.35)' }}>
+            "Knowledge is learned, but wisdom is remembered."
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

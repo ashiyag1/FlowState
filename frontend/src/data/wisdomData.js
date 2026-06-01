@@ -560,6 +560,32 @@ const LIFE_ISSUES = [
     ],
     tip: "Sleeping with a pillow under your knees takes the pressure off your lower spine.",
   },
+  {
+    id: 7, title: "Chronic Fatigue & Burnout", tag: "Energy", color: "#D49B6A", emoji: "☀️",
+    summary: "Replenish your vital life force (Ojas) with nourishing herbs and rituals.",
+    approach: "Ayurveda",
+    steps: [
+      "Avoid iced drinks and excessive caffeine which drain your adrenal energy.",
+      "Drink warm almond milk with a pinch of Ashwagandha and cardamom to rebuild Ojas.",
+      "Practice Nadi Shodhana (Alternate Nostril Breathing) to clear mental fatigue and balance energy.",
+      "Ensure you are in bed sleeping by 10 PM to align with the natural circadian rhythms.",
+      "Massage warm sesame oil on your ears and scalp to soothe a frayed nervous system."
+    ],
+    tip: "A handful of soaked almonds and dates in the morning provides instant, clean prana (vital force).",
+  },
+  {
+    id: 8, title: "Digital Eye Strain", tag: "Vision", color: "#5F9EA0", emoji: "👁️",
+    summary: "Cool tired eyes and restore visual clarity with ancient Netra practices.",
+    approach: "Ayurveda & Yoga",
+    steps: [
+      "Splash cool water on your eyes 5-10 times throughout the day, especially after long screen sessions.",
+      "Practice Palming: Rub your palms together until warm, then cup them gently over closed eyes.",
+      "Do Netra Vyayam (eye exercises): gently roll your eyes up, down, left, right, and in circles.",
+      "Place cotton pads soaked in pure organic rose water over closed eyelids for 10 minutes.",
+      "Follow the 20-20-20 rule: every 20 minutes, look at something 20 feet away for 20 seconds."
+    ],
+    tip: "Gazing at a ghee lamp flame (Trataka practice) strengthens eye muscles and enhances concentration.",
+  },
 ];
 
 const TODAY_WISDOM = {

@@ -8,6 +8,16 @@ import { motion, AnimatePresence } from 'framer-motion'
 import NotificationsButton from '../system/NotificationsButton'
 import { useAchievements } from '../../context/AchievementsContext'
 import { useWellness } from '../../context/WellnessContext'
+import { useNotif } from '../system/NotificationPopup'
+
+const BRANDING_LOCKS = {
+  'Tarang-FlowState': 0,
+  'Saanjh': 50,
+  'Antara': 100,
+  'Sattva': 150,
+  'Sukoon': 200,
+  'Ekaa': 250
+}
 
 const getLocalYYYYMMDD = (d = new Date()) => {
   const year = d.getFullYear()
@@ -101,31 +111,26 @@ function FlowSymbol({ size = 32 }) {
   )
 }
 
-function NavItem({ to, label, sub }) {
+function NavItem({ to, label }) {
   return (
     <div style={{ position: 'relative' }}>
       <NavLink to={to} end={to === '/'} style={{ textDecoration: 'none' }}
         className={({ isActive }) =>
-          `relative flex flex-col items-center px-3 py-1.5 rounded-full transition-all duration-300 select-none
-           ${isActive ? 'text-[#3d2208] dark:text-[#f5e6c8]' : 'text-[#5c3d1e]/85 dark:text-[#e8c97a]/75 hover:text-[#3d2208] dark:hover:text-[#f5e6c8]'}`
+          `relative flex flex-col items-center px-3 py-2 transition-all duration-300 select-none
+           ${isActive ? 'text-[#3d2208] dark:text-[#f5e6c8]' : 'text-[#5c3d1e]/75 dark:text-[#e8c97a]/70 hover:text-[#3d2208] dark:hover:text-[#f5e6c8]'}`
         }>
         {({ isActive }) => (<>
           {isActive && (
-            <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full"
+            <motion.span layoutId="nav-underline" className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full"
               style={{
-                background: 'linear-gradient(135deg, rgba(212,168,42,0.32), rgba(232,199,122,0.14))',
-                border: '1px solid rgba(212,168,42,0.5)',
-                boxShadow: '0 0 24px rgba(212,168,42,0.18), 0 4px 12px rgba(180,120,20,0.1), inset 0 1px 0 rgba(255,240,190,0.25)',
+                background: 'linear-gradient(90deg, #d4a82a, #e8c77a)',
+                boxShadow: '0 0 8px rgba(212,168,42,0.4)',
               }}
               transition={{ type:'spring', stiffness:400, damping:36 }}/>
           )}
-          <span className="relative z-10 text-[0.75rem] font-semibold leading-tight tracking-wider"
+          <span className="relative z-10 text-[0.82rem] font-bold leading-tight tracking-wider"
             style={{ fontFamily:"'Cinzel',serif" }}>
             {label}
-          </span>
-          <span className="relative z-10 text-[0.55rem] leading-none opacity-60 mt-0.5"
-            style={{ fontFamily:"'Lora',serif", fontStyle:'italic' }}>
-            {sub}
           </span>
         </>)}
       </NavLink>
@@ -267,6 +272,7 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
   const { setGalleryOpen } = useAchievements()
   const { journal, habitDone } = useWellness()
+  const notif = useNotif()
   const navigate = useNavigate()
   const [visible,    setVisible]  = useState(true)
   const [scrolled,   setScrolled] = useState(false)
@@ -434,59 +440,44 @@ export default function Navbar() {
         animate={{ y: visible ? 0 : -120, opacity: visible ? 1 : 0 }}
         transition={{ duration:0.35, ease:[0.4,0,0.2,1] }}
         style={{
-          position:'fixed', top:0, left:'50%', zIndex:50,
-          x:'-50%',
-          paddingTop:'1.25rem',
-          pointerEvents:'none',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          width: '100%',
+          height: '68px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 4%',
+          background: glassBg,
+          backdropFilter: 'blur(28px) saturate(1.3)',
+          WebkitBackdropFilter: 'blur(28px) saturate(1.3)',
+          borderBottom: `1px solid ${glassBorder}`,
+          boxShadow: dark ? glassShadowDark : glassShadow,
+          transition: 'all 0.3s ease',
+          pointerEvents: 'auto',
         }}
       >
-        {/* ── DESKTOP CAPSULE ── */}
-        <div className="hidden md:flex" style={{
-          alignItems:'center', gap:'1.25rem',
-          padding:'0.4rem 0.7rem',
-          borderRadius:999,
-          background: glassBg,
-          backdropFilter:'blur(28px) saturate(1.3)',
-          WebkitBackdropFilter:'blur(28px) saturate(1.3)',
-          border:`1px solid ${glassBorder}`,
-          boxShadow: dark ? glassShadowDark : glassShadow,
-          transition:'box-shadow 0.4s ease, background 0.3s ease, border 0.3s ease',
-          position:'relative',
-          pointerEvents:'auto',
-        }}>
-          {/* Translucent gold highlight line at top of capsule */}
-          <span style={{
-            position:'absolute', top:-1, left:'20%', right:'20%', height:1,
-            background:'linear-gradient(90deg,transparent,rgba(212,168,42,0.18),transparent)',
-            pointerEvents:'none', borderRadius:1,
-          }}/>
-
-          {/* LEFT — nav */}
-          <div style={{ display:'flex', alignItems:'center', gap:1 }}>
-            {NAV.map((item, i) => (
-              <div key={item.to} style={{ display:'flex', alignItems:'center' }}>
-                <NavItem {...item}/>
-                {i < NAV.length - 1 && <GoldStar/>}
-              </div>
-            ))}
-          </div>
-
-          {/* CENTRE — brand */}
-          <div style={{ display:'flex', alignItems:'center', gap:6, position:'relative' }} ref={nameDropdownRef}>
-            <NavLink to="/" style={{ textDecoration:'none' }}>
-              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                <div className="nb-float" style={{ position:'relative' }}>
+        {/* LEFT SECTION — brand and navigation links side-by-side like Netflix */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem' }}>
+          {/* CENTRE — brand (placed left now) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }} ref={nameDropdownRef}>
+            <NavLink to="/" style={{ textDecoration: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="nb-float" style={{ position: 'relative' }}>
                   <span style={{
-                    position:'absolute', inset:0, borderRadius:'50%',
-                    background:'radial-gradient(circle,rgba(212,168,42,0.35) 0%,transparent 70%)',
-                    filter:'blur(8px)', transform:'scale(1.4)', opacity:0.4,
-                    pointerEvents:'none',
-                  }}/>
-                  <FlowSymbol size={28}/>
+                    position: 'absolute', inset: 0, borderRadius: '50%',
+                    background: 'radial-gradient(circle,rgba(212,168,42,0.35) 0%,transparent 70%)',
+                    filter: 'blur(8px)', transform: 'scale(1.4)', opacity: 0.4,
+                    pointerEvents: 'none',
+                  }} />
+                  <FlowSymbol size={28} />
                 </div>
                 <span style={{
                   ...wordmarkStyle,
-                  fontSize:'1.28rem',
+                  fontSize: '1.28rem',
                   color: dark ? '#e8c46a' : '#8a5a12',
                   fontFamily: currentBranding.fontFamily,
                   letterSpacing: currentBranding.letterSpacing,
@@ -497,7 +488,7 @@ export default function Navbar() {
                 }}>{currentBranding.name}</span>
               </div>
             </NavLink>
-            
+
             <button
               type="button"
               onClick={() => setNameDropdownOpen(prev => !prev)}
@@ -556,11 +547,19 @@ export default function Navbar() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {Object.entries(BRANDING_OPTIONS).map(([key, opt]) => {
                       const isSelected = selectedBranding === key
+                      const requiredPrana = BRANDING_LOCKS[key] || 0
+                      const userPrana = user?.pranaPoints || 0
+                      const isLocked = requiredPrana > userPrana
                       return (
                         <motion.button
                           key={key}
                           whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
                           onClick={() => {
+                            if (isLocked) {
+                              notif(`🔒 Unlock ${opt.name} by earning ${requiredPrana} Prana Points! Complete all daily rituals.`, 'info')
+                              setNameDropdownOpen(false)
+                              return
+                            }
                             setSelectedBranding(key)
                             localStorage.setItem('fwa_selected_branding', key)
                             setNameDropdownOpen(false)
@@ -581,21 +580,25 @@ export default function Navbar() {
                             textAlign: 'left',
                             width: '100%',
                             transition: 'all 0.2s ease',
+                            opacity: isLocked ? 0.55 : 1,
                           }}
                         >
-                          <span style={{
-                            fontFamily: opt.fontFamily,
-                            fontSize: '0.92rem',
-                            fontWeight: opt.fontWeight,
-                            fontStyle: opt.fontStyle,
-                            letterSpacing: opt.letterSpacing,
-                            textTransform: opt.textTransform || 'none',
-                            color: isSelected
-                              ? (dark ? '#ffe090' : '#8a5a12')
-                              : (dark ? '#e8d5a8' : '#5c3d1e'),
-                          }}>
-                            {opt.name}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                            <span style={{
+                              fontFamily: opt.fontFamily,
+                              fontSize: '0.92rem',
+                              fontWeight: opt.fontWeight,
+                              fontStyle: opt.fontStyle,
+                              letterSpacing: opt.letterSpacing,
+                              textTransform: opt.textTransform || 'none',
+                              color: isSelected
+                                ? (dark ? '#ffe090' : '#8a5a12')
+                                : (dark ? '#e8d5a8' : '#5c3d1e'),
+                            }}>
+                              {opt.name}
+                            </span>
+                            {isLocked && <span style={{ fontSize: '0.65rem', color: dark ? 'rgba(212,168,42,0.7)' : 'rgba(138,90,18,0.7)' }}>🔒 {requiredPrana}</span>}
+                          </div>
                           <span style={{
                             fontFamily: "'Lora', serif",
                             fontStyle: 'italic',
@@ -614,119 +617,203 @@ export default function Navbar() {
             </AnimatePresence>
           </div>
 
-          {/* RIGHT — actions */}
-          <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-          {/* Cycle Pill */}
-            {journalCycle > 0 && (
-              <motion.button
-                type="button"
-                onClick={() => navigate('/quotes')}
-                title={cycleAtRisk ? "Read Wisdom today to continue your cycle." : isOnRestDay ? "Rest day active. You won't lose your cycle." : `${journalCycle}-day reflection cycle 🌕 (Click to read Wisdom)`}
-                animate={cycleAtRisk ? { scale: [1, 1.06, 1] } : {}}
-                transition={{ repeat: Infinity, duration: 1.6 }}
-                whileHover={{ scale: 1.06 }}
-                whileTap={{ scale: 0.94 }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 4,
-                  padding: '3px 10px 3px 8px',
-                  borderRadius: 999,
-                  border: cycleAtRisk
-                    ? '1px solid rgba(251,146,60,0.5)'
-                    : isOnRestDay 
-                      ? '1px solid rgba(139, 111, 76, 0.35)'
-                      : '1px solid rgba(212,168,42,0.35)',
-                  background: cycleAtRisk
-                    ? 'rgba(251,146,60,0.12)'
-                    : isOnRestDay
-                      ? 'rgba(139, 111, 76, 0.1)'
-                      : 'rgba(212,168,42,0.1)',
-                  boxShadow: cycleAtRisk
-                    ? '0 0 10px rgba(251,146,60,0.2)'
-                    : isOnRestDay
-                      ? 'none'
-                      : '0 0 10px rgba(212,168,42,0.12)',
-                  cursor: 'pointer',
-                  transition: 'all 0.25s ease',
-                }}
-              >
-                <span style={{ fontSize: 13 }}>{isOnRestDay ? '🌙' : '🌕'}</span>
-                <span style={{
-                  fontFamily: "'Cinzel', serif",
-                  fontSize: '0.65rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.04em',
-                  color: cycleAtRisk ? '#fb923c' : isOnRestDay ? (dark ? '#bda379' : '#8b6f4c') : (dark ? '#e8c46a' : '#8a5a12'),
-                }}>
-                  {isOnRestDay ? 'Rest' : journalCycle}
+          {/* LEFT — nav (links now next to brand logo) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            {NAV.map((item) => (
+              <NavItem key={item.to} {...item} />
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT — actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          {isAuthenticated && user && (
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate('/profile')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '4px 12px',
+                borderRadius: 999,
+                border: dark ? '1px solid rgba(212,168,42,0.22)' : '1px solid #e8d5b0',
+                background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
+                boxShadow: '0 1px 6px rgba(160,100,10,0.04)',
+                cursor: 'pointer',
+                transition: 'all 0.25s ease',
+              }}
+              title={`Level ${Math.floor((user.xp || 0) / 100) + 1} Sadhaka`}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <span style={{ fontSize: '11px' }}>✨</span>
+                <span style={{ fontSize: '0.7rem', color: '#c9a84c', fontWeight: 700, fontFamily: "'Cinzel', serif" }}>
+                  {user.xp || 0} <span style={{ opacity: 0.7, fontSize: '0.58rem', fontWeight: 600 }}>XP</span>
                 </span>
-              </motion.button>
-            )}
-            <motion.button type="button" whileTap={{ scale:0.88 }} onClick={toggle}
+              </div>
+              <span style={{ width: 1, height: 12, background: dark ? 'rgba(212,168,42,0.25)' : '#e8d5b0' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                <span style={{ fontSize: '11px' }}>🪷</span>
+                <span style={{ fontSize: '0.7rem', color: '#E8622A', fontWeight: 700, fontFamily: "'Cinzel', serif" }}>
+                  {user.pranaPoints || 0} <span style={{ opacity: 0.7, fontSize: '0.58rem', fontWeight: 600 }}>Pts</span>
+                </span>
+              </div>
+            </motion.button>
+          )}
+
+          <motion.button type="button" whileTap={{ scale: 0.88 }} onClick={toggle}
+            style={{
+              width: 30, height: 30, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1px solid rgba(212,168,42,0.22)',
+              background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
+              boxShadow: '0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
+              color: dark ? '#d9b96a' : '#6b4c12',
+              cursor: 'pointer', transition: 'all 0.25s ease',
+            }} aria-label="Toggle theme">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={dark ? 'sun' : 'moon'}
+                initial={{ rotate: -90, opacity: 0, scale: 0.6 }}
+                animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                exit={{ rotate: 90, opacity: 0, scale: 0.6 }}
+                transition={{ duration: 0.18 }}>
+                {dark ? <Sun size={12} /> : <Moon size={12} />}
+              </motion.div>
+            </AnimatePresence>
+          </motion.button>
+
+          <NotificationsButton />
+
+          <motion.button type="button" whileTap={{ scale: 0.88 }} onClick={() => setGalleryOpen(true)}
+            style={{
+              width: 30, height: 30, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1px solid rgba(212,168,42,0.22)',
+              background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
+              boxShadow: '0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
+              color: dark ? '#d9b96a' : '#6b4c12',
+              cursor: 'pointer', transition: 'all 0.25s ease',
+            }} aria-label="Open achievements">
+            <Award size={13} />
+          </motion.button>
+
+          <motion.button type="button" whileTap={{ scale: 0.88 }} onClick={toggleMute}
+            style={{
+              width: 30, height: 30, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '1px solid rgba(212,168,42,0.22)',
+              background: isMuted
+                ? 'rgba(127,29,29,0.1)'
+                : dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
+              color: isMuted ? '#b91c1c' : dark ? '#d9b96a' : '#6b4c12',
+              cursor: 'pointer', transition: 'all 0.25s ease',
+            }} aria-label={isMuted ? 'Unmute sounds' : 'Mute sounds'}>
+            {isMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
+          </motion.button>
+
+          <div ref={resourcesRef} style={{ position: 'relative' }}>
+            <motion.button type="button" whileTap={{ scale: 0.88 }} onClick={() => setResourcesOpen(!resourcesOpen)}
               style={{
-                width:30, height:30, borderRadius:'50%',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                border:'1px solid rgba(212,168,42,0.22)',
+                width: 30, height: 30, borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '1px solid rgba(212,168,42,0.22)',
                 background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
-                boxShadow:'0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
+                boxShadow: '0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
                 color: dark ? '#d9b96a' : '#6b4c12',
-                cursor:'pointer', transition:'all 0.25s ease',
-              }} aria-label="Toggle theme">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={dark?'sun':'moon'}
-                  initial={{ rotate:-90, opacity:0, scale:0.6 }}
-                  animate={{ rotate:0,   opacity:1, scale:1   }}
-                  exit={{    rotate:90,  opacity:0, scale:0.6 }}
-                  transition={{ duration:0.18 }}>
-                  {dark ? <Sun size={12}/> : <Moon size={12}/>}
+                cursor: 'pointer', transition: 'all 0.25s ease',
+              }} aria-label="Curated Practices">
+              <BookOpen size={12} />
+            </motion.button>
+
+            <AnimatePresence>
+              {resourcesOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  style={{
+                    position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                    width: 260, zIndex: 100,
+                    borderRadius: 16,
+                    background: dark ? 'rgba(22, 14, 6, 0.92)' : 'rgba(253, 248, 235, 0.95)',
+                    backdropFilter: 'blur(32px) saturate(1.4)',
+                    WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
+                    border: '1px solid rgba(212,168,42,0.22)',
+                    boxShadow: '0 16px 48px rgba(0,0,0,0.3), 0 0 40px rgba(212,168,42,0.06)',
+                    overflow: 'hidden',
+                    pointerEvents: 'auto',
+                  }}
+                >
+                  <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, rgba(212,168,42,0.5), rgba(232,134,42,0.3), transparent)' }} />
+                  <div style={{ padding: '14px 16px 8px', borderBottom: '1px solid rgba(212,168,42,0.12)' }}>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', fontWeight: 600, color: dark ? '#f5e6c8' : '#3d2208' }}>
+                      Curated Practices
+                    </div>
+                    <div style={{ fontSize: '0.65rem', color: dark ? 'rgba(212,168,42,0.55)' : 'rgba(92,61,30,0.5)', marginTop: 2 }}>
+                      Ashiya's personal YouTube library
+                    </div>
+                  </div>
+                  <div style={{ padding: '6px 8px' }}>
+                    {[
+                      { title: 'Yoga for Beginners', desc: 'Stretch out the laptop slouch & recharge your body vibe.', url: 'https://youtu.be/oDP-89wRXUk?si=v5TLzJNX1ty3XymT' },
+                      { title: 'Deep Yoga Nidra', desc: 'The ultimate brain nap—feel like you slept 4 hours in just 20 mins.', url: 'https://youtu.be/uPSml_JQGVY?si=nhVhj5Ag64X3CHEQ' },
+                      { title: 'Surya Namaskar', desc: 'The ultimate 5-minute full body cheat-code to boost your dopamine.', url: 'https://youtu.be/AneOlb4dAZU?si=zXqpYa1iZ7MQ0hK-' },
+                      { title: 'Chakra Meditation', desc: 'De-clutter your subconscious & stop the late-night overthinking loops.', url: 'https://youtu.be/Zdy-NVFpSUI?si=ayma3Ml5RqjFXKE-' },
+                      { title: 'Kapalbhati Breath', desc: 'Like a double-shot espresso for your focus, minus the caffeine crash.', url: 'https://youtu.be/AtG7cx6p7DY?si=BdKVCedciXeLo4SJ' },
+                      { title: 'Anulom Vilom', desc: 'The biological chill-pill. Instantly balances nervous system chaos.', url: 'https://youtu.be/blbv5UTBCGg?si=DQt8rU1zp_H5_frA' }
+                    ].map((link, idx) => (
+                      <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                        <motion.div
+                          whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
+                          style={{
+                            display: 'flex', alignItems: 'flex-start', gap: 10,
+                            padding: '10px 10px', borderRadius: 10,
+                            cursor: 'pointer', transition: 'background 0.15s',
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={dark ? '#d9b96a' : '#8a5a12'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                          </svg>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{
+                              fontFamily: "'Cinzel', serif",
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              letterSpacing: '0.04em',
+                              color: dark ? '#e8d5a8' : '#5c3d1e',
+                            }}>
+                              {link.title}
+                            </span>
+                            <span style={{
+                              fontFamily: "'Lora', serif",
+                              fontStyle: 'italic',
+                              fontSize: '0.62rem',
+                              color: dark ? 'rgba(212,168,42,0.55)' : 'rgba(92,61,30,0.6)',
+                              marginTop: 2,
+                              lineHeight: 1.25
+                            }}>
+                              {link.desc}
+                            </span>
+                          </div>
+                        </motion.div>
+                      </a>
+                    ))}
+                  </div>
                 </motion.div>
-              </AnimatePresence>
-            </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
 
-            <NotificationsButton />
-
-            <motion.button type="button" whileTap={{ scale:0.88 }} onClick={() => setGalleryOpen(true)}
-              style={{
-                width:30, height:30, borderRadius:'50%',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                border:'1px solid rgba(212,168,42,0.22)',
-                background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
-                boxShadow:'0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
-                color: dark ? '#d9b96a' : '#6b4c12',
-                cursor:'pointer', transition:'all 0.25s ease',
-              }} aria-label="Open achievements">
-              <Award size={13}/>
-            </motion.button>
-
-            <motion.button type="button" whileTap={{ scale:0.88 }} onClick={toggleMute}
-              style={{
-                width:30, height:30, borderRadius:'50%',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                border:'1px solid rgba(212,168,42,0.22)',
-                background: isMuted
-                  ? 'rgba(127,29,29,0.1)'
-                  : dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
-                color: isMuted ? '#b91c1c' : dark ? '#d9b96a' : '#6b4c12',
-                cursor:'pointer', transition:'all 0.25s ease',
-              }} aria-label={isMuted ? 'Unmute sounds' : 'Mute sounds'}>
-              {isMuted ? <VolumeX size={12}/> : <Volume2 size={12}/>}
-            </motion.button>
-
-            <div ref={resourcesRef} style={{ position: 'relative' }}>
-              <motion.button type="button" whileTap={{ scale:0.88 }} onClick={() => setResourcesOpen(!resourcesOpen)}
-                style={{
-                  width:30, height:30, borderRadius:'50%',
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                  border:'1px solid rgba(212,168,42,0.22)',
-                  background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
-                  boxShadow:'0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
-                  color: dark ? '#d9b96a' : '#6b4c12',
-                  cursor:'pointer', transition:'all 0.25s ease',
-                }} aria-label="Curated Practices">
-                <BookOpen size={12}/>
-              </motion.button>
+          {isAuthenticated ? (
+            <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <ProfileAvatar user={user} size={30} onClick={() => setProfileOpen(p => !p)} />
 
               <AnimatePresence>
-                {resourcesOpen && (
+                {profileOpen && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.92, y: -8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -734,9 +821,11 @@ export default function Navbar() {
                     transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
                     style={{
                       position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                      width: 260, zIndex: 100,
+                      width: 230, zIndex: 100,
                       borderRadius: 16,
-                      background: dark ? 'rgba(22, 14, 6, 0.92)' : 'rgba(253, 248, 235, 0.95)',
+                      background: dark
+                        ? 'rgba(22, 14, 6, 0.92)'
+                        : 'rgba(253, 248, 235, 0.95)',
                       backdropFilter: 'blur(32px) saturate(1.4)',
                       WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
                       border: '1px solid rgba(212,168,42,0.22)',
@@ -745,210 +834,133 @@ export default function Navbar() {
                       pointerEvents: 'auto',
                     }}
                   >
-                    <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, rgba(212,168,42,0.5), rgba(232,134,42,0.3), transparent)' }} />
-                    <div style={{ padding: '14px 16px 8px', borderBottom: '1px solid rgba(212,168,42,0.12)' }}>
-                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', fontWeight: 600, color: dark ? '#f5e6c8' : '#3d2208' }}>
-                        Curated Practices
-                      </div>
-                      <div style={{ fontSize: '0.65rem', color: dark ? 'rgba(212,168,42,0.55)' : 'rgba(92,61,30,0.5)', marginTop: 2 }}>
-                        Ashiya's personal YouTube library
+                    {/* Gold accent line at top */}
+                    <div style={{
+                      height: 2,
+                      background: 'linear-gradient(90deg, transparent, rgba(212,168,42,0.5), rgba(232,134,42,0.3), transparent)',
+                    }} />
+
+                    {/* User Info */}
+                    <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(212,168,42,0.12)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <ProfileAvatar user={user} size={36} onClick={() => { }} style={{ cursor: 'default' }} />
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{
+                            fontFamily: "'Cinzel', serif",
+                            fontSize: '0.78rem',
+                            fontWeight: 600,
+                            color: dark ? '#f5e6c8' : '#3d2208',
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          }}>
+                            {user?.name || 'User'}
+                          </div>
+                          <div style={{
+                            fontSize: '0.65rem',
+                            color: dark ? 'rgba(212,168,42,0.55)' : 'rgba(92,61,30,0.5)',
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                            marginTop: 2,
+                          }}>
+                            {user?.email || ''}
+                          </div>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Menu Items */}
                     <div style={{ padding: '6px 8px' }}>
-                      {[
-                        { title: 'Yoga for Beginners', url: 'https://youtu.be/oDP-89wRXUk?si=v5TLzJNX1ty3XymT' },
-                        { title: 'Deep Yoga Nidra', url: 'https://youtu.be/uPSml_JQGVY?si=nhVhj5Ag64X3CHEQ' },
-                        { title: 'Surya Namaskar', url: 'https://youtu.be/AneOlb4dAZU?si=zXqpYa1iZ7MQ0hK-' },
-                        { title: 'Chakra Meditation', url: 'https://youtu.be/Zdy-NVFpSUI?si=ayma3Ml5RqjFXKE-' },
-                        { title: 'Kapalbhati Breath', url: 'https://youtu.be/AtG7cx6p7DY?si=BdKVCedciXeLo4SJ' },
-                        { title: 'Anulom Vilom', url: 'https://youtu.be/blbv5UTBCGg?si=DQt8rU1zp_H5_frA' }
-                      ].map((link, idx) => (
-                        <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                          <motion.div
-                            whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: 10,
-                              padding: '10px 10px', borderRadius: 10,
-                              cursor: 'pointer', transition: 'background 0.15s',
-                            }}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={dark ? '#d9b96a' : '#8a5a12'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                              <circle cx="12" cy="12" r="10"></circle>
-                              <polygon points="10 8 16 12 10 16 10 8"></polygon>
-                            </svg>
-                            <span style={{
-                              fontFamily: "'Cinzel', serif",
-                              fontSize: '0.7rem',
-                              fontWeight: 500,
-                              letterSpacing: '0.04em',
-                              color: dark ? '#e8d5a8' : '#5c3d1e',
-                            }}>
-                              {link.title}
-                            </span>
-                          </motion.div>
-                        </a>
-                      ))}
+                      <motion.div
+                        whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
+                        onClick={() => { setProfileOpen(false); navigate('/profile') }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '10px 10px', borderRadius: 10,
+                          cursor: 'pointer', transition: 'background 0.15s',
+                        }}
+                      >
+                        <User size={13} style={{ color: dark ? '#d9b96a' : '#8a5a12', flexShrink: 0 }} />
+                        <span style={{
+                          fontFamily: "'Cinzel', serif",
+                          fontSize: '0.7rem',
+                          fontWeight: 500,
+                          letterSpacing: '0.06em',
+                          color: dark ? '#e8d5a8' : '#5c3d1e',
+                        }}>
+                          View Profile
+                        </span>
+                      </motion.div>
+
+                      {/* Install PWA Button */}
+                      <motion.div
+                        whileHover={{ backgroundColor: dark ? 'rgba(87, 184, 214, 0.1)' : 'rgba(87, 184, 214, 0.08)' }}
+                        onClick={() => {
+                          setProfileOpen(false)
+                          alert("To install: Open browser menu (or share sheet on iOS) and tap 'Add to Home Screen'.")
+                        }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '10px 10px', borderRadius: 10,
+                          cursor: 'pointer', transition: 'background 0.15s',
+                          borderBottom: '1px solid rgba(212,168,42,0.1)'
+                        }}
+                      >
+                        <Download size={13} style={{ color: '#57B8D6', flexShrink: 0 }} />
+                        <span style={{
+                          fontFamily: "'Cinzel', serif",
+                          fontSize: '0.7rem',
+                          fontWeight: 500,
+                          letterSpacing: '0.06em',
+                          color: '#57B8D6',
+                        }}>
+                          Install App
+                        </span>
+                      </motion.div>
+
+                      <motion.div
+                        whileHover={{ backgroundColor: dark ? 'rgba(180,40,40,0.1)' : 'rgba(180,40,40,0.06)' }}
+                        onClick={() => { setProfileOpen(false); logout(); navigate('/') }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '10px 10px', borderRadius: 10,
+                          cursor: 'pointer', transition: 'background 0.15s',
+                        }}
+                      >
+                        <LogOut size={13} style={{ color: '#b45a3c', flexShrink: 0 }} />
+                        <span style={{
+                          fontFamily: "'Cinzel', serif",
+                          fontSize: '0.7rem',
+                          fontWeight: 500,
+                          letterSpacing: '0.06em',
+                          color: '#b45a3c',
+                        }}>
+                          Logout
+                        </span>
+                      </motion.div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            {isAuthenticated ? (
-              <div ref={dropdownRef} style={{ position: 'relative' }}>
-                <ProfileAvatar user={user} size={30} onClick={() => setProfileOpen(p => !p)} />
-
-                <AnimatePresence>
-                  {profileOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.92, y: -8 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.92, y: -8 }}
-                      transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                      style={{
-                        position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                        width: 230, zIndex: 100,
-                        borderRadius: 16,
-                        background: dark
-                          ? 'rgba(22, 14, 6, 0.92)'
-                          : 'rgba(253, 248, 235, 0.95)',
-                        backdropFilter: 'blur(32px) saturate(1.4)',
-                        WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
-                        border: '1px solid rgba(212,168,42,0.22)',
-                        boxShadow: '0 16px 48px rgba(0,0,0,0.3), 0 0 40px rgba(212,168,42,0.06)',
-                        overflow: 'hidden',
-                        pointerEvents: 'auto',
-                      }}
-                    >
-                      {/* Gold accent line at top */}
-                      <div style={{
-                        height: 2,
-                        background: 'linear-gradient(90deg, transparent, rgba(212,168,42,0.5), rgba(232,134,42,0.3), transparent)',
-                      }} />
-
-                      {/* User Info */}
-                      <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid rgba(212,168,42,0.12)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <ProfileAvatar user={user} size={36} onClick={() => {}} style={{ cursor: 'default' }} />
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{
-                              fontFamily: "'Cinzel', serif",
-                              fontSize: '0.78rem',
-                              fontWeight: 600,
-                              color: dark ? '#f5e6c8' : '#3d2208',
-                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                            }}>
-                              {user?.name || 'User'}
-                            </div>
-                            <div style={{
-                              fontSize: '0.65rem',
-                              color: dark ? 'rgba(212,168,42,0.55)' : 'rgba(92,61,30,0.5)',
-                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                              marginTop: 2,
-                            }}>
-                              {user?.email || ''}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Menu Items */}
-                      <div style={{ padding: '6px 8px' }}>
-                        <motion.div
-                          whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
-                          onClick={() => { setProfileOpen(false); navigate('/profile') }}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 10,
-                            padding: '10px 10px', borderRadius: 10,
-                            cursor: 'pointer', transition: 'background 0.15s',
-                          }}
-                        >
-                          <User size={13} style={{ color: dark ? '#d9b96a' : '#8a5a12', flexShrink: 0 }} />
-                          <span style={{
-                            fontFamily: "'Cinzel', serif",
-                            fontSize: '0.7rem',
-                            fontWeight: 500,
-                            letterSpacing: '0.06em',
-                            color: dark ? '#e8d5a8' : '#5c3d1e',
-                          }}>
-                            View Profile
-                          </span>
-                        </motion.div>
-
-                        {/* Install PWA Button */}
-                        <motion.div
-                          whileHover={{ backgroundColor: dark ? 'rgba(87, 184, 214, 0.1)' : 'rgba(87, 184, 214, 0.08)' }}
-                          onClick={() => {
-                            setProfileOpen(false)
-                            alert("To install: Open browser menu (or share sheet on iOS) and tap 'Add to Home Screen'.")
-                          }}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 10,
-                            padding: '10px 10px', borderRadius: 10,
-                            cursor: 'pointer', transition: 'background 0.15s',
-                            borderBottom: '1px solid rgba(212,168,42,0.1)'
-                          }}
-                        >
-                          <Download size={13} style={{ color: '#57B8D6', flexShrink: 0 }} />
-                          <span style={{
-                            fontFamily: "'Cinzel', serif",
-                            fontSize: '0.7rem',
-                            fontWeight: 500,
-                            letterSpacing: '0.06em',
-                            color: '#57B8D6',
-                          }}>
-                            Install App
-                          </span>
-                        </motion.div>
-
-                        <motion.div
-                          whileHover={{ backgroundColor: dark ? 'rgba(180,40,40,0.1)' : 'rgba(180,40,40,0.06)' }}
-                          onClick={() => { setProfileOpen(false); logout(); navigate('/') }}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 10,
-                            padding: '10px 10px', borderRadius: 10,
-                            cursor: 'pointer', transition: 'background 0.15s',
-                          }}
-                        >
-                          <LogOut size={13} style={{ color: '#b45a3c', flexShrink: 0 }} />
-                          <span style={{
-                            fontFamily: "'Cinzel', serif",
-                            fontSize: '0.7rem',
-                            fontWeight: 500,
-                            letterSpacing: '0.06em',
-                            color: '#b45a3c',
-                          }}>
-                            Logout
-                          </span>
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ) : (
-              <NavLink to="/login" style={{ textDecoration:'none' }}>
-                <motion.div whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}
-                  style={{
-                    display:'inline-flex', alignItems:'center', gap:5,
-                    padding:'5px 12px', borderRadius:999,
-                    fontFamily:"'Cinzel',serif", fontSize:'0.64rem',
-                    fontWeight:600, letterSpacing:'0.08em',
-                    color: dark ? '#f5e6c8' : '#5c3d1e',
-                    textTransform:'uppercase',
-                    background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
-                    border:'1px solid rgba(212,168,42,0.22)',
-                    boxShadow:'0 1px 4px rgba(160,100,10,0.04)',
-                    cursor:'pointer', transition:'all 0.25s ease',
-                  }}>
-                  <LogIn size={10}/>
-                  <span>Sign In</span>
-                </motion.div>
-              </NavLink>
-            )}
-          </div>
+          ) : (
+            <NavLink to="/login" style={{ textDecoration: 'none' }}>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '5px 12px', borderRadius: 999,
+                  fontFamily: "'Cinzel',serif", fontSize: '0.64rem',
+                  fontWeight: 600, letterSpacing: '0.08em',
+                  color: dark ? '#f5e6c8' : '#5c3d1e',
+                  textTransform: 'uppercase',
+                  background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
+                  border: '1px solid rgba(212,168,42,0.22)',
+                  boxShadow: '0 1px 4px rgba(160,100,10,0.04)',
+                  cursor: 'pointer', transition: 'all 0.25s ease',
+                }}>
+                <LogIn size={10} />
+                <span>Sign In</span>
+              </motion.div>
+            </NavLink>
+          )}
         </div>
-
-        {/* Mobile capsule removed (top navbar is not visible on mobile viewports) */}
       </motion.header>
 
       {/* ── MOBILE DRAWER ── */}
@@ -1070,11 +1082,19 @@ export default function Navbar() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                           {Object.entries(BRANDING_OPTIONS).map(([key, opt]) => {
                             const isSelected = selectedBranding === key
+                            const requiredPrana = BRANDING_LOCKS[key] || 0
+                            const userPrana = user?.pranaPoints || 0
+                            const isLocked = requiredPrana > userPrana
                             return (
                               <motion.button
                                 key={key}
                                 whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
                                 onClick={() => {
+                                  if (isLocked) {
+                                    notif(`🔒 Unlock ${opt.name} by earning ${requiredPrana} Prana Points! Complete all daily rituals.`, 'info')
+                                    setMobileNameDropdownOpen(false)
+                                    return
+                                  }
                                   setSelectedBranding(key)
                                   localStorage.setItem('fwa_selected_branding', key)
                                   setMobileNameDropdownOpen(false)
@@ -1095,21 +1115,25 @@ export default function Navbar() {
                                   textAlign: 'left',
                                   width: '100%',
                                   transition: 'all 0.2s ease',
+                                  opacity: isLocked ? 0.55 : 1,
                                 }}
                               >
-                                <span style={{
-                                  fontFamily: opt.fontFamily,
-                                  fontSize: '0.85rem',
-                                  fontWeight: opt.fontWeight,
-                                  fontStyle: opt.fontStyle,
-                                  letterSpacing: opt.letterSpacing,
-                                  textTransform: opt.textTransform || 'none',
-                                  color: isSelected
-                                    ? (dark ? '#ffe090' : '#8a5a12')
-                                    : (dark ? '#e8d5a8' : '#5c3d1e'),
-                                }}>
-                                  {opt.name}
-                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                  <span style={{
+                                    fontFamily: opt.fontFamily,
+                                    fontSize: '0.85rem',
+                                    fontWeight: opt.fontWeight,
+                                    fontStyle: opt.fontStyle,
+                                    letterSpacing: opt.letterSpacing,
+                                    textTransform: opt.textTransform || 'none',
+                                    color: isSelected
+                                      ? (dark ? '#ffe090' : '#8a5a12')
+                                      : (dark ? '#e8d5a8' : '#5c3d1e'),
+                                  }}>
+                                    {opt.name}
+                                  </span>
+                                  {isLocked && <span style={{ fontSize: '0.6rem', color: dark ? 'rgba(212,168,42,0.7)' : 'rgba(138,90,18,0.7)' }}>🔒 {requiredPrana}</span>}
+                                </div>
                                 <span style={{
                                   fontFamily: "'Lora', serif",
                                   fontStyle: 'italic',
@@ -1230,6 +1254,19 @@ export default function Navbar() {
                         }}>
                           {user?.email || ''}
                         </div>
+                        <div style={{
+                          fontSize: '0.65rem',
+                          color: '#c9a84c',
+                          fontWeight: 700,
+                          marginTop: 3,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6
+                        }}>
+                          <span>✨ {user.xp || '—'} XP</span>
+                          <span style={{ color: dark ? 'rgba(212,168,42,0.3)' : 'rgba(92,61,30,0.2)' }}>|</span>
+                          <span style={{ color: '#E8622A' }}>🪷 {user.pranaPoints || '—'} Prana</span>
+                        </div>
                       </div>
                     </div>
 
@@ -1344,7 +1381,7 @@ export default function Navbar() {
             display: none !important;
           }
           .desktop-top-nav {
-            display: block !important;
+            display: flex !important;
           }
         }
         @media (max-width: 767px) {

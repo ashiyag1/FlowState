@@ -1,5 +1,5 @@
 import express from 'express'
-import { dbGetHabits, dbAddHabit, dbDeleteHabit, dbToggleHabit } from '../db.js'
+import { dbGetHabits, dbAddHabit, dbDeleteHabit, dbToggleHabit, dbAdjustUserPoints } from '../db.js'
 import authMiddleware from '../middleware/auth.js'
 
 const router = express.Router()
@@ -26,8 +26,35 @@ router.post('/', async (req, res) => {
       if (!habitId || !date || !time) {
         return res.status(400).json({ error: 'habitId, date, and time are required for toggle' })
       }
-      await dbToggleHabit(req.userId, date, habitId, time)
-      return res.status(200).json({ success: true, message: 'Habit execution toggled' })
+      const isDone = await dbToggleHabit(req.userId, date, habitId, time)
+      
+      const { habits, habitDone } = await dbGetHabits(req.userId)
+      const todayDone = habitDone[date] || {}
+      
+      const completedCount = habits.filter(h => todayDone[h.id]).length
+      const totalCount = habits.length
+      
+      let xpDiff = isDone ? 25 : -25
+      let pranaDiff = 0
+      
+      if (isDone) {
+        if (totalCount > 0 && completedCount === totalCount) {
+          pranaDiff = 10
+        }
+      } else {
+        if (totalCount > 0 && completedCount === totalCount - 1) {
+          pranaDiff = -10
+        }
+      }
+      
+      const user = await dbAdjustUserPoints(req.userId, xpDiff, pranaDiff)
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Habit execution toggled', 
+        isDone, 
+        user 
+      })
     }
 
     if (!name || !icon || !color) {

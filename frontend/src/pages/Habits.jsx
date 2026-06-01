@@ -14,6 +14,7 @@ import ShimmerBar from '../components/tracker/ShimmerBar'
 import WaterWidget from '../components/tracker/WaterWidget'
 import DailyTasksWidget from '../components/tracker/DailyTasksWidget'
 import habitsBg from '../assets/pages/habits_bg.webp'
+import lotusImg from '../assets/dashboard/lotus.png'
 import { getHinduDetails, getScientificInsights } from '../utils/hinduCalendar'
 import { fmtDate } from '../utils'
 import DiyaLamp from '../icons/DiyaLamp'
@@ -357,6 +358,24 @@ export default function Habits() {
                 }}
               >
                 <div className="flex items-center gap-2">
+                  <motion.img
+                    src={lotusImg}
+                    alt="Streak Lotus"
+                    initial={{ scale: 0.2, rotate: -30, opacity: 0 }}
+                    animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                    whileHover={{ scale: 1.2, rotate: 15 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 160,
+                      damping: 10
+                    }}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      objectFit: 'contain',
+                      filter: 'drop-shadow(0 2px 6px rgba(232, 98, 42, 0.15))'
+                    }}
+                  />
                   <span className="font-display text-2xl font-bold" style={{ color: dark ? '#ffeab8' : '#8B6914' }}>{bestStreak}</span>
                   <span className="text-[9px] uppercase tracking-wider text-ink-soft/60 dark:text-ivory/60 leading-none">day streak</span>
                 </div>
@@ -393,7 +412,7 @@ export default function Habits() {
                     <h3 className="text-xs font-bold text-[#c9933a] tracking-widest uppercase font-display">
                       Ancient Vessel Unlocked
                     </h3>
-                    <span className="text-[10px] text-ink dark:text-white mt-1">+50 Prana Earned</span>
+                    <span className="text-[10px] text-ink dark:text-white mt-1">+10 Prana Earned</span>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -453,7 +472,27 @@ export default function Habits() {
                         </div>
                         
                         {/* Streak number */}
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
+                          {streak > 0 && (
+                            <motion.img
+                              src={lotusImg}
+                              alt="Streak Lotus"
+                              initial={{ scale: 0.3, rotate: -20, opacity: 0 }}
+                              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                              whileHover={{ scale: 1.25, rotate: 10 }}
+                              transition={{
+                                type: 'spring',
+                                stiffness: 180,
+                                damping: 12
+                              }}
+                              style={{
+                                width: '15px',
+                                height: '15px',
+                                objectFit: 'contain',
+                                filter: 'drop-shadow(0 1px 3px rgba(200, 169, 110, 0.2))'
+                              }}
+                            />
+                          )}
                           <span className="text-[10px] font-bold text-[#8B6914] dark:text-[#ffeab8]">{streak}</span>
                         </div>
 
