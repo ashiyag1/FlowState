@@ -74,6 +74,7 @@ export function AuthProvider({ children }) {
       }
 
       localStorage.setItem('fwa_auth_token', data.token)
+      if (data.user?.name) localStorage.setItem('fwa_guest_name', data.user.name.split(' ')[0])
       setToken(data.token)
       setUser(data.user)
       setIsAuthenticated(true)
@@ -102,6 +103,7 @@ export function AuthProvider({ children }) {
       }
 
       localStorage.setItem('fwa_auth_token', data.token)
+      if (data.user?.name) localStorage.setItem('fwa_guest_name', data.user.name.split(' ')[0])
       setToken(data.token)
       setUser(data.user)
       setIsAuthenticated(true)
@@ -125,6 +127,7 @@ export function AuthProvider({ children }) {
   // Logout handler
   const logout = useCallback(() => {
     localStorage.removeItem('fwa_auth_token')
+    localStorage.removeItem('fwa_guest_name')
     setToken(null)
     setUser(null)
     setIsAuthenticated(false)

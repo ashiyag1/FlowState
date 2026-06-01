@@ -7,6 +7,9 @@ import morningBg from '../assets/hero/morningBg.webp'
 import afternoonBg from '../assets/hero/afternoonBg.webp'
 import eveningBg from '../assets/hero/eveningBg.webp'
 import nightBg from '../assets/hero/nightBg.webp'
+import { useWellness } from '../context/WellnessContext'
+import { useAuth } from '../context/AuthContext'
+import { computeArchetype } from '../utils/soulArchetype'
 
 /* ─────────────────────────────────────────────────────────────
    TIME OF DAY DETECTION  (safe — used inside useEffect only)
@@ -373,7 +376,7 @@ function HeroText({ tod, config, reflection }) {
             cursor: 'pointer',
           }}
         >
-          SCROLL TO BEST UTILIZE THE SITE ⬇
+          BEGIN YOUR PRACTICE ✦
         </motion.button>
       </motion.div>
 
@@ -407,31 +410,74 @@ function HeroText({ tod, config, reflection }) {
    Drop-in replacement for the original HeroSection.
    No changes needed in Home.jsx.
 ───────────────────────────────────────────────────────────── */
-export default function HeroSection({ reflection }) {
-  /* ── Hydration-safe time-of-day ──
-     Start with a safe default, then set real time in useEffect.
-     Prevents server/client render mismatch and avoids calling
-     new Date() during the initial render pass. */
+export default function HeroSection({ reflection, viewMode }) {
+  const { user } = useAuth()
+  const { journal, habits, getStreak } = useWellness()
+  const { archetype } = useMemo(() => computeArchetype(journal), [journal])
+  const userName = user?.name?.split(' ')[0] || localStorage.getItem('fwa_guest_name') || ''
+
+  const habitStreak = useMemo(() => {
+    if (!habits || habits.length === 0) return 0
+    return Math.max(0, ...habits.map(h => getStreak(h.id)))
+  }, [habits, getStreak])
+
+  const filledSegments = useMemo(() => {
+    return habitStreak % 8 || (habitStreak > 0 ? 7 : 0)
+  }, [habitStreak])
+
+  /* ── Hydration-safe time-of-day ── */
   const [tod, setTod] = useState('morning')
 
   useEffect(() => {
-    setTod(getTimeOfDay())
-    const id = setInterval(() => setTod(getTimeOfDay()), 60_000)
-    if (IS_DEBUG) console.log('[DEBUG] HeroSection mounted | timeOfDay:', getTimeOfDay())
+    const actual = getTimeOfDay()
+    if (viewMode) {
+      if (viewMode === 'evening') {
+        setTod(actual === 'night' ? 'night' : 'evening')
+      } else {
+        setTod(actual === 'afternoon' ? 'afternoon' : 'morning')
+      }
+    } else {
+      setTod(actual)
+    }
+  }, [viewMode])
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const actual = getTimeOfDay()
+      if (viewMode) {
+        if (viewMode === 'evening') {
+          setTod(actual === 'night' ? 'night' : 'evening')
+        } else {
+          setTod(actual === 'afternoon' ? 'afternoon' : 'morning')
+        }
+      } else {
+        setTod(actual)
+      }
+    }, 60_000)
     return () => clearInterval(id)
-  }, [])
+  }, [viewMode])
 
   const config = TIME_CONFIG[tod]
+
+  const greeting = useMemo(() => {
+    if (tod === 'morning') return 'Good morning'
+    if (tod === 'afternoon') return 'Good afternoon'
+    if (tod === 'evening') return 'Good evening'
+    return 'Good night'
+  }, [tod])
 
   return (
     <section style={{
       position: 'relative',
-      minHeight: '100dvh',
+      minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
       background: '#160b04',
+      padding: '0 20px',
+      borderBottom: '0.5px solid #e8d5b0',
+      width: '100%',
     }}>
 
       {/* ── Layer 1: Background photo — swaps per time of day ── */}
@@ -485,7 +531,7 @@ export default function HeroSection({ reflection }) {
         />
       </AnimatePresence>
 
-      {/* ── Layer 4: Dark directional overlays (preserved from original) ── */}
+      {/* ── Layer 4: Dark directional overlays ── */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(16,7,2,0.42) 0%, rgba(35,16,4,0.18) 35%, rgba(25,10,3,0.55) 75%, rgba(253,246,227,0) 100%)' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 8%, rgba(255,210,100,0.22) 0%, rgba(232,119,34,0.08) 28%, transparent 56%)' }} />
       <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '30%', background: config.sideVignette }} />
@@ -541,31 +587,114 @@ export default function HeroSection({ reflection }) {
         <MandalaSVG />
       </div>
 
-      {/* ── Hero content ── */}
+      {/* ── Greeting & Streak Top Bar ── */}
+      <div style={{
+        position: 'absolute',
+        top: '110px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 10,
+        width: '96%',
+        maxWidth: '1200px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+      }}>
+        {/* Left Side: Personalised greeting */}
+        <div style={{ textAlign: 'left' }}>
+          <div style={{
+            fontSize: '11px',
+            color: '#c8a96e',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '4px',
+            fontWeight: 500,
+            fontFamily: 'sans-serif',
+          }}>
+            {greeting}
+          </div>
+          <h1 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: '26px',
+            color: '#fdf6ec',
+            lineHeight: 1.2,
+            fontWeight: 500,
+            margin: 0,
+          }}>
+            Welcome back{userName ? <>, <span style={{ color: '#c8a96e', fontWeight: 600 }}>{userName}</span></> : ''}
+          </h1>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            background: 'rgba(200, 169, 110, 0.15)',
+            border: '0.5px solid rgba(200, 169, 110, 0.35)',
+            borderRadius: '99px',
+            padding: '4px 10px',
+            fontSize: '11px',
+            color: '#c8a96e',
+            marginTop: '6px',
+          }}>
+            <span style={{ fontSize: '12px' }}>🍃</span> {archetype.id} · Day {habitStreak || 1}
+          </div>
+        </div>
+
+        {/* Right Side: Habit Streak */}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: '32px',
+            color: '#c8a96e',
+            lineHeight: 1,
+            fontWeight: 500,
+          }}>
+            {habitStreak}
+          </div>
+          <div style={{
+            fontSize: '10px',
+            color: 'rgba(253, 246, 236, 0.7)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+          }}>
+            habit streak
+          </div>
+          <div style={{
+            display: 'flex',
+            gap: '3px',
+            marginTop: '6px',
+            justifyContent: 'flex-end',
+          }}>
+            {Array.from({ length: 7 }).map((_, idx) => {
+              const isFilled = idx < filledSegments
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    width: '18px',
+                    height: '3px',
+                    borderRadius: '99px',
+                    background: isFilled ? '#c8a96e' : 'rgba(232, 213, 176, 0.3)',
+                  }}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Central Hero Text ── */}
       <div style={{
         position: 'relative',
         zIndex: 10,
-        width: '100%', maxWidth: 1180,
-        margin: '0 auto', padding: 'clamp(4.5rem, 10vw, 7rem) clamp(1rem, 4vw, 1.5rem) 2rem',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: '80px', // provides spacing from the absolute positioned top bar
       }}>
-        <div style={{
-          display: 'flex', flexWrap: 'wrap',
-          alignItems: 'center', justifyContent: 'center',
-          gap: '3rem',
-        }}>
-          <HeroText tod={tod} config={config} reflection={reflection} />
-
-          {/* MandalaQuoteCard — hidden on mobile to prevent overflow */}
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="hidden md:flex flex-none justify-center ml-0 lg:ml-[4.6rem] mt-6 lg:mt-0"
-          >
-            <MandalaQuoteCard tod={tod} />
-          </motion.div>
-        </div>
+        <HeroText tod={tod} config={config} reflection={reflection} />
       </div>
+
 
     </section>
   )

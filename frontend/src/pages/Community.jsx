@@ -10,11 +10,7 @@ import DiyaLamp from '../icons/DiyaLamp'
 import communityBg from '../assets/community_bg.webp'
 
 const DUMMY_ACTIVITIES = []
-const DUMMY_INTENTIONS = [
-  { id: 'int-1', author: 'Aarav', text: 'To stay fully present in every conversation today.', time: 'Just now' },
-  { id: 'int-2', author: 'Riya', text: 'To drink warm water from my copper vessel first thing in the morning.', time: '10m ago' },
-  { id: 'int-3', author: 'Dev', text: 'To show kindness to myself when things do not go as planned.', time: '1h ago' }
-]
+const DUMMY_INTENTIONS = []
 
 export default function Community() {
   const { dark } = useTheme()
@@ -24,18 +20,15 @@ export default function Community() {
   const [activities, setActivities] = useState(DUMMY_ACTIVITIES)
   const [intentions, setIntentions] = useState(DUMMY_INTENTIONS)
   const [newIntention, setNewIntention] = useState('')
-  const [globalVibe, setGlobalVibe] = useState(12845)
   const [particles, setParticles] = useState([])
+  const [baseVibe, setBaseVibe] = useState(1008)
+  const globalVibe = baseVibe + (intentions.length * 5) + (activities.length * 5)
 
   const topMembers = [...activities].sort((a, b) => b.streak - a.streak).slice(0, 3)
   const medals = ['🥇', '🥈', '🥉']
   const leaders = topMembers.length > 0
     ? topMembers.map((member, i) => ({ ...member, rank: medals[i] || '⭐' }))
-    : [
-        { rank: '🥇', name: 'Diya Kapoor', habit: '🌿 Seedlings', streak: 35, color: '#E8622A' },
-        { rank: '🥈', name: 'Sneha Sharma', habit: '🧘 Yoga Sadhana', streak: 24, color: '#C9933A' },
-        { rank: '🥉', name: 'Ishaan Verma', habit: '🏃 Sunset Sprint', streak: 18, color: '#1B4FA8' }
-      ]
+    : []
 
   useEffect(() => {
     fetch('/api/community/feed')
@@ -91,7 +84,7 @@ export default function Community() {
         act.id === activityId ? { ...act, prana: act.prana + 1 } : act
       )
     )
-    setGlobalVibe((v) => v + 5)
+    setBaseVibe((v) => v + 5)
     notif('Positive Prana sent! ✦', 'default')
   }
 
@@ -112,7 +105,6 @@ export default function Community() {
       const intention = await res.json()
       setIntentions(prev => [intention, ...prev])
       setNewIntention('')
-      setGlobalVibe((v) => v + 50)
       notif('Intention pinned to the Sankalpa Wall ✦', 'success')
     } catch (err) {
       console.error('Add intention error:', err)
@@ -371,23 +363,34 @@ export default function Community() {
               </div>
 
               {/* Input Area */}
-              <div className="mb-4 flex flex-col gap-2 relative z-10">
-                <textarea
-                  value={newIntention}
-                  onChange={(e) => setNewIntention(e.target.value)}
-                  maxLength={100}
-                  placeholder="i'm focusing on..."
-                  rows={2}
-                  className="w-full rounded-2xl border border-indigo-200/20 dark:border-indigo-900/40 bg-white/60 dark:bg-black/20 p-3 text-[13px] text-indigo-950 dark:text-indigo-50 leading-relaxed placeholder:text-indigo-900/40 dark:placeholder:text-indigo-100/40 resize-none focus:outline-none focus:ring-2 focus:ring-white/50 transition-all custom-scrollbar"
-                />
-                <button
-                  onClick={handleAddIntention}
-                  disabled={!newIntention.trim()}
-                  className="w-full py-2.5 rounded-[16px] bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-bold text-[11px] tracking-wide shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 transition-transform active:scale-95"
-                >
-                  <Send size={12} /> pin it to the wall
-                </button>
-              </div>
+              {isAuthenticated ? (
+                <div className="mb-4 flex flex-col gap-2 relative z-10">
+                  <textarea
+                    value={newIntention}
+                    onChange={(e) => setNewIntention(e.target.value)}
+                    maxLength={100}
+                    placeholder="i'm focusing on..."
+                    rows={2}
+                    className="w-full rounded-2xl border border-indigo-200/20 dark:border-indigo-900/40 bg-white/60 dark:bg-black/20 p-3 text-[13px] text-indigo-950 dark:text-indigo-50 leading-relaxed placeholder:text-indigo-900/40 dark:placeholder:text-indigo-100/40 resize-none focus:outline-none focus:ring-2 focus:ring-white/50 transition-all custom-scrollbar"
+                  />
+                  <button
+                    onClick={handleAddIntention}
+                    disabled={!newIntention.trim()}
+                    className="w-full py-2.5 rounded-[16px] bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-bold text-[11px] tracking-wide shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 transition-transform active:scale-95"
+                  >
+                    <Send size={12} /> pin it to the wall
+                  </button>
+                </div>
+              ) : (
+                <div className="mb-4 flex flex-col gap-2 relative z-10 p-4 rounded-2xl border border-indigo-200/20 dark:border-indigo-900/40 bg-white/30 dark:bg-black/10 text-center">
+                  <p className="text-[12px] text-indigo-900 dark:text-indigo-200 font-semibold mb-2">
+                    Join the Sangha to share your energy
+                  </p>
+                  <p className="text-[10px] text-indigo-800/70 dark:text-indigo-300/70">
+                    Log in to pin your intentions to the Sankalpa Wall.
+                  </p>
+                </div>
+              )}
 
               {/* Intentions List (iMessage bubbles style) */}
               <div className="flex flex-col gap-2.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar relative z-10">

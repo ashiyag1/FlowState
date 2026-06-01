@@ -714,14 +714,7 @@ let communityCache = null
 let communityCacheTime = 0
 
 export async function dbGetCommunityFeed() {
-  // Mock data for the community feed to prevent leaking personal journal entries
-  return [
-    { id: 'act-1', name: 'Diya Kapoor', avatar: '🌸', habit: '🧘 Meditation & Sadhana', streak: 24, time: '20 minutes ago', text: 'Completed 15 minutes of Pranayama and morning meditation. Feeling deeply grounded today.', prana: 142, comments: 3, color: '#E8622A' },
-    { id: 'act-2', name: 'Ishaan Verma', avatar: '🏃', habit: '🏃 Run & Fitness', streak: 18, time: '1 hour ago', text: 'Chasing sunsets! Just finished a 5km run at twilight. Consistency beats perfection!', prana: 89, comments: 1, color: '#1B4FA8' },
-    { id: 'act-3', name: 'Kavya Rao', avatar: '🪷', habit: '💧 Hydration (Amrit)', streak: 31, time: '3 hours ago', text: 'Hit my 3-liter target of copper-vessel water before evening. Feels like cellular revival.', prana: 205, comments: 5, color: '#1A7A4E' },
-    { id: 'act-4', name: 'Kabir Mehta', avatar: '📖', habit: '📖 Study & Wisdom', streak: 9, time: '5 hours ago', text: 'Reading Swami Vivekananda\'s thoughts on the power of focus. Absolutely fires up the mind.', prana: 67, comments: 2, color: '#7B68AE' },
-    { id: 'act-5', name: 'Sneha Sharma', avatar: '🌿', habit: '🌿 Nature Walk', streak: 14, time: '8 hours ago', text: 'Spent an hour in the garden today. Connecting with the earth brings such clarity.', prana: 120, comments: 4, color: '#C9933A' }
-  ]
+  return []
 }
 
 export async function dbGetIntentions() {

@@ -103,31 +103,33 @@ function FlowSymbol({ size = 32 }) {
 
 function NavItem({ to, label, sub }) {
   return (
-    <NavLink to={to} end={to === '/'} style={{ textDecoration: 'none' }}
-      className={({ isActive }) =>
-        `relative flex flex-col items-center px-3 py-1.5 rounded-full transition-all duration-300 select-none
-         ${isActive ? 'text-[#3d2208] dark:text-[#f5e6c8]' : 'text-[#5c3d1e]/85 dark:text-[#e8c97a]/75 hover:text-[#3d2208] dark:hover:text-[#f5e6c8]'}`
-      }>
-      {({ isActive }) => (<>
-        {isActive && (
-          <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full"
-            style={{
-              background: 'linear-gradient(135deg, rgba(212,168,42,0.32), rgba(232,199,122,0.14))',
-              border: '1px solid rgba(212,168,42,0.5)',
-              boxShadow: '0 0 24px rgba(212,168,42,0.18), 0 4px 12px rgba(180,120,20,0.1), inset 0 1px 0 rgba(255,240,190,0.25)',
-            }}
-            transition={{ type:'spring', stiffness:400, damping:36 }}/>
-        )}
-        <span className="relative z-10 text-[0.75rem] font-semibold leading-tight tracking-wider"
-          style={{ fontFamily:"'Cinzel',serif" }}>
-          {label}
-        </span>
-        <span className="relative z-10 text-[0.55rem] leading-none opacity-60 mt-0.5"
-          style={{ fontFamily:"'Lora',serif", fontStyle:'italic' }}>
-          {sub}
-        </span>
-      </>)}
-    </NavLink>
+    <div style={{ position: 'relative' }}>
+      <NavLink to={to} end={to === '/'} style={{ textDecoration: 'none' }}
+        className={({ isActive }) =>
+          `relative flex flex-col items-center px-3 py-1.5 rounded-full transition-all duration-300 select-none
+           ${isActive ? 'text-[#3d2208] dark:text-[#f5e6c8]' : 'text-[#5c3d1e]/85 dark:text-[#e8c97a]/75 hover:text-[#3d2208] dark:hover:text-[#f5e6c8]'}`
+        }>
+        {({ isActive }) => (<>
+          {isActive && (
+            <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, rgba(212,168,42,0.32), rgba(232,199,122,0.14))',
+                border: '1px solid rgba(212,168,42,0.5)',
+                boxShadow: '0 0 24px rgba(212,168,42,0.18), 0 4px 12px rgba(180,120,20,0.1), inset 0 1px 0 rgba(255,240,190,0.25)',
+              }}
+              transition={{ type:'spring', stiffness:400, damping:36 }}/>
+          )}
+          <span className="relative z-10 text-[0.75rem] font-semibold leading-tight tracking-wider"
+            style={{ fontFamily:"'Cinzel',serif" }}>
+            {label}
+          </span>
+          <span className="relative z-10 text-[0.55rem] leading-none opacity-60 mt-0.5"
+            style={{ fontFamily:"'Lora',serif", fontStyle:'italic' }}>
+            {sub}
+          </span>
+        </>)}
+      </NavLink>
+    </div>
   )
 }
 
@@ -270,8 +272,10 @@ export default function Navbar() {
   const [scrolled,   setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [resourcesOpen, setResourcesOpen] = useState(false)
   const lastY = useRef(0)
   const dropdownRef = useRef(null)
+  const resourcesRef = useRef(null)
 
   // Lock background scroll when mobile drawer is open
   useEffect(() => {
@@ -342,6 +346,18 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [profileOpen])
+
+  // Close resources dropdown on outside click
+  useEffect(() => {
+    if (!resourcesOpen) return
+    const handleClick = (e) => {
+      if (resourcesRef.current && !resourcesRef.current.contains(e.target)) {
+        setResourcesOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [resourcesOpen])
 
   const glassBg = dark
     ? 'rgba(16, 10, 4, 0.68)'
@@ -695,7 +711,88 @@ export default function Navbar() {
               {isMuted ? <VolumeX size={12}/> : <Volume2 size={12}/>}
             </motion.button>
 
-            {/* Profile Avatar / Sign In */}
+            <div ref={resourcesRef} style={{ position: 'relative' }}>
+              <motion.button type="button" whileTap={{ scale:0.88 }} onClick={() => setResourcesOpen(!resourcesOpen)}
+                style={{
+                  width:30, height:30, borderRadius:'50%',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  border:'1px solid rgba(212,168,42,0.22)',
+                  background: dark ? 'rgba(212,168,42,0.08)' : 'rgba(255,255,255,0.4)',
+                  boxShadow:'0 1px 6px rgba(160,100,10,0.04), inset 0 1px 0 rgba(232,199,122,0.08)',
+                  color: dark ? '#d9b96a' : '#6b4c12',
+                  cursor:'pointer', transition:'all 0.25s ease',
+                }} aria-label="Curated Practices">
+                <BookOpen size={12}/>
+              </motion.button>
+
+              <AnimatePresence>
+                {resourcesOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.92, y: -8 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: -8 }}
+                    transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    style={{
+                      position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                      width: 260, zIndex: 100,
+                      borderRadius: 16,
+                      background: dark ? 'rgba(22, 14, 6, 0.92)' : 'rgba(253, 248, 235, 0.95)',
+                      backdropFilter: 'blur(32px) saturate(1.4)',
+                      WebkitBackdropFilter: 'blur(32px) saturate(1.4)',
+                      border: '1px solid rgba(212,168,42,0.22)',
+                      boxShadow: '0 16px 48px rgba(0,0,0,0.3), 0 0 40px rgba(212,168,42,0.06)',
+                      overflow: 'hidden',
+                      pointerEvents: 'auto',
+                    }}
+                  >
+                    <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, rgba(212,168,42,0.5), rgba(232,134,42,0.3), transparent)' }} />
+                    <div style={{ padding: '14px 16px 8px', borderBottom: '1px solid rgba(212,168,42,0.12)' }}>
+                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', fontWeight: 600, color: dark ? '#f5e6c8' : '#3d2208' }}>
+                        Curated Practices
+                      </div>
+                      <div style={{ fontSize: '0.65rem', color: dark ? 'rgba(212,168,42,0.55)' : 'rgba(92,61,30,0.5)', marginTop: 2 }}>
+                        Ashiya's personal YouTube library
+                      </div>
+                    </div>
+                    <div style={{ padding: '6px 8px' }}>
+                      {[
+                        { title: 'Yoga for Beginners', url: 'https://youtu.be/oDP-89wRXUk?si=v5TLzJNX1ty3XymT' },
+                        { title: 'Deep Yoga Nidra', url: 'https://youtu.be/uPSml_JQGVY?si=nhVhj5Ag64X3CHEQ' },
+                        { title: 'Surya Namaskar', url: 'https://youtu.be/AneOlb4dAZU?si=zXqpYa1iZ7MQ0hK-' },
+                        { title: 'Chakra Meditation', url: 'https://youtu.be/Zdy-NVFpSUI?si=ayma3Ml5RqjFXKE-' },
+                        { title: 'Kapalbhati Breath', url: 'https://youtu.be/AtG7cx6p7DY?si=BdKVCedciXeLo4SJ' },
+                        { title: 'Anulom Vilom', url: 'https://youtu.be/blbv5UTBCGg?si=DQt8rU1zp_H5_frA' }
+                      ].map((link, idx) => (
+                        <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                          <motion.div
+                            whileHover={{ backgroundColor: dark ? 'rgba(212,168,42,0.08)' : 'rgba(212,168,42,0.06)' }}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 10,
+                              padding: '10px 10px', borderRadius: 10,
+                              cursor: 'pointer', transition: 'background 0.15s',
+                            }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={dark ? '#d9b96a' : '#8a5a12'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                            </svg>
+                            <span style={{
+                              fontFamily: "'Cinzel', serif",
+                              fontSize: '0.7rem',
+                              fontWeight: 500,
+                              letterSpacing: '0.04em',
+                              color: dark ? '#e8d5a8' : '#5c3d1e',
+                            }}>
+                              {link.title}
+                            </span>
+                          </motion.div>
+                        </a>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             {isAuthenticated ? (
               <div ref={dropdownRef} style={{ position: 'relative' }}>
                 <ProfileAvatar user={user} size={30} onClick={() => setProfileOpen(p => !p)} />

@@ -441,6 +441,30 @@ const SCHOLARS = [
   }
 ]
 
+export const ALL_HERITAGE_STORIES = [
+  ...SCHOLARS.map(s => ({
+    label: s.field ? s.field.toUpperCase() : 'SCHOLAR',
+    title: s.story.title,
+    desc: s.desc,
+    route: '/heritage',
+    matchKey: s.story.title
+  })),
+  ...CONCEPT_STORIES.map(c => ({
+    label: c.tag ? c.tag.toUpperCase() : 'CONCEPT',
+    title: c.title,
+    desc: c.paragraphs[0],
+    route: '/heritage',
+    matchKey: c.title
+  })),
+  ...CURIOSITY_STORIES.map(c => ({
+    label: c.tag ? c.tag.toUpperCase() : 'CURIOSITY',
+    title: c.title,
+    desc: c.paragraphs[0],
+    route: '/heritage',
+    matchKey: c.title
+  }))
+]
+
 const CATEGORIES = [
   { id: 'all', label: 'all', icon: <Sparkles size={13} /> },
   { id: 'mathematics', label: 'mathematics', icon: <span style={{fontSize: '14px', lineHeight: 1, fontFamily: 'serif', fontWeight: 'bold'}}>π</span> },

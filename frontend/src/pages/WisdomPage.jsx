@@ -8,6 +8,8 @@ import wisdomBg from '../assets/pages/wisdom_bg.webp'
 import HeroHeader from '../sections/wisdom/HeroHeader'
 import TopicFilterBar from '../sections/wisdom/TopicFilterBar'
 import TodaysWisdom from '../components/wisdom/TodaysWisdom.jsx'
+import WisdomCarousel from '../sections/WisdomCarousel.jsx'
+import { SANKALPAS } from './Home.jsx'
 import ExploreByTopic from '../sections/wisdom/ExploreByTopic'
 import LifeIssuesGrid from '../sections/wisdom/LifeIssuesGrid'
 import QuoteBanner from '../sections/wisdom/QuoteBanner'
@@ -20,7 +22,7 @@ import {
 } from '../data/wisdomData'
 
 function WisdomContent() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const [activeTopic, setActiveTopic] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
@@ -35,6 +37,9 @@ function WisdomContent() {
     markStreakToday()
     trackEvent('wisdom_read')
   }, [markStreakToday, trackEvent])
+
+  const activeSankalpa = user?.activeSankalpa || 'discipline'
+  const currentSankalpa = SANKALPAS[activeSankalpa]
 
   // Filter books by active topic and search query
   const filteredBooks = TOPIC_BOOKS.filter(book => {
@@ -87,7 +92,7 @@ function WisdomContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 flex-1 mt-4 pb-8">
           <div className="lg:col-span-3 flex flex-col gap-9 overflow-hidden min-w-0">
-            <TodaysWisdom wisdom={TODAY_WISDOM} />
+            <WisdomCarousel sankalpa={currentSankalpa} />
             
             {filteredBooks.length > 0 ? (
               <ExploreByTopic

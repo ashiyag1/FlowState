@@ -67,37 +67,23 @@ const ERA_COLORS = {
   motivation: '#E87722',
 }
 
-function QuoteScroll() {
-  const [quote, setQuote] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [spinning, setSpinning] = useState(false)
-  const { playWisdomSound } = useSoundEffects()
+export function QuoteScroll({ sankalpa }) {
+  const [quoteIdx, setQuoteIdx] = useState(0)
 
-  const load = async (force = false) => {
-    setLoading(true)
-    try {
-      setQuote(await fetchAIQuote(force))
-    } catch {
-      setQuote(getDailyQuote())
-    } finally {
-      setLoading(false)
+  const handleRefresh = () => {
+    if (sankalpa?.wisdomOptions) {
+      setQuoteIdx((prev) => (prev + 1) % sankalpa.wisdomOptions.length)
     }
   }
 
-  useEffect(() => {
-    load()
-  }, [])
-
-  const handleRefresh = async () => {
-    setSpinning(true)
-    Store.del('quote_' + today())
-    await load(true)
-    playWisdomSound()
-    setSpinning(false)
+  const quote = sankalpa?.wisdomOptions?.[quoteIdx] || {
+    wis: '"What you seek is seeking you."',
+    src: 'Rumi',
+    ref: '— on the journey'
   }
 
-  const accentColor = quote ? ERA_COLORS[quote.category] || '#D4A84B' : '#D4A84B'
-  const displayQuote = quote?.translation || quote?.text
+  const displayQuote = quote.wis
+  const accentColor = '#D4A84B'
 
   return (
     <div className="fs-wisdom-scroll">
@@ -107,27 +93,14 @@ function QuoteScroll() {
       <button
         className="fs-quote-refresh"
         onClick={handleRefresh}
-        disabled={loading || spinning}
         aria-label="Refresh quote"
         title="Get a new quote"
       >
-        <RefreshCw size={13} className={spinning || loading ? 'animate-spin' : ''} />
+        <RefreshCw size={13} />
       </button>
 
       <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.div
-            key="loading"
-            className="fs-quote-loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <span />
-            <span />
-            <span />
-          </motion.div>
-        ) : quote ? (
+        {quote ? (
           <motion.div
             key={displayQuote?.slice(0, 24)}
             className="fs-quote-content"
@@ -135,20 +108,17 @@ function QuoteScroll() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
+            style={{ maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}
           >
-            <div className="fs-quote-mark" style={{ color: accentColor }}>
+            <div className="fs-quote-mark" style={{ color: accentColor, margin: '0 auto 12px' }}>
               "
             </div>
             <blockquote>"{displayQuote}"</blockquote>
-            <div className="fs-quote-author">- {quote.author}</div>
-            {quote.source && quote.source !== quote.author && (
-              <div className="fs-quote-source">{quote.source}</div>
+            <div className="fs-quote-author">- {quote.src}</div>
+            {quote.ref && (
+              <div className="fs-quote-source" style={{ textAlign: 'center' }}>{quote.ref}</div>
             )}
-            {quote.category && (
-              <div className="fs-quote-category" style={{ borderColor: `${accentColor}77` }}>
-                {quote.category}
-              </div>
-            )}
+
           </motion.div>
         ) : null}
       </AnimatePresence>
@@ -231,7 +201,7 @@ function CarouselControls({ total, current, onPrev, onNext, onDot }) {
   )
 }
 
-function WisdomStyles() {
+export function WisdomStyles() {
   return (
     <style>{`
       .fs-wisdom-panorama {
@@ -282,11 +252,11 @@ function WisdomStyles() {
         position: relative;
         z-index: 3;
         min-height: 360px;
-        display: grid;
-        grid-template-columns: minmax(280px, 1fr) minmax(24px, 0.08fr) minmax(360px, 1fr);
+        display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 20px;
-        padding: 24px 32px 80px 18px; 
+        justify-content: center;
+        padding: 40px; 
       }
 
       .fs-wisdom-scroll {
@@ -381,10 +351,10 @@ function WisdomStyles() {
       .fs-quote-content blockquote {
         margin: 0 0 18px;
         font-family: 'Cormorant Garamond', serif;
-        font-size: clamp(22px, 2.35vw, 31px);
-        line-height: 1.23;
+        font-size: clamp(19px, 2.35vw, 24px);
+        line-height: 1.35;
         font-style: italic;
-        font-weight: 600;
+        font-weight: 500;
         color: #5a3517;
       }
 
@@ -439,8 +409,7 @@ function WisdomStyles() {
       .fs-quote-loading span:nth-child(3) { width: 68%; }
 
       .fs-wisdom-glass {
-        justify-self: end;
-        width: min(100%, 440px);
+        width: 100%;
         min-height: auto;
         position: relative;
         overflow: hidden;
@@ -638,25 +607,13 @@ function WisdomStyles() {
   )
 }
 
-export default function WisdomCarousel() {
+export default function WisdomCarousel({ sankalpa }) {
   const { slide, goNext, goPrev, goTo } = useWisdomCarousel(SLIDES.length)
   const activeSlide = SLIDES[slide]
 
   return (
     <section style={{ marginBottom: '4rem' }}>
       <WisdomStyles />
-
-      <motion.div
-        initial={{ opacity: 0, y: 26 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-      >
-        <SectionHeading
-          eyebrow="Today's Wisdom"
-          title="Ancient wisdom, modern life."
-        />
-      </motion.div>
 
       <motion.div
         className="fs-wisdom-panorama"
@@ -680,8 +637,6 @@ export default function WisdomCarousel() {
         </div>
 
         <div className="fs-wisdom-layout">
-          <QuoteScroll />
-          <span aria-hidden />
           <SlideCard slide={activeSlide} />
         </div>
 

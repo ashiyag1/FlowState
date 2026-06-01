@@ -31,10 +31,6 @@ router.post('/intentions', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Intention text is required' })
     }
     let name = author || 'Seeker'
-    if (!author && req.userId) {
-      const u = await dbFindUserById(req.userId)
-      if (u) name = u.name.split(' ')[0]
-    }
     const intention = await dbAddIntention(name, text.trim())
     res.status(201).json(intention)
   } catch (err) {

@@ -17,6 +17,13 @@ const RESOURCES = [
 ]
 
 export default function ExploreSection({ dark }) {
+  const glassCardStyle = {
+    background: dark ? 'rgba(18, 12, 4, 0.95)' : 'rgba(253, 248, 240, 0.95)',
+    backdropFilter: 'blur(24px)',
+    WebkitBackdropFilter: 'blur(24px)',
+    border: dark ? '1px solid rgba(200, 169, 110, 0.15)' : '1px solid rgba(200, 169, 110, 0.25)',
+  }
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -24,8 +31,8 @@ export default function ExploreSection({ dark }) {
         <motion.div variants={fadeUp(0)} initial="hidden" whileInView="show" viewport={{ once: true }}>
           <Link to="/heritage" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
             <div className="fs-gold-corner-card" style={{
+              ...glassCardStyle,
               position: 'relative', padding: '1.5rem 1.25rem', overflow: 'hidden', height: '100%',
-              background: dark ? 'linear-gradient(135deg, rgba(30,20,10,0.8), rgba(15,10,5,0.9))' : 'linear-gradient(135deg, rgba(255,248,235,0.9), rgba(255,242,215,0.8))'
             }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, #c9a84c, transparent)` }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '0.8rem' }}>
@@ -48,8 +55,8 @@ export default function ExploreSection({ dark }) {
         <motion.div variants={fadeUp(0.08)} initial="hidden" whileInView="show" viewport={{ once: true }}>
           <Link to="/community" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
             <div className="fs-gold-corner-card" style={{
+              ...glassCardStyle,
               position: 'relative', padding: '1.5rem 1.25rem', overflow: 'hidden', height: '100%',
-              background: dark ? 'linear-gradient(135deg, rgba(25,25,35,0.8), rgba(15,15,20,0.9))' : 'linear-gradient(135deg, rgba(240,245,255,0.9), rgba(230,235,245,0.8))'
             }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, #7EC8E3, transparent)` }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '0.8rem' }}>
@@ -72,9 +79,8 @@ export default function ExploreSection({ dark }) {
       {/* Ashiya's Curated Resources */}
       <motion.div variants={fadeUp(0.12)} initial="hidden" whileInView="show" viewport={{ once: true }}>
         <div style={{
+          ...glassCardStyle,
           position: 'relative', padding: '1.5rem', borderRadius: '20px',
-          background: dark ? 'rgba(15,10,4,0.7)' : 'rgba(255,252,240,0.85)',
-          border: '1px solid rgba(201,168,76,0.2)',
         }}>
           <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.4rem', fontWeight: 600, color: dark ? '#e8d9b5' : '#5C3D1E', marginBottom: '0.2rem', textAlign: 'center' }}>
             Ashiya's Curated Practices

@@ -77,6 +77,41 @@ function fadeUp(delay = 0) {
   }
 }
 
+function getLunarSubtitle(hindu) {
+  if (!hindu) return '';
+  const isShukla = hindu.paksha && hindu.paksha.includes('Shukla');
+  const pakshaStr = isShukla ? 'Shukla Paksha' : 'Krishna Paksha';
+  
+  let tithiStr = '';
+  if (hindu.tithiNum === 15) {
+    tithiStr = isShukla ? 'Purnima' : 'Amavasya';
+  } else {
+    tithiStr = `Tithi ${hindu.tithiNum}`;
+  }
+  
+  let phaseStr = '';
+  if (isShukla) {
+    if (hindu.tithiNum === 15) {
+      phaseStr = 'Full Moon';
+    } else if (hindu.tithiNum >= 11) {
+      phaseStr = 'Purnima approaching';
+    } else {
+      phaseStr = 'Waxing';
+    }
+  } else {
+    if (hindu.tithiNum === 15) {
+      phaseStr = 'New Moon';
+    } else if (hindu.tithiNum >= 11) {
+      phaseStr = 'Amavasya approaching';
+    } else {
+      phaseStr = 'Waning';
+    }
+  }
+  
+  return `${pakshaStr} · ${tithiStr} · ${phaseStr}`;
+}
+
+
 export default function Habits() {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
@@ -101,25 +136,8 @@ export default function Habits() {
   const todayDone = habitDone[td] || {}
   const doneCount = habits.filter(h => todayDone[h.id]).length
 
-  // Mood State
-  const [activeMood, setActiveMood] = useState(() => {
-    return localStorage.getItem('fwa_ritual_mood') || 'Grounding'
-  })
-  
   // Lunar Facts Carousel State
   const [currentInsightIdx, setCurrentInsightIdx] = useState(0)
-
-  // Suggested Practice State - Completed Moods for Today
-  const [completedMoods, setCompletedMoods] = useState(() => {
-    try {
-      const saved = localStorage.getItem('fwa_completed_moods_' + todayStr)
-      return saved ? JSON.parse(saved) : {}
-    } catch (e) {
-      return {}
-    }
-  })
-
-  const isSuggestedDone = !!completedMoods[activeMood]
 
   const handleAdd = () => {
     if (!isAuthenticated) {
@@ -240,7 +258,7 @@ export default function Habits() {
       }} />
 
       <div style={{
-        position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', padding: '4.5rem 1.2rem 4rem'
+        position: 'relative', zIndex: 1, maxWidth: '1650px', width: '96%', margin: '0 auto', padding: '4.5rem 1.2rem 4rem'
       }}>
         
         {/* HERO TITLE */}
@@ -266,24 +284,30 @@ export default function Habits() {
           </h1>
         </motion.div>
 
-        {/* CYCLE TOOLTIP */}
-        <motion.div initial="hidden" animate="show" variants={fadeUp(0.02)} style={{
-          background: dark ? 'rgba(30,20,50,0.6)' : 'rgba(230,240,255,0.7)',
-          border: '1px solid rgba(129,140,248,0.3)',
-          borderRadius: 16, padding: '12px 20px', marginBottom: '1.5rem',
-          display: 'flex', alignItems: 'center', gap: 12, backdropFilter: 'blur(10px)'
-        }}>
-          <span className="text-xl">🌙</span>
-          <p style={{ fontFamily: "'Lora', serif", fontSize: '0.85rem', color: dark ? '#dbeafe' : '#1e3a8a', margin: 0, fontWeight: 500 }}>
-            <strong>Forgiving Cycles:</strong> Miss 1 day? It's your <strong>Relax Day</strong>. Miss 2 days? The cycle resets. Set your preferred cycle length (7 or 15 days) and custom Relax Day in your Settings. Be gentle with yourself.
+        {/* FORGIVING CYCLES FULL-WIDTH BANNER */}
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={fadeUp(0.02)}
+          className="w-full p-2.5 px-4 mb-4 rounded-xl text-xs border flex items-center justify-center gap-2"
+          style={{
+            background: dark ? 'rgba(20,15,10,0.3)' : '#fdf6ec',
+            borderColor: dark ? 'rgba(201,168,76,0.15)' : '#e8d5b0',
+            color: dark ? '#fcf6e8' : '#2c1a00',
+            fontFamily: 'var(--font-sans)',
+          }}
+        >
+          <span>🌙</span>
+          <p className="m-0 text-center">
+            Forgiving Cycles — Miss 1 day? It's your <strong className="font-semibold" style={{ color: dark ? '#ffeab8' : '#8B6914' }}>Relax Day</strong>. Miss 2? The cycle resets gently. Be gentle with yourself.
           </p>
         </motion.div>
 
         {/* BENTO BOX LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 items-start">
           
-          {/* LEFT PANEL: My Flow (Span 7) */}
-          <div className="lg:col-span-7 flex flex-col gap-5">
+          {/* LEFT PANEL: ACTIONS */}
+          <div className="flex flex-col gap-5 w-full">
             
             {/* MY SADHANA RITUALS CARD */}
             <motion.div 
@@ -291,224 +315,93 @@ export default function Habits() {
               animate="show" 
               variants={fadeUp(0.08)} 
               style={{
-                background: dark ? 'rgba(20, 15, 10, 0.55)' : 'rgba(255, 252, 246, 0.70)',
-                border: dark ? '1px solid rgba(201, 168, 76, 0.16)' : '1px solid rgba(201, 168, 76, 0.22)',
+                background: dark ? 'rgba(20, 15, 10, 0.45)' : '#fdf6ec',
+                border: dark ? '1px solid rgba(201, 168, 76, 0.16)' : '1px solid #e8d5b0',
                 borderRadius: '24px',
-                padding: '1.5rem',
+                padding: '1.25rem',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
-                boxShadow: dark ? '0 12px 36px rgba(0,0,0,0.25)' : '0 12px 36px rgba(139,111,76,0.06)',
+                boxShadow: dark ? '0 12px 36px rgba(0,0,0,0.25)' : 'none',
               }}
             >
-              <div className="flex items-center justify-between mb-4 border-b border-gold/10 pb-2">
-                <span className="font-display text-xs text-gold flex items-center gap-1.5 uppercase font-bold tracking-wide">
+              <div className="flex items-center justify-between mb-3 border-b border-gold/10 pb-2">
+                <span 
+                  className="font-display text-xs flex items-center gap-1.5 uppercase font-bold tracking-wider px-2.5 py-1 rounded-lg border" 
+                  style={{ 
+                    color: dark ? '#ff9e7a' : '#E8622A',
+                    backgroundColor: dark ? 'rgba(232, 98, 42, 0.15)' : 'rgba(232, 98, 42, 0.1)',
+                    borderColor: dark ? 'rgba(232, 98, 42, 0.3)' : 'rgba(232, 98, 42, 0.25)',
+                  }}
+                >
                   🕯️ My Active Sadhanas
                 </span>
                 <button
-                  onClick={() => setShowAddForm(!showAddForm)}
-                  className="text-[10px] text-gold-lt border border-gold/30 hover:bg-gold/15 py-1 px-3 rounded-full transition-all font-semibold"
+                  onClick={() => setShowAddForm(prev => !prev)}
+                  className="text-[10px] text-gold border border-gold/30 hover:bg-gold/15 py-1 px-3 rounded-full transition-all font-semibold"
+                  style={{ color: dark ? '#ffeab8' : '#8B6914', borderColor: dark ? 'rgba(201,168,76,0.3)' : 'rgba(139,105,20,0.3)' }}
                 >
-                  {showAddForm ? 'Close Builder' : '+ Add Ritual'}
+                  Add ritual
                 </button>
               </div>
 
-              {/* Collapsible form container */}
-              <AnimatePresence>
-                {showAddForm && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden mb-4 p-3 border border-gold/10 rounded-2xl bg-black/10 flex flex-col gap-3"
-                  >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Ritual Name</label>
-                        <input
-                          type="text"
-                          value={name}
-                          placeholder="Type or pick an idea below →"
-                          maxLength={35}
-                          onChange={e => setName(e.target.value)}
-                          className="w-full rounded-xl border border-gold/20 bg-white/5 px-3 py-2 text-xs text-ink dark:text-ivory outline-none focus:border-gold shadow-inner"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Ritual Color Accent</label>
-                        <div className="flex gap-1.5 flex-wrap py-1">
-                          {HABIT_COLORS.map(c => (
-                            <button
-                              key={c}
-                              onClick={() => setSelColor(c)}
-                              className="w-5 h-5 rounded-md border transition-all"
-                              style={{
-                                backgroundColor: c,
-                                borderColor: selColor === c ? 'white' : 'transparent',
-                                transform: selColor === c ? 'scale(1.1)' : 'none'
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
+              <p className="text-[10.5px] italic mt-0 mb-3 opacity-80 leading-relaxed font-sans" style={{ color: dark ? '#ffb394' : '#C44E1C' }}>
+                Tapas (discipline) is a warm, steady fire. Just take one small step today.
+              </p>
 
-                      {/* Forgiving Cycles Settings */}
-                      <div>
-                        <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Cycle Length</label>
-                        <select 
-                          value={cycleLength}
-                          onChange={(e) => setCycleLength(Number(e.target.value))}
-                          className="w-full rounded-xl border border-gold/20 bg-white/5 px-3 py-2 text-xs text-ink dark:text-ivory outline-none focus:border-gold"
-                        >
-                          <option value={7} className="bg-black/80">7 Days (Weekly Rhythm)</option>
-                          <option value={15} className="bg-black/80">15 Days (Paksha Cycle)</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Relax Day</label>
-                        <select 
-                          value={relaxDay}
-                          onChange={(e) => setRelaxDay(e.target.value)}
-                          className="w-full rounded-xl border border-gold/20 bg-white/5 px-3 py-2 text-xs text-ink dark:text-ivory outline-none focus:border-gold"
-                        >
-                          <option value="None" className="bg-black/80">None</option>
-                          <option value="Monday" className="bg-black/80">Monday</option>
-                          <option value="Tuesday" className="bg-black/80">Tuesday</option>
-                          <option value="Wednesday" className="bg-black/80">Wednesday</option>
-                          <option value="Thursday" className="bg-black/80">Thursday</option>
-                          <option value="Friday" className="bg-black/80">Friday</option>
-                          <option value="Saturday" className="bg-black/80">Saturday</option>
-                          <option value="Sunday" className="bg-black/80">Sunday</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1.5">✨ Pick a Ritual Idea</label>
-                      <div className="max-h-[180px] overflow-y-auto flex flex-col gap-2 pr-1 custom-scrollbar">
-                        {RITUAL_IDEAS.map(group => (
-                          <div key={group.category}>
-                            <span className="text-[8px] uppercase tracking-widest text-ink-soft/40 dark:text-ivory/40 font-bold block mb-1">{group.category}</span>
-                            <div className="flex flex-wrap gap-1">
-                              {group.items.map(item => (
-                                <button
-                                  key={item.name}
-                                  onClick={() => { setName(item.name); setIcon(item.icon) }}
-                                  className="text-[10px] px-2 py-1 rounded-lg border border-gold/10 hover:border-gold/30 hover:bg-gold/5 bg-white/[0.02] text-ink dark:text-ivory/80 transition-all whitespace-nowrap"
-                                >
-                                  {item.icon} {item.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Choose Icon</label>
-                      <div className="flex flex-wrap gap-1 bg-black/20 p-2 rounded-xl max-h-[50px] overflow-y-auto">
-                        {ICONS.map(ic => (
-                          <button
-                            key={ic}
-                            onClick={() => setIcon(ic)}
-                            className={`w-6 h-6 rounded flex items-center justify-center text-xs transition-all ${
-                              ic === icon ? 'bg-gold/20' : 'bg-transparent hover:bg-white/5'
-                            }`}
-                          >
-                            {ic}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={handleAdd}
-                      disabled={!name.trim()}
-                      className="w-full py-2 bg-gradient-to-r from-saffron to-gold text-white font-semibold text-xs tracking-wider rounded-xl disabled:opacity-30 transition-all hover:shadow-lg active:scale-98"
-                    >
-                      + Add New Sadhana
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Today's Streak Mini-Bar */}
+              <div 
+                className="flex items-center justify-between gap-4 px-3 py-2 rounded-xl mb-3"
+                style={{
+                  background: dark ? 'rgba(201, 168, 76, 0.03)' : 'rgba(200, 169, 110, 0.03)',
+                  border: dark ? '1px solid rgba(201, 168, 76, 0.08)' : '1px solid #e8d5b0',
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-2xl font-bold" style={{ color: dark ? '#ffeab8' : '#8B6914' }}>{bestStreak}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-ink-soft/60 dark:text-ivory/60 leading-none">day streak</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1 justify-end">
+                    {Array.from({ length: 7 }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`h-[3px] w-4 rounded-full`}
+                        style={{
+                          backgroundColor: idx < (bestStreak % 8 || (bestStreak > 0 ? 7 : 0))
+                            ? '#C9933A'
+                            : (dark ? 'rgba(255,255,255,0.08)' : '#e8d5b0')
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[9px] text-ink-soft/40 dark:text-ivory/40 italic whitespace-nowrap hidden sm:inline">
+                    Every streak starts somewhere
+                  </span>
+                </div>
+              </div>
 
               {/* DAILY QUEST CHEST ANIMATION */}
               <AnimatePresence>
                 {allDoneToday && selectedIso === todayStr && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.5, y: 50, rotateX: 45 }}
-                    animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                    transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-                    className="flex flex-col items-center justify-center bg-gradient-to-br from-amber-600/20 via-gold/10 to-saffron/20 p-6 rounded-3xl border-2 border-gold/40 mb-6 overflow-hidden relative shadow-[0_0_40px_rgba(201,168,76,0.3)]"
-                    style={{ backdropFilter: 'blur(10px)' }}
+                    className="flex flex-col items-center justify-center bg-gradient-to-br from-amber-600/20 via-gold/10 to-saffron/20 p-4 rounded-2xl border border-gold/30 mb-3 overflow-hidden relative"
                   >
-                    <motion.div
-                      animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                      className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,168,76,0.2)_0%,transparent_70%)] pointer-events-none"
-                    />
-                    <motion.div
-                      animate={{ 
-                        y: [0, -10, 0],
-                        scale: [1, 1.1, 1],
-                        filter: ['drop-shadow(0 0 10px rgba(201,168,76,0.5))', 'drop-shadow(0 0 25px rgba(255,215,0,0.8))', 'drop-shadow(0 0 10px rgba(201,168,76,0.5))']
-                      }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                      className="text-6xl relative z-10 mb-2"
-                    >
-                      🏺
-                    </motion.div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="text-center z-10"
-                    >
-                      <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold to-saffron tracking-widest uppercase" style={{ fontFamily: "'Cinzel', serif" }}>
-                        Ancient Vessel Unlocked
-                      </h3>
-                      <div className="mt-2 inline-flex items-center gap-1.5 bg-black/30 dark:bg-white/10 px-4 py-1.5 rounded-full border border-gold/30">
-                        <span className="text-xl">✨</span>
-                        <span className="text-sm font-extrabold text-white">+50 Prana Earned</span>
-                      </div>
-                    </motion.div>
+                    <div className="text-3xl relative z-10 mb-1">🏺</div>
+                    <h3 className="text-xs font-bold text-[#c9933a] tracking-widest uppercase font-display">
+                      Ancient Vessel Unlocked
+                    </h3>
+                    <span className="text-[10px] text-ink dark:text-white mt-1">+50 Prana Earned</span>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {/* 1. Dynamic Sadhana Diya */}
-              <div className="flex items-center gap-4 bg-black/10 p-3 rounded-2xl border border-white/5 mb-3">
-                <div style={{ position: 'relative', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{
-                    position: 'absolute',
-                    inset: -8,
-                    borderRadius: '50%',
-                    background: `radial-gradient(circle, rgba(255,160,32,${0.15 + doneRatio * 0.35}) 0%, transparent 70%)`,
-                    filter: 'blur(4px)',
-                    opacity: doneCount > 0 ? 1 : 0.3,
-                    transition: 'all 0.5s ease',
-                  }} />
-                  <DiyaLamp size={38} className={doneCount > 0 ? "fs-active-diya" : ""} progress={doneRatio} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-display text-xs font-bold text-ink dark:text-ivory" style={{ color: dark ? '#f3edd7' : '#3d250d' }}>Your Daily Sadhana Flame</h4>
-                  <p className="text-[10px] text-ink-soft/60 dark:text-ivory/60 leading-normal font-light">
-                    {selectedDoneCount === 0 
-                      ? "Begin a small ritual to light your sanctuary fire." 
-                      : selectedDoneCount === habits.length 
-                        ? "Your flame burns bright. Your day is in rhythm." 
-                        : "Your daily ritual fire is glowing. Keep going."}
-                  </p>
-                </div>
-              </div>
-
               {/* Rituals list items */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 {habits.length === 0 ? (
-                  <p className="text-xs text-ink-soft/50 dark:text-ivory/50 italic text-center py-4">No rituals added yet.</p>
+                  <p className="text-[11px] text-ink-soft/40 dark:text-ivory/40 italic text-center py-4">No rituals added yet.</p>
                 ) : (
                   habits.map((h) => {
                     const done = !!selectedDayDone[h.id]
@@ -518,21 +411,52 @@ export default function Habits() {
                     return (
                       <motion.div
                         key={h.id}
-                        whileHover={{ scale: 1.01 }}
+                        whileHover={{ scale: 1.005 }}
                         onClick={() => { if (isPastOrToday) handleToggleHabit(h.id, selectedIso) }}
-                        className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs cursor-pointer select-none transition-all ${
-                          done
-                            ? 'bg-gold/5 border-gold/25 text-ink dark:text-ivory'
-                            : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04]'
-                        }`}
-                        style={{ opacity: isPastOrToday ? 1 : 0.4 }}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl border text-xs cursor-pointer select-none transition-all`}
+                        style={{
+                          background: done 
+                            ? (dark ? 'rgba(201, 168, 76, 0.08)' : 'rgba(200, 169, 110, 0.08)')
+                            : (dark ? 'rgba(255,255,255,0.02)' : '#fff8f0'),
+                          borderColor: done 
+                            ? 'rgba(201, 168, 76, 0.35)' 
+                            : (dark ? 'rgba(255,255,255,0.05)' : '#e8d5b0'),
+                          opacity: isPastOrToday ? 1 : 0.4,
+                        }}
                       >
-                        <HabitCheckbox done={done} color={h.color} size={22} />
-                        <span className="text-base shrink-0">{h.icon}</span>
-                        <span className="flex-1 truncate font-display font-medium text-ink dark:text-ivory/95" style={{ color: dark ? '#fcf6e8' : '#3d2e1a' }}>
-                          {h.name}
-                        </span>
-                        <StreakFlame streak={streak} />
+                        {/* Checkbox circle with colored dot */}
+                        <div className="relative shrink-0 w-6 h-6 flex items-center justify-center">
+                          <div 
+                            className="w-5 h-5 rounded-full border flex items-center justify-center transition-all"
+                            style={{
+                              borderColor: done ? h.color : (dark ? 'rgba(255,255,255,0.2)' : '#e8d5b0'),
+                              background: done ? `${h.color}22` : 'transparent',
+                            }}
+                          >
+                            <div 
+                              className="w-2.5 h-2.5 rounded-full" 
+                              style={{ 
+                                backgroundColor: h.color,
+                                opacity: done ? 1 : 0.4,
+                              }} 
+                            />
+                          </div>
+                        </div>
+                        <span className="text-sm shrink-0">{h.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-display font-medium text-ink dark:text-ivory/95 truncate" style={{ color: dark ? '#fcf6e8' : '#2c1a00' }}>
+                            {h.name}
+                          </div>
+                          <div className="text-[9px] text-ink-soft/50 dark:text-ivory/40">
+                            {h.relaxDay ? (h.relaxDay !== 'None' ? `${h.relaxDay} relax day` : `${h.cycleLength} day cycle`) : `${h.cycleLength} day cycle`}
+                          </div>
+                        </div>
+                        
+                        {/* Streak number */}
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] font-bold text-[#8B6914] dark:text-[#ffeab8]">{streak}</span>
+                        </div>
+
                         <button
                           onClick={(e) => handleDeleteHabit(e, h.id)}
                           className="p-1 rounded-md text-ink-soft/20 dark:text-ivory/20 hover:text-rose-400 hover:bg-white/5 shrink-0"
@@ -544,175 +468,187 @@ export default function Habits() {
                   })
                 )}
               </div>
+
+              {/* INLINE ADD FORM */}
+              <AnimatePresence>
+                {showAddForm && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    style={{
+                      background: dark ? 'rgba(20, 15, 10, 0.25)' : '#fffaf3',
+                      border: dark ? '1px solid rgba(201, 168, 76, 0.15)' : '1px solid #e8d5b0',
+                      borderRadius: '16px',
+                      padding: '1rem',
+                      overflow: 'hidden',
+                    }}
+                    className="flex flex-col gap-3"
+                  >
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b border-gold/10 pb-2">
+                      <span className="font-display text-[11px] font-semibold uppercase tracking-wider text-[#8B6914] dark:text-[#e8d5b5]">
+                        New Sadhana
+                      </span>
+                      <button 
+                        onClick={() => setShowAddForm(false)} 
+                        className="text-gold hover:text-rose-400 font-bold text-xs"
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    {/* Inputs */}
+                    <div>
+                      <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Ritual Name</label>
+                      <input
+                        type="text"
+                        value={name}
+                        placeholder="e.g. Surya Namaskar, Meditation..."
+                        maxLength={35}
+                        onChange={e => setName(e.target.value)}
+                        className="w-full rounded-xl border border-gold/20 bg-[#fffaf3] dark:bg-[#1a140f] px-3 py-1.5 text-xs text-ink dark:text-ivory outline-none focus:border-gold shadow-inner"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Color Accent</label>
+                      <div className="flex gap-1.5 flex-wrap py-0.5">
+                        {HABIT_COLORS.map(c => (
+                          <button
+                            key={c}
+                            onClick={() => setSelColor(c)}
+                            className="w-5 h-5 rounded-full border transition-all"
+                            style={{
+                              backgroundColor: c,
+                              borderColor: selColor === c ? (dark ? '#fff' : '#2c1a00') : 'transparent',
+                              transform: selColor === c ? 'scale(1.1)' : 'none'
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Cycle Length</label>
+                        <select 
+                          value={cycleLength}
+                          onChange={(e) => setCycleLength(Number(e.target.value))}
+                          className="w-full rounded-xl border border-gold/20 bg-[#fffaf3] dark:bg-[#1a140f] px-2 py-1.5 text-xs text-ink dark:text-ivory outline-none focus:border-gold"
+                        >
+                          <option value={7}>7 Days (Weekly)</option>
+                          <option value={15}>15 Days (Paksha)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Relax Day</label>
+                        <select 
+                          value={relaxDay}
+                          onChange={(e) => setRelaxDay(e.target.value)}
+                          className="w-full rounded-xl border border-gold/20 bg-[#fffaf3] dark:bg-[#1a140f] px-2 py-1.5 text-xs text-ink dark:text-ivory outline-none focus:border-gold"
+                        >
+                          <option value="None">None</option>
+                          <option value="Monday">Monday</option>
+                          <option value="Tuesday">Tuesday</option>
+                          <option value="Wednesday">Wednesday</option>
+                          <option value="Thursday">Thursday</option>
+                          <option value="Friday">Friday</option>
+                          <option value="Saturday">Saturday</option>
+                          <option value="Sunday">Sunday</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1.5">✨ Pick a Suggested Ritual</label>
+                      <div className="flex flex-wrap gap-1 bg-black/5 dark:bg-black/20 p-1.5 rounded-xl max-h-[80px] overflow-y-auto">
+                        {RITUAL_IDEAS[0].items.map(item => (
+                          <button
+                            key={item.name}
+                            onClick={() => { setName(item.name); setIcon(item.icon) }}
+                            className="text-[9px] px-2 py-0.5 rounded-lg border border-gold/10 hover:border-gold/30 hover:bg-gold/5 bg-white/[0.02] text-ink dark:text-ivory/80 transition-all whitespace-nowrap"
+                          >
+                            {item.icon} {item.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] text-gold uppercase tracking-wider font-bold mb-1">Choose Icon</label>
+                      <div className="flex flex-wrap gap-1 bg-black/5 dark:bg-black/20 p-1.5 rounded-xl max-h-[55px] overflow-y-auto">
+                        {ICONS.map(ic => (
+                          <button
+                            key={ic}
+                            onClick={() => setIcon(ic)}
+                            className={`w-5.5 h-5.5 rounded flex items-center justify-center text-xs transition-all ${
+                              ic === icon ? 'bg-gold/20 scale-110' : 'bg-transparent hover:bg-white/5'
+                            }`}
+                          >
+                            {ic}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleAdd}
+                      disabled={!name.trim()}
+                      className="w-full py-2 bg-gradient-to-r from-saffron to-gold text-white font-semibold text-xs tracking-wider rounded-xl disabled:opacity-30 transition-all hover:shadow-md active:scale-98"
+                    >
+                      Add to my sadhanas
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* WATER TRACKER WIDGET (Promoted up!) */}
+            <motion.div initial="hidden" animate="show" variants={fadeUp(0.12)}>
+              <WaterWidget />
             </motion.div>
 
             {/* DAILY TASKS WIDGET */}
-            <motion.div initial="hidden" animate="show" variants={fadeUp(0.08)}>
-              <DailyTasksWidget selectedIso={selectedIso} />
-            </motion.div>
-
-            {/* WATER TRACKER WIDGET */}
             <motion.div initial="hidden" animate="show" variants={fadeUp(0.14)}>
-              <WaterWidget />
+              <DailyTasksWidget selectedIso={selectedIso} />
             </motion.div>
           </div>
 
-          {/* RIGHT PANEL: Analytics, Mood & Environment (Span 5) */}
-          <div className="lg:col-span-5 flex flex-col gap-5">
+          {/* RIGHT PANEL: CONTEXT ONLY */}
+          <div className="flex flex-col gap-5 w-full lg:max-w-[320px] lg:ml-auto">
             
-            {/* MOOD & SPIRIT BENTO BOX */}
-            <motion.div 
+            {/* TODAY'S DATE + TITHI BLOCK & CALENDAR (Merged into one compact card) */}
+            <motion.div
               initial="hidden" 
               animate="show" 
               variants={fadeUp(0.04)} 
               style={{
-                background: dark ? 'rgba(20, 15, 10, 0.45)' : 'rgba(255, 252, 246, 0.65)',
-                border: dark ? '1px solid rgba(201, 168, 76, 0.16)' : '1px solid rgba(201, 168, 76, 0.22)',
+                background: dark ? 'rgba(20, 15, 10, 0.45)' : '#fdf6ec',
+                border: dark ? '1px solid rgba(201, 168, 76, 0.16)' : '1px solid #e8d5b0',
                 borderRadius: '24px',
-                padding: '1.25rem',
+                padding: '0.85rem 1rem',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
+                boxShadow: dark ? '0 12px 36px rgba(0,0,0,0.25)' : 'none',
               }}
+              className="flex flex-col gap-2.5"
             >
-              {/* Gregorian + Indian Lunar Calendar Title */}
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gold/10 pb-3 mb-4">
+              {/* Date Header */}
+              <div className="flex items-center justify-between border-b border-gold/10 pb-1.5">
                 <div>
-                  <span className="text-[9px] uppercase tracking-widest text-saffron font-bold">
-                    Calendar & Stars
-                  </span>
-                  <h2 className="font-display text-base text-ivory font-semibold mt-0.5" style={{ color: dark ? '#f3edd7' : '#3d250d' }}>
+                  <h2 className="font-display text-xs font-semibold flex items-center gap-1.5" style={{ color: dark ? '#ffeab8' : '#8B6914', margin: 0 }}>
                     {new Date(selectedIso).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
-                    <span className="text-gold/60 ml-2 font-normal text-xs">
-                      — {selectedHindu.moonSymbol} {selectedHindu.tithiEmoji}
-                    </span>
+                    <span className="text-gold/80">{selectedHindu.moonSymbol}</span>
                   </h2>
-                </div>
-              </div>
-
-              {/* Moods row */}
-              <div className="mb-4">
-                <span className="text-[9px] uppercase tracking-wider text-gold font-bold block mb-2">
-                  What is your spirit seeking?
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {Object.keys(MOOD_DETAILS).map((m) => {
-                    const active = activeMood === m
-                    return (
-                      <motion.button
-                        key={m}
-                        whileHover={{ scale: 1.04 }}
-                        whileTap={{ scale: 0.96 }}
-                        onClick={() => {
-                          setActiveMood(m)
-                          localStorage.setItem('fwa_ritual_mood', m)
-                        }}
-                        style={{
-                          padding: '6px 14px',
-                          borderRadius: '999px',
-                          fontSize: '11px',
-                          fontFamily: "'Cinzel', serif",
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          border: active 
-                            ? '1px solid #c9a84c' 
-                            : (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)'),
-                          background: active 
-                            ? 'linear-gradient(135deg, rgba(201,168,76,0.2) 0%, rgba(201,168,76,0.05) 100%)' 
-                            : (dark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0,0,0,0.02)'),
-                          color: active 
-                            ? (dark ? '#ffe090' : '#8a5a12') 
-                            : (dark ? '#e8d5a8' : '#5c3d1e'),
-                          boxShadow: active ? '0 0 12px rgba(201,168,76,0.18)' : 'none',
-                          transition: 'all 0.3s ease',
-                        }}
-                      >
-                        <span className="mr-1">{MOOD_DETAILS[m].icon}</span> {m}
-                      </motion.button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Suggested daily practice */}
-              <div style={{
-                background: dark ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.35)',
-                border: '1px dashed rgba(201, 168, 76, 0.25)',
-                borderRadius: '16px',
-                padding: '12px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '12px',
-              }}>
-                <div className="flex-1">
-                  <span className="text-[8px] uppercase tracking-wider text-saffron font-bold block">
-                    {activeMood} Practice
-                  </span>
-                  <p className="text-xs text-ivory/80 leading-relaxed font-light mt-1" style={{ color: dark ? '#e8ebd8' : '#3a2007' }}>
-                    <strong>{MOOD_DETAILS[activeMood].icon} {MOOD_DETAILS[activeMood].suggestion}</strong>
+                  <p className="text-[9px] font-medium mt-0.5 mb-0" style={{ color: dark ? '#c8a96e' : '#8B6914' }}>
+                    {getLunarSubtitle(selectedHindu)}
                   </p>
                 </div>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    const newStatus = !isSuggestedDone
-                    const updated = { ...completedMoods, [activeMood]: newStatus }
-                    setCompletedMoods(updated)
-                    localStorage.setItem('fwa_completed_moods_' + todayStr, JSON.stringify(updated))
-                    if (newStatus) {
-                      playHabitSound()
-                      trackEvent('suggested_ritual_done')
-                    }
-                  }}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '999px',
-                    fontSize: '10px',
-                    fontFamily: "'Cinzel', serif",
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    border: 'none',
-                    background: isSuggestedDone 
-                      ? 'linear-gradient(135deg, #1A7A4E 0%, #2D6A4F 100%)' 
-                      : 'linear-gradient(135deg, #E8622A 0%, #C9933A 100%)',
-                    color: 'white',
-                    boxShadow: isSuggestedDone ? '0 4px 12px rgba(26,122,78,0.3)' : '0 4px 12px rgba(232,98,42,0.3)',
-                  }}
-                >
-                  {isSuggestedDone ? '✦ Done' : 'Ignite'}
-                </motion.button>
-              </div>
-            </motion.div>
-            
-            {/* MONTHLY CALENDAR GRID CARD */}
-            <motion.div 
-              initial="hidden" 
-              animate="show" 
-              variants={fadeUp(0.1)} 
-              style={{
-                background: dark ? 'rgba(20, 15, 10, 0.35)' : 'rgba(255, 252, 246, 0.5)',
-                border: dark ? '1px solid rgba(201, 168, 76, 0.12)' : '1px solid rgba(201, 168, 76, 0.18)',
-                borderRadius: '24px',
-                padding: '1.25rem',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                boxShadow: 'none', // removes administrative dominance
-              }}
-            >
-              {/* Calendar Header with Navigators */}
-              <div className="flex items-center justify-between mb-3 border-b border-gold/10 pb-2">
-                <div>
-                  <h2 className="font-display text-sm text-ivory font-semibold" style={{ color: dark ? '#e8d9b5' : '#5C3D1E' }}>
-                    {calDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
-                  </h2>
-                  <p className="text-[9px] text-ink-soft/40 dark:text-ivory/40 font-light mt-0.5">
-                    Gregorian &amp; Indian Lunar Cycles
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-1.5">
+                {/* Navigation arrows for Month */}
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => {
                       setCalDate(d => { const n = new Date(d); n.setMonth(n.getMonth() - 1); return n })
@@ -720,7 +656,7 @@ export default function Habits() {
                     }}
                     className="p-1 rounded-lg border border-gold/15 hover:bg-gold/10 text-gold-lt transition-all"
                   >
-                    <ChevronLeft size={12} />
+                    <ChevronLeft size={10} />
                   </button>
                   <button
                     onClick={() => {
@@ -729,12 +665,13 @@ export default function Habits() {
                     }}
                     className="p-1 rounded-lg border border-gold/15 hover:bg-gold/10 text-gold-lt transition-all"
                   >
-                    <ChevronRight size={12} />
+                    <ChevronRight size={10} />
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 mb-3">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-1 border-b border-gold/10 pb-2 text-center max-w-[280px] mx-auto w-full">
                 {[
                   { label: 'Active days', value: monthStats.activeDays },
                   { label: 'Perfect days', value: monthStats.perfectDays },
@@ -742,18 +679,17 @@ export default function Habits() {
                 ].map((stat) => (
                   <div
                     key={stat.label}
+                    className="py-0.5 px-1"
                     style={{
-                      borderRadius: 14,
-                      padding: '8px 6px',
-                      textAlign: 'center',
-                      background: dark ? 'rgba(255,255,255,0.035)' : 'rgba(255,255,255,0.48)',
-                      border: dark ? '1px solid rgba(201,168,76,0.12)' : '1px solid rgba(201,168,76,0.18)',
+                      background: dark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.3)',
+                      border: dark ? '1px solid rgba(201,168,76,0.1)' : '1px solid #e8d5b0',
+                      borderRadius: '8px',
                     }}
                   >
-                    <div className="font-display text-sm font-bold" style={{ color: dark ? '#ffeab8' : '#6b3f10' }}>
+                    <div className="font-display text-xs font-bold" style={{ color: dark ? '#ffeab8' : '#8B6914', lineHeight: 1.1 }}>
                       {stat.value}
                     </div>
-                    <div className="text-[8px] uppercase tracking-wider text-gold/60">
+                    <div className="text-[7px] uppercase tracking-wider text-gold/60">
                       {stat.label}
                     </div>
                   </div>
@@ -761,174 +697,108 @@ export default function Habits() {
               </div>
 
               {/* 7-Column Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {/* Weekday labels */}
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-                  <div key={day} className="text-center font-display text-[9px] font-bold text-gold/40 uppercase tracking-wider py-1">
-                    {day}
-                  </div>
-                ))}
+              <div className="max-w-[280px] mx-auto w-full">
+                <div className="grid grid-cols-7 gap-1 text-center font-display text-[8px] font-bold text-gold/40 uppercase tracking-wider mb-1">
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
+                    <div key={day}>{day}</div>
+                  ))}
+                </div>
+                
+                <div className="grid grid-cols-7 gap-1 justify-items-center">
+                  {/* Pre-offset blank days */}
+                  {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+                    <div key={`empty-${i}`} className="w-7 h-7" />
+                  ))}
 
-                {/* Pre-offset blank days */}
-                {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                  <div key={`empty-${i}`} className="bg-transparent rounded-xl aspect-[1.1]" />
-                ))}
+                  {/* Days of the month */}
+                  {dayNums.map(d => {
+                    const iso = isoForDay(d)
+                    const isToday = iso === todayStr
+                    const isSelected = selectedDay === d
+                    const dayDone = habitDone[iso] || {}
+                    const doneOnDayCount = habits.filter(h => dayDone[h.id]).length
+                    const isFuture = iso > todayStr
+                    const hasHabits = habits.length > 0
+                    const isPerfect = hasHabits && doneOnDayCount === habits.length
+                    const isPartial = hasHabits && doneOnDayCount > 0 && doneOnDayCount < habits.length
+                    const hasProgress = isPerfect || isPartial
+                    const completionPct = hasHabits ? Math.round((doneOnDayCount / habits.length) * 100) : 0
 
-                {/* Days of the month */}
-                {dayNums.map(d => {
-                  const iso = isoForDay(d)
-                  const isToday = iso === todayStr
-                  const isSelected = selectedDay === d
-                  const hindu = getHinduDetails(iso)
-                  
-                  const dayDone = habitDone[iso] || {}
-                  const doneOnDayCount = habits.filter(h => dayDone[h.id]).length
-                  
-                  const isFuture = iso > todayStr
-                  const hasHabits = habits.length > 0
-                  const isPerfect = hasHabits && doneOnDayCount === habits.length
-                  const isPartial = hasHabits && doneOnDayCount > 0 && doneOnDayCount < habits.length
-                  const hasProgress = isPerfect || isPartial
-                  const completionPct = hasHabits ? Math.round((doneOnDayCount / habits.length) * 100) : 0
-                  const runLength = getDayRun(d)
-                  const isOnRun = runLength >= 2
-                  const ringColor = isPerfect ? '#f5c84c' : isPartial ? '#E8622A' : 'rgba(201,168,76,0.18)'
-
-                  // Dynamic styles for the gamified "wow i completed these tasks everyday?? damn" vibe
-                  let cellBg = 'transparent'
-                  let cellBorder = 'transparent'
-                  let cellShadow = 'none'
-
-                  // LeetCode-style green dopamine loop heatmap
-                  let greenColor = 'transparent'
-                  if (!isFuture && hasProgress) {
-                    if (completionPct <= 30) greenColor = dark ? '#0e4429' : '#d6e685'
-                    else if (completionPct <= 60) greenColor = dark ? '#006d32' : '#8cc665'
-                    else if (completionPct < 100) greenColor = dark ? '#26a641' : '#44a340'
-                    else if (completionPct === 100) greenColor = dark ? '#39d353' : '#1e6823'
+                    let cellBg = 'transparent'
+                    let textStyle = { color: dark ? '#fcf6e8' : '#2c1a00' }
                     
-                    cellBg = greenColor
-                  }
+                    if (hasProgress && !isFuture) {
+                      if (completionPct <= 30) {
+                        cellBg = dark ? '#0e4429' : '#9be9a8';
+                        textStyle = { color: dark ? '#85e89d' : '#1b5e20' };
+                      } else if (completionPct <= 60) {
+                        cellBg = dark ? '#006d32' : '#40c463';
+                        textStyle = { color: '#ffffff' };
+                      } else if (completionPct < 100) {
+                        cellBg = dark ? '#26a641' : '#30a14e';
+                        textStyle = { color: '#ffffff' };
+                      } else if (completionPct === 100) {
+                        cellBg = dark ? '#39d353' : '#216e39';
+                        textStyle = { color: dark ? '#0e4429' : '#ffffff' };
+                      }
+                    }
 
-                  if (isSelected) {
-                    cellBorder = 'rgba(201, 168, 76, 0.8)'
-                    if (cellBg === 'transparent') cellBg = dark ? 'rgba(201, 168, 76, 0.18)' : 'rgba(201, 168, 76, 0.22)'
-                  } else if (isToday) {
-                    cellBorder = 'rgba(232, 98, 42, 0.5)'
-                    if (cellBg === 'transparent') cellBg = dark ? 'rgba(232, 98, 42, 0.08)' : 'rgba(232, 98, 42, 0.12)'
-                  }
-                  if (isPerfect) {
-                     cellShadow = `0 0 12px ${greenColor}80`
-                  }
+                    let cellBorder = 'transparent'
+                    let borderThickness = '1px'
+                    if (isToday) {
+                      cellBorder = dark ? 'rgba(201,168,76,0.5)' : '#e8d5b0';
+                      if (cellBg === 'transparent') {
+                        cellBg = dark ? 'rgba(201,168,76,0.1)' : 'rgba(200,169,110,0.1)';
+                      }
+                    }
+                    if (isSelected) {
+                      cellBorder = dark ? '#ffeab8' : '#8B6914';
+                      borderThickness = '2px';
+                      if (cellBg === 'transparent') {
+                        cellBg = dark ? 'rgba(201,168,76,0.25)' : 'rgba(200, 169, 110, 0.2)';
+                      }
+                    }
 
-                  return (
-                    <motion.div
-                      key={d}
-                      whileHover={{ scale: 1.06, y: -2 }}
-                      onClick={() => setSelectedDay(d)}
-                      className={`rounded-lg p-1.5 cursor-pointer transition-all border flex flex-col justify-between aspect-[1.08] relative overflow-hidden ${
-                        !isSelected && !isToday && !hasProgress
-                          ? 'bg-transparent border-transparent hover:bg-white/[0.03] hover:border-gold/15'
-                          : ''
-                      }`}
-                      style={{
-                        background: cellBg,
-                        borderColor: cellBorder,
-                        boxShadow: cellShadow,
-                        opacity: isFuture ? 0.45 : 1,
-                      }}
-                    >
-                      {isOnRun && !isFuture && (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            left: -8,
-                            right: -8,
-                            bottom: 6,
-                            height: 2,
-                            background: 'linear-gradient(90deg, transparent, rgba(245,200,76,0.72), transparent)',
-                            boxShadow: '0 0 10px rgba(245,200,76,0.38)',
-                          }}
-                        />
-                      )}
-
-                      {/* Cell Header: Gregorian Day & Tithi abbreviation */}
-                      <div className="flex justify-between items-center">
-                        <span
-                          className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold relative"
-                          style={{
-                            color: isToday || isPerfect ? '#fff' : (dark ? 'rgba(255,246,232,0.78)' : '#594022'),
-                            background: hasProgress
-                              ? `conic-gradient(${ringColor} ${completionPct * 3.6}deg, rgba(255,255,255,0.09) 0deg)`
-                              : (isToday ? '#E8622A' : 'rgba(255,255,255,0.04)'),
-                            boxShadow: isPerfect ? '0 0 10px rgba(245,200,76,0.45)' : 'none',
-                          }}
-                        >
-                          <span
-                            className="absolute inset-[2px] rounded-full"
-                            style={{
-                              background: isPerfect
-                                ? 'linear-gradient(135deg, #E8622A, #C9933A)'
-                                : isPartial
-                                  ? (dark ? 'rgba(20,15,10,0.9)' : '#fff8ee')
-                                  : isToday
-                                    ? '#E8622A'
-                                    : (dark ? 'rgba(20,15,10,0.75)' : 'rgba(255,255,255,0.8)'),
-                            }}
-                          />
-                          <span className="relative z-10">{d}</span>
-                        </span>
-                        
-                        <span className="text-[7px] text-gold/70 dark:text-gold/45" title={hindu.tithiFull}>
-                          {hindu.moonSymbol}{hindu.tithiNum}
-                        </span>
-                      </div>
-
-                      {/* Cell Bottom: Habits dots & status icon */}
-                      <div className="flex justify-between items-end mt-auto">
-                        <div className="flex flex-wrap gap-[2px] justify-start max-w-[70%]">
-                          {habits.slice(0, 5).map(h => {
-                            const done = !!dayDone[h.id]
-                            return (
-                              <span
-                                key={h.id}
-                                className="w-[4px] h-[4px] rounded-full"
-                                style={{
-                                  backgroundColor: done ? h.color : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
-                                  boxShadow: done ? `0 0 5px ${h.color}` : 'none',
-                                }}
-                              />
-                            )
-                          })}
-                        </div>
-                        {hasProgress && !isFuture && (
-                          <span 
-                            className="text-[9px] leading-none select-none filter drop-shadow-[0_0_2px_rgba(201,168,76,0.3)] animate-pulse"
-                            title={isPerfect ? `Perfect day. ${runLength} day run.` : `${completionPct}% complete`}
-                          >
-                            {isPerfect ? '🔥' : '✦'}
-                          </span>
-                        )}
-                      </div>
-                    </motion.div>
-                  )
-                })}
+                    return (
+                       <motion.div
+                         key={d}
+                         whileHover={{ scale: 1.05 }}
+                         onClick={() => setSelectedDay(d)}
+                         className="rounded-full cursor-pointer flex flex-col items-center justify-center w-7 h-7 relative text-[9px] transition-all"
+                         style={{
+                           background: cellBg,
+                           border: cellBorder !== 'transparent' ? `${borderThickness} solid ${cellBorder}` : 'none',
+                           opacity: isFuture ? 0.35 : 1,
+                         }}
+                       >
+                         <span className="font-semibold" style={textStyle}>
+                           {d}
+                         </span>
+                         {/* Dot under number */}
+                         {hasProgress && !isFuture && !isSelected && (
+                           <span 
+                             className="w-0.5 h-0.5 rounded-full absolute bottom-1" 
+                             style={{ backgroundColor: isPerfect ? (dark ? '#39d353' : '#216e39') : '#c9933a' }} 
+                           />
+                         )}
+                       </motion.div>
+                    )
+                  })}
+                </div>
               </div>
             </motion.div>
 
-            {/* INTEGRATED LUNAR SCIENCE CAROUSEL */}
+            {/* INTEGRATED LUNAR SCIENCE CAROUSEL (Custom dark themed Fact card) */}
             <motion.div 
               initial="hidden" 
               animate="show" 
               variants={fadeUp(0.12)} 
               style={{
-                background: dark ? 'rgba(20, 15, 10, 0.45)' : 'rgba(255, 252, 246, 0.65)',
-                border: dark ? '1px solid rgba(201, 168, 76, 0.16)' : '1px solid rgba(201, 168, 76, 0.22)',
-                borderRadius: '24px',
-                padding: '1.25rem',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                minHeight: '310px',
+                background: '#1c1208',
+                border: '1px solid rgba(201, 168, 76, 0.3)',
+                borderRadius: '20px',
+                padding: '0.85rem 1rem',
+                minHeight: '210px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
@@ -941,16 +811,14 @@ export default function Habits() {
                   position: 'absolute',
                   inset: 0,
                   pointerEvents: 'none',
-                  background: dark
-                    ? 'radial-gradient(circle at 85% 12%, rgba(129,140,248,0.12), transparent 34%), radial-gradient(circle at 10% 88%, rgba(232,98,42,0.10), transparent 38%)'
-                    : 'radial-gradient(circle at 85% 12%, rgba(201,168,76,0.18), transparent 34%), radial-gradient(circle at 10% 88%, rgba(232,98,42,0.10), transparent 38%)',
+                  background: 'radial-gradient(circle at 85% 12%, rgba(201,168,76,0.18), transparent 34%), radial-gradient(circle at 10% 88%, rgba(232,98,42,0.10), transparent 38%)',
                 }}
               />
-              <div className="flex items-center justify-between border-b border-gold/10 pb-2 mb-3">
-                <h3 className="font-display text-xs text-gold flex items-center gap-1.5 uppercase font-bold tracking-wider">
-                  <Sparkles size={12} /> Mind-Blowing Moon Facts
+              <div className="flex items-center justify-between border-b border-[#c8a96e]/20 pb-1.5 mb-2">
+                <h3 className="font-display text-[10px] text-gold flex items-center gap-1.5 uppercase font-bold tracking-wider" style={{ color: '#c8a96e', margin: 0 }}>
+                  <Sparkles size={11} /> Mind-blowing moon fact
                 </h3>
-                <span className="text-[9px] text-ink-soft/40 dark:text-ivory/40">
+                <span className="text-[8px] text-[#c8a96e]/40">
                   {currentInsightIdx + 1} / {scientificInsights.length}
                 </span>
               </div>
@@ -962,29 +830,29 @@ export default function Habits() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -8 }}
                   transition={{ duration: 0.25 }}
-                  className="flex-1 flex flex-col gap-3 py-1 relative z-10"
+                  className="flex-1 flex flex-col gap-2 py-0.5 relative z-10"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-center gap-2">
                     <div
                       className="shrink-0 flex items-center justify-center"
                       style={{
-                        width: 46,
-                        height: 46,
-                        borderRadius: 16,
-                        background: dark ? 'rgba(255,255,255,0.055)' : 'rgba(255,255,255,0.7)',
-                        border: '1px solid rgba(201,168,76,0.22)',
-                        boxShadow: '0 0 22px rgba(201,168,76,0.12)',
+                        width: 32,
+                        height: 32,
+                        borderRadius: 10,
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(201,168,76,0.25)',
+                        boxShadow: '0 0 12px rgba(201,168,76,0.15)',
                       }}
                     >
-                      <span className="text-2xl">{currentInsight.icon}</span>
+                      <span className="text-base">{currentInsight.icon}</span>
                     </div>
                     <div className="min-w-0">
-                      <span className="inline-flex text-[8px] uppercase tracking-[0.18em] text-saffron font-bold mb-1">
+                      <span className="inline-flex text-[7px] uppercase tracking-[0.18em] text-[#c8a96e]/60 font-bold mb-0">
                         {currentInsight.stat}
                       </span>
                       <h4 style={{
-                        fontSize: '0.875rem', fontWeight: 700, letterSpacing: '0.02em', lineHeight: 1.3,
-                        color: dark ? '#fcf6e8' : '#3d2e1a', margin: 0,
+                        fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.02em', lineHeight: 1.2,
+                        color: '#fdf6ec', margin: 0,
                       }}>
                         {currentInsight.title}
                       </h4>
@@ -992,57 +860,55 @@ export default function Habits() {
                   </div>
 
                   <p style={{
-                    fontSize: '11px', lineHeight: 1.6, fontWeight: 300, fontFamily: "'Playfair Display', serif",
-                    color: dark ? 'rgba(252,246,232,0.68)' : 'rgba(61,45,26,0.7)',
+                    fontSize: '10px', lineHeight: 1.4, fontWeight: 300, fontFamily: "'Lora', serif",
+                    color: '#c8a96e88', margin: '4px 0 0'
                   }}>
                     {currentInsight.desc}
                   </p>
 
                   <div
                     style={{
-                      borderRadius: 16,
-                      padding: '10px 12px',
-                      background: dark ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.48)',
-                      border: '1px solid rgba(201,168,76,0.14)',
+                      borderRadius: 12,
+                      padding: '6px 10px',
+                      background: 'rgba(0,0,0,0.2)',
+                      border: '1px solid rgba(201,168,76,0.15)',
+                      marginTop: '4px'
                     }}
                   >
-                    <p className="text-[10px] leading-relaxed m-0" style={{ color: dark ? '#ffeab8' : '#704615' }}>
-                      <strong>Why it slaps:</strong> {currentInsight.vibe}
-                    </p>
-                    <p className="text-[10px] leading-relaxed m-0 mt-1" style={{ color: dark ? 'rgba(252,246,232,0.62)' : 'rgba(61,37,13,0.72)' }}>
-                      <strong>Try this:</strong> {currentInsight.tryThis}
+                    <p className="text-[9px] leading-relaxed m-0" style={{ color: '#c8a96e' }}>
+                      <strong>Why it slaps:</strong> "{currentInsight.vibe}"
                     </p>
                   </div>
                 </motion.div>
               </AnimatePresence>
 
-              <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/5">
-                <div className="flex gap-1.5">
+              <div className="flex justify-between items-center mt-2 pt-1.5 border-t border-[#c8a96e]/10">
+                <div className="flex gap-1">
                   {scientificInsights.map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setCurrentInsightIdx(i)}
-                      className="h-1.5 rounded-full transition-all"
+                      className="h-1 rounded-full transition-all"
                       style={{
-                        width: i === currentInsightIdx ? 18 : 6,
-                        background: i === currentInsightIdx ? '#C9933A' : (dark ? 'rgba(255,255,255,0.16)' : 'rgba(92,61,30,0.18)'),
+                        width: i === currentInsightIdx ? 12 : 4,
+                        background: i === currentInsightIdx ? '#C9933A' : 'rgba(200,169,110,0.2)',
                       }}
                       aria-label={`Open lunar insight ${i + 1}`}
                     />
                   ))}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setCurrentInsightIdx(prev => (prev - 1 + scientificInsights.length) % scientificInsights.length)}
-                    className="p-1 rounded-md border border-gold/15 bg-white/[0.02] hover:bg-gold/10 text-gold-lt transition-all"
+                    className="p-0.5 rounded border border-[#c8a96e]/20 bg-white/[0.02] hover:bg-[#c8a96e]/10 text-[#c8a96e] transition-all"
                   >
-                    <ChevronLeft size={11} />
+                    <ChevronLeft size={10} />
                   </button>
                   <button
                     onClick={() => setCurrentInsightIdx(prev => (prev + 1) % scientificInsights.length)}
-                    className="p-1 rounded-md border border-gold/15 bg-white/[0.02] hover:bg-gold/10 text-gold-lt transition-all"
+                    className="p-0.5 rounded border border-[#c8a96e]/20 bg-white/[0.02] hover:bg-[#c8a96e]/10 text-[#c8a96e] transition-all"
                   >
-                    <ChevronRight size={11} />
+                    <ChevronRight size={10} />
                   </button>
                 </div>
               </div>
@@ -1052,6 +918,7 @@ export default function Habits() {
 
         </div>
       </div>
+
     </PageLayout>
   )
 }

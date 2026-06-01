@@ -74,7 +74,7 @@ function PageLoader() {
 }
 
 const Home        = lazy(() => import('./pages/Home'))
-const Habits      = lazy(() => import('./pages/Habits'))
+import Habits      from './pages/Habits'
 const Journal     = lazy(() => import('./pages/Journal'))
 const WisdomPage  = lazy(() => import('./pages/WisdomPage'))
 const Heritage    = lazy(() => import('./pages/Heritage'))
@@ -83,6 +83,8 @@ const Login       = lazy(() => import('./pages/Login'))
 const AIAssistant = lazy(() => import('./components/system/AIAssistant'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const Resources   = lazy(() => import('./pages/Resources'))
+
 
 function ScrollReset() {
   const { pathname } = useLocation()
@@ -116,6 +118,7 @@ function AppContent() {
           <Route path="/login"   element={<Login />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin"   element={<AdminDashboard />} />
+          <Route path="/resources" element={<Resources />} />
           <Route path="*"        element={<Home />} />
         </Routes>
       </Suspense>
