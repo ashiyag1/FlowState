@@ -1,7 +1,11 @@
-import jwt from 'jsonwebtoken'
+import { jwtVerify } from 'jose'
 
-export default function authMiddleware(req, res, next) {
-  const JWT_SECRET = process.env.JWT_SECRET || 'flowstate_secret_key_108'
+export default async function authMiddleware(req, res, next) {
+  const JWT_SECRET = process.env.JWT_SECRET
+  if (!JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET not set — rejecting all requests')
+    return res.status(500).json({ error: 'Server configuration error' })
+  }
 
   try {
     const authHeader = req.headers.authorization || req.headers.Authorization
@@ -11,13 +15,14 @@ export default function authMiddleware(req, res, next) {
     }
 
     const token = authHeader.split(' ')[1]
-    const decoded = jwt.verify(token, JWT_SECRET)
+    const secretKey = new TextEncoder().encode(JWT_SECRET)
+    const { payload } = await jwtVerify(token, secretKey)
 
-    if (!decoded || !decoded.userId) {
+    if (!payload || !payload.userId) {
       return res.status(401).json({ error: 'Unauthorized: Invalid token payload' })
     }
 
-    req.userId = decoded.userId
+    req.userId = payload.userId
     next()
   } catch (err) {
     console.error('Authentication middleware error:', err)

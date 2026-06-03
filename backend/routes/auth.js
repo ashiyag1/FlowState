@@ -1,26 +1,40 @@
 import express from 'express'
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
+import { SignJWT } from 'jose'
 import { dbCreateUser, dbFindUserByEmail, dbFindUserById } from '../db.js'
 import authMiddleware from '../middleware/auth.js'
+import { ensureString, escapeHTML } from '../utils/security.js'
 
 const router = express.Router()
-const JWT_SECRET = process.env.JWT_SECRET || 'flowstate_secret_key_108'
+
+// Fail-fast: crash loudly if JWT_SECRET is missing rather than silently using
+// a hardcoded fallback that would allow anyone to forge valid tokens.
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is not set. Server cannot start safely.')
+}
 
 // Signup Route
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password } = req.body
+    let { name, email, password } = req.body
+
+    name = ensureString(name).trim()
+    email = ensureString(email).trim().toLowerCase()
+    password = ensureString(password)
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required' })
     }
 
+    // Escape name for XSS prevention when displayed in UI
+    const escapedName = escapeHTML(name)
+
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters long' })
     }
 
-    const existingUser = await dbFindUserByEmail(email.toLowerCase())
+    const existingUser = await dbFindUserByEmail(email)
     if (existingUser) {
       return res.status(400).json({ error: 'An account with this email already exists' })
     }
@@ -28,10 +42,14 @@ router.post('/signup', async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const passwordHash = await bcrypt.hash(password, salt)
     
-    const user = await dbCreateUser(name, email.toLowerCase(), passwordHash)
+    const user = await dbCreateUser(escapedName, email, passwordHash)
     
     const userId = user._id ? user._id.toString() : user.id
-    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
+    const token = await new SignJWT({ userId })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('7d')
+      .sign(new TextEncoder().encode(JWT_SECRET))
 
     return res.status(201).json({
       token,
@@ -57,13 +75,16 @@ router.post('/signup', async (req, res) => {
 // Login Route
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body
+    let { email, password } = req.body
+
+    email = ensureString(email).trim().toLowerCase()
+    password = ensureString(password)
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' })
     }
 
-    const user = await dbFindUserByEmail(email.toLowerCase())
+    const user = await dbFindUserByEmail(email)
     if (!user) {
       return res.status(400).json({ error: 'Invalid email or password' })
     }
@@ -74,7 +95,11 @@ router.post('/login', async (req, res) => {
     }
 
     const userId = user._id ? user._id.toString() : user.id
-    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
+    const token = await new SignJWT({ userId })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('7d')
+      .sign(new TextEncoder().encode(JWT_SECRET))
 
     return res.status(200).json({
       token,
@@ -130,7 +155,9 @@ router.get('/me', authMiddleware, async (req, res) => {
 // Google OAuth
 router.post('/google', async (req, res) => {
   try {
-    const { accessToken } = req.body
+    let { accessToken } = req.body
+    accessToken = ensureString(accessToken)
+    
     if (!accessToken) {
       return res.status(400).json({ error: 'Access token is required' })
     }
@@ -145,15 +172,22 @@ router.post('/google', async (req, res) => {
       return res.status(400).json({ error: 'Could not retrieve email from Google' })
     }
 
-    let user = await dbFindUserByEmail(profile.email.toLowerCase())
+    const email = ensureString(profile.email).trim().toLowerCase()
+    const name = escapeHTML(ensureString(profile.name || 'User').trim())
+
+    let user = await dbFindUserByEmail(email)
     if (!user) {
       const salt = await bcrypt.genSalt(10)
       const placeholderHash = await bcrypt.hash(Math.random().toString(36), salt)
-      user = await dbCreateUser(profile.name || 'User', profile.email.toLowerCase(), placeholderHash)
+      user = await dbCreateUser(name, email, placeholderHash)
     }
 
     const userId = user._id ? user._id.toString() : user.id
-    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
+    const token = await new SignJWT({ userId })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('7d')
+      .sign(new TextEncoder().encode(JWT_SECRET))
 
     return res.status(200).json({
       token,

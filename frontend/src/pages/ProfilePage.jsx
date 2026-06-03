@@ -1,37 +1,22 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Camera, User, Mail, MapPin, Lock, Sun, Moon,
-  Volume2, VolumeX, Bell, BellOff, Trash2, LogOut,
-  Check, X, Edit3, Shield, Eye, EyeOff, Calendar, Award
-} from 'lucide-react'
+import { useMemo, useCallback } from 'react'
+import { motion } from 'framer-motion'
+import { LogOut } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useNotif } from '../components/system/NotificationPopup'
 import PageLayout from '../components/ui/PageLayout'
 import { useNavigate } from 'react-router-dom'
-import { useMemo } from 'react'
 import { useWellness } from '../context/WellnessContext'
 import { computeArchetype, computeWellnessScore } from '../utils/soulArchetype'
 
-const PRANA_TIERS = [
-  { threshold: 0, title: "Seeker (Arambha)", desc: "A seeker embarking on the paths of awareness.", next: { name: "Practitioner", threshold: 50 } },
-  { threshold: 50, title: "Practitioner (Sadhaka)", desc: "A dedicated practitioner cultivating steady focus.", next: { name: "Harmonist", threshold: 100 } },
-  { threshold: 100, title: "Harmonist (Yogi/Yogini)", desc: "Living in balance, uniting inner and outer rhythms.", next: { name: "Visionary Sage", threshold: 150 } },
-  { threshold: 150, title: "Visionary Sage (Rishi/Rishika)", desc: "Awakened awareness, seeing the light within all things.", next: { name: "Liberated Spirit", threshold: 200 } },
-  { threshold: 200, title: "Liberated Spirit (Jivanmukta)", desc: "Resting in pure liberation, the ultimate state of flow.", next: null }
-]
-
-function getPranaTier(prana) {
-  let activeTier = PRANA_TIERS[0]
-  for (const tier of PRANA_TIERS) {
-    if (prana >= tier.threshold) {
-      activeTier = tier
-    }
-  }
-  return activeTier
-}
+// Extracted Subcomponents
+import ProfileHeaderCard from '../components/profile/ProfileHeaderCard'
+import PranaTierCard from '../components/profile/PranaTierCard'
+import SoulIdentityCard from '../components/profile/SoulIdentityCard'
+import PreferencesSettingsCard from '../components/profile/PreferencesSettingsCard'
+import AccountSettingsCard from '../components/profile/AccountSettingsCard'
+import DangerZoneCard from '../components/profile/DangerZoneCard'
 
 const getLocalYYYYMMDD = (d = new Date()) => {
   const year = d.getFullYear()
@@ -72,183 +57,24 @@ const GoldDivider = () => (
   </div>
 )
 
-/* ── Section Card Wrapper ── */
-function SectionCard({ children, className = '' }) {
-  return (
-    <motion.div variants={fadeUp}>
-      <div className={`rounded-2xl border border-gold/15 bg-white/80 dark:bg-white/[0.04] backdrop-blur-xl shadow-xl p-6 md:p-8 ${className}`}
-        style={{
-          boxShadow: '0 8px 40px rgba(0,0,0,0.06), 0 0 60px rgba(212,168,42,0.03)',
-        }}>
-        {children}
-      </div>
-    </motion.div>
-  )
-}
-
-function SectionTitle({ icon: Icon, children }) {
-  return (
-    <div className="flex items-center gap-2.5 mb-5">
-      <span className="text-gold/50 text-xs">✦</span>
-      {Icon && <Icon size={15} className="text-gold/60" />}
-      <h3 className="text-xs font-semibold tracking-[0.14em] uppercase text-gold dark:text-gold-lt"
-        style={{ fontFamily: "'Cinzel', serif" }}>
-        {children}
-      </h3>
-    </div>
-  )
-}
-
-/* ── Custom Toggle Switch ── */
-function ToggleSwitch({ checked, onChange, iconOn, iconOff, label, sublabel }) {
-  const IconOn = iconOn
-  const IconOff = iconOff
-  return (
-    <div className="flex items-center justify-between py-3 group">
-      <div>
-        <div className="text-sm font-medium text-ink dark:text-sand-lt/90" style={{ fontFamily: "'Lexend', sans-serif" }}>
-          {label}
-        </div>
-        {sublabel && (
-          <div className="text-[0.68rem] text-mist-dark/50 dark:text-sand-lt/30 mt-0.5" style={{ fontFamily: "'Lora', serif", fontStyle: 'italic' }}>
-            {sublabel}
-          </div>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={onChange}
-        className="relative inline-flex h-7 w-[52px] items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gold/25"
-        style={{
-          background: checked
-            ? 'linear-gradient(135deg, #C9933A, #E8B96A)'
-            : 'rgba(180,160,130,0.2)',
-          border: `1px solid ${checked ? 'rgba(212,168,42,0.5)' : 'rgba(180,160,130,0.25)'}`,
-          boxShadow: checked ? '0 0 16px rgba(212,168,42,0.2), inset 0 1px 0 rgba(255,240,190,0.3)' : 'none',
-        }}
-      >
-        <motion.div
-          animate={{ x: checked ? 24 : 2 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          className="flex items-center justify-center rounded-full bg-white shadow-md"
-          style={{
-            width: 22, height: 22,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          }}
-        >
-          {checked
-            ? (IconOn && <IconOn size={11} className="text-[#C9933A]" />)
-            : (IconOff && <IconOff size={11} className="text-gray-400" />)
-          }
-        </motion.div>
-      </button>
-    </div>
-  )
-}
-
-/* ── Input Base Style (matches Login.jsx) ── */
-const inputBase =
-  'w-full rounded-xl px-4 py-3 text-sm border bg-white/70 backdrop-blur-sm placeholder:text-mist-dark/40 ' +
-  'focus:outline-none focus:ring-2 focus:ring-saffron/25 focus:border-saffron/50 transition-all duration-300 ' +
-  'dark:bg-white/[0.04] dark:text-white dark:placeholder:text-white/30 dark:border-gold/15 border-gold/20'
-
-/* ── Delete Confirmation Modal ── */
-function DeleteModal({ open, onClose, onConfirm }) {
-  return (
-    <AnimatePresence>
-      {open && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed inset-0 z-[101] flex items-center justify-center p-4"
-          >
-            <div className="w-full max-w-sm rounded-2xl border border-red-500/20 bg-white/95 dark:bg-[#1a0f06]/95 backdrop-blur-xl p-6 md:p-8"
-              style={{ boxShadow: '0 24px 64px rgba(0,0,0,0.3), 0 0 40px rgba(220,60,40,0.08)' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Red accent line */}
-              <div className="h-1 w-16 mx-auto mb-5 rounded-full" style={{ background: 'linear-gradient(90deg, #dc2626, #ea580c)' }} />
-
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4"
-                  style={{ background: 'rgba(220,40,40,0.08)', border: '1px solid rgba(220,40,40,0.15)' }}>
-                  <Trash2 size={22} className="text-red-500" />
-                </div>
-                <h3 className="text-lg font-semibold text-ink dark:text-sand-lt mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  Delete Account?
-                </h3>
-                <p className="text-sm text-mist-dark/60 dark:text-sand-lt/40 mb-6 leading-relaxed" style={{ fontFamily: "'Lora', serif", fontStyle: 'italic' }}>
-                  This action is irreversible. All your data, rituals, and journals will be permanently erased.
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={onClose}
-                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium border border-gold/20 text-ink/70 dark:text-sand-lt/70 hover:bg-gold/5 transition-colors"
-                  style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.05em' }}
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={onConfirm}
-                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
-                  style={{
-                    background: 'linear-gradient(135deg, #dc2626, #ea580c)',
-                    fontFamily: "'Cinzel', serif",
-                    letterSpacing: '0.05em',
-                    boxShadow: '0 4px 16px rgba(220,40,40,0.25)',
-                  }}
-                >
-                  Delete Forever
-                </motion.button>
-              </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  )
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PROFILE PAGE
-   ═══════════════════════════════════════════════════════════ */
 export default function ProfilePage() {
-  const { user, setUser, updateProfile, updateAvatar, changePassword, deleteAccount, logout } = useAuth()
+  const { user, updateProfile, updateAvatar, changePassword, deleteAccount, logout } = useAuth()
   const { dark, toggle } = useTheme()
-  const { isMuted, toggleMute, playHydrationSound } = useSoundEffects()
+  const { isMuted, toggleMute } = useSoundEffects()
   const { journal, habitDone, habits, todayTotal, waterGoal } = useWellness()
   const notif = useNotif()
   const navigate = useNavigate()
-
-  const userPranaTier = useMemo(() => getPranaTier(user?.pranaPoints || 0), [user?.pranaPoints])
 
   // Archetype + wellness score
   const { archetype } = useMemo(() => computeArchetype(journal), [journal])
   const todayStr = getLocalYYYYMMDD()
   const habitsCompletedToday = Object.keys(habitDone[todayStr] || {}).length
+  
   const journalCycle = useMemo(() => {
     const dates = [...new Set(journal.map(e => e.date))].sort().reverse()
     let count = 0
-    let currentD = new Date()
     let expectedDates = []
     
-    // Create an array of all possible expected dates backwards from today up to the length of journal entries (plus some buffer)
     for (let i = 0; i < dates.length * 2 + 2; i++) {
       const d = new Date()
       d.setDate(d.getDate() - i)
@@ -256,7 +82,6 @@ export default function ProfilePage() {
     }
     
     let expectedIdx = 0
-    // Check today, then yesterday, then day before
     if (!dates.includes(expectedDates[expectedIdx])) {
       expectedIdx++
       if (!dates.includes(expectedDates[expectedIdx])) {
@@ -270,17 +95,17 @@ export default function ProfilePage() {
           count++
           expectedIdx++
         } else {
-          // Check for a 1-day gap
           if (dates.includes(expectedDates[expectedIdx + 1])) {
-            expectedIdx++ // skip the rest day
+            expectedIdx++ // skip forgiven rest day
           } else {
-            break // 2-day gap breaks it
+            break // 2-day gap breaks cycle
           }
         }
       }
     }
     return count
   }, [journal])
+
   const waterPct = waterGoal > 0 ? Math.min(todayTotal / waterGoal, 1) : 0
   const wellnessScore = useMemo(() => computeWellnessScore({
     journalStreak: journalCycle,
@@ -290,159 +115,21 @@ export default function ProfilePage() {
     waterPct,
   }), [journalCycle, journal.length, habitsCompletedToday, habits.length, waterPct])
 
-  // Local form state
-  const [editingName, setEditingName] = useState(false)
-  const [nameVal, setNameVal] = useState('')
-  const [bioVal, setBioVal] = useState('')
-  const [locationVal, setLocationVal] = useState('')
-  const [notifEnabled, setNotifEnabled] = useState(true)
+  const handleProfileUpdate = useCallback(async (data) => {
+    return await updateProfile(data)
+  }, [updateProfile])
 
-  // Password
-  const [showPwSection, setShowPwSection] = useState(false)
-  const [currentPw, setCurrentPw] = useState('')
-  const [newPw, setNewPw] = useState('')
-  const [confirmPw, setConfirmPw] = useState('')
-  const [showCurrentPw, setShowCurrentPw] = useState(false)
-  const [showNewPw, setShowNewPw] = useState(false)
-
-  // Delete modal
-  const [deleteOpen, setDeleteOpen] = useState(false)
-
-  // File input ref
-  const fileInputRef = useRef(null)
-  const nameInputRef = useRef(null)
-
-  // Sync local state with user data
-  useEffect(() => {
-    if (user) {
-      setNameVal(user.name || '')
-      setBioVal(user.bio || '')
-      setLocationVal(user.location || '')
-      setNotifEnabled(user.preferences?.notificationsEnabled !== false)
-    }
-  }, [user])
-
-  // Focus name input when editing
-  useEffect(() => {
-    if (editingName && nameInputRef.current) {
-      nameInputRef.current.focus()
-      nameInputRef.current.select()
-    }
-  }, [editingName])
-
-  /* ── Handlers ── */
-  const handleAvatarChange = useCallback(async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Validation for JPG, JPEG, and PNG formats
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
-    const fileExt = file.name.split('.').pop().toLowerCase()
-    const allowedExts = ['jpg', 'jpeg', 'png']
-    if (!allowedTypes.includes(file.type) && !allowedExts.includes(fileExt)) {
-      notif('Only JPG, JPEG, and PNG files are allowed', 'error')
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      notif('Image too large — max 5MB', 'error')
-      return
-    }
-    const reader = new FileReader()
-    reader.onloadend = async () => {
-      const base64 = reader.result
-      // Optimistic update
-      setUser(prev => ({ ...prev, avatar: base64 }))
-      const res = await updateAvatar(base64)
-      if (res.success) {
-        notif('Avatar updated ✦', 'success')
-      } else {
-        notif(res.error || 'Failed to update avatar', 'error')
-      }
-    }
-    reader.readAsDataURL(file)
-  }, [updateAvatar, notif, setUser])
+  const handleAvatarUpdate = useCallback(async (base64) => {
+    return await updateAvatar(base64)
+  }, [updateAvatar])
 
   const handleRemoveAvatar = useCallback(async () => {
-    const oldAvatar = user?.avatar || ''
-    // Optimistic update
-    setUser(prev => ({ ...prev, avatar: '' }))
-    const res = await updateAvatar('')
-    if (res.success) {
-      notif('Avatar removed ✦', 'success')
-    } else {
-      notif(res.error || 'Failed to remove avatar', 'error')
-      // Revert on failure
-      setUser(prev => ({ ...prev, avatar: oldAvatar }))
-    }
-  }, [updateAvatar, notif, setUser, user?.avatar])
+    return await updateAvatar('')
+  }, [updateAvatar])
 
-  const handleNameSave = useCallback(async () => {
-    setEditingName(false)
-    if (!nameVal.trim() || nameVal.trim() === user?.name) return
-    const res = await updateProfile({ name: nameVal.trim() })
-    if (res.success) {
-      notif('Name updated ✦', 'success')
-    } else {
-      notif(res.error || 'Failed to update name', 'error')
-      setNameVal(user?.name || '')
-    }
-  }, [nameVal, user, updateProfile, notif])
-
-  const handleBioSave = useCallback(async () => {
-    if (bioVal === (user?.bio || '')) return
-    const res = await updateProfile({ bio: bioVal })
-    if (res.success) {
-      notif('Bio updated ✦', 'success')
-    } else {
-      notif(res.error || 'Failed to update bio', 'error')
-    }
-  }, [bioVal, user, updateProfile, notif])
-
-  const handleLocationSave = useCallback(async () => {
-    if (locationVal === (user?.location || '')) return
-    const res = await updateProfile({ location: locationVal })
-    if (res.success) {
-      notif('Location updated ✦', 'success')
-    } else {
-      notif(res.error || 'Failed to update location', 'error')
-    }
-  }, [locationVal, user, updateProfile, notif])
-
-  const handleNotifToggle = useCallback(async () => {
-    const newVal = !notifEnabled
-    setNotifEnabled(newVal)
-    const res = await updateProfile({ preferences: { notificationsEnabled: newVal } })
-    if (!res.success) {
-      setNotifEnabled(!newVal)
-      notif(res.error || 'Failed to update preferences', 'error')
-    }
-  }, [notifEnabled, updateProfile, notif])
-
-  const handlePasswordChange = useCallback(async () => {
-    if (!currentPw || !newPw) {
-      notif('Please fill in all password fields', 'error')
-      return
-    }
-    if (newPw !== confirmPw) {
-      notif('New passwords do not match', 'error')
-      return
-    }
-    if (newPw.length < 6) {
-      notif('Password must be at least 6 characters', 'error')
-      return
-    }
-    const res = await changePassword(currentPw, newPw)
-    if (res.success) {
-      notif('Password changed successfully ✦', 'success')
-      setCurrentPw('')
-      setNewPw('')
-      setConfirmPw('')
-      setShowPwSection(false)
-    } else {
-      notif(res.error || 'Failed to change password', 'error')
-    }
-  }, [currentPw, newPw, confirmPw, changePassword, notif])
+  const handlePasswordChange = useCallback(async (currentPw, newPw) => {
+    return await changePassword(currentPw, newPw)
+  }, [changePassword])
 
   const handleDeleteAccount = useCallback(async () => {
     const res = await deleteAccount()
@@ -452,13 +139,16 @@ export default function ProfilePage() {
     } else {
       notif(res.error || 'Failed to delete account', 'error')
     }
-    setDeleteOpen(false)
   }, [deleteAccount, notif, navigate])
 
-  const initial = user?.name?.charAt(0)?.toUpperCase() || '?'
-  const joinedDate = user?.joinedAt || user?.createdAt
-    ? new Date(user.joinedAt || user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : null
+  const notifEnabled = user?.preferences?.notificationsEnabled !== false
+  const handleNotifToggle = useCallback(async () => {
+    const newVal = !notifEnabled
+    const res = await updateProfile({ preferences: { notificationsEnabled: newVal } })
+    if (!res.success) {
+      notif(res.error || 'Failed to update preferences', 'error')
+    }
+  }, [notifEnabled, updateProfile, notif])
 
   return (
     <PageLayout>
@@ -488,569 +178,75 @@ export default function ProfilePage() {
           animate="animate"
           className="max-w-2xl mx-auto relative z-10 flex flex-col gap-6"
         >
-          {/* ═══════════ SECTION 1: Profile Header ═══════════ */}
-          <SectionCard>
-            <div className="flex flex-col items-center text-center">
-              {/* Avatar */}
-              <div className="relative group mb-5">
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  className="relative"
-                  style={{
-                    width: 96, height: 96, borderRadius: '50%',
-                    border: '2.5px solid rgba(212,168,42,0.4)',
-                    boxShadow: '0 0 32px rgba(212,168,42,0.12), 0 8px 24px rgba(0,0,0,0.08)',
-                    overflow: 'hidden',
-                    background: user?.avatar ? 'transparent' : 'linear-gradient(135deg, #C9933A, #E8B96A)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  {user?.avatar ? (
-                    <img src={user.avatar} alt={user?.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span style={{
-                      fontFamily: "'Playfair Display', serif",
-                      fontSize: 38,
-                      fontWeight: 700,
-                      color: '#fff',
-                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                    }}>
-                      {initial}
-                    </span>
-                  )}
-
-                  {/* Camera overlay on hover */}
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                    style={{
-                      background: 'rgba(0,0,0,0.4)',
-                      borderRadius: '50%',
-                    }}
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Camera size={22} className="text-white" />
-                  </motion.div>
-                </motion.div>
-
-                {/* Subtle golden glow ring */}
-                <div className="absolute -inset-1.5 rounded-full opacity-20 pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(212,168,42,0.3) 0%, transparent 70%)',
-                    filter: 'blur(6px)',
-                  }}
-                />
-
-                {user?.avatar && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={handleRemoveAvatar}
-                    className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-white dark:bg-[#1a0f06] border border-gold/30 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 shadow-md z-10 flex items-center justify-center cursor-pointer"
-                    title="Remove Photo"
-                  >
-                    <Trash2 size={13} />
-                  </motion.button>
-                )}
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/png, image/jpeg, image/jpg"
-                  className="hidden"
-                  onChange={handleAvatarChange}
-                />
-              </div>
-
-              {/* Name (editable) */}
-              <div className="flex items-center gap-2 mb-1.5">
-                {editingName ? (
-                  <input
-                    ref={nameInputRef}
-                    value={nameVal}
-                    onChange={(e) => setNameVal(e.target.value)}
-                    onBlur={handleNameSave}
-                    onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
-                    className="text-center text-2xl md:text-3xl font-semibold text-ink dark:text-sand-lt bg-transparent border-b-2 border-gold/30 focus:border-gold/60 outline-none transition-colors px-2 py-0.5"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
-                  />
-                ) : (
-                  <motion.h1
-                    className="text-2xl md:text-3xl font-semibold text-ink dark:text-sand-lt cursor-pointer hover:text-gold/80 transition-colors"
-                    style={{ fontFamily: "'Playfair Display', serif" }}
-                    onClick={() => setEditingName(true)}
-                    whileHover={{ scale: 1.01 }}
-                  >
-                    {user?.name || 'Your Name'}
-                  </motion.h1>
-                )}
-                {!editingName && (
-                  <button
-                    onClick={() => setEditingName(true)}
-                    className="text-gold/40 hover:text-gold transition-colors p-1"
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                )}
-              </div>
-
-              {/* Email */}
-              <div className="flex items-center gap-1.5 text-mist-dark/50 dark:text-sand-lt/40 text-sm mb-2">
-                <Mail size={13} />
-                <span>{user?.email || 'email@example.com'}</span>
-              </div>
-
-              {/* Member since */}
-              {joinedDate && (
-                <div className="flex items-center gap-1.5 text-gold/50 dark:text-gold-lt/40 text-xs mt-1"
-                  style={{ fontFamily: "'Lora', serif", fontStyle: 'italic' }}>
-                  <Calendar size={11} />
-                  <span>Member since {joinedDate}</span>
-                </div>
-              )}
-
-              {/* Bio */}
-              <div className="w-full mt-5">
-                <label className="block text-[0.65rem] text-gold/50 dark:text-gold-lt/40 uppercase tracking-widest mb-1.5 text-left"
-                  style={{ fontFamily: "'Cinzel', serif" }}>
-                  Bio
-                </label>
-                <textarea
-                  value={bioVal}
-                  onChange={(e) => setBioVal(e.target.value)}
-                  onBlur={handleBioSave}
-                  placeholder="Tell us about your journey..."
-                  rows={3}
-                  className={`${inputBase} resize-none`}
-                  style={{ fontFamily: "'Lora', serif", fontStyle: 'italic', lineHeight: 1.7 }}
-                />
-              </div>
-            </div>
-          </SectionCard>
+          {/* PROFILE HEADER CARD */}
+          <motion.div variants={fadeUp}>
+            <ProfileHeaderCard
+              user={user}
+              onUpdateAvatar={handleAvatarUpdate}
+              onRemoveAvatar={handleRemoveAvatar}
+              onUpdateProfile={handleProfileUpdate}
+            />
+          </motion.div>
 
           <GoldDivider />
 
-          {/* ═══════════ PRANA & XP CENTER ═══════════ */}
-          <SectionCard>
-            <SectionTitle icon={Award}>Sadhana Energy &amp; Progress</SectionTitle>
-            
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              
-              {/* Interactive SVG Mandala */}
-              <div className="relative flex items-center justify-center shrink-0" style={{ width: 140, height: 140 }}>
-                {/* Outer Glow */}
-                <div 
-                  className="absolute inset-0 rounded-full opacity-30 pointer-events-none transition-all duration-500"
-                  style={{
-                    background: `radial-gradient(circle, ${user?.pranaPoints > 0 ? '#E8622A' : '#C9933A'} 0%, transparent 70%)`,
-                    filter: 'blur(16px)',
-                    transform: `scale(${1 + Math.min(user?.pranaPoints || 0, 250) / 500})`,
-                  }}
-                />
-                
-                {/* SVG Mandala */}
-                <motion.svg
-                  onClick={() => {
-                    playHydrationSound();
-                    notif("✨ You feel the pulse of Prana flow within you...", "info");
-                  }}
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: Math.max(10, 60 - Math.min(user?.pranaPoints || 0, 250) * 0.2), // spins faster with more prana!
-                    ease: "linear"
-                  }}
-                  viewBox="0 0 100 100"
-                  className="w-full h-full cursor-pointer select-none transition-transform hover:scale-105 active:scale-95"
-                  style={{
-                    filter: `drop-shadow(0 0 12px ${user?.pranaPoints > 100 ? '#E8622A66' : '#C9933A44'})`
-                  }}
-                >
-                  <circle cx="50" cy="50" r="45" stroke="#c9a84c" strokeWidth="0.8" fill="none" opacity="0.3" />
-                  <circle cx="50" cy="50" r="35" stroke="#c9a84c" strokeWidth="0.5" fill="none" opacity="0.4" />
-                  <circle cx="50" cy="50" r="22" stroke="#E8622A" strokeWidth="0.6" fill="none" opacity="0.6" />
-                  <circle cx="50" cy="50" r="8" fill="#E8622A" opacity="0.85" />
-                  <circle cx="50" cy="50" r="3" fill="#fff" />
-                  
-                  {/* Concentric Petals / Rays */}
-                  {Array.from({ length: 12 }).map((_, i) => {
-                    const angle = (i * 360) / 12
-                    return (
-                      <g key={i} transform={`rotate(${angle} 50 50)`}>
-                        <path d="M50 15 C52 25 48 25 50 35 C52 25 48 25 50 15 Z" fill="#c9a84c" opacity="0.5" />
-                        <circle cx="50" cy="22" r="1.2" fill="#E8622A" />
-                        <line x1="50" y1="35" x2="50" y2="42" stroke="#E8622A" strokeWidth="0.4" opacity="0.6" />
-                      </g>
-                    )
-                  })}
-                  
-                  {/* Inner Lotus Petals */}
-                  {Array.from({ length: 6 }).map((_, i) => {
-                    const angle = (i * 360) / 6 + 15
-                    return (
-                      <g key={i} transform={`rotate(${angle} 50 50)`}>
-                        <ellipse cx="50" cy="38" rx="2.5" ry="6" fill="#E8622A" opacity="0.8" />
-                      </g>
-                    )
-                  })}
-                </motion.svg>
-              </div>
-
-              {/* Progress & Tier Details */}
-              <div className="flex-1 w-full">
-                {/* Level Title */}
-                <div className="flex items-baseline justify-between mb-1">
-                  <span className="text-[10px] text-gold/60 uppercase tracking-[0.14em] font-bold font-sans">
-                    Spiritual Tier
-                  </span>
-                  <span className="text-xs font-bold text-gold dark:text-gold-lt" style={{ fontFamily: "'Cinzel', serif" }}>
-                    Level {Math.floor((user?.xp || 0) / 100) + 1}
-                  </span>
-                </div>
-                
-                {/* Current Tier Name */}
-                <h4 className="text-xl font-bold font-display leading-tight mb-1" style={{ color: dark ? '#ffe090' : '#8a5a12' }}>
-                  {userPranaTier.title}
-                </h4>
-                
-                {/* Tier Description */}
-                <p className="text-[11px] text-ink/60 dark:text-sand-lt/50 italic font-serif leading-relaxed mb-4">
-                  "{userPranaTier.desc}"
-                </p>
-
-                {/* Points stats */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-gold/5 dark:bg-white/[0.02] border border-gold/10 rounded-xl p-2.5 text-center">
-                    <span className="text-[8px] text-gold/60 uppercase tracking-widest font-bold block mb-1">Total Experience</span>
-                    <span className="text-lg font-bold" style={{ color: dark ? '#e8d5a8' : '#5c3d1e' }}>✨ {user?.xp || '—'} <span className="text-xs font-normal opacity-60">XP</span></span>
-                  </div>
-                  <div className="bg-saffron/5 dark:bg-white/[0.02] border border-saffron/10 rounded-xl p-2.5 text-center">
-                    <span className="text-[8px] text-saffron/60 uppercase tracking-widest font-bold block mb-1">Prana Points</span>
-                    <span className="text-lg font-bold" style={{ color: '#E8622A' }}>🪷 {user?.pranaPoints || '—'} <span className="text-xs font-normal opacity-60">Prana</span></span>
-                  </div>
-                </div>
-
-                {/* Progress bar to next tier */}
-                {userPranaTier.next && (
-                  <div>
-                    <div className="flex justify-between items-center text-[9px] text-mist-dark/60 dark:text-sand-lt/40 font-semibold uppercase tracking-wider mb-1">
-                      <span>Progress to {userPranaTier.next.name}</span>
-                      <span>{user?.pranaPoints || '—'} / {userPranaTier.next.threshold} Prana</span>
-                    </div>
-                    <div style={{ height: 6, borderRadius: 999, background: 'rgba(201,168,76,0.1)', overflow: 'hidden' }}>
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(100, ((user?.pranaPoints || 0) / userPranaTier.next.threshold) * 100)}%` }}
-                        transition={{ duration: 1, ease: 'easeOut' }}
-                        className="h-full bg-gradient-to-r from-gold to-[#E8622A] rounded-full"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </SectionCard>
+          {/* PRANA & XP PROGRESS CARD */}
+          <motion.div variants={fadeUp}>
+            <PranaTierCard
+              dark={dark}
+              user={user}
+            />
+          </motion.div>
 
           <GoldDivider />
 
-          {/* ═══════════ SOUL ARCHETYPE + WELLNESS SCORE ═══════════ */}
-          <SectionCard>
-            <SectionTitle>Soul Identity</SectionTitle>
-            {/* Archetype display */}
-            <div style={{
-              padding: '1.1rem 1.4rem',
-              borderRadius: 16,
-              background: `linear-gradient(135deg, ${archetype.gradient.replace('linear-gradient(135deg,', '').replace(')', '')}20, transparent)`,
-              border: `1px solid ${archetype.color}30`,
-              marginBottom: '1.25rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-            }}>
-              <motion.span
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ fontSize: 36, filter: `drop-shadow(0 0 12px ${archetype.glow})` }}
-              >
-                {archetype.emoji}
-              </motion.span>
-              <div style={{ flex: 1 }}>
-                <p className="text-[9px] text-gold/60 uppercase tracking-[0.16em] font-bold font-sans" style={{ marginBottom: 2 }}>Your Soul Type</p>
-                <p className="text-xl font-bold" style={{
-                  fontFamily: "'Playfair Display', serif",
-                  background: archetype.gradient,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}>{archetype.id}</p>
-                <p className="text-xs italic text-ink/60 dark:text-sand-lt/60" style={{ fontFamily: "'Lora', serif", marginTop: 2 }}>
-                  {archetype.tagline}
-                </p>
-                <p className="text-[10px] text-ink/50 dark:text-sand-lt/40 mt-1" style={{ fontFamily: "'Lora', serif", fontStyle: 'italic', lineHeight: 1.5 }}>
-                  {archetype.desc}
-                </p>
-              </div>
-            </div>
-
-            {/* Wellness Score */}
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <p className="text-[10px] text-gold/60 uppercase tracking-widest font-bold font-sans">Wellness Score</p>
-                <p style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: '1.4rem',
-                  fontWeight: 700,
-                  background: wellnessScore >= 70 ? 'linear-gradient(90deg, #34d399, #10b981)'
-                    : wellnessScore >= 40 ? 'linear-gradient(90deg, #c9933a, #e8b96a)'
-                    : 'linear-gradient(90deg, #94a3b8, #64748b)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  margin: 0,
-                }}>{wellnessScore}<span style={{ fontSize: '0.65rem', opacity: 0.5 }}>/100</span></p>
-              </div>
-              <div style={{ height: 6, borderRadius: 999, background: 'rgba(201,168,76,0.1)', overflow: 'hidden' }}>
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${wellnessScore}%` }}
-                  transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
-                  style={{
-                    height: '100%', borderRadius: 999,
-                    background: wellnessScore >= 70 ? 'linear-gradient(90deg, #34d399, #10b981)'
-                      : wellnessScore >= 40 ? 'linear-gradient(90deg, #c9933a, #e8b96a)'
-                      : 'linear-gradient(90deg, #94a3b8, #64748b)',
-                  }}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: 10, flexWrap: 'wrap' }}>
-                {[
-                  { label: '🌕 Cycle', value: `${journalCycle}d` },
-                  { label: '📖 Entries', value: journal.length },
-                  { label: '🌿 Rituals', value: `${habitsCompletedToday}/${habits.length}` },
-                  { label: '💧 Hydration', value: `${Math.round(waterPct * 100)}%` },
-                ].map(stat => (
-                  <div key={stat.label} style={{
-                    flex: '1 1 60px',
-                    padding: '6px 10px',
-                    borderRadius: 10,
-                    background: 'rgba(201,168,76,0.06)',
-                    border: '1px solid rgba(201,168,76,0.12)',
-                    textAlign: 'center',
-                  }}>
-                    <p style={{ fontFamily: "'Cinzel', serif", fontSize: '0.58rem', color: 'rgba(201,168,76,0.6)', margin: 0, letterSpacing: '0.06em' }}>{stat.label}</p>
-                    <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '0.95rem', fontWeight: 700, margin: '2px 0 0', color: dark ? '#f5e6c8' : '#2d1f0e' }}>{stat.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </SectionCard>
+          {/* SOUL IDENTITY & SCORE CARD */}
+          <motion.div variants={fadeUp}>
+            <SoulIdentityCard
+              dark={dark}
+              archetype={archetype}
+              wellnessScore={wellnessScore}
+              journalCycle={journalCycle}
+              totalJournalEntries={journal.length}
+              habitsCompletedToday={habitsCompletedToday}
+              totalHabits={habits.length}
+              waterPct={waterPct}
+            />
+          </motion.div>
 
           <GoldDivider />
 
-          {/* ═══════════ SECTION 2: Preferences ═══════════ */}
-          <SectionCard>
-            <SectionTitle icon={Sun}>Preferences</SectionTitle>
-
-            <div className="divide-y divide-gold/10">
-              <ToggleSwitch
-                checked={dark}
-                onChange={toggle}
-                iconOn={Moon}
-                iconOff={Sun}
-                label={dark ? 'Dark Mode' : 'Light Mode'}
-                sublabel="Toggle between light and dark themes"
-              />
-
-              <ToggleSwitch
-                checked={!isMuted}
-                onChange={toggleMute}
-                iconOn={Volume2}
-                iconOff={VolumeX}
-                label="Sound Effects"
-                sublabel="Crystal chimes, sitar notes, ambient sounds"
-              />
-
-              <ToggleSwitch
-                checked={notifEnabled}
-                onChange={handleNotifToggle}
-                iconOn={Bell}
-                iconOff={BellOff}
-                label="Notifications"
-                sublabel="Reminders for rituals and hydration"
-              />
-            </div>
-          </SectionCard>
+          {/* PREFERENCES SWITCHES CARD */}
+          <motion.div variants={fadeUp}>
+            <PreferencesSettingsCard
+              dark={dark}
+              toggleTheme={toggle}
+              isMuted={isMuted}
+              toggleMute={toggleMute}
+              notifEnabled={notifEnabled}
+              onToggleNotifications={handleNotifToggle}
+            />
+          </motion.div>
 
           <GoldDivider />
 
-
-          {/* ═══════════ SECTION 3: Account Settings ═══════════ */}
-          <SectionCard>
-            <SectionTitle icon={Shield}>Account</SectionTitle>
-
-            {/* Location field */}
-            <div className="mb-5">
-              <label className="block text-[0.65rem] text-gold/50 dark:text-gold-lt/40 uppercase tracking-widest mb-1.5"
-                style={{ fontFamily: "'Cinzel', serif" }}>
-                Location
-              </label>
-              <div className="relative group">
-                <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-mist-dark/60 group-focus-within:text-saffron transition-colors duration-300" />
-                <input
-                  type="text"
-                  value={locationVal}
-                  onChange={(e) => setLocationVal(e.target.value)}
-                  onBlur={handleLocationSave}
-                  placeholder="Where are you based?"
-                  className={`${inputBase} !pl-10`}
-                />
-              </div>
-            </div>
-
-            {/* Change Password */}
-            <div className="border-t border-gold/10 pt-4">
-              <button
-                onClick={() => setShowPwSection(p => !p)}
-                className="flex items-center gap-2 text-sm font-medium text-ink/70 dark:text-sand-lt/60 hover:text-gold transition-colors w-full text-left py-1"
-                style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.05em' }}
-              >
-                <Lock size={14} className="text-gold/50" />
-                <span>Change Password</span>
-                <motion.span
-                  animate={{ rotate: showPwSection ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="ml-auto text-gold/40"
-                >
-                  ▾
-                </motion.span>
-              </button>
-
-              <AnimatePresence>
-                {showPwSection && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="pt-4 flex flex-col gap-3">
-                      {/* Current password */}
-                      <div>
-                        <label className="block text-[0.65rem] text-gold/50 dark:text-gold-lt/40 uppercase tracking-widest mb-1.5"
-                          style={{ fontFamily: "'Cinzel', serif" }}>
-                          Current Password
-                        </label>
-                        <div className="relative group">
-                          <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-mist-dark/60 group-focus-within:text-saffron transition-colors duration-300" />
-                          <input
-                            type={showCurrentPw ? 'text' : 'password'}
-                            value={currentPw}
-                            onChange={(e) => setCurrentPw(e.target.value)}
-                            placeholder="••••••••"
-                            className={`${inputBase} !pl-10 !pr-10`}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowCurrentPw(s => !s)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-mist-dark/50 hover:text-ink dark:hover:text-white transition-colors"
-                          >
-                            {showCurrentPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* New password */}
-                      <div>
-                        <label className="block text-[0.65rem] text-gold/50 dark:text-gold-lt/40 uppercase tracking-widest mb-1.5"
-                          style={{ fontFamily: "'Cinzel', serif" }}>
-                          New Password
-                        </label>
-                        <div className="relative group">
-                          <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-mist-dark/60 group-focus-within:text-saffron transition-colors duration-300" />
-                          <input
-                            type={showNewPw ? 'text' : 'password'}
-                            value={newPw}
-                            onChange={(e) => setNewPw(e.target.value)}
-                            placeholder="••••••••"
-                            className={`${inputBase} !pl-10 !pr-10`}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowNewPw(s => !s)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-mist-dark/50 hover:text-ink dark:hover:text-white transition-colors"
-                          >
-                            {showNewPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Confirm password */}
-                      <div>
-                        <label className="block text-[0.65rem] text-gold/50 dark:text-gold-lt/40 uppercase tracking-widest mb-1.5"
-                          style={{ fontFamily: "'Cinzel', serif" }}>
-                          Confirm New Password
-                        </label>
-                        <div className="relative group">
-                          <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-mist-dark/60 group-focus-within:text-saffron transition-colors duration-300" />
-                          <input
-                            type={showNewPw ? 'text' : 'password'}
-                            value={confirmPw}
-                            onChange={(e) => setConfirmPw(e.target.value)}
-                            placeholder="••••••••"
-                            className={`${inputBase} !pl-10`}
-                          />
-                        </div>
-                      </div>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handlePasswordChange}
-                        className="mt-1 w-full px-6 py-3 rounded-xl bg-gradient-to-r from-saffron to-gold text-white text-sm font-semibold tracking-wide shadow-glow-saffron hover:shadow-lg hover:shadow-saffron/30 transition-all duration-300 flex items-center justify-center gap-2"
-                        style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.08em' }}
-                      >
-                        <Shield size={14} />
-                        Update Password
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </SectionCard>
+          {/* ACCOUNT SECURITY CARD */}
+          <motion.div variants={fadeUp}>
+            <AccountSettingsCard
+              user={user}
+              onUpdateProfile={handleProfileUpdate}
+              onChangePassword={handlePasswordChange}
+            />
+          </motion.div>
 
           <GoldDivider />
 
-          {/* ═══════════ SECTION 4: Danger Zone ═══════════ */}
-          <SectionCard className="!border-red-500/10 dark:!border-red-500/8">
-            <div className="flex items-center gap-2.5 mb-4">
-              <span className="text-red-500/50 text-xs">✦</span>
-              <Trash2 size={14} className="text-red-500/50" />
-              <h3 className="text-xs font-semibold tracking-[0.14em] uppercase text-red-500/70 dark:text-red-400/60"
-                style={{ fontFamily: "'Cinzel', serif" }}>
-                Danger Zone
-              </h3>
-            </div>
-
-            <p className="text-sm text-mist-dark/50 dark:text-sand-lt/30 mb-4 leading-relaxed"
-              style={{ fontFamily: "'Lora', serif", fontStyle: 'italic' }}>
-              Once you delete your account, there is no going back. All your rituals, journals, and progress will be permanently removed.
-            </p>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setDeleteOpen(true)}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/5 hover:border-red-500/30 transition-all duration-300 flex items-center gap-2"
-              style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.06em' }}
-            >
-              <Trash2 size={14} />
-              Delete Account
-            </motion.button>
-          </SectionCard>
+          {/* IRREVERSIBLE DANGER ZONE CARD */}
+          <motion.div variants={fadeUp}>
+            <DangerZoneCard
+              onDeleteAccount={handleDeleteAccount}
+            />
+          </motion.div>
 
           {/* Bottom Logout */}
           <motion.div variants={fadeUp} className="text-center pt-2 pb-8">
@@ -1059,18 +255,10 @@ export default function ProfilePage() {
               className="inline-flex items-center gap-2 text-sm text-mist-dark/40 dark:text-sand-lt/30 hover:text-saffron dark:hover:text-gold transition-colors"
               style={{ fontFamily: "'Cinzel', serif", letterSpacing: '0.06em', fontSize: '0.72rem' }}
             >
-              <LogOut size={13} />
               Sign Out
             </button>
           </motion.div>
         </motion.div>
-
-        {/* Delete Confirmation Modal */}
-        <DeleteModal
-          open={deleteOpen}
-          onClose={() => setDeleteOpen(false)}
-          onConfirm={handleDeleteAccount}
-        />
       </div>
     </PageLayout>
   )

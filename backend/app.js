@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
 import compression from 'compression'
 import rateLimit from 'express-rate-limit'
 import authRoutes from './routes/auth.js'
@@ -23,14 +24,37 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map(o => o.trim())
 
+const isPrivateIP = (url) => {
+  try {
+    const hostname = new URL(url).hostname
+    return (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname)
+    )
+  } catch {
+    return false
+  }
+}
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
     if (!origin) return callback(null, true)
-    if (allowedOrigins.includes(origin)) return callback(null, true)
+    if (allowedOrigins.includes(origin) || isPrivateIP(origin)) return callback(null, true)
     callback(new Error(`CORS blocked: origin "${origin}" is not allowed`))
   },
   credentials: true,
+}))
+
+// ── SECURITY HEADERS ──────────────────────────────────────────────────────────
+// helmet sets X-Frame-Options, Content-Security-Policy, HSTS, and 10+ other
+// protective headers to guard against clickjacking, XSS, and MIME sniffing.
+app.use(helmet({
+  crossOriginEmbedderPolicy: false, // Needed so Google OAuth popup doesn't break
+  contentSecurityPolicy: false,     // Managed by Vercel/Vite frontend instead
 }))
 
 // ── COMPRESSION ───────────────────────────────────────────────────────────────
@@ -39,6 +63,15 @@ app.use(compression())
 
 // ── BODY PARSER ───────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '5mb' }))
+
+// ── API VERSIONING FALLBACK ──────────────────────────────────────────────────
+// Automatically rewrites legacy /api/... requests to /api/v1/... to ensure zero breakage.
+app.use((req, res, next) => {
+  if (req.url.startsWith('/api/') && !req.url.startsWith('/api/v1/')) {
+    req.url = req.url.replace('/api/', '/api/v1/');
+  }
+  next();
+});
 
 // ── RATE LIMITING ─────────────────────────────────────────────────────────────
 // Global: 100 requests per 15 minutes per IP
@@ -59,28 +92,46 @@ const authLimiter = rateLimit({
   message: { error: 'Too many login attempts, please try again later.' },
 })
 
-app.use('/api', globalLimiter)
-app.use('/api/auth/login', authLimiter)
-app.use('/api/auth/signup', authLimiter)
+// AI Chat endpoint (Sahayak): strict minutely rate limiter to prevent scraping
+const aiChatMinutelyLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many queries to Sahayak. Please pause, breathe, and try again in a minute.' },
+})
+
+// AI Chat endpoint (Sahayak): strict hourly rate limiter to prevent billing abuse
+const aiChatHourlyLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'You have reached your hourly limit for AI guidance. Rest, and return in an hour — Sahayak will be here.' },
+})
+
+app.use('/api/v1', globalLimiter)
+app.use('/api/v1/auth/login', authLimiter)
+app.use('/api/v1/auth/signup', authLimiter)
 
 // ── HEALTH CHECK ──────────────────────────────────────────────────────────────
 // Used by hosting platforms (Render, Railway, Fly.io) to verify the server is alive
-app.get('/api/health', (req, res) => {
+app.get('/api/v1/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
 // ── ROUTES ────────────────────────────────────────────────────────────────────
-app.use('/api/auth', authRoutes)
-app.use('/api/water', waterRoutes)
-app.use('/api/habits', habitsRoutes)
-app.use('/api/journal', journalRoutes)
-app.use('/api/chat', chatRoutes)
-app.use('/api/community', communityRoutes)
-app.use('/api/profile', profileRoutes)
-app.use('/api/badges', badgesRoutes)
+app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/water', waterRoutes)
+app.use('/api/v1/habits', habitsRoutes)
+app.use('/api/v1/journal', journalRoutes)
+app.use('/api/v1/chat', aiChatMinutelyLimiter, aiChatHourlyLimiter, chatRoutes)
+app.use('/api/v1/community', communityRoutes)
+app.use('/api/v1/profile', profileRoutes)
+app.use('/api/v1/badges', badgesRoutes)
 
 // ── 404 FALLBACK ──────────────────────────────────────────────────────────────
-app.use('/api/*', (req, res) => {
+app.use('/api/v1/*', (req, res) => {
   res.status(404).json({ error: 'Endpoint not found' })
 })
 

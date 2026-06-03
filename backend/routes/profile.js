@@ -1,6 +1,7 @@
 import express from 'express'
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcrypt'
 import authMiddleware from '../middleware/auth.js'
+import { ensureString, escapeHTML, sanitizeNoSql } from '../utils/security.js'
 import {
   dbFindUserById,
   dbUpdateUserProfile,
@@ -20,10 +21,11 @@ router.put('/', async (req, res) => {
   try {
     const { name, bio, location, preferences } = req.body
     const updates = {}
-    if (name !== undefined) updates.name = name
-    if (bio !== undefined) updates.bio = bio
-    if (location !== undefined) updates.location = location
-    if (preferences !== undefined) updates.preferences = preferences
+    
+    if (name !== undefined) updates.name = escapeHTML(ensureString(name).trim())
+    if (bio !== undefined) updates.bio = escapeHTML(ensureString(bio).trim())
+    if (location !== undefined) updates.location = escapeHTML(ensureString(location).trim())
+    if (preferences !== undefined) updates.preferences = sanitizeNoSql(preferences)
 
     const user = await dbUpdateUserProfile(req.userId, updates)
     return res.status(200).json({ user })
@@ -39,9 +41,16 @@ router.put('/', async (req, res) => {
 // PUT /avatar — Upload avatar (base64 string)
 router.put('/avatar', async (req, res) => {
   try {
-    const { avatar } = req.body
+    let { avatar } = req.body
     if (avatar === undefined) {
       return res.status(400).json({ error: 'Avatar data is required' })
+    }
+
+    avatar = ensureString(avatar)
+
+    // Strict Size Limit: Reject if base64 string exceeds 2.8 million characters (~2MB)
+    if (avatar.length > 2800000) {
+      return res.status(400).json({ error: 'Avatar file size must not exceed 2MB' })
     }
 
     if (avatar !== '') {
@@ -50,9 +59,21 @@ router.put('/avatar', async (req, res) => {
         'data:image/png;base64,',
         'data:image/jpg;base64,'
       ]
+      
       const isValidFormat = allowedPrefixes.some(prefix => avatar.toLowerCase().startsWith(prefix))
       if (!isValidFormat) {
         return res.status(400).json({ error: 'Only JPG, JPEG, and PNG images are allowed' })
+      }
+
+      // Strict Base64 validation: Ensure payload contains only valid base64 characters
+      const commaIndex = avatar.indexOf(',')
+      if (commaIndex === -1) {
+        return res.status(400).json({ error: 'Invalid avatar data URL format' })
+      }
+      const base64Data = avatar.substring(commaIndex + 1)
+      const base64Regex = /^[a-zA-Z0-9+/]*={0,2}$/
+      if (!base64Regex.test(base64Data)) {
+        return res.status(400).json({ error: 'Invalid base64 payload encoding' })
       }
     }
 
@@ -70,7 +91,10 @@ router.put('/avatar', async (req, res) => {
 // PUT /password — Change password
 router.put('/password', async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body
+    let { currentPassword, newPassword } = req.body
+
+    currentPassword = ensureString(currentPassword)
+    newPassword = ensureString(newPassword)
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: 'Current password and new password are required' })
@@ -119,7 +143,10 @@ router.post('/adjust-points', async (req, res) => {
     if (xpDiff === undefined && pranaDiff === undefined) {
       return res.status(400).json({ error: 'xpDiff or pranaDiff is required' })
     }
-    const user = await dbAdjustUserPoints(req.userId, xpDiff || 0, pranaDiff || 0)
+    const xpVal = Number(xpDiff || 0)
+    const pranaVal = Number(pranaDiff || 0)
+    console.log(`[Profile API AdjustPoints] User ${req.userId} adjusting points. Diffs -> XP: ${xpVal}, Prana: ${pranaVal}`)
+    const user = await dbAdjustUserPoints(req.userId, xpVal, pranaVal)
     return res.status(200).json({ user })
   } catch (err) {
     console.error('Adjust points error:', err)

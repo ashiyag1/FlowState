@@ -114,7 +114,7 @@ export default function AIAssistant() {
       .map(m => ({ role: m.role, content: m.text }))
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('/api/v1/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

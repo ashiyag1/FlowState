@@ -1,6 +1,7 @@
 import express from 'express'
 import { dbGetCommunityFeed, dbGetIntentions, dbAddIntention, dbFindUserById } from '../db.js'
 import authMiddleware from '../middleware/auth.js'
+import { ensureString, escapeHTML } from '../utils/security.js'
 
 const router = express.Router()
 
@@ -26,12 +27,19 @@ router.get('/intentions', async (req, res) => {
 
 router.post('/intentions', authMiddleware, async (req, res) => {
   try {
-    const { text, author } = req.body
-    if (!text || !text.trim()) {
+    let { text } = req.body
+    
+    text = escapeHTML(ensureString(text).trim())
+
+    if (!text) {
       return res.status(400).json({ error: 'Intention text is required' })
     }
-    let name = author || 'Seeker'
-    const intention = await dbAddIntention(name, text.trim())
+
+    // Use the verified server-side user name — never trust client-supplied author
+    const user = await dbFindUserById(req.userId)
+    const name = (user && user.name) ? user.name : 'Seeker'
+    
+    const intention = await dbAddIntention(name, text)
     res.status(201).json(intention)
   } catch (err) {
     console.error('Add intention error:', err)

@@ -1,149 +1,131 @@
-# Tarang‑FlowState — Wellness Dashboard
+# 🌸 Tarang‑FlowState — Wellness & Mindfulness Dashboard
 
-A mindful wellness app to track hydration, build habits, journal, explore wisdom, and connect with community — wrapped in a warm Indian-spiritual aesthetic.
-
----
-
-## Architecture Overview
-
-```
-User's Browser (React SPA)
-       │
-       │  (localhost:5173 dev / Vercel prod)
-       │
-       ▼
-  ┌──────────────────────────────────────────────────┐
-  │  Vite Dev Server (dev) / Vercel (prod)           │
-  │  - Proxies /api/* → backend (dev)                │
-  │  - Serves static build (prod)                    │
-  └──────────────┬───────────────────────────────────┘
-                 │  /api/* requests
-                 ▼
-  ┌──────────────────────────────────────────────────┐
-  │  Express.js Backend (port 5000)                  │
-  │  - Cluster mode (1 process per CPU core)         │
-  │  - Rate limited (100 req/15min global)           │
-  │  - Compression (gzip)                            │
-  └──┬──────────┬──────────┬──────────┬──────────────┘
-     │          │          │          │
-     ▼          ▼          ▼          ▼
-  Auth    Wellness   Community   Achievements
- Routes    Routes     Routes       Routes
-     │          │          │          │
-     └──────────┴──────────┴──────────┘
-                        │
-                        ▼
-            ┌──────────────────────┐
-            │  Database Layer      │
-            │  - MongoDB (if URI)  │
-            │  - db.json fallback  │
-            └──────────────────────┘
-
-  AI Features:
-  Frontend → /api/chat → Gemini API (primary) / Groq SDK (fallback)
-```
+Tarang-FlowState is a mindful wellness application designed to help users track hydration, build positive habits, journal their thoughts, absorb ancient wisdom, and connect with a supportive community. It is wrapped in a warm, glassmorphism design with a rich Indian-spiritual aesthetic.
 
 ---
 
-## Request Flow (Interview Answer)
+## ✨ Features
 
-**1. Frontend (React + Vite):** User interacts with the SPA. On any action (login, log water, write journal), the frontend calls relative `/api/*` endpoints using native `fetch()`.
-
-**2. Dev Proxy / Production:** In development, Vite's dev server proxies `/api/*` to `localhost:5000`. In production on Vercel, `vercel.json` rewrites `/api/(.*)` to the serverless function at `api/index.js`.
-
-**3. Backend (Express.js):** The request hits `backend/app.js` which:
-- Validates CORS (whitelist from `ALLOWED_ORIGINS`)
-- Applies rate limiting (100/15min global, 10/15min on auth)
-- Routes to the correct route handler (`/api/auth`, `/api/water`, etc.)
-- JWT middleware (`backend/middleware/auth.js`) protects most routes
-
-**4. Database Layer (`backend/db.js`):** Each route calls db helper functions. If `MONGODB_URI` is set, it uses Mongoose (MongoDB). Otherwise, it falls back to a local `db.json` file. Same API interface regardless of backend.
-
-**5. Response** flows back through the same path.
-
-**6. AI Chat:** Frontend sends message to `/api/chat`, backend forwards to **Groq SDK (Llama-3.3-70B)** as primary AI provider, falls back to **Google Gemini**, then to local keyword-based replies if both APIs are unavailable.
-
----
-
-## Features
-
-| Category | Features |
-|----------|----------|
-| **Tracking** | Water intake (daily goal, progress ring, 7-day history), Habits/Rituals (streak tracking, monthly calendar, Hindu calendar integration), Journal (7 mood tags, heatmap, streak) |
-| **Wisdom** | Daily quotes, 14 topics × 12 books, book reader with progress/bookmarks/notes, wisdom streak |
-| **Heritage** | 13 Indian scholars, ancient texts, interactive map, audio narration |
-| **Community** | Activity feed, intentions board, search, prana (karma) counter |
-| **Profile** | Avatar upload (base64), bio/location, password change, account deletion, theme/sound/notification toggles |
-| **Achievements** | 23 badges across 4 categories (Streaks, Journaling, Wellness, Wisdom), auto-unlocked via `AchievementEngine` |
-| **Soul Archetype** | Computes Dreamer/Warrior/Seeker/Restorer from journal + habits |
-| **AI** | Floating "Sahayak" chat (Gemini + Groq fallback), in-memory conversation cache (5 msg/user, 1h TTL) |
-| **UX** | JWT auth, dark mode with glass-morphism, 7 ambient sound presets, PWA support, time-adaptive UI |
+- **🧘 Mindful Tracking**:
+  - **Water Intake**: Daily goal rings, progress tracking, and hydration logs.
+  - **Habits & Rituals**: Streak tracking, completion calendar, and integrations with the traditional Hindu calendar.
+  - **Emotional Journaling**: Daily mood tracking (7 emotional presets), mood trend heatmaps, and consistency streaks.
+- **📜 Wisdom Library**:
+  - Daily ancient quote reflections.
+  - A structured catalog of **14 topics × 12 books** of ancient philosophy.
+  - Custom Book Reader supporting progress tracking, bookmarks, and color-coded sticky notes.
+- **🗺️ Indian Heritage Portal**:
+  - Interactive map highlighting **13 Indian scholars** and their contributions to science, astronomy, and mathematics.
+  - Narration support for reading pages.
+- **👥 Satsang Community**:
+  - A public daily intentions board and wellness activity feed.
+  - Prana (Karma) point system tracking user XP based on mindfulness activities.
+- **🤖 Sahayak AI Assistant**:
+  - A floating, context-aware AI wellness companion.
+  - Utilizes **Groq SDK (Llama-3.3-70B)** as the primary engine with **Google Gemini** as a smart fallback.
+- **🎭 Soul Archetype**:
+  - Automatically calculates your archetype (*Dreamer*, *Warrior*, *Seeker*, or *Restorer*) based on your journaling patterns and habits.
+- **🎵 Ambient Soundscapes**:
+  - **7 customizable ambient soundscapes** (Temple bells, flutes, rain, tanpura) to ground your focus while practicing.
 
 ---
 
-## Tech Stack
+## 🔒 Security & Optimization Implementations
 
-| Layer | Technologies |
-|-------|-------------|
-| **Frontend** | React 18, Vite 5, React Router v6, Tailwind CSS 3, Framer Motion, Lucide React |
-| **Backend** | Node.js, Express.js, Mongoose (MongoDB) / JSON file fallback |
-| **Auth** | JWT (jsonwebtoken), bcryptjs |
-| **AI** | Groq SDK (primary, Llama-3.3-70B), Google Generative AI (Gemini, fallback) |
-| **Hosting** | Vercel (frontend + serverless API functions) |
-| **Monitoring** | @vercel/analytics, @vercel/speed-insights |
-| **Performance** | Compression (gzip), cluster mode (multi-core), rate limiting |
+This project implements rigorous security and performance standards:
+
+- **🛡️ Input Sanitization**:
+  - **XSS Prevention**: All user-controlled text inputs are HTML-escaped to prevent script injection.
+  - **NoSQL Injection Block**: Custom recursive filtering strips keys starting with `$` to prevent operators from bypassing DB logic.
+  - **Type Safety**: Automatic type coercion prevents object injection in routes.
+- **⚡ Layered Rate Limiting**:
+  - **Global Limiter**: Restricts traffic to 100 requests per 15 minutes per IP.
+  - **Auth Limiter**: Blocks login/signup brute force attempts (max 10 requests per 15 minutes).
+  - **Sahayak AI Limiters**: Strict minutely (5/min) and hourly (30/hour) limits protect against scraper bots and API quota drainage.
+- **🖼️ Secure Base64 File Uploads**:
+  - Avatar uploading checks lengths to enforce a strict **2MB size limit**.
+  - Strict MIME header verification allows only `jpeg`, `png`, and `jpg`.
+  - Regular expression checks ensure the payload consists of valid Base64 character sets.
+- **📁 API Versioning & Fallbacks**:
+  - Endpoints are mounted behind the `/api/v1/` prefix.
+  - A fallback routing middleware dynamically redirects legacy `/api/` calls to `/api/v1/` internally, ensuring zero downtime and complete backward compatibility.
+- **🏋️ Upgraded Hashing & Session Cryptography**:
+  - Swapped `bcryptjs` for native `bcrypt` to speed up password hashing by **20x** and mitigate server Denial of Service (DoS) CPU starvation.
+  - Transitioned token handling to `jose` for modern, lightweight, edge-compatible JWT session management.
 
 ---
 
-## Project Structure
+## 🛠️ Technology Stack
 
-```
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React 18, Vite 5, React Router v6, Tailwind CSS 3, Framer Motion, Lucide React, html-to-image |
+| **Backend** | Node.js, Express.js (v4), native `bcrypt`, `jose` |
+| **Database** | MongoDB (via Mongoose) / Local JSON Database fallback |
+| **APIs** | Google Generative AI (Gemini), Groq SDK (Llama) |
+| **Hosting** | Vercel (Edge-compatible serverless functions) |
+
+---
+
+## 📁 Project Structure
+
+```text
 tarang-flowstate/
-├── api/index.js           # Vercel serverless entry (imports Express app)
+├── api/                   # Vercel Serverless Function entry (imports app.js)
 ├── backend/
-│   ├── app.js             # Express app setup (CORS, rate-limit, routes)
-│   ├── server.js          # Cluster-mode startup (forks per CPU)
-│   ├── db.js              # Database layer (MongoDB + JSON fallback)
-│   ├── db.json            # Fallback JSON database
-│   ├── middleware/auth.js # JWT authentication middleware
-│   ├── routes/            # auth.js, water.js, habits.js, journal.js,
-│   │                      # chat.js, community.js, profile.js, badges.js
-│   ├── models/            # Mongoose schemas (User, WaterLog, Habit, etc.)
-│   └── services/AchievementEngine.js
+│   ├── app.js             # Express application setup, middlewares, and routes
+│   ├── server.js          # Local development server bootloader
+│   ├── db.js              # Database router (MongoDB Mongoose OR JSON file DB)
+│   ├── db.json            # Local JSON database storage file
+│   ├── middleware/        # JWT Authentication, Rate limiters, Sanitizers
+│   ├── routes/            # Versioned API routes (auth, profile, journal, etc.)
+│   ├── models/            # Mongoose Schema Definitions
+│   └── services/          # Achievement and Badge evaluation engine
 ├── frontend/
-│   ├── public/            # PWA assets (sw.js, manifest, icons)
+│   ├── public/            # Static assets and PWA files
 │   └── src/
-│       ├── pages/         # 10 route pages (Dashboard, Water, Habits, etc.)
-│       ├── components/    # Reusable UI components
-│       ├── context/       # AuthContext, WellnessContext, AchievementsContext (7)
-│       ├── hooks/         # 4 custom hooks
-│       ├── data/          # Static wisdom content
-│       └── utils/         # emotionalMemory, soulArchetype, hinduCalendar
-├── vercel.json            # Vercel deployment config
-└── package.json           # Monorepo root scripts
+│       ├── components/    # Reusable modular UI components
+│       ├── context/       # State management (Auth, Theme, Wellness, etc.)
+│       ├── pages/         # Route views (Dashboard, Wisdom, Heritage, etc.)
+│       ├── sections/      # Home view layouts (HeroSection, DailyFlow, etc.)
+│       ├── utils/         # Helper functions ( हिंदू Calendar, Archetype calculators)
+│       └── assets/        # Audios, badges, images, and fonts
+├── package.json           # Root workspace and script configurations
+└── vercel.json            # Deployment routing instructions
 ```
 
 ---
 
-## Quick Start
+## 🚀 Getting Started
 
+### 1. Prerequisites
+Ensure you have **Node.js (v18+)** and **npm** installed on your system.
+
+### 2. Installation
+Clone the repository and install all frontend and backend dependencies using the monorepo script:
 ```bash
-git clone <repo>
+# Clone the repository
+git clone <your-repository-url>
+cd MYfirstproject
+
+# Install all packages
 npm run install-all
-# Set JWT_SECRET in backend/.env (MONGODB_URI & GEMINI_API_KEY optional)
+```
+
+### 3. Environment Variables
+Create a `.env` file inside the `backend/` directory:
+```env
+JWT_SECRET=your_jwt_signing_key_here
+MONGODB_URI=your_mongodb_connection_string_optional
+GEMINI_API_KEY=your_google_gemini_api_key_optional
+ALLOWED_ORIGINS=http://localhost:5173
+```
+> 💡 *Note: If `MONGODB_URI` is omitted, the backend automatically writes and reads data to and from the local `backend/db.json` file for offline development.*
+
+### 4. Running Locally
+Run both the React frontend and the Express backend concurrently:
+```bash
 npm run dev
 ```
-
-Frontend → `:5173` · Backend → `:5000`
-
----
-
-## Environment Variables
-
-| Variable | Required | Default | Purpose |
-|----------|----------|---------|---------|
-| `JWT_SECRET` | Yes | — | Token signing secret |
-| `MONGODB_URI` | No | — | MongoDB connection (uses db.json if absent) |
-| `GEMINI_API_KEY` | No | — | Google Gemini for AI chat |
-| `ALLOWED_ORIGINS` | No | `http://localhost:5173` | CORS whitelist (comma-separated) |
-| `PORT` | No | `5000` | Backend port |
+- **React Frontend**: [http://localhost:5173](http://localhost:5173)
+- **Express Backend**: [http://localhost:5000](http://localhost:5000)

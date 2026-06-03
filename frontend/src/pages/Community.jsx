@@ -31,7 +31,7 @@ export default function Community() {
     : []
 
   useEffect(() => {
-    fetch('/api/community/feed')
+    fetch('/api/v1/community/feed')
       .then(res => res.json())
       .then(data => {
         if (data.activities && data.activities.length > 0) {
@@ -44,7 +44,7 @@ export default function Community() {
   }, [])
 
   useEffect(() => {
-    fetch('/api/community/intentions')
+    fetch('/api/v1/community/intentions')
       .then(res => res.json())
       .then(data => {
         if (data.intentions && data.intentions.length > 0) {
@@ -93,7 +93,7 @@ export default function Community() {
     try {
       const headers = { 'Content-Type': 'application/json' }
       if (token) headers['Authorization'] = `Bearer ${token}`
-      const res = await fetch('/api/community/intentions', {
+      const res = await fetch('/api/v1/community/intentions', {
         method: 'POST',
         headers,
         body: JSON.stringify({

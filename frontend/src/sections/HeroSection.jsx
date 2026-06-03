@@ -125,7 +125,10 @@ const TIME_CONFIG = {
 /* ─────────────────────────────────────────────────────────────
    PETAL CONFIG  (colors injected from TIME_CONFIG at render)
 ───────────────────────────────────────────────────────────── */
-const PETAL_BASE = Array.from({ length: 14 }, (_, i) => ({
+// Reduce petal count on mobile to spare GPU memory on low-end Android devices.
+// 14 compositor layers is too many for Snapdragon 665-class chips.
+const IS_MOBILE = typeof window !== 'undefined' && window.innerWidth < 640
+const PETAL_BASE = Array.from({ length: IS_MOBILE ? 6 : 14 }, (_, i) => ({
   id: i,
   left: `${(i * 7.3) % 100}%`,
   size: 9 + (i % 5) * 2.5,
@@ -493,6 +496,8 @@ export default function HeroSection({ reflection, viewMode }) {
           <img
             src={config.bgImage}
             alt=""
+            fetchpriority="high"
+            decoding="async"
             style={{
               position: 'absolute',
               top: '50%',
@@ -590,7 +595,9 @@ export default function HeroSection({ reflection, viewMode }) {
       {/* ── Greeting & Streak Top Bar ── */}
       <div style={{
         position: 'absolute',
-        top: '110px',
+        // env(safe-area-inset-top) handles the iPhone Dynamic Island / notch.
+        // Falls back to 72px on non-notched devices.
+        top: 'calc(env(safe-area-inset-top, 0px) + 72px)',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 10,

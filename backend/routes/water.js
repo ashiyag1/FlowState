@@ -1,6 +1,7 @@
 import express from 'express'
 import { dbGetWater, dbSaveWaterGoal, dbAddWaterEntry, dbRemoveWaterEntry, dbClearWaterToday } from '../db.js'
 import authMiddleware from '../middleware/auth.js'
+import { ensureString, sanitizeNoSql } from '../utils/security.js'
 
 const router = express.Router()
 
@@ -23,12 +24,23 @@ router.post('/', async (req, res) => {
     const { waterGoal, date, entry } = req.body
 
     if (waterGoal !== undefined) {
-      await dbSaveWaterGoal(req.userId, Number(waterGoal))
+      const parsedGoal = Number(waterGoal)
+      if (isNaN(parsedGoal) || parsedGoal <= 0) {
+        return res.status(400).json({ error: 'Invalid water goal amount' })
+      }
+      await dbSaveWaterGoal(req.userId, parsedGoal)
       return res.status(200).json({ success: true, message: 'Water goal updated' })
     }
 
     if (date && entry) {
-      await dbAddWaterEntry(req.userId, date, entry)
+      const sanitizedDate = ensureString(date).trim()
+      const sanitizedEntry = sanitizeNoSql(entry)
+      if (sanitizedEntry && typeof sanitizedEntry === 'object') {
+        if (sanitizedEntry.id) sanitizedEntry.id = ensureString(sanitizedEntry.id)
+        if (sanitizedEntry.time) sanitizedEntry.time = ensureString(sanitizedEntry.time)
+        if (sanitizedEntry.amount) sanitizedEntry.amount = Number(sanitizedEntry.amount || 0)
+      }
+      await dbAddWaterEntry(req.userId, sanitizedDate, sanitizedEntry)
       return res.status(201).json({ success: true, message: 'Water log entry added' })
     }
 
@@ -45,12 +57,12 @@ router.delete('/', async (req, res) => {
     const { date, entryId, clear } = req.body
 
     if (date && entryId) {
-      await dbRemoveWaterEntry(req.userId, date, entryId)
+      await dbRemoveWaterEntry(req.userId, ensureString(date).trim(), ensureString(entryId).trim())
       return res.status(200).json({ success: true, message: 'Water entry deleted' })
     }
 
     if (date && clear) {
-      await dbClearWaterToday(req.userId, date)
+      await dbClearWaterToday(req.userId, ensureString(date).trim())
       return res.status(200).json({ success: true, message: 'Water logs cleared' })
     }
 

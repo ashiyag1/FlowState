@@ -149,7 +149,7 @@ export async function evaluateAchievements(userId) {
   const badgeDefinitions = [
     { id: "3_day_streak", target: 3 },
     { id: "journalled_10_times", target: 10 },
-    { id: "hydration_sage", target: 5 },
+    { id: "hydration_sage", target: 2 },
     { id: "wisdom_seeker", target: 3 },
     { id: "cosmic_rhythm", target: 7 },
     { id: "sunrise_consistency", target: 3 },

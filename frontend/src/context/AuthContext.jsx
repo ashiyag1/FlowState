@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const res = await fetch('/api/auth/me', {
+        const res = await fetch('/api/v1/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -91,7 +91,7 @@ export function AuthProvider({ children }) {
   const signup = useCallback(async (name, email, password) => {
     setLoading(true)
     try {
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch('/api/v1/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })
@@ -136,7 +136,7 @@ export function AuthProvider({ children }) {
   // Update profile (name, bio, location, preferences)
   const updateProfile = useCallback(async (data) => {
     try {
-      const res = await fetch('/api/profile', {
+      const res = await fetch('/api/v1/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -156,7 +156,7 @@ export function AuthProvider({ children }) {
   // Update avatar
   const updateAvatar = useCallback(async (base64) => {
     try {
-      const res = await fetch('/api/profile/avatar', {
+      const res = await fetch('/api/v1/profile/avatar', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ export function AuthProvider({ children }) {
   // Change password
   const changePassword = useCallback(async (currentPassword, newPassword) => {
     try {
-      const res = await fetch('/api/profile/password', {
+      const res = await fetch('/api/v1/profile/password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ export function AuthProvider({ children }) {
   // Delete account
   const deleteAccount = useCallback(async () => {
     try {
-      const res = await fetch('/api/profile', {
+      const res = await fetch('/api/v1/profile', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -216,7 +216,7 @@ export function AuthProvider({ children }) {
   const adjustPoints = useCallback(async (xpDiff, pranaDiff = 0) => {
     if (!isAuthenticated || !token) return
     try {
-      const res = await fetch('/api/profile/adjust-points', {
+      const res = await fetch('/api/v1/profile/adjust-points', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

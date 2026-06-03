@@ -109,4 +109,27 @@
 .fs-diya-lamp:hover .fs-diya-flicker {
   animation-duration: 2.8s;
 }
+
+/* ── Accessibility: Respect system reduced-motion preference ───────────── */
+/*
+  Users who enable "Reduce Motion" in iOS/Android/macOS accessibility settings
+  have vestibular disorders, motion sickness, or simply prefer less movement.
+  This turns off all our decorative animations for those users.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .fs-petal,
+  .fs-mandala-spin,
+  .fs-glow,
+  .fs-diya-flicker,
+  .fs-breath-aura,
+  .nb-float {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Keep transform-based transitions but make them instant */
+  .fs-diya-flame-group {
+    transition: none !important;
+  }
+}
 

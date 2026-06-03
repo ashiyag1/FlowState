@@ -74,7 +74,7 @@ function PageLoader() {
 }
 
 const Home        = lazy(() => import('./pages/Home'))
-import Habits      from './pages/Habits'
+const Habits      = lazy(() => import('./pages/Habits'))
 const Journal     = lazy(() => import('./pages/Journal'))
 const WisdomPage  = lazy(() => import('./pages/WisdomPage'))
 const Heritage    = lazy(() => import('./pages/Heritage'))

@@ -50,6 +50,8 @@ const inputBase =
   'focus:outline-none focus:ring-2 focus:ring-saffron/25 focus:border-saffron/50 transition-all duration-300 ' +
   'dark:bg-white/[0.04] dark:text-white dark:placeholder:text-white/30'
 
+import { useEffect } from 'react'
+
 export default function Login() {
   const notif = useNotif()
   const navigate = useNavigate()
@@ -59,6 +61,39 @@ export default function Login() {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  const handleGoogleLoginWithToken = async (accessToken) => {
+    try {
+      const res = await fetch('/api/v1/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken })
+      })
+      const data = await res.json()
+      if (res.ok) {
+        onSocialLogin(data)
+        notif('Signed in with Google ✦', 'success')
+        navigate('/')
+      } else {
+        notif(data.error || 'Google sign-in failed', 'error')
+      }
+    } catch {
+      notif('Google sign-in failed', 'error')
+    }
+  }
+
+  // Parse redirect token if returning from a redirect oauth flow (for PWAs)
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash) {
+      const params = new URLSearchParams(hash.substring(1))
+      const accessToken = params.get('access_token')
+      if (accessToken) {
+        window.history.replaceState(null, null, ' ')
+        handleGoogleLoginWithToken(accessToken)
+      }
+    }
+  }, [])
 
   const submit = async (e) => {
     e.preventDefault()
@@ -87,29 +122,25 @@ export default function Login() {
       notif('Google Client ID not configured — add VITE_GOOGLE_CLIENT_ID to frontend .env', 'error')
       return
     }
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+
+    if (isStandalone) {
+      // Use OAuth Redirect Flow inside standalone apps since popup windows (window.open) are blocked
+      const redirectUri = encodeURIComponent(window.location.origin + '/login')
+      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`
+      window.location.href = oauthUrl
+      return
+    }
+
+    // Default Popup Flow for standard browser tabs
     const loadGoogle = () => {
       const client = google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: 'email profile openid',
         callback: async (response) => {
           if (response.access_token) {
-            try {
-              const res = await fetch('/api/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accessToken: response.access_token })
-              })
-              const data = await res.json()
-              if (res.ok) {
-                onSocialLogin(data)
-                notif('Signed in with Google ✦', 'success')
-                navigate('/')
-              } else {
-                notif(data.error || 'Google sign-in failed', 'error')
-              }
-            } catch {
-              notif('Google sign-in failed', 'error')
-            }
+            await handleGoogleLoginWithToken(response.access_token)
           }
         },
         error_callback: () => notif('Google sign-in cancelled', 'error')

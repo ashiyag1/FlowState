@@ -5,6 +5,9 @@ const HabitSchema = new mongoose.Schema({
   name: { type: String, required: true },
   icon: { type: String, required: true },
   color: { type: String, required: true },
+  cycleLength: { type: Number, default: 7 },
+  relaxDay: { type: String, default: 'None' },
+  streakFreezes: { type: Number, default: 3 },
   createdAt: { type: Date, default: Date.now }
 })
 

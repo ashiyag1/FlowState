@@ -224,7 +224,7 @@ export function AchievementsProvider({ children }) {
     if (isAuthenticated && token) {
       isFetchingRef.current = true;
       try {
-        const res = await fetch('/api/badges', {
+        const res = await fetch('/api/v1/badges', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -259,7 +259,7 @@ export function AchievementsProvider({ children }) {
   const triggerServerCheck = useCallback(async () => {
     if (!isAuthenticated || !token) return;
     try {
-      const res = await fetch('/api/badges/check', {
+      const res = await fetch('/api/v1/badges/check', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -286,21 +286,21 @@ export function AchievementsProvider({ children }) {
             // Sync each unique wisdom date so server can compute streak properly
             const wisdomDatesToSync = localStats.wisdomDates || [];
             for (const dateStr of wisdomDatesToSync) {
-              await fetch('/api/badges/track', {
+              await fetch('/api/v1/badges/track', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ actionType: 'wisdom_read', localDate: dateStr })
               });
             }
             if (localStats.breathingCount) {
-              await fetch('/api/badges/track', {
+              await fetch('/api/v1/badges/track', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ actionType: 'breathing_completed' })
               });
             }
             if (localStats.sankalpaCount) {
-              await fetch('/api/badges/track', {
+              await fetch('/api/v1/badges/track', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ actionType: 'sankalpa_completed' })
@@ -308,7 +308,7 @@ export function AchievementsProvider({ children }) {
             }
             if (localStats.booksOpened && localStats.booksOpened.length > 0) {
               for (const bookId of localStats.booksOpened) {
-                await fetch('/api/badges/track', {
+                await fetch('/api/v1/badges/track', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                   body: JSON.stringify({ actionType: 'book_opened', metadata: { bookId } })
@@ -547,7 +547,7 @@ export function AchievementsProvider({ children }) {
     try {
       const todayStr = getToday();
       // Log the main activity
-      const res = await fetch('/api/badges/track', {
+      const res = await fetch('/api/v1/badges/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ actionType, metadata, localDate: todayStr })
@@ -564,7 +564,7 @@ export function AchievementsProvider({ children }) {
 
       // Log secondary events like sunrise or midnight journals
       for (const evt of additionalEvents) {
-        const subRes = await fetch('/api/badges/track', {
+        const subRes = await fetch('/api/v1/badges/track', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ actionType: evt, localDate: todayStr })
