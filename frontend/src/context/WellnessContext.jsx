@@ -5,14 +5,15 @@ import { useAuth } from './AuthContext'
 const WellnessContext = createContext(null)
 
 function useLocalState(key, initial) {
-  const [state, setRaw] = useState(() => Store.get(key, initial))
+  const prefixedKey = 'fwa_' + key
+  const [state, setRaw] = useState(() => Store.get(prefixedKey, initial))
   const setState = useCallback((val) => {
     setRaw(prev => {
       const next = typeof val === 'function' ? val(prev) : val
-      Store.set(key, next)
+      Store.set(prefixedKey, next)
       return next
     })
-  }, [key])
+  }, [prefixedKey])
   return [state, setState]
 }
 
@@ -63,8 +64,8 @@ export function WellnessProvider({ children }) {
             setHabits(serverHabits)
             setHabitDone(habitsData.habitDone || {})
           } else {
-            const localHabits = Store.get('habits_list', [])
-            const localHabitDone = Store.get('habit_done', {})
+            const localHabits = Store.get('fwa_habits_list', [])
+            const localHabitDone = Store.get('fwa_habit_done', {})
             
             if (localHabits.length > 0) {
               // BUG D FIX: Track whether sync succeeded before clearing local habits
@@ -126,7 +127,7 @@ export function WellnessProvider({ children }) {
                 }
 
                 setHabitDone(updatedHabitDone)
-                Store.set('habit_done', updatedHabitDone)
+                Store.set('fwa_habit_done', updatedHabitDone)
 
                 // Re-fetch habits from server to get correct server-generated IDs
                 const refetchRes = await fetch('/api/v1/habits', {
@@ -167,12 +168,12 @@ export function WellnessProvider({ children }) {
     prevAuthRef.current = isAuthenticated
     // Only restore from localStorage when user actually transitions from logged-in to logged-out
     if (wasAuthenticated && !isAuthenticated) {
-      setWaterGoal(Store.get('water_goal', 2500))
-      setWaterLog(Store.get('water_log', {}))
-      setHabits(Store.get('habits_list', []))
-      setHabitDone(Store.get('habit_done', {}))
-      setDailyTasks(Store.get('daily_tasks', {}))
-      setJournal(Store.get('journal_entries', []))
+      setWaterGoal(Store.get('fwa_water_goal', 2500))
+      setWaterLog(Store.get('fwa_water_log', {}))
+      setHabits(Store.get('fwa_habits_list', []))
+      setHabitDone(Store.get('fwa_habit_done', {}))
+      setDailyTasks(Store.get('fwa_daily_tasks', {}))
+      setJournal(Store.get('fwa_journal_entries', []))
     }
   }, [isAuthenticated, setWaterGoal, setWaterLog, setHabits, setHabitDone, setDailyTasks, setJournal])
 

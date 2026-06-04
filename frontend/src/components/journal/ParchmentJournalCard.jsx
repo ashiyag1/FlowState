@@ -21,7 +21,7 @@ export function ParchmentJournalCard({
   reflection,
   activePrompt,
   onSaveEntry,
-  onCycleCategory,
+  onCyclePrompt,
   inkSplash,
   xpToast
 }) {
@@ -74,7 +74,7 @@ export function ParchmentJournalCard({
           </h4>
           
           <button
-            onClick={onCycleCategory}
+            onClick={onCyclePrompt}
             className="text-[9px] text-[#8a5a2b] dark:text-gold-lt bg-gold/10 hover:bg-gold/20 py-0.5 px-2 rounded-full border border-gold/20 transition-all font-semibold"
           >
             Inspire Me ✦

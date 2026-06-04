@@ -11,6 +11,7 @@ import WaterWidget from '../components/tracker/WaterWidget'
 import DailyTasksWidget from '../components/tracker/DailyTasksWidget'
 import habitsBg from '../assets/pages/habits_bg.webp'
 import { getHinduDetails } from '../utils/hinduCalendar'
+import { today as getToday } from '../utils'
 import { useNotif } from '../components/system/NotificationPopup'
 
 // Extracted Subcomponents
@@ -31,7 +32,7 @@ export default function Habits() {
   const [selectedDay, setSelectedDay] = useState(new Date().getDate())
   const [currentInsightIdx, setCurrentInsightIdx] = useState(0)
 
-  const todayStr = new Date().toISOString().slice(0, 10)
+  const todayStr = getToday()
   const todayDone = habitDone[todayStr] || {}
   const doneCount = habits.filter(h => todayDone[h.id]).length
 
@@ -41,7 +42,7 @@ export default function Habits() {
   const isoForDay = (d) =>
     `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
 
-  const bestStreak = Math.max(0, ...habits.map(h => getStreak(h.id)))
+  const bestStreak = habits?.length > 0 ? Math.max(0, ...habits.map(h => getStreak(h.id))) : 0
   const allDoneToday = habits.length > 0 && doneCount === habits.length
 
   // Selected Day Calculations

@@ -21,7 +21,7 @@ import { useBookGestures } from './BookDetailModal/useBookGestures.js'
 
 export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   const { dark } = useTheme()
-  const { updateBookProgress, savePage, removeSavedPage, isPageSaved, addNote, removeNote, getPageNotes } = useWisdom()
+  const { updateBookProgress, savePage, removeSavedPage, isPageSaved, addNote, removeNote, getPageNotes, markStreakToday } = useWisdom()
   const { trackEvent } = useAchievements()
   const { adjustPoints } = useAuth()
 
@@ -105,8 +105,10 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   // BUG J FIX: Stable refs for callbacks to prevent XP timer restart when callback identities change
   const adjustPointsRef = useRef(adjustPoints)
   const trackEventRef = useRef(trackEvent)
+  const markStreakTodayRef = useRef(markStreakToday)
   useEffect(() => { adjustPointsRef.current = adjustPoints }, [adjustPoints])
   useEffect(() => { trackEventRef.current = trackEvent }, [trackEvent])
+  useEffect(() => { markStreakTodayRef.current = markStreakToday }, [markStreakToday])
 
   // Reading contemplation timer for XP awards (6 seconds)
   const [awardedPages, setAwardedPages] = useState(new Set())
@@ -124,6 +126,8 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
       adjustPointsRef.current(10, 0)
       setXpFloats(prev => [...prev, Date.now()])
       trackEventRef.current('page_read', { bookId: book.id, page: idx })
+      trackEventRef.current('wisdom_read')
+      markStreakTodayRef.current()
       logPageReadToday(book.id, idx)
       window.dispatchEvent(new Event('wisdom_progress_updated'))
       setAwardedPages(prev => {

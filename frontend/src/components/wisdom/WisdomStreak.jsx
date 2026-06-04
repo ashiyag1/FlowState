@@ -163,24 +163,23 @@ export default function WisdomStreak() {
                 fontSize: '8px', fontWeight: 700,
                 background: day.done
                   ? 'linear-gradient(135deg, #C9933A, #E8B96A)'
-                  : day.future
-                    ? 'transparent'
-                    : (dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'),
+                  : (dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'),
                 border: `1.5px solid ${
                   day.done ? '#C9933A' :
-                    day.future ? 'transparent' :
-                      (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)')
+                      (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)')
                 }`,
                 color: day.done ? '#fff' : 'transparent',
                 boxShadow: day.done ? '0 0 8px rgba(201,147,58,0.25)' : 'none',
+                opacity: day.future ? 0.4 : 1,
               }}>
                 {day.done ? '✓' : ''}
               </div>
               <span style={{
                 fontSize: '6px', fontWeight: 600,
+                opacity: day.future ? 0.4 : 1,
                 color: day.done
                   ? (dark ? 'rgba(201,147,58,0.5)' : 'rgba(139,94,47,0.4)')
-                  : (day.future ? 'transparent' : (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)')),
+                  : (dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.2)'),
               }}>
                 {day.label}
               </span>

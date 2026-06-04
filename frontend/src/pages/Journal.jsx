@@ -293,9 +293,14 @@ export default function Journal() {
               reflection={reflection}
               activePrompt={activePrompt}
               onSaveEntry={addEntry}
-              onCycleCategory={() => {
-                setCatIndex((c) => (c + 1) % CATEGORIZED_PROMPTS.length)
-                setPromptIndex(0)
+              onCyclePrompt={() => {
+                const nextPrompt = promptIndex + 1;
+                if (nextPrompt >= CATEGORIZED_PROMPTS[catIndex].prompts.length) {
+                  setCatIndex((c) => (c + 1) % CATEGORIZED_PROMPTS.length);
+                  setPromptIndex(0);
+                } else {
+                  setPromptIndex(nextPrompt);
+                }
               }}
               inkSplash={inkSplash}
               xpToast={xpToast}

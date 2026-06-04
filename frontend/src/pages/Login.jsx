@@ -304,7 +304,10 @@ export default function Login() {
           <motion.p variants={fadeUp} className="text-center text-sm text-mist-dark dark:text-ocean-lt/50 mt-6">
             {mode === 'login' ? "New to FlowState? " : 'Already have an account? '}
             <button
-              onClick={() => setMode((m) => (m === 'login' ? 'signup' : 'login'))}
+              onClick={() => {
+                setMode((m) => (m === 'login' ? 'signup' : 'login'));
+                setForm({ name: '', email: '', password: '' });
+              }}
               className="text-saffron dark:text-gold-lt font-semibold hover:underline underline-offset-2"
             >
               {mode === 'login' ? 'Create an account' : 'Sign in'}

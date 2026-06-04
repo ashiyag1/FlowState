@@ -34,6 +34,7 @@ const JAR_MILESTONES = [
 
 const STORAGE_KEY = 'wisdom_jar_count'
 const STORAGE_DATE_KEY = 'wisdom_jar_date'
+const STORAGE_ITEMS_KEY = 'wisdom_jar_items'
 
 function getLocalIsoDate() {
   const d = new Date()
@@ -45,15 +46,18 @@ function getLocalIsoDate() {
 
 function getStoredJar() {
   try {
-    const today = getLocalIsoDate()  // BUG 4 FIX: use ISO date, not toDateString()
+    const today = getLocalIsoDate()
     const storedDate = localStorage.getItem(STORAGE_DATE_KEY)
     if (storedDate !== today) {
       localStorage.setItem(STORAGE_DATE_KEY, today)
       localStorage.setItem(STORAGE_KEY, '0')
-      return 0
+      localStorage.setItem(STORAGE_ITEMS_KEY, '[]')
+      return { count: 0, items: [] }
     }
-    return parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
-  } catch { return 0 }
+    const count = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
+    const items = JSON.parse(localStorage.getItem(STORAGE_ITEMS_KEY) || '[]')
+    return { count, items }
+  } catch { return { count: 0, items: [] } }
 }
 
 export default function LotusOracle() {
@@ -61,11 +65,15 @@ export default function LotusOracle() {
   const { dark } = useTheme()
   const [isBloomed, setIsBloomed] = useState(false)
   const [quote, setQuote] = useState(null)
-  const [jarCount, setJarCount] = useState(() => getStoredJar())
+  
+  const [jarData] = useState(() => getStoredJar())
+  const [jarCount, setJarCount] = useState(jarData.count)
+  const [collected, setCollected] = useState(jarData.items)
+  
   const [showFlyAnim, setShowFlyAnim] = useState(false)
   const [toast, setToast] = useState(null)
-  const [collected, setCollected] = useState([])
   const [shakeJar, setShakeJar] = useState(false)
+  const [showJarModal, setShowJarModal] = useState(false)
 
   const handleBloom = () => {
     playHabitSound()
@@ -80,11 +88,13 @@ export default function LotusOracle() {
     if (!quote) return
     
     const newCount = jarCount + 1
+    const newCollected = [...collected, quote]
     setJarCount(newCount)
-    setCollected(prev => [...prev, quote])
+    setCollected(newCollected)
     
     try {
       localStorage.setItem(STORAGE_KEY, String(newCount))
+      localStorage.setItem(STORAGE_ITEMS_KEY, JSON.stringify(newCollected))
       window.dispatchEvent(new Event('wisdom_progress_updated'))
     } catch {}
 
@@ -105,13 +115,10 @@ export default function LotusOracle() {
       }, 500)
     }
 
-    // Reset to bloom again
+    // Close the lotus after collecting
     setIsBloomed(false)
     setTimeout(() => {
-      const nextAvailable = INSIGHTS.filter(i => i !== quote)
-      const next = nextAvailable[Math.floor(Math.random() * nextAvailable.length)]
-      setQuote(next)
-      setIsBloomed(true)
+      setQuote(null)
     }, 350)
   }
 
@@ -149,6 +156,47 @@ export default function LotusOracle() {
         )}
       </AnimatePresence>
 
+      {/* Jar Viewer Modal overlay */}
+      <AnimatePresence>
+        {showJarModal && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute inset-0 z-40 flex flex-col items-center justify-start p-4 backdrop-blur-xl"
+            style={{ 
+              background: dark ? 'rgba(26, 20, 16, 0.95)' : 'rgba(255, 252, 246, 0.95)',
+              border: dark ? '1px solid rgba(201, 168, 76, 0.2)' : '1px solid rgba(201, 168, 76, 0.3)'
+            }}
+          >
+            <div className="flex w-full justify-between items-center mb-4 border-b border-gold/10 pb-2">
+              <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-sandalwood dark:text-gold" style={{ fontFamily: "'Cinzel', serif" }}>
+                Your Wisdom Jar 🏺
+              </h4>
+              <button 
+                onClick={() => setShowJarModal(false)}
+                className="p-1 rounded-full bg-gold/10 hover:bg-gold/20 text-gold transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            
+            <div className="flex-1 w-full overflow-y-auto pr-1 flex flex-col gap-3 text-left pb-2 scrollbar-thin scrollbar-thumb-gold/20 scrollbar-track-transparent">
+              {collected.length === 0 ? (
+                <p className="text-[10px] italic text-mist-dark/60 dark:text-sand-lt/50 text-center mt-10">Your jar is empty today.<br/>Tap the lotus to seek guidance.</p>
+              ) : (
+                collected.map((item, idx) => (
+                  <div key={idx} className="p-3 rounded-xl border border-gold/10 bg-gold/5">
+                    <p className="text-[11px] italic leading-relaxed text-ink/90 dark:text-ivory/90 font-serif mb-2">"{item.text}"</p>
+                    <p className="text-[9px] uppercase tracking-wider font-bold text-saffron/80 dark:text-saffron-lt">— {item.author}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header + Wisdom Jar counter */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-extrabold uppercase tracking-wider text-sandalwood dark:text-gold" style={{ fontFamily: "'Cinzel', serif" }}>
@@ -158,12 +206,15 @@ export default function LotusOracle() {
         <motion.div
           animate={shakeJar ? { rotate: [0, -8, 8, -5, 5, 0] } : {}}
           transition={{ duration: 0.5 }}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-full cursor-default"
+          onClick={() => setShowJarModal(true)}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-1.5 px-2 py-1 rounded-full cursor-pointer"
           style={{
             background: dark ? 'rgba(201,147,58,0.1)' : 'rgba(201,147,58,0.08)',
             border: '1px solid rgba(201,147,58,0.2)',
           }}
-          title={`Wisdom Jar: ${jarCount} collected today`}
+          title={`Click to view your ${jarCount} collected wisdoms`}
         >
           <span className="text-sm">🏺</span>
           <span className="text-[9px] font-bold" style={{ color: dark ? '#C9933A' : '#8B5E2F' }}>
@@ -205,9 +256,9 @@ export default function LotusOracle() {
         </AnimatePresence>
 
         <motion.div 
-          onClick={isBloomed ? undefined : handleBloom}
-          className={`cursor-pointer focus:outline-none flex items-center justify-center p-2 relative z-10 ${isBloomed ? 'cursor-default' : ''}`}
-          whileHover={{ scale: isBloomed ? 1 : 1.08 }}
+          onClick={isBloomed ? handleReset : handleBloom}
+          className={`cursor-pointer focus:outline-none flex items-center justify-center p-2 relative z-10`}
+          whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
           animate={isBloomed ? { rotate: 360 } : { rotate: 0 }}
           transition={isBloomed ? { duration: 1.2, ease: [0.22, 1, 0.36, 1] } : { type: 'spring', stiffness: 200 }}
@@ -300,15 +351,25 @@ export default function LotusOracle() {
                   </span>
                   
                   {/* Collect button */}
-                  <motion.button
-                    onClick={handleCollect}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="mt-4 px-4 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-full cursor-pointer flex items-center gap-1.5 text-white"
-                    style={{ background: 'linear-gradient(135deg, #C9933A, #E8B96A)', boxShadow: '0 2px 12px rgba(201,147,58,0.35)' }}
-                  >
-                    🏺 Add to Jar
-                  </motion.button>
+                  <div className="flex justify-center gap-2 mt-4">
+                    <motion.button
+                      onClick={handleReset}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-4 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-full cursor-pointer text-ink/60 dark:text-ivory/60 border border-ink/20 dark:border-ivory/20"
+                    >
+                      Skip
+                    </motion.button>
+                    <motion.button
+                      onClick={handleCollect}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-4 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-full cursor-pointer flex items-center gap-1.5 text-white"
+                      style={{ background: 'linear-gradient(135deg, #C9933A, #E8B96A)', boxShadow: '0 2px 12px rgba(201,147,58,0.35)' }}
+                    >
+                      🏺 Add to Jar
+                    </motion.button>
+                  </div>
                 </>
               )}
             </motion.div>

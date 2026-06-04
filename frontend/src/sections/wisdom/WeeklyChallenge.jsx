@@ -4,7 +4,7 @@ import { useTheme } from '../../context/ThemeContext'
 import { checkChallengeCompletionToday, getChallengeTodayProgress } from '../../utils/wisdomTracking'
 
 // Monday-first order to match weekIsoDates (index 0=Mon … 6=Sun)
-const DAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+const DAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'Sa', 'Su']
 
 const WEEKLY_CHALLENGES = [
   {
@@ -78,14 +78,32 @@ function getCurrentWeekIsoDates() {
   })
 }
 
-// Read the same streak log that WisdomStreak/WisdomContext uses.
-function loadStreakLog() {
+function saveChallengeCompletionDate(challengeId, dateStr) {
   try {
-    const raw = localStorage.getItem('fwa_wisdom_streak_log')
-    return raw ? JSON.parse(raw) : {}
-  } catch { return {} }
+    const raw = localStorage.getItem('fwa_wisdom_challenges_completed') || '{}'
+    const data = JSON.parse(raw)
+    if (!data[challengeId]) {
+      data[challengeId] = []
+    }
+    if (!data[challengeId].includes(dateStr)) {
+      data[challengeId].push(dateStr)
+      localStorage.setItem('fwa_wisdom_challenges_completed', JSON.stringify(data))
+    }
+  } catch (e) {
+    console.error(e)
+  }
 }
 
+function loadChallengeCompletionDates(challengeId) {
+  try {
+    const raw = localStorage.getItem('fwa_wisdom_challenges_completed')
+    if (!raw) return []
+    const data = JSON.parse(raw)
+    return data[challengeId] || []
+  } catch {
+    return []
+  }
+}
 
 export default function WeeklyChallenge() {
   const { dark } = useTheme()
@@ -93,27 +111,33 @@ export default function WeeklyChallenge() {
 
   const weekIsoDates = getCurrentWeekIsoDates() // [mon, tue, wed, thu, fri, sat, sun]
   const todayIso = new Date().toISOString().slice(0, 10)
-  const todayWeekIdx = weekIsoDates.indexOf(todayIso) // 0-6, or -1 if somehow not found
 
-  const [streakLog, setStreakLog] = useState(() => loadStreakLog())
   const [justDone, setJustDone] = useState(false)
   const [todayProgress, setTodayProgress] = useState(() => getChallengeTodayProgress(challenge.id))
+  const [completedDates, setCompletedDates] = useState(() => loadChallengeCompletionDates(challenge.id))
 
   const key = challenge.id
 
-  // A day is "done" if it appears in the wisdom streak log for that ISO date.
-  // This makes WeeklyChallenge consistent with WisdomStreak.
-  const daysCompleted = weekIsoDates.filter(iso => !!streakLog[iso])
-  const todayDone = !!streakLog[todayIso]
+  const todayDone = todayProgress.current >= todayProgress.target
+  const daysCompleted = weekIsoDates.filter(iso => {
+    if (iso === todayIso) {
+      return todayDone
+    }
+    return completedDates.includes(iso)
+  })
   const totalDone = daysCompleted.length
 
-  // Re-read the streak log whenever reading progress updates.
+  // Re-read the progress whenever it updates.
   useEffect(() => {
     const handleUpdate = () => {
       const currentProg = getChallengeTodayProgress(key)
       setTodayProgress(currentProg)
-      // Reload the streak log so the day dots stay in sync.
-      setStreakLog(loadStreakLog())
+      
+      // Auto-save challenge completion when target is reached
+      if (currentProg.current >= currentProg.target) {
+        saveChallengeCompletionDate(key, todayIso)
+      }
+      setCompletedDates(loadChallengeCompletionDates(key))
     }
 
     handleUpdate()
@@ -121,8 +145,8 @@ export default function WeeklyChallenge() {
     window.addEventListener('wisdom_progress_updated', handleUpdate)
     // Also listen for storage changes from other tabs / context writes.
     const handleStorage = (e) => {
-      if (e.key === 'fwa_wisdom_streak_log') {
-        setStreakLog(loadStreakLog())
+      if (e.key === 'fwa_wisdom_challenges_completed') {
+        setCompletedDates(loadChallengeCompletionDates(key))
       }
     }
     window.addEventListener('storage', handleStorage)
@@ -237,7 +261,7 @@ export default function WeeklyChallenge() {
         <div className="flex items-center gap-2 mb-3">
           {DAYS_SHORT.map((d, i) => {
             const iso = weekIsoDates[i] // Mon=0 … Sun=6
-            const done = !!streakLog[iso]
+            const done = daysCompleted.includes(iso)
             const isToday = iso === todayIso
             const isFuture = iso > todayIso
             return (
