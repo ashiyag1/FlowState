@@ -14,13 +14,14 @@ const BOTTLES = [
 ]
 
 export default function WaterWidget() {
-  const { waterGoal, setWaterGoal, todayTotal, addWater } = useWellness()
+  const { waterGoal, setWaterGoal, todayTotal, addWater, getWaterStreak } = useWellness()
   const { playHydrationSound } = useSoundEffects()
   const { dark } = useTheme()
   const [customMl, setCustomMl] = useState('')
   
   const total = todayTotal
   const waterPct = Math.round(calcPct(total, waterGoal))
+  const waterStreak = getWaterStreak ? getWaterStreak() : 0
 
   const handleAddWater = (ml, label) => {
     const wasBelowGoal = total < waterGoal
@@ -111,13 +112,33 @@ export default function WaterWidget() {
             </div>
           </div>
 
-          <div>
-            <div className="font-display text-lg font-bold text-[#8B6914] dark:text-[#ffeab8] leading-tight">
-              {total} ml
+          <div className="flex-1 flex justify-between items-center pr-2">
+            <div>
+              <div className="font-display text-lg font-bold text-[#8B6914] dark:text-[#ffeab8] leading-tight">
+                {total} ml
+              </div>
+              <div className="text-[10px] text-ink-soft/60 dark:text-ivory/60">
+                of {waterGoal}ml goal
+              </div>
             </div>
-            <div className="text-[10px] text-ink-soft/60 dark:text-ivory/60">
-              of {waterGoal}ml goal
-            </div>
+            
+            {waterStreak > 0 && (
+              <div 
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-sm"
+                style={{
+                  backgroundColor: dark ? 'rgba(87, 184, 214, 0.15)' : 'rgba(87, 184, 214, 0.08)',
+                  borderColor: dark ? 'rgba(87, 184, 214, 0.3)' : 'rgba(87, 184, 214, 0.25)',
+                }}
+              >
+                <span className="text-[11px]">💧</span>
+                <span 
+                  className="text-[9px] font-bold uppercase tracking-wider whitespace-nowrap"
+                  style={{ color: dark ? '#a5f3fc' : '#1e748f' }}
+                >
+                  {waterStreak} day streak
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

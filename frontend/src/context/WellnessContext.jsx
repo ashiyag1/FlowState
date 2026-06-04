@@ -385,6 +385,32 @@ export function WellnessProvider({ children }) {
 
   const getStreak = useCallback((id) => streakCache[id] ?? 0, [streakCache])
 
+  const waterStreak = useMemo(() => {
+    let streak = 0
+    const todayStr = new Date().toISOString().slice(0, 10)
+    const parts = todayStr.split('-')
+    const d = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])))
+
+    for (let i = 0; i < 365; i++) {
+      const iso = d.toISOString().slice(0, 10)
+      const dayEntries = waterLog[iso] || []
+      const dayTotal = dayEntries.reduce((sum, e) => sum + e.ml, 0)
+      
+      if (dayTotal >= waterGoal) {
+        streak++
+        d.setUTCDate(d.getUTCDate() - 1)
+      } else {
+        if (i === 0) {
+          d.setUTCDate(d.getUTCDate() - 1)
+          continue
+        }
+        break
+      }
+    }
+    return streak
+  }, [waterLog, waterGoal])
+
+
   const todayHabitDone = habitDone[td] || {}
 
   // ── DAILY TASKS MUTATIONS ──────────────────────
@@ -531,6 +557,15 @@ export function WellnessProvider({ children }) {
   }, [isAuthenticated, token, setJournal, adjustPoints, journal])
 
   // ── AUTO-CHECK RITUAL FOR WISDOM CHALLENGE ──────────────────────────
+  const habitsRef = useRef(habits)
+  const habitDoneRef = useRef(habitDone)
+  useEffect(() => {
+    habitsRef.current = habits
+  }, [habits])
+  useEffect(() => {
+    habitDoneRef.current = habitDone
+  }, [habitDone])
+
   useEffect(() => {
     const WEEKLY_CHALLENGES = [
       { id: 'bhagavad_gita_3' },
@@ -581,7 +616,7 @@ export function WellnessProvider({ children }) {
 
       if (currentProgress >= targetProgress) {
         const todayKey = new Date().toISOString().slice(0, 10)
-        const match = habits.find(h => {
+        const match = habitsRef.current.find(h => {
           const nameLower = h.name.toLowerCase()
           return nameLower.includes('read') || 
                  nameLower.includes('wisdom') || 
@@ -593,7 +628,7 @@ export function WellnessProvider({ children }) {
         })
 
         if (match) {
-          const isTicked = !!(habitDone[todayKey] || {})[match.id]
+          const isTicked = !!(habitDoneRef.current[todayKey] || {})[match.id]
           if (!isTicked) {
             console.log(`[Auto-Ritual] Daily reading goal met! Checking off habit: "${match.name}" (ID: ${match.id})`)
             toggleHabit(match.id, todayKey)
@@ -602,17 +637,17 @@ export function WellnessProvider({ children }) {
       }
     }
 
-    handleUpdate()
+    // Only listen to progress updates. Do NOT run handleUpdate() immediately on mount/render
     window.addEventListener('wisdom_progress_updated', handleUpdate)
     return () => window.removeEventListener('wisdom_progress_updated', handleUpdate)
-  }, [isAuthenticated, token, habits, habitDone, toggleHabit])
+  }, [isAuthenticated, token, toggleHabit])
 
   return (
     <WellnessContext.Provider value={{
       // water
       waterGoal, setWaterGoal: updateWaterGoal,
       waterLog, todayEntries, todayTotal,
-      addWater, removeWater, clearWaterToday,
+      addWater, removeWater, clearWaterToday, getWaterStreak: () => waterStreak,
       // habits
       habits, addHabit, deleteHabit,
       habitDone, todayHabitDone, toggleHabit, getStreak,

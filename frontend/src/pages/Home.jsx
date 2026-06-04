@@ -14,6 +14,7 @@ import homeBg from '../assets/home_bg.webp'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { useTheme } from '../context/ThemeContext'
 import { useWellness } from '../context/WellnessContext'
+import { useAchievements } from '../context/AchievementsContext'
 import { getEmotionalReflection } from '../utils/emotionalMemory'
 import { computeArchetype } from '../utils/soulArchetype'
 import { useNavigate, Link } from 'react-router-dom'
@@ -34,6 +35,7 @@ export default function Home() {
   const { dark } = useTheme()
   const { journal, habitDone, habits, todayTotal, waterGoal, getStreak, addWater, addEntry, deleteEntry, waterLog, todayEntries } = useWellness()
   const { user, updateProfile } = useAuth()
+  const { trackEvent } = useAchievements()
   
   const [userName, setUserName] = useState(() => {
     return user?.name?.split(' ')[0] || localStorage.getItem('fwa_guest_name') || 'Seeker'
@@ -92,7 +94,8 @@ export default function Home() {
 
   // Active Ritual completion state
   const [ritualDone, setRitualDone] = useState(() => {
-    return localStorage.getItem('fwa_mockup_ritual_done') === 'true'
+    const todayKey = new Date().toISOString().slice(0, 10)
+    return localStorage.getItem('fwa_mockup_ritual_done') === todayKey
   })
 
   // Dynamic ViewMode (Morning / Evening) togglable for preview, synced with actual hour
@@ -108,9 +111,11 @@ export default function Home() {
 
   // Complete a ritual
   const handleCompleteRitual = () => {
+    const todayKey = new Date().toISOString().slice(0, 10)
     setRitualDone(true)
-    localStorage.setItem('fwa_mockup_ritual_done', 'true')
+    localStorage.setItem('fwa_mockup_ritual_done', todayKey)
     playHabitSound()
+    trackEvent('sankalpa_completed')
     notif('Sadhana complete · streak protected 🔥', 'success')
   }
 
@@ -310,10 +315,12 @@ export default function Home() {
               todayTotal={todayTotal}
               waterGoal={waterGoal}
               onTogglePractice={() => {
+                const todayKey = new Date().toISOString().slice(0, 10)
                 if (!ritualDone) {
                   setRitualDone(true)
-                  localStorage.setItem('fwa_mockup_ritual_done', 'true')
+                  localStorage.setItem('fwa_mockup_ritual_done', todayKey)
                   playHabitSound()
+                  trackEvent('sankalpa_completed')
                   notif(`Sadhana complete: "${todayRitual.name}" logged 🧘`, 'success')
                 } else {
                   setRitualDone(false)

@@ -11,7 +11,7 @@ export function HeritageSnapCard({
   const isExpanded = expandedId === item.id
 
   return (
-    <div style={{
+    <div id={item.id} style={{
       height: isExpanded ? 'auto' : '100dvh',
       minHeight: '100dvh',
       width: '100%',

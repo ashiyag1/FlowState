@@ -78,6 +78,18 @@ function Heritage() {
     return () => stopWisdomAmbience()
   }, [stopWisdomAmbience])
 
+  // Scroll expanded story to top when opened to keep viewport focus
+  useEffect(() => {
+    if (expandedId) {
+      const el = document.getElementById(expandedId)
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 100)
+      }
+    }
+  }, [expandedId])
+
   return (
     <div style={{ height: '100dvh', width: '100vw', background: dark ? '#050301' : '#1a1005', overflow: 'hidden' }}>
       
@@ -100,7 +112,7 @@ function Heritage() {
       <div style={{
         height: '100dvh',
         overflowY: 'scroll',
-        scrollSnapType: 'y mandatory',
+        scrollSnapType: expandedId ? 'none' : 'y mandatory',
         scrollBehavior: 'smooth',
       }} className="hide-scrollbar">
         {FEED.map((item, index) => (
