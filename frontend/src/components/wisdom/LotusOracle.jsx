@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSoundEffects } from '../../context/SoundEffectsContext'
+import { useSoundEffects } from '../../hooks/useSoundEffects'
 import { useTheme } from '../../context/ThemeContext'
 
 const INSIGHTS = [
@@ -35,9 +35,17 @@ const JAR_MILESTONES = [
 const STORAGE_KEY = 'wisdom_jar_count'
 const STORAGE_DATE_KEY = 'wisdom_jar_date'
 
+function getLocalIsoDate() {
+  const d = new Date()
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function getStoredJar() {
   try {
-    const today = new Date().toDateString()
+    const today = getLocalIsoDate()  // BUG 4 FIX: use ISO date, not toDateString()
     const storedDate = localStorage.getItem(STORAGE_DATE_KEY)
     if (storedDate !== today) {
       localStorage.setItem(STORAGE_DATE_KEY, today)

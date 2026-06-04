@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
 import { checkChallengeCompletionToday, getChallengeTodayProgress } from '../../utils/wisdomTracking'
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const DAYS_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+// Monday-first order to match weekIsoDates (index 0=Mon … 6=Sun)
+const DAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 const WEEKLY_CHALLENGES = [
   {
@@ -49,65 +49,98 @@ const WEEKLY_CHALLENGES = [
   },
 ]
 
-const STORAGE_KEY = 'weekly_challenge_progress'
+
+// Returns a stable week number aligned to Monday (ISO-style).
+// Epoch day 0 was a Thursday, so we subtract 3 to shift origin to Monday.
+function getMondayAlignedWeekNum() {
+  const epochDay = Math.floor(Date.now() / (24 * 60 * 60 * 1000))
+  return Math.floor((epochDay + 3) / 7)
+}
 
 function getWeekChallenge() {
-  const weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000))
+  const weekNum = getMondayAlignedWeekNum()
   return WEEKLY_CHALLENGES[weekNum % WEEKLY_CHALLENGES.length]
 }
 
-function getTodayIdx() {
-  return new Date().getDay()
+// Returns the ISO date string (YYYY-MM-DD) for each day of the current
+// Mon-Sun week. Index 0 = Monday, index 6 = Sunday.
+function getCurrentWeekIsoDates() {
+  const today = new Date()
+  const dayOfWeek = today.getDay() // 0=Sun … 6=Sat
+  const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - mondayOffset)
+  monday.setHours(0, 0, 0, 0)
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    return d.toISOString().slice(0, 10)
+  })
 }
 
-function loadProgress() {
+// Read the same streak log that WisdomStreak/WisdomContext uses.
+function loadStreakLog() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem('fwa_wisdom_streak_log')
     return raw ? JSON.parse(raw) : {}
   } catch { return {} }
 }
 
-function saveProgress(data) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)) } catch {}
-}
 
 export default function WeeklyChallenge() {
   const { dark } = useTheme()
   const challenge = getWeekChallenge()
-  const todayIdx = getTodayIdx()
 
-  const [progress, setProgress] = useState(() => loadProgress())
+  const weekIsoDates = getCurrentWeekIsoDates() // [mon, tue, wed, thu, fri, sat, sun]
+  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayWeekIdx = weekIsoDates.indexOf(todayIso) // 0-6, or -1 if somehow not found
+
+  const [streakLog, setStreakLog] = useState(() => loadStreakLog())
   const [justDone, setJustDone] = useState(false)
   const [todayProgress, setTodayProgress] = useState(() => getChallengeTodayProgress(challenge.id))
 
   const key = challenge.id
-  const daysCompleted = progress[key] || []
-  const todayDone = daysCompleted.includes(todayIdx)
+
+  // A day is "done" if it appears in the wisdom streak log for that ISO date.
+  // This makes WeeklyChallenge consistent with WisdomStreak.
+  const daysCompleted = weekIsoDates.filter(iso => !!streakLog[iso])
+  const todayDone = !!streakLog[todayIso]
   const totalDone = daysCompleted.length
 
+  // Re-read the streak log whenever reading progress updates.
   useEffect(() => {
     const handleUpdate = () => {
       const currentProg = getChallengeTodayProgress(key)
       setTodayProgress(currentProg)
-      
-      const currentProgressData = loadProgress()
-      const currentDaysCompleted = currentProgressData[key] || []
-      const isAlreadyDone = currentDaysCompleted.includes(todayIdx)
-      
-      if (!isAlreadyDone && currentProg.current >= currentProg.target) {
-        const updated = { ...currentProgressData, [key]: [...currentDaysCompleted, todayIdx] }
-        setProgress(updated)
-        saveProgress(updated)
-        setJustDone(true)
-        setTimeout(() => setJustDone(false), 2500)
+      // Reload the streak log so the day dots stay in sync.
+      setStreakLog(loadStreakLog())
+    }
+
+    handleUpdate()
+
+    window.addEventListener('wisdom_progress_updated', handleUpdate)
+    // Also listen for storage changes from other tabs / context writes.
+    const handleStorage = (e) => {
+      if (e.key === 'fwa_wisdom_streak_log') {
+        setStreakLog(loadStreakLog())
       }
     }
-    
-    handleUpdate()
-    
-    window.addEventListener('wisdom_progress_updated', handleUpdate)
-    return () => window.removeEventListener('wisdom_progress_updated', handleUpdate)
-  }, [key, todayIdx])
+    window.addEventListener('storage', handleStorage)
+    return () => {
+      window.removeEventListener('wisdom_progress_updated', handleUpdate)
+      window.removeEventListener('storage', handleStorage)
+    }
+  }, [key])
+
+  // Show the "just done" flash when today transitions to done.
+  const prevTodayDoneRef = useRef(todayDone)
+  useEffect(() => {
+    if (todayDone && !prevTodayDoneRef.current) {
+      setJustDone(true)
+      setTimeout(() => setJustDone(false), 2500)
+    }
+    prevTodayDoneRef.current = todayDone
+  }, [todayDone])
 
   const pct = Math.round((totalDone / 7) * 100)
 
@@ -203,8 +236,10 @@ export default function WeeklyChallenge() {
         {/* ── Day tracker ─── */}
         <div className="flex items-center gap-2 mb-3">
           {DAYS_SHORT.map((d, i) => {
-            const done = daysCompleted.includes(i)
-            const isToday = i === todayIdx
+            const iso = weekIsoDates[i] // Mon=0 … Sun=6
+            const done = !!streakLog[iso]
+            const isToday = iso === todayIso
+            const isFuture = iso > todayIso
             return (
               <div
                 key={i}
@@ -223,10 +258,13 @@ export default function WeeklyChallenge() {
                       : '1.5px solid transparent',
                     color: done
                       ? '#fff'
-                      : isToday
-                        ? challenge.color
-                        : (dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'),
+                      : isFuture
+                        ? (dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)')
+                        : isToday
+                          ? challenge.color
+                          : (dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'),
                     boxShadow: done ? `0 2px 8px ${challenge.color}35` : 'none',
+                    opacity: isFuture ? 0.45 : 1,
                   }}
                 >
                   {done ? '✓' : d}

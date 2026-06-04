@@ -78,9 +78,14 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
 
   const showBack = dragDir === 1 && angle < -90
 
+  // BUG E FIX: Only fire book_opened once per mount, not every time trackEvent identity changes
+  const trackedOpenRef = useRef(false)
   useEffect(() => {
-    trackEvent('book_opened', { bookId: book.id })
-  }, [book.id, trackEvent])
+    if (!trackedOpenRef.current) {
+      trackedOpenRef.current = true
+      trackEvent('book_opened', { bookId: book.id })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update book progress on page changes
   useEffect(() => {
@@ -97,6 +102,12 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
     }
   }, [idx, book.id, updateBookProgress, book.pages?.length])
 
+  // BUG J FIX: Stable refs for callbacks to prevent XP timer restart when callback identities change
+  const adjustPointsRef = useRef(adjustPoints)
+  const trackEventRef = useRef(trackEvent)
+  useEffect(() => { adjustPointsRef.current = adjustPoints }, [adjustPoints])
+  useEffect(() => { trackEventRef.current = trackEvent }, [trackEvent])
+
   // Reading contemplation timer for XP awards (6 seconds)
   const [awardedPages, setAwardedPages] = useState(new Set())
   const [readingTimerActive, setReadingTimerActive] = useState(false)
@@ -110,9 +121,9 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
 
     setReadingTimerActive(true)
     const timer = setTimeout(() => {
-      adjustPoints(10, 0)
+      adjustPointsRef.current(10, 0)
       setXpFloats(prev => [...prev, Date.now()])
-      trackEvent('page_read', { bookId: book.id, page: idx })
+      trackEventRef.current('page_read', { bookId: book.id, page: idx })
       logPageReadToday(book.id, idx)
       window.dispatchEvent(new Event('wisdom_progress_updated'))
       setAwardedPages(prev => {
@@ -124,7 +135,7 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
     }, 6000)
 
     return () => clearTimeout(timer)
-  }, [idx, awardedPages, adjustPoints, trackEvent, book.id])
+  }, [idx, awardedPages, book.id]) // BUG J FIX: removed adjustPoints and trackEvent from deps
 
   // Sharing handlers
   const handleShareText = useCallback(async () => {

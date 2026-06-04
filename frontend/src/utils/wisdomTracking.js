@@ -1,6 +1,15 @@
+// Helper: returns local date as YYYY-MM-DD (ISO-style but local timezone)
+function getLocalIsoDate() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function logPageReadToday(bookId, pageIdx) {
   try {
-    const today = new Date().toDateString();
+    const today = getLocalIsoDate();
     const STORAGE_KEY = 'wisdom_pages_read_today';
     const raw = localStorage.getItem(STORAGE_KEY);
     let data = { date: today, reads: {} };
@@ -36,7 +45,7 @@ export function checkChallengeCompletionToday(challengeId) {
 }
 
 export function getChallengeTodayProgress(challengeId) {
-  const today = new Date().toDateString();
+  const today = getLocalIsoDate();
   
   if (challengeId === 'lotus_jar_5') {
     const storedDate = localStorage.getItem('wisdom_jar_date');

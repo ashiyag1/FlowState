@@ -33,14 +33,16 @@ export async function connectDB() {
       await mongoose.connect(MONGODB_URI)
       console.log('MongoDB connected successfully')
       
-      // Update/sync default badges in MongoDB
-      for (const badge of DEFAULT_BADGES) {
-        await Badge.findOneAndUpdate(
-          { badgeId: badge.badgeId },
-          { $set: badge },
-          { upsert: true }
-        )
-      }
+//Update/sync default badges in MongoDB in parallel
+  await Promise.all(
+    DEFAULT_BADGES.map(badge =>
+      Badge.findOneAndUpdate(
+        { badgeId: badge.badgeId },
+        { $set: badge },
+        { upsert: true }
+      )
+    )
+  )
       console.log('Default badges synchronized in MongoDB')
     } catch (err) {
       console.error('MongoDB connection error — falling back to JSON file database:', err)

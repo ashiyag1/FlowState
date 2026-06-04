@@ -68,10 +68,18 @@ const ERA_COLORS = {
 }
 
 export function QuoteScroll({ sankalpa }) {
-  const [quoteIdx, setQuoteIdx] = useState(0)
+  const [quoteIdx, setQuoteIdx] = useState(() => {
+    const d = new Date()
+    const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
+    const optionsCount = sankalpa?.wisdomOptions?.length || 1
+    return seed % optionsCount
+  })
 
   useEffect(() => {
-    setQuoteIdx(0)
+    const d = new Date()
+    const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
+    const optionsCount = sankalpa?.wisdomOptions?.length || 1
+    setQuoteIdx(seed % optionsCount)
   }, [sankalpa])
 
   const handleRefresh = () => {

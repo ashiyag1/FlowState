@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import { useWisdom } from '../context/WisdomContext'
 import { useAuth } from '../context/AuthContext'
@@ -67,13 +67,21 @@ function WisdomContent() {
   const { trackEvent } = useAchievements()
   const [bookInitialPage, setBookInitialPage] = useState(0)
 
+  // BUG 2 FIX: Only fire markStreakToday and trackEvent ONCE per mount,
+  // not every time their callback identities change (e.g. after badge check)
+  const trackedRef = useRef(false)
   useEffect(() => {
-    markStreakToday()
-    trackEvent('wisdom_read')
-  }, [markStreakToday, trackEvent])
+    if (!trackedRef.current) {
+      trackedRef.current = true
+      markStreakToday()
+      trackEvent('wisdom_read')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredBooks = TOPIC_BOOKS.filter(book => {
+    // BUG 16 FIX: Match against book.topics array first, then fall back to title/scripture text
     const matchesTopic = activeTopic === 'All' || 
+      (Array.isArray(book.topics) && book.topics.some(t => t.toLowerCase() === activeTopic.toLowerCase())) ||
       book.title.toLowerCase().includes(activeTopic.toLowerCase()) ||
       (book.scripture && book.scripture.toLowerCase().includes(activeTopic.toLowerCase()))
     const matchesSearch = !searchQuery ||

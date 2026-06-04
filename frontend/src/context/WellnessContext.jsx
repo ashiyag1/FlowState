@@ -67,8 +67,10 @@ export function WellnessProvider({ children }) {
             const localHabitDone = Store.get('habit_done', {})
             
             if (localHabits.length > 0) {
+              // BUG D FIX: Track whether sync succeeded before clearing local habits
               console.log('[Wellness Sync] Syncing guest habits to backend...', localHabits)
               const idMap = {}
+              let syncFailed = false
               for (const h of localHabits) {
                 try {
                   const res = await fetch('/api/v1/habits', {
@@ -86,57 +88,61 @@ export function WellnessProvider({ children }) {
                   if (res.ok) {
                     const saved = await res.json()
                     idMap[h.id] = saved.id
+                  } else {
+                    syncFailed = true
                   }
                 } catch (err) {
                   console.error('Failed to sync guest habit to server:', err)
+                  syncFailed = true
                 }
               }
-              
-              // Rewrite habitDone keys and sync to server
-              const updatedHabitDone = { ...localHabitDone }
-              for (const dateKey of Object.keys(updatedHabitDone)) {
-                const dayDone = { ...updatedHabitDone[dateKey] }
-                let changed = false
-                for (const tempId of Object.keys(dayDone)) {
-                  if (idMap[tempId]) {
-                    const time = dayDone[tempId]
-                    const serverId = idMap[tempId]
-                    delete dayDone[tempId]
-                    dayDone[serverId] = time
-                    changed = true
-                    
-                    // Sync the completion to the server
-                    try {
-                      await fetch('/api/v1/habits', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ toggle: true, habitId: serverId, date: dateKey, time })
-                      })
-                    } catch (err) {
-                      console.error('Failed to sync completion to server:', err)
+
+              // Only proceed with clearing local state if ALL syncs succeeded
+              if (!syncFailed) {
+                // Rewrite habitDone keys and sync to server
+                const updatedHabitDone = { ...localHabitDone }
+                for (const dateKey of Object.keys(updatedHabitDone)) {
+                  const dayDone = { ...updatedHabitDone[dateKey] }
+                  let changed = false
+                  for (const tempId of Object.keys(dayDone)) {
+                    if (idMap[tempId]) {
+                      const time = dayDone[tempId]
+                      const serverId = idMap[tempId]
+                      delete dayDone[tempId]
+                      dayDone[serverId] = time
+                      changed = true
+                      try {
+                        await fetch('/api/v1/habits', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                          body: JSON.stringify({ toggle: true, habitId: serverId, date: dateKey, time })
+                        })
+                      } catch (err) {
+                        console.error('Failed to sync completion to server:', err)
+                      }
                     }
                   }
+                  if (changed) updatedHabitDone[dateKey] = dayDone
                 }
-                if (changed) {
-                  updatedHabitDone[dateKey] = dayDone
+
+                setHabitDone(updatedHabitDone)
+                Store.set('habit_done', updatedHabitDone)
+
+                // Re-fetch habits from server to get correct server-generated IDs
+                const refetchRes = await fetch('/api/v1/habits', {
+                  headers: { 'Authorization': `Bearer ${token}` }
+                })
+                if (refetchRes.ok) {
+                  const refetchData = await refetchRes.json()
+                  setHabits(refetchData.habits || [])
                 }
+              } else {
+                // Sync partially failed — keep local habits in place, do not wipe them
+                console.warn('[Wellness Sync] Some habits failed to sync. Keeping local habits.')
               }
-              
-              setHabitDone(updatedHabitDone)
-              Store.set('habit_done', updatedHabitDone)
-              
-              // Re-fetch habits from server to get correct server-generated list
-              const refetchRes = await fetch('/api/v1/habits', {
-                headers: { 'Authorization': `Bearer ${token}` }
-              })
-              if (refetchRes.ok) {
-                const refetchData = await refetchRes.json()
-                setHabits(refetchData.habits || [])
-              }
-            } else {
-              setHabits([])
-              setHabitDone({})
             }
+            // BUG D FIX: If both server AND local are empty, do NOT call setHabits([]) —
+            // just leave state as is (it was already initialized from localStorage)
           }
         }
 
@@ -153,9 +159,14 @@ export function WellnessProvider({ children }) {
     fetchBackendData()
   }, [isAuthenticated, token, setWaterGoal, setWaterLog, setHabits, setHabitDone, setJournal])
 
-  // Clear data on logout / Restore from local storage on logout
+  // BUG 15 FIX: Only restore from localStorage once when user logs OUT (not on every render where !isAuthenticated)
+  // Track previous auth state to detect actual logout transitions
+  const prevAuthRef = useRef(isAuthenticated)
   useEffect(() => {
-    if (!isAuthenticated) {
+    const wasAuthenticated = prevAuthRef.current
+    prevAuthRef.current = isAuthenticated
+    // Only restore from localStorage when user actually transitions from logged-in to logged-out
+    if (wasAuthenticated && !isAuthenticated) {
       setWaterGoal(Store.get('water_goal', 2500))
       setWaterLog(Store.get('water_log', {}))
       setHabits(Store.get('habits_list', []))
@@ -315,11 +326,10 @@ export function WellnessProvider({ children }) {
     const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0')
     const version = ++toggleVersion.current
 
-    // Snapshot current state for rollback on API failure
-    const snapshotBefore = Store.get('habit_done', {})
-
-    // Optimistic UI update
+    // BUG A FIX: Snapshot from React state (not stale localStorage) before the optimistic update
+    let snapshotBefore = null
     setHabitDone(prev => {
+      snapshotBefore = prev  // capture current React state
       const day = { ...(prev[dateKey] || {}) }
       if (day[id]) delete day[id]
       else day[id] = time
@@ -336,7 +346,7 @@ export function WellnessProvider({ children }) {
         // Rollback if server rejected the toggle
         if (!res.ok) {
           console.error('Habit toggle rejected by server — rolling back UI')
-          setHabitDone(snapshotBefore)
+          if (snapshotBefore !== null) setHabitDone(snapshotBefore)
         } else {
           const data = await res.json()
           if (data.user && version === toggleVersion.current) {
@@ -346,7 +356,7 @@ export function WellnessProvider({ children }) {
       } catch (err) {
         // Rollback on network failure to prevent false ticks persisting
         console.error('Habit toggle network error — rolling back UI:', err)
-        setHabitDone(snapshotBefore)
+        if (snapshotBefore !== null) setHabitDone(snapshotBefore)
       }
     }
   }, [isAuthenticated, token, setHabitDone, setUser])
@@ -573,8 +583,13 @@ export function WellnessProvider({ children }) {
       { id: 'anxiety_guide' },
       { id: 'discipline_week' }
     ]
+    // BUG 3 FIX: Use Monday-aligned week number (same as WeeklyChallenge.jsx)
+    function getMondayAlignedWeekNum() {
+      const epochDay = Math.floor(Date.now() / (24 * 60 * 60 * 1000))
+      return Math.floor((epochDay + 3) / 7)
+    }
     function getWeekChallengeId() {
-      const weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000))
+      const weekNum = getMondayAlignedWeekNum()
       return WEEKLY_CHALLENGES[weekNum % WEEKLY_CHALLENGES.length].id
     }
 
@@ -582,14 +597,15 @@ export function WellnessProvider({ children }) {
       if (!isAuthenticated || !token) return
       
       const challengeId = getWeekChallengeId()
-      const today = new Date().toDateString()
+      // BUG G FIX: Use ISO date string everywhere, not toDateString()
+      const todayIso = new Date().toISOString().slice(0, 10)
       
       let currentProgress = 0
       let targetProgress = 1
       
       if (challengeId === 'lotus_jar_5') {
         const storedDate = localStorage.getItem('wisdom_jar_date')
-        currentProgress = storedDate === today ? parseInt(localStorage.getItem('wisdom_jar_count') || '0', 10) : 0
+        currentProgress = storedDate === todayIso ? parseInt(localStorage.getItem('wisdom_jar_count') || '0', 10) : 0
         targetProgress = 5
       } else {
         const raw = localStorage.getItem('wisdom_pages_read_today')
@@ -597,7 +613,7 @@ export function WellnessProvider({ children }) {
         if (raw) {
           try {
             const parsed = JSON.parse(raw)
-            if (parsed && parsed.date === today && parsed.reads) {
+            if (parsed && parsed.date === todayIso && parsed.reads) {
               reads = parsed.reads
             }
           } catch (e) {}
@@ -615,7 +631,7 @@ export function WellnessProvider({ children }) {
       }
 
       if (currentProgress >= targetProgress) {
-        const todayKey = new Date().toISOString().slice(0, 10)
+        const todayKey = todayIso
         const match = habitsRef.current.find(h => {
           const nameLower = h.name.toLowerCase()
           return nameLower.includes('read') || 
