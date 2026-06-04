@@ -237,13 +237,15 @@ export function AchievementsProvider({ children }) {
         isFetchingRef.current = false;
       }
     } else {
-      // Guest mode: load badges progress as fully locked (0 progress)
+      // Guest mode: load badges progress from local storage
+      const localBadgesProgress = Store.get('fwa_local_badges', {});
       const merged = FRONTEND_DEFAULT_BADGES.map(badge => {
+        const local = localBadgesProgress[badge.badgeId] || { progress: 0, isUnlocked: false, unlockedAt: null };
         return {
           ...badge,
-          progress: 0,
-          isUnlocked: false,
-          unlockedAt: null
+          progress: local.progress,
+          isUnlocked: local.isUnlocked,
+          unlockedAt: local.unlockedAt
         };
       });
       setBadges(merged);
@@ -521,10 +523,13 @@ export function AchievementsProvider({ children }) {
 
   // Track event entry point (called by components)
   const trackEvent = useCallback(async (actionType, metadata = {}) => {
-    // Return early if not authenticated; guest mode does not unlock achievements
+    // BUG 11 FIX: Guest users now run through local achievement evaluation
+    // instead of silently returning with no badge progress tracked
     if (!isAuthenticated || !token) {
+      evaluateLocalAchievements(actionType, metadata);
       return;
     }
+
 
     const currentHour = new Date().getHours();
     

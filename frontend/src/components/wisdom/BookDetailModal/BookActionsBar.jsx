@@ -192,6 +192,7 @@ export function BookActionsBar({
             </div>
           )}
         </div>
+
       </div>
     </div>
   )

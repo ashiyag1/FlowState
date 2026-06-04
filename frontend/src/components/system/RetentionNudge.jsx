@@ -52,13 +52,13 @@ export default function RetentionNudge() {
     <AnimatePresence>
       {show && (
         <motion.div
-          initial={{ opacity: 0, y: 60, scale: 0.95 }}
+          initial={{ opacity: 0, y: -60, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 40, scale: 0.97 }}
+          exit={{ opacity: 0, y: -40, scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 380, damping: 28 }}
           style={{
             position: 'fixed',
-            bottom: '5.5rem',
+            top: '5.5rem',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 60,

@@ -219,14 +219,18 @@ export default function SankalpaCard() {
   const { dark } = useTheme()
   const { trackEvent } = useAchievements()
 
-  const getTodayDate = () =>
-    new Date().toISOString().split('T')[0]
+  const getTodayDate = () => {
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+    return localISOTime.split('T')[0];
+  }
 
   const [sankalpa, setSankalpa] = useState(null)
   const [inputVal, setInputVal] = useState('')
   const [isCompleted, setCompleted] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [showSmoke, setShowSmoke] = useState(false)
+  const [showPetals, setShowPetals] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editVal, setEditVal] = useState('')
 
@@ -268,13 +272,25 @@ export default function SankalpaCard() {
 
   // Stop smoke after 5 seconds
   useEffect(() => {
+    let timer;
     if (showSmoke) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         setShowSmoke(false)
       }, 5000)
-      return () => clearTimeout(timer)
     }
+    return () => clearTimeout(timer)
   }, [showSmoke])
+
+  // Stop petals after 6 seconds
+  useEffect(() => {
+    let timer;
+    if (showPetals) {
+      timer = setTimeout(() => {
+        setShowPetals(false)
+      }, 6000)
+    }
+    return () => clearTimeout(timer)
+  }, [showPetals])
 
   const handleCommit = () => {
     if (!inputVal.trim()) return
@@ -287,6 +303,7 @@ export default function SankalpaCard() {
   const handleFulfill = () => {
     playHabitSound()
     setCompleted(true)
+    setShowPetals(true)
     trackEvent('sankalpa_completed')
   }
 
@@ -298,6 +315,7 @@ export default function SankalpaCard() {
   const handleSaveEdit = () => {
     if (!editVal.trim()) return
     setSankalpa(editVal.trim())
+    setCompleted(false)
     setIsEditing(false)
     setEditVal('')
   }
@@ -308,12 +326,14 @@ export default function SankalpaCard() {
   }
 
   const handleDelete = () => {
+    if (!window.confirm("Are you sure you want to remove today's sankalpa?")) return;
     setSankalpa(null)
     setCompleted(false)
     setInputVal('')
     setIsEditing(false)
     setEditVal('')
     setShowSmoke(false)
+    setShowPetals(false)
     localStorage.removeItem('daily_sankalpa')
   }
 
@@ -363,8 +383,11 @@ export default function SankalpaCard() {
     >
       {/* Dynamic Rose Petal Burst Shower when sankalpa is completed */}
       <AnimatePresence>
-        {isCompleted && (
-          <div className="absolute inset-0 overflow-hidden pointer-events-none z-20">
+        {showPetals && (
+          <motion.div 
+            className="absolute inset-0 overflow-hidden pointer-events-none z-20"
+            exit={{ opacity: 0, transition: { duration: 1 } }}
+          >
             {rosePetals.map((p) => (
               <motion.div
                 key={p.id}
@@ -393,7 +416,7 @@ export default function SankalpaCard() {
                 }}
               />
             ))}
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 

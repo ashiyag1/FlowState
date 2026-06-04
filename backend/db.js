@@ -65,5 +65,6 @@ export {
 export {
   dbGetBadges,
   dbGetUserBadges,
-  dbSaveUserBadge
+  dbSaveUserBadge,
+  dbSaveUserBadges
 } from './db/badgeRepository.js'

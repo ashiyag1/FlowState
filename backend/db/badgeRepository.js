@@ -45,3 +45,31 @@ export async function dbSaveUserBadge(userId, badgeId, updates) {
     return ub
   }
 }
+
+export async function dbSaveUserBadges(userId, updatesArray) {
+  await connectDB()
+  if (getIsMongo()) {
+    await Promise.all(
+      updatesArray.map(({ badgeId, updates }) =>
+        UserBadge.findOneAndUpdate(
+          { userId, badgeId },
+          { $set: updates },
+          { upsert: true }
+        )
+      )
+    )
+  } else {
+    const db = await readJsonDB()
+    if (!db.userBadges) db.userBadges = []
+    for (const { badgeId, updates } of updatesArray) {
+      let ub = db.userBadges.find(x => x.userId === userId && x.badgeId === badgeId)
+      if (!ub) {
+        ub = { id: Math.random().toString(36).slice(2, 9), userId, badgeId, progress: 0, isUnlocked: false }
+        db.userBadges.push(ub)
+      }
+      Object.assign(ub, updates)
+    }
+    await writeJsonDB(db)
+  }
+}
+

@@ -8,7 +8,7 @@ export default function BadgeToast() {
   const { dark } = useTheme();
 
   return (
-    <div className="fixed top-6 right-6 z-[99] flex flex-col gap-3 pointer-events-none max-w-sm w-full">
+    <div className="fixed top-6 left-4 right-4 md:left-auto md:right-6 z-[99] flex flex-col gap-3 pointer-events-none md:max-w-sm w-auto md:w-full">
       <AnimatePresence>
         {toasts.map(({ id, badge }) => (
           <motion.div
@@ -20,7 +20,7 @@ export default function BadgeToast() {
             style={{
               background: dark 
                 ? 'linear-gradient(135deg, rgba(28, 18, 8, 0.95) 0%, rgba(18, 11, 4, 0.95) 100%)'
-                : 'linear-gradient(135deg, rgba(254, 252, 246, 0.98) 0%, rgba(24df, 242, 230, 0.98) 100%)',
+                : 'linear-gradient(135deg, rgba(254, 252, 246, 0.98) 0%, rgba(245, 242, 230, 0.98) 100%)',
               backdropFilter: 'blur(20px)',
               boxShadow: dark
                 ? '0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(201, 147, 58, 0.08)'

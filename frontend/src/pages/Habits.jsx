@@ -11,6 +11,7 @@ import WaterWidget from '../components/tracker/WaterWidget'
 import DailyTasksWidget from '../components/tracker/DailyTasksWidget'
 import habitsBg from '../assets/pages/habits_bg.webp'
 import { getHinduDetails } from '../utils/hinduCalendar'
+import { useNotif } from '../components/system/NotificationPopup'
 
 // Extracted Subcomponents
 import ActiveSadhanasCard from '../components/tracker/Habits/ActiveSadhanasCard'
@@ -24,6 +25,7 @@ export default function Habits() {
   const { trackEvent } = useAchievements()
   const { playHabitSound } = useSoundEffects()
   const { dark } = useTheme()
+  const notif = useNotif()
 
   const [calDate, setCalDate] = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(new Date().getDate())
@@ -50,7 +52,7 @@ export default function Habits() {
 
   const handleAdd = (habitData) => {
     if (!isAuthenticated) {
-      navigate('/login')
+      notif('Please sign in to save your rituals ✦', 'info')
       return
     }
     addHabit(habitData)
@@ -58,7 +60,7 @@ export default function Habits() {
 
   const handleToggleHabit = (id, dateKey) => {
     if (!isAuthenticated) {
-      navigate('/login')
+      notif('Please sign in to track your rituals ✦', 'info')
       return
     }
     const alreadyDone = !!(habitDone[dateKey] || {})[id]
@@ -72,7 +74,7 @@ export default function Habits() {
   const handleDeleteHabit = (e, id) => {
     e.stopPropagation()
     if (!isAuthenticated) {
-      navigate('/login')
+      notif('Please sign in to modify rituals ✦', 'info')
       return
     }
     deleteHabit(id)

@@ -152,15 +152,12 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
     try {
       const el = cardRef.current
       if (!el) return
-      el.style.display = 'block'
-      await new Promise(r => requestAnimationFrame(r))
       const dataUrl = await toPng(el, {
         pixelRatio: 2,
         cacheBust: true,
-        style: { display: 'block' },
+        fontEmbedCSS: '',
         backgroundColor: '#fcf6e8',
       })
-      el.style.display = 'none'
       const imgRes = await fetch(dataUrl)
       const blob = await imgRes.blob()
       if (!blob) return
@@ -251,7 +248,10 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
           styles={s}
         />
 
-        <WisdomShareCard ref={cardRef} book={book} cur={cur} />
+        {/* Hidden off-screen layout container for rendering target */}
+        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '0', height: '0', overflow: 'hidden' }}>
+          <WisdomShareCard ref={cardRef} book={book} cur={cur} />
+        </div>
 
         <WisdomShareOverlay
           previewImage={previewImage}

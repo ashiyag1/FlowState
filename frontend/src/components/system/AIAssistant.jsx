@@ -153,6 +153,14 @@ export default function AIAssistant() {
         .chat-scrollbar::-webkit-scrollbar { width: 4px; }
         .chat-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(212,168,42,0.25); border-radius: 99px; }
+        .sahayak-fab { bottom: 20px; }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+        @media (max-width: 768px) {
+          .sahayak-fab { bottom: 84px; }
+        }
       `}</style>
 
       <AnimatePresence>
@@ -331,7 +339,7 @@ export default function AIAssistant() {
         whileTap={{ scale: 0.92 }}
         onClick={() => setOpen(o => !o)}
         style={{
-          position: 'fixed', bottom: 20, right: 20, zIndex: 999,
+          position: 'fixed', right: 20, zIndex: 999,
           width: 52, height: 52, borderRadius: '50%',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           border: '1px solid rgba(212,168,42,0.25)',
@@ -341,6 +349,7 @@ export default function AIAssistant() {
           cursor: 'pointer', color: '#c4911e',
           transition: 'all 0.25s ease',
         }}
+        className="sahayak-fab"
         aria-label="Toggle AI assistant"
       >
         {open ? <X size={20} /> : <CozyFriendIcon size={26} />}

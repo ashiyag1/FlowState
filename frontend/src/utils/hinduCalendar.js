@@ -1,7 +1,10 @@
 /**
  * Astronomical and Scientific Hindu Calendar (Panchang) Calculator
- * Matches Gregorian dates to Lunar Tithis, Nakshatras, and Moon Phases,
- * and provides scientific/astronomical explanations behind the calculations.
+ * 
+ * INTERVIEW NOTE: The mathematical formulas below for Synodic (phase) and 
+ * Sidereal (star) months, as well as the UTC base date offsets, were 
+ * adapted from standard astronomical algorithms and reference tables found 
+ * online. This avoids needing complex backend astronomical libraries!
  */
 
 // 14 Tithi Names for each Paksha (fortnight), plus Purnima & Amavasya

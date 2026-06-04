@@ -133,27 +133,7 @@ export default function ImmersiveFooter() {
           A sanctuary for quiet reflection, ritual tracker, and inner space.
         </p>
 
-        <div className="feedback-actions">
-          <span style={{ fontSize: '0.72rem', color: dark ? 'rgba(232,217,181,0.6)' : 'rgba(92,61,30,0.65)', fontStyle: 'italic', marginRight: '2px', fontFamily: "'Lora', serif" }}>
-            ✉ Share Feedback:
-          </span>
-          <a 
-            href="https://mail.google.com/mail/?view=cm&fs=1&to=ashiyagarg75@gmail.com&su=FlowState%20Feedback" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-feedback-btn"
-          >
-            Gmail
-          </a>
-          <a 
-            href="https://outlook.live.com/mail/0/deeplink/compose?to=ashiyagarg75@gmail.com&subject=FlowState%20Feedback" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-feedback-btn"
-          >
-            Outlook
-          </a>
-        </div>
+
 
         <div className="footer-credits">
           Made with <span style={{ color: '#b45a3c', fontSize: '0.8rem' }}>♥</span> by Ashiya

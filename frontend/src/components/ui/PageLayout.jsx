@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 
 export default function PageLayout({ children, className = '' }) {
-  const hasPb = className.includes('pb-') || className.includes('py-') || className.includes('p-')
+  const hasPb = /(^|\s)(p-|py-|pb-)\d+/.test(className)
   const defaultPadding = hasPb ? '' : 'pb-28 md:pb-12'
   return (
     <motion.main

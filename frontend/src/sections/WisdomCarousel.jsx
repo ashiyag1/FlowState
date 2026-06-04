@@ -68,31 +68,32 @@ const ERA_COLORS = {
 }
 
 export function QuoteScroll({ sankalpa }) {
+  const DEFAULT_QUOTES = [
+    { wis: 'What you seek is seeking you.', src: 'Rumi', ref: '— on the journey' },
+    { wis: 'The quieter you become, the more you can hear.', src: 'Ram Dass', ref: '— stillness' },
+    { wis: 'Set your heart upon your work, but never on its reward.', src: 'Bhagavad Gita', ref: '— action' }
+  ]
+
   const [quoteIdx, setQuoteIdx] = useState(() => {
     const d = new Date()
     const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
-    const optionsCount = sankalpa?.wisdomOptions?.length || 1
-    return seed % optionsCount
+    const options = sankalpa?.wisdomOptions || DEFAULT_QUOTES
+    return seed % options.length
   })
 
   useEffect(() => {
     const d = new Date()
     const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
-    const optionsCount = sankalpa?.wisdomOptions?.length || 1
-    setQuoteIdx(seed % optionsCount)
+    const options = sankalpa?.wisdomOptions || DEFAULT_QUOTES
+    setQuoteIdx(seed % options.length)
   }, [sankalpa])
 
   const handleRefresh = () => {
-    if (sankalpa?.wisdomOptions) {
-      setQuoteIdx((prev) => (prev + 1) % sankalpa.wisdomOptions.length)
-    }
+    const options = sankalpa?.wisdomOptions || DEFAULT_QUOTES
+    setQuoteIdx((prev) => (prev + 1) % options.length)
   }
 
-  const quote = sankalpa?.wisdomOptions?.[quoteIdx] || {
-    wis: '"What you seek is seeking you."',
-    src: 'Rumi',
-    ref: '— on the journey'
-  }
+  const quote = (sankalpa?.wisdomOptions || DEFAULT_QUOTES)[quoteIdx]
 
   const displayQuote = quote.wis
   const accentColor = '#D4A84B'
@@ -125,7 +126,7 @@ export function QuoteScroll({ sankalpa }) {
             <div className="fs-quote-mark" style={{ color: accentColor, margin: '0 auto 12px' }}>
               "
             </div>
-            <blockquote>"{displayQuote}"</blockquote>
+            <blockquote>{displayQuote}</blockquote>
             <div className="fs-quote-author">- {quote.src}</div>
             {quote.ref && (
               <div className="fs-quote-source" style={{ textAlign: 'center' }}>{quote.ref}</div>
@@ -545,7 +546,9 @@ export function WisdomStyles() {
       }
 
       .fs-wisdom-dots {
-        display: none;
+        display: flex;
+        align-items: center;
+        gap: 7px;
       }
 
       .fs-wisdom-dots button {

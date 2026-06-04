@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Volume2, Music, CheckCircle2, Bookmark, Play, Flame, Droplet, Sparkles, Feather } from 'lucide-react'
 import PageLayout from '../components/ui/PageLayout'
@@ -30,6 +30,7 @@ import SoundSanctuaryPanel from '../components/dashboard/SoundSanctuaryPanel'
 
 import { SANKALPAS, getTodayRitual } from '../data/sankalpaConfig'
 
+
 export default function Home() {
   const { startWisdomAmbience, stopWisdomAmbience, isMuted, toggleMute, playHabitSound, playHydrationSound } = useSoundEffects()
   const { dark } = useTheme()
@@ -59,7 +60,9 @@ export default function Home() {
   })
   const [sankalpaPanelOpen, setSankalpaPanelOpen] = useState(false)
   const [onboardingOpen, setOnboardingOpen] = useState(() => {
-    return !localStorage.getItem('fwa_onboarding_completed')
+    // BUG 14 FIX: check for truthy value, not just key existence (empty string is falsy but localStorage.getItem returns it)
+    const val = localStorage.getItem('fwa_onboarding_completed')
+    return !val || val !== 'true'
   })
   const [wisdomRead, setWisdomRead] = useState(() => {
     const todayKey = new Date().toISOString().slice(0, 10)
@@ -174,12 +177,19 @@ export default function Home() {
     return 250 // fallback default
   }, [waterLog, todayEntries])
 
-  const handleSetSankalpa = (key) => {
+  const handleSetSankalpa = async (key) => {
     setSelectedSankalpa(key)
     localStorage.setItem('fwa_mockup_sankalpa', key)
     setRitualDone(false)
     localStorage.removeItem('fwa_mockup_ritual_done')
     setSankalpaPanelOpen(false)
+    if (user) {
+      try {
+        await updateProfile({ activeSankalpa: key })
+      } catch (err) {
+        console.error('Failed to sync sankalpa to profile:', err)
+      }
+    }
   }
 
   const handleWisdomRead = () => {
@@ -432,26 +442,6 @@ export default function Home() {
                   style={{ fontSize: '11px', color: '#e8622a', fontWeight: 600, textDecoration: 'none', marginTop: 'auto', alignSelf: 'flex-start', fontFamily: 'sans-serif' }}
                 >
                   Explore archives →
-                </Link>
-              </div>
-
-              {/* Community column */}
-              <div style={{ ...glassCardStyle, borderRadius: '20px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 6px #4ade80' }} />
-                  <span style={{ fontSize: '10px', color: '#4ade80', fontWeight: 700, fontFamily: 'sans-serif' }}>LIVE SANGHA</span>
-                </div>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '28px', fontWeight: 700, color: dark ? '#ffeab8' : '#1c1208', margin: 0 }}>
-                  {Math.floor(40 + Math.sin(Date.now() / 15000) * 8)} souls
-                </div>
-                <p style={{ fontSize: '12px', color: dark ? 'rgba(245,230,200,0.7)' : '#5c4322', margin: 0, fontFamily: 'sans-serif' }}>
-                  Practitioners currently in focus or deep reflection.
-                </p>
-                <Link
-                  to="/community"
-                  style={{ fontSize: '11px', color: '#e8622a', fontWeight: 600, textDecoration: 'none', marginTop: 'auto', alignSelf: 'flex-start', fontFamily: 'sans-serif' }}
-                >
-                  Enter the Sangha →
                 </Link>
               </div>
             </div>

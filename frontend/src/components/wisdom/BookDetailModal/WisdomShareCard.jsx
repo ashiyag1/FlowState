@@ -3,9 +3,6 @@ import React from 'react'
 export const WisdomShareCard = React.forwardRef(({ book, cur }, ref) => {
   const s = {
     shareCard: {
-      display: 'none',
-      position: 'absolute',
-      left: '-9999px',
       width: '400px',
       padding: '2rem',
       background: '#fcf6e8',

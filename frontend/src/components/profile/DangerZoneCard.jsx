@@ -3,6 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Trash2 } from 'lucide-react'
 
 function DeleteModal({ open, onClose, onConfirm }) {
+  const [confirmText, setConfirmText] = useState('')
+
+  // Reset input when modal opens/closes
+  React.useEffect(() => {
+    if (open) setConfirmText('')
+  }, [open])
+
   return (
     <AnimatePresence>
       {open && (
@@ -38,6 +45,18 @@ function DeleteModal({ open, onClose, onConfirm }) {
                 <p className="text-sm text-mist-dark/60 dark:text-sand-lt/40 mb-6 leading-relaxed" style={{ fontFamily: "'Lora', serif", fontStyle: 'italic' }}>
                   This action is irreversible. All your data, rituals, and journals will be permanently erased.
                 </p>
+                <div className="mb-6 text-left">
+                  <label className="block text-xs font-medium text-ink/70 dark:text-sand-lt/70 mb-2">
+                    Type <strong className="text-red-500 font-bold tracking-widest">DELETE</strong> to confirm:
+                  </label>
+                  <input
+                    type="text"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    placeholder="DELETE"
+                    className="w-full rounded-xl px-4 py-3 text-sm border bg-white/70 backdrop-blur-sm placeholder:text-mist-dark/40 focus:outline-none focus:ring-2 focus:ring-red-500/25 focus:border-red-500/50 transition-all dark:bg-white/[0.04] dark:text-white dark:border-red-500/15 border-red-500/20 text-center uppercase"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3">
@@ -51,10 +70,11 @@ function DeleteModal({ open, onClose, onConfirm }) {
                   Cancel
                 </motion.button>
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={confirmText === 'DELETE' ? { scale: 1.02 } : {}}
+                  whileTap={confirmText === 'DELETE' ? { scale: 0.98 } : {}}
                   onClick={onConfirm}
-                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+                  disabled={confirmText !== 'DELETE'}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     background: 'linear-gradient(135deg, #dc2626, #ea580c)',
                     fontFamily: "'Cinzel', serif",

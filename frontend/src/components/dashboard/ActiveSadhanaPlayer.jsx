@@ -75,10 +75,10 @@ export function ActiveSadhanaPlayer({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
               <div style={{ flex: 1, minWidth: '200px' }}>
                 <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 600, margin: 0 }}>
-                  {todayRitual.name}
+                  {todayRitual?.name || "Morning Ritual"}
                 </h3>
                 <p style={{ fontSize: '13px', color: dark ? 'rgba(245,230,200,0.7)' : '#5c4322', margin: '4px 0 0', fontFamily: 'sans-serif' }}>
-                  {todayRitual.desc}
+                  {todayRitual?.desc || "Take a moment for yourself."}
                 </p>
               </div>
               <button
@@ -96,7 +96,7 @@ export function ActiveSadhanaPlayer({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
               <div>
                 <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 600, margin: 0 }}>
-                  How was your day, {userName}?
+                  How was your day, {userName || "Seeker"}?
                 </h3>
                 <p style={{ fontSize: '13px', color: dark ? 'rgba(245,230,200,0.7)' : '#5c4322', margin: '4px 0 0', fontFamily: 'sans-serif' }}>
                   Let go of productivity guilt. Capture your evening reflection.

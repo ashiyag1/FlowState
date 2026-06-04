@@ -52,7 +52,7 @@ export function LunarCalendarCard({
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
   const dayNums = Array.from({ length: daysInMonth }, (_, i) => i + 1)
   const firstDayOfMonth = new Date(calYear, calMonth, 1).getDay()
-  const todayStr = new Date().toISOString().slice(0, 10)
+  const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)
 
   const isoForDay = (d) =>
     `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
@@ -91,7 +91,9 @@ export function LunarCalendarCard({
       <div className="flex items-center justify-between border-b border-gold/10 pb-1.5">
         <div>
           <h2 className="font-display text-xs font-semibold flex items-center gap-1.5" style={{ color: dark ? '#ffeab8' : '#8B6914', margin: 0 }}>
-            {new Date(selectedIso).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+            {/* BUG 7 FIX: Parse as local time with T00:00:00 — new Date("YYYY-MM-DD") parses as UTC which shows wrong day in some timezones */}
+            {new Date(selectedIso + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+
             <span className="text-gold/80">{selectedHindu.moonSymbol}</span>
           </h2>
           <p className="text-[9px] font-medium mt-0.5 mb-0" style={{ color: dark ? '#c8a96e' : '#8B6914' }}>
@@ -105,7 +107,6 @@ export function LunarCalendarCard({
               const n = new Date(calDate)
               n.setMonth(n.getMonth() - 1)
               onSetCalDate(n)
-              onSetSelectedDay(1)
             }}
             className="p-1 rounded-lg border border-gold/15 hover:bg-gold/10 text-gold-lt transition-all"
           >
@@ -116,7 +117,6 @@ export function LunarCalendarCard({
               const n = new Date(calDate)
               n.setMonth(n.getMonth() + 1)
               onSetCalDate(n)
-              onSetSelectedDay(1)
             }}
             className="p-1 rounded-lg border border-gold/15 hover:bg-gold/10 text-gold-lt transition-all"
           >
@@ -154,8 +154,8 @@ export function LunarCalendarCard({
       {/* 7-Column Calendar Grid */}
       <div className="max-w-[280px] mx-auto w-full">
         <div className="grid grid-cols-7 gap-1 text-center font-display text-[8px] font-bold text-gold/40 uppercase tracking-wider mb-1">
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-            <div key={day}>{day}</div>
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+            <div key={`${day}-${i}`}>{day}</div>
           ))}
         </div>
 

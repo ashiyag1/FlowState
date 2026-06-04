@@ -116,6 +116,25 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
     return insightMap[clientMoodTrends.topMood] || null
   }, [clientMoodTrends.topMood])
 
+  if (!entries || entries.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="mt-8 flex flex-col gap-5 text-center p-8 journal-glass border border-gold/20"
+      >
+        <div className="text-gold mb-2 text-2xl">🌱</div>
+        <h3 className="font-display text-sm text-ivory font-semibold mb-1">
+          Your Journey Begins
+        </h3>
+        <p className="text-[11px] text-ivory/60 font-light max-w-sm mx-auto">
+          Write your first entry to start tracking your emotional patterns and discover your soul archetype.
+        </p>
+      </motion.div>
+    )
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -123,37 +142,6 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
       transition={{ duration: 0.6, delay: 0.2 }}
       className="mt-8 flex flex-col gap-5"
     >
-      {/* Cycle celebration banner */}
-      {cycles >= 3 && (
-        <motion.div
-          initial={{ scale: 0.97, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="journal-glass p-4 border border-gold/30 flex items-center gap-4 relative overflow-hidden"
-        >
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: 'radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.08) 0%, transparent 60%)'
-          }} />
-          <motion.span
-            animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ fontSize: 28 }}
-          >🌕</motion.span>
-          <div>
-            <p className="font-display text-sm text-ivory font-bold">
-              {cycles}-Day Reflection Phase
-            </p>
-            <p className="text-[11px] text-ivory/60 font-light mt-0.5">
-              {cycles >= 7 ? 'A full phase completed. The mind remembers what you nurture.' :
-               cycles >= 5 ? 'Beautiful rhythm — your inner world is listening.' :
-               'Even the moon has phases. Thank you for showing up.'}
-            </p>
-          </div>
-          <div className="ml-auto shrink-0 text-right">
-            <p className="text-[9px] text-gold/60 uppercase tracking-widest font-bold">Current Cycle</p>
-            <p className="font-display text-2xl text-gold font-bold">{cycles}</p>
-          </div>
-        </motion.div>
-      )}
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

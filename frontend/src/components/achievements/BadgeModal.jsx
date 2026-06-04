@@ -49,7 +49,7 @@ export default function BadgeModal() {
   // Play sound on mount when a new badge is unlocked
   useEffect(() => {
     if (activeUnlockBadge && isFreshUnlock) {
-      playTempleChime();
+      // playTempleChime();
     }
   }, [activeUnlockBadge, isFreshUnlock]);
 
@@ -85,7 +85,7 @@ export default function BadgeModal() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 30 }}
           transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-          className="relative max-w-md w-full mx-4 rounded-3xl border p-8 text-center overflow-visible select-none shadow-2xl"
+          className="relative max-w-md w-full mx-4 rounded-3xl border p-8 text-center overflow-y-auto overflow-x-hidden select-none shadow-2xl max-h-[90dvh]"
           style={{
             background: dark
               ? 'linear-gradient(180deg, #1d1208 0%, #100a04 100%)'

@@ -12,8 +12,8 @@ export function HeritageSnapCard({
 
   return (
     <div id={item.id} style={{
-      height: isExpanded ? 'auto' : '100dvh',
-      minHeight: '100dvh',
+      height: isExpanded ? 'auto' : '100vh',
+      minHeight: '100vh',
       width: '100%',
       scrollSnapAlign: isExpanded ? 'none' : 'start',
       position: 'relative',

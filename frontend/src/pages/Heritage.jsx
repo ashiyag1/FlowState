@@ -52,11 +52,18 @@ function Heritage() {
       }))
     ]
     
-    // Deterministic shuffle
+    // Pseudo-random deterministic shuffle seeded by today's date
+    const todaySeed = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    let seed = parseInt(todaySeed, 10)
+    const random = () => {
+      const x = Math.sin(seed++) * 10000
+      return x - Math.floor(x)
+    }
+
     let m = items.length, t, i
     const shuffled = [...items]
     while (m) {
-      i = Math.floor(Math.random() * m--)
+      i = Math.floor(random() * m--)
       t = shuffled[m]
       shuffled[m] = shuffled[i]
       shuffled[i] = t
@@ -83,9 +90,9 @@ function Heritage() {
     if (expandedId) {
       const el = document.getElementById(expandedId)
       if (el) {
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }, 100)
+        })
       }
     }
   }, [expandedId])

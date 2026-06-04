@@ -74,7 +74,9 @@ export function WisdomProvider({ children }) {
   }, [setStreakLog])
 
   const getStreakDays = useCallback(() => {
-    const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+    // BUG I FIX: Use distinct labels — was ['S','M','T','W','T','F','S'] where Sat+Sun both showed 'S'
+    const dayLabels = ['Su', 'M', 'T', 'W', 'T', 'F', 'Sa']
+
     const result = []
     const td = new Date()
     const dayOfWeek = td.getDay()

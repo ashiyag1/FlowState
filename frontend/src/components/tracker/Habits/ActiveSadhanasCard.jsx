@@ -245,10 +245,16 @@ export function ActiveSadhanasCard({
                 </div>
 
                 <button
-                  onClick={(e) => onDeleteHabit(e, h.id)}
-                  className="p-1 rounded-md text-ink-soft/20 dark:text-ivory/20 hover:text-rose-400 hover:bg-white/5 shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (window.confirm("Delete this ritual?")) {
+                      onDeleteHabit(e, h.id)
+                    }
+                  }}
+                  aria-label="Delete ritual"
+                  className="p-2 rounded-md text-ink-soft/40 dark:text-ivory/40 hover:text-rose-500 hover:bg-white/10 shrink-0"
                 >
-                  <X size={11} />
+                  <X size={14} />
                 </button>
               </motion.div>
             )

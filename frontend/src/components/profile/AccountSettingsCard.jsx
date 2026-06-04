@@ -85,14 +85,21 @@ export function AccountSettingsCard({
         </label>
         <div className="relative group">
           <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-mist-dark/60 group-focus-within:text-saffron transition-colors duration-300" />
-          <input
-            type="text"
-            value={locationVal}
-            onChange={(e) => setLocationVal(e.target.value)}
-            onBlur={handleLocationSave}
-            placeholder="Where are you based?"
-            className={`${inputBase} !pl-10`}
-          />
+            <input
+              type="text"
+              value={locationVal}
+              onChange={(e) => setLocationVal(e.target.value)}
+              placeholder="Where are you based?"
+              className={`${inputBase} !pl-10 !pr-16`}
+            />
+            {locationVal !== (user?.location || '') && (
+              <button 
+                onClick={handleLocationSave}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider text-white bg-gradient-to-r from-saffron to-gold hover:shadow-lg transition-all"
+              >
+                Save
+              </button>
+            )}
         </div>
       </div>
 

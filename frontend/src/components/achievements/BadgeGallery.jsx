@@ -106,7 +106,7 @@ export default function BadgeGallery() {
           <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
             {!isAuthenticated && (
               <div 
-                className="mb-6 p-4 rounded-2xl border text-xs leading-relaxed flex items-center gap-3"
+                className="mb-6 p-4 rounded-2xl border text-xs leading-relaxed flex flex-col sm:flex-row sm:items-center gap-4 justify-between"
                 style={{
                   background: dark 
                     ? 'rgba(232, 98, 42, 0.08)' 
@@ -115,10 +115,29 @@ export default function BadgeGallery() {
                   color: dark ? '#f3beab' : '#a24b27'
                 }}
               >
-                <ShieldAlert size={16} className="shrink-0 text-saffron animate-pulse" />
-                <div>
-                  <span className="font-bold">Guest Mode:</span> You are currently logged out. Log in or create an account to start tracking progress and unlocking these beautiful spiritual milestones!
+                <div className="flex items-center gap-3">
+                  <ShieldAlert size={16} className="shrink-0 text-saffron animate-pulse" />
+                  <div>
+                    <span className="font-bold">Guest Mode:</span> You are currently logged out. Log in or create an account to start tracking progress and unlocking these beautiful spiritual milestones!
+                  </div>
                 </div>
+                <button
+                  onClick={() => {
+                    setGalleryOpen(false);
+                    window.location.href = '/login';
+                  }}
+                  className="shrink-0 px-4 py-2 rounded-lg font-semibold tracking-wider uppercase text-[10px] bg-saffron text-white shadow-md hover:bg-saffron-dark transition-colors border border-saffron-dark"
+                >
+                  Sign In
+                </button>
+              </div>
+            )}
+
+            {filteredBadges.length === 0 && (
+              <div className="py-12 flex flex-col items-center justify-center text-center text-ink-soft/60 dark:text-ivory-soft/60 border border-dashed border-gold/20 rounded-2xl">
+                <Compass size={32} className="text-gold/40 mb-3" />
+                <p className="text-sm font-semibold">No badges found</p>
+                <p className="text-xs mt-1">Keep practicing to discover hidden milestones here.</p>
               </div>
             )}
 

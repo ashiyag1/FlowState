@@ -4,7 +4,7 @@ import {
   dbGetHabits,
   dbGetJournal,
   dbGetUserBadges,
-  dbSaveUserBadge
+  dbSaveUserBadges
 } from '../db.js';
 
 // Helper to compute consecutive active days across a set of dates
@@ -42,7 +42,15 @@ function computeMaxConsecutiveDays(dateStrings) {
 
 export async function evaluateAchievements(userId) {
   // 1. Fetch user & stats
-  const user = await dbFindUserById(userId);
+    // 1. Fetch all user data sources in parallel
+  const [user, waterData, habitData, journalEntries, userBadges] = await Promise.all([
+    dbFindUserById(userId),
+    dbGetWater(userId),
+    dbGetHabits(userId),
+    dbGetJournal(userId),
+    dbGetUserBadges(userId)
+  ]);
+
   if (!user) throw new Error('User not found');
   
   const stats = user.stats || {
@@ -63,8 +71,7 @@ export async function evaluateAchievements(userId) {
   const midnightJournalDates = Array.isArray(stats.midnightJournalDates) ? stats.midnightJournalDates : [];
   const pagesRead = Array.isArray(stats.pagesRead) ? stats.pagesRead : [];
 
-  // 2. Fetch water logs
-  const waterData = await dbGetWater(userId);
+  // Parse water logs
   const waterGoal = waterData.waterGoal || 2500;
   const waterLogs = waterData.logs || {};
   
@@ -80,10 +87,8 @@ export async function evaluateAchievements(userId) {
     }
   }
 
-  // 3. Fetch habits and streaks
-  const habitData = await dbGetHabits(userId);
+  // Parse habits
   const habitDone = habitData.habitDone || {};
-  
   let maxHabitStreak = 0;
   let maxHabitsInADay = 0;
   const habitDates = new Set();
@@ -98,14 +103,11 @@ export async function evaluateAchievements(userId) {
     }
   }
   
-  // Calculate habit streak (consecutive days where at least 1 habit was completed)
   maxHabitStreak = computeMaxConsecutiveDays(habitDates);
 
-  // 4. Fetch journal entries
-  const journalEntries = await dbGetJournal(userId);
+  // Parse journal
   const journalDates = new Set(journalEntries.map(e => e.date));
   const journalCount = journalDates.size;
-
   // 5. Calculate Cosmic Rhythm & Wisdom Streaks
   const maxWisdomStreak = computeMaxConsecutiveDays(new Set(wisdomDates));
 
@@ -143,13 +145,12 @@ export async function evaluateAchievements(userId) {
   };
 
   // 7. Get existing badges & evaluate
-  const userBadges = await dbGetUserBadges(userId);
   const userBadgeMap = new Map(userBadges.map(ub => [ub.badgeId, ub]));
   
   const badgeDefinitions = [
     { id: "3_day_streak", target: 3 },
     { id: "journalled_10_times", target: 10 },
-    { id: "hydration_sage", target: 2 },
+    { id: "hydration_sage", target: 5 },
     { id: "wisdom_seeker", target: 3 },
     { id: "cosmic_rhythm", target: 7 },
     { id: "sunrise_consistency", target: 3 },
@@ -168,6 +169,7 @@ export async function evaluateAchievements(userId) {
   ];
 
   const newlyUnlocked = [];
+  const badgeUpdatesToSave = [];
   
   for (const badgeDef of badgeDefinitions) {
     const currentProgress = metrics[badgeDef.id] || 0;
@@ -185,12 +187,17 @@ export async function evaluateAchievements(userId) {
       updates.isUnlocked = true;
       updates.unlockedAt = new Date().toISOString();
       
-      const saved = await dbSaveUserBadge(userId, badgeDef.id, updates);
+      badgeUpdatesToSave.push({ badgeId: badgeDef.id, updates });
       newlyUnlocked.push(badgeDef.id);
     } else if (existing?.progress !== updates.progress) {
       // Just update progress
-      await dbSaveUserBadge(userId, badgeDef.id, updates);
+      badgeUpdatesToSave.push({ badgeId: badgeDef.id, updates });
     }
+  }
+
+  // 🚀 Save all badge updates in a single batch operation
+  if (badgeUpdatesToSave.length > 0) {
+    await dbSaveUserBadges(userId, badgeUpdatesToSave);
   }
 
   return newlyUnlocked;

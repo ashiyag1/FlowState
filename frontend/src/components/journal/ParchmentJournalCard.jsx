@@ -141,7 +141,7 @@ export function ParchmentJournalCard({
       <div className="relative z-10 flex items-center justify-between border-t border-gold/15 pt-3 mt-4">
         <span className="flex items-center gap-1 text-[9px] text-[#8a5a2b] dark:text-gold-lt/70 italic font-mono font-medium">
           <Feather size={10} />
-          {text.length}/1000 characters
+          {(text || '').length}/1000 characters
         </span>
 
         {/* Purple Wax Seal Button */}
@@ -160,9 +160,12 @@ export function ParchmentJournalCard({
             )}
           </AnimatePresence>
 
-          <div
-            onClick={onSaveEntry}
-            className={`wax-seal-wood-container ${!text.trim() && 'opacity-30 cursor-not-allowed'}`}
+          <button
+            onClick={() => {
+              if (text && text.trim()) onSaveEntry()
+            }}
+            disabled={!text || !text.trim()}
+            className={`wax-seal-wood-container ${(!text || !text.trim()) ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <div className="wax-seal-purple-seal">
               <LotusFlower size={20} />
@@ -171,7 +174,7 @@ export function ParchmentJournalCard({
               <span className="wax-seal-wood-text-title">Preserve Reflection</span>
               <span className="wax-seal-wood-text-subtitle">Seal this thought</span>
             </div>
-          </div>
+          </button>
         </div>
       </div>
     </div>

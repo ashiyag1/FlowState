@@ -130,7 +130,7 @@ export default function Resources() {
         
         {/* Back Link */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           style={{
             background: 'none', border: 'none', color: '#c8a96e',
             display: 'flex', alignItems: 'center', gap: '6px',
@@ -188,7 +188,7 @@ export default function Resources() {
             }} />
             <input
               type="text"
-              placeholder="Search scripts, audio loops, translation manuals..."
+              placeholder="Search titles, keywords, or topics..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{
@@ -203,6 +203,19 @@ export default function Resources() {
                 fontFamily: 'sans-serif'
               }}
             />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                aria-label="Clear search"
+                style={{
+                  position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', color: '#c8a96e', opacity: 0.7, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
+              >
+                <span style={{ fontSize: '18px', lineHeight: 1 }}>&times;</span>
+              </button>
+            )}
           </div>
 
           {/* Filter Categories */}
@@ -336,24 +349,28 @@ export default function Resources() {
                     onClick={() => {
                       if (res.category === 'audio') {
                         navigate('/')
+                      } else if (res.url) {
+                        window.open(res.url, '_blank', 'noopener,noreferrer')
                       }
                     }}
+                    disabled={res.category !== 'audio' && !res.url}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
                       fontSize: '12px',
                       color: '#c8a96e',
-                      cursor: 'pointer',
+                      cursor: (res.category !== 'audio' && !res.url) ? 'not-allowed' : 'pointer',
                       background: 'none',
                       border: 'none',
                       padding: 0,
                       fontWeight: 600,
                       fontFamily: 'sans-serif',
-                      width: 'fit-content'
+                      width: 'fit-content',
+                      opacity: (res.category !== 'audio' && !res.url) ? 0.5 : 1
                     }}
                   >
-                    {res.linkText} <ExternalLink size={11} />
+                    {res.linkText} {(res.category === 'audio' || !res.url) ? null : <ExternalLink size={11} />}
                   </button>
                 </motion.div>
               ))

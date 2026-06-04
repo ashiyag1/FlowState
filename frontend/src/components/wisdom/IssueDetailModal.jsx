@@ -142,24 +142,7 @@ export default function IssueDetailModal({ issue, onClose }) {
           </button>
 
           <div className="flex items-center gap-2">
-            {/* Share button on final step */}
-            {currentStep === issue.steps.length - 1 && (
-              <motion.button
-                onClick={handleShare}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="flex items-center gap-1.5 font-bold tracking-wider uppercase text-xs px-4 py-3 rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer"
-                style={{
-                  border: `1.5px solid ${issue.color}60`,
-                  color: issue.color,
-                  background: `${issue.color}15`,
-                }}
-              >
-                <Share2 size={13} />
-                Share
-              </motion.button>
-            )}
+
 
             <button 
               onClick={nextStep}

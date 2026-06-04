@@ -89,12 +89,12 @@ export default function PwaInstallBanner() {
       {showChromeBanner && (
         <motion.div
           key="chrome-banner"
-          initial={{ opacity: 0, y: 80 }}
+          initial={{ opacity: 0, y: -80 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 80 }}
+          exit={{ opacity: 0, y: -80 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+            position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
             zIndex: 9000, width: 'calc(100vw - 32px)', maxWidth: 420,
             borderRadius: 20,
             background: 'rgba(253,246,227,0.95)',
@@ -154,12 +154,12 @@ export default function PwaInstallBanner() {
       {showIOSGuide && (
         <motion.div
           key="ios-guide"
-          initial={{ opacity: 0, y: 80 }}
+          initial={{ opacity: 0, y: -80 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 80 }}
+          exit={{ opacity: 0, y: -80 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           style={{
-            position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+            position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
             zIndex: 9000, width: 'calc(100vw - 32px)', maxWidth: 420,
             borderRadius: 20,
             background: 'rgba(253,246,227,0.97)',

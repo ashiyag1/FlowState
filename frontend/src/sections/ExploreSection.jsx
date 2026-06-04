@@ -26,7 +26,7 @@ export default function ExploreSection({ dark }) {
 
   return (
     <div className="flex flex-col gap-6 w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {/* Heritage Widget */}
         <motion.div variants={fadeUp(0)} initial="hidden" whileInView="show" viewport={{ once: true }}>
           <Link to="/heritage" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
@@ -51,29 +51,7 @@ export default function ExploreSection({ dark }) {
           </Link>
         </motion.div>
 
-        {/* Community Widget */}
-        <motion.div variants={fadeUp(0.08)} initial="hidden" whileInView="show" viewport={{ once: true }}>
-          <Link to="/community" style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
-            <div className="fs-gold-corner-card" style={{
-              ...glassCardStyle,
-              position: 'relative', padding: '1.5rem 1.25rem', overflow: 'hidden', height: '100%',
-            }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, #7EC8E3, transparent)` }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '0.8rem' }}>
-                <div style={{ padding: 8, borderRadius: 12, background: 'rgba(126,200,227,0.15)', color: '#7EC8E3' }}>
-                  <Users size={20} />
-                </div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.3rem', fontWeight: 600, color: dark ? '#e8d9b5' : '#5C3D1E', margin: 0, lineHeight: 1 }}>The Sangha (Community)</h3>
-              </div>
-              <p style={{ fontFamily: "'Lora', serif", fontSize: '0.82rem', color: dark ? '#c9b080' : '#8B5E2F', lineHeight: 1.6, margin: '0 0 1rem' }}>
-                Join the collective energy. Share your journey and support others in a judgment-free space.
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: "'Cinzel', serif", fontSize: '0.62rem', fontWeight: 700, color: '#7EC8E3', letterSpacing: '0.08em' }}>
-                Join the Circle <ArrowRight size={10} />
-              </div>
-            </div>
-          </Link>
-        </motion.div>
+
       </div>
 
       {/* Ashiya's Curated Resources */}

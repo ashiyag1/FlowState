@@ -37,9 +37,6 @@ export default function BreathingPortal() {
           return prev - 1
         })
       }, 1000)
-    } else {
-      setCycleStep(0)
-      setTimeLeft(4)
     }
     return () => clearInterval(timer)
   }, [isActive, cycleStep, trackEvent])
@@ -47,6 +44,8 @@ export default function BreathingPortal() {
   const toggleBreathing = () => setIsActive(!isActive)
   const closeModal = () => {
     setIsActive(false)
+    setCycleStep(0)
+    setTimeLeft(4)
     setIsModalOpen(false)
   }
 
@@ -107,6 +106,7 @@ export default function BreathingPortal() {
               {/* Close Button */}
               <button
                 onClick={closeModal}
+                aria-label="Close portal"
                 className="absolute top-6 right-6 p-3 rounded-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 transition-colors z-50 shadow-md"
               >
                 <X size={24} className="text-ink dark:text-ivory" />
@@ -204,7 +204,7 @@ export default function BreathingPortal() {
                     </>
                   ) : (
                     <>
-                      <Play size={14} fill="currentColor" /> Begin Practice
+                      <Play size={14} fill="currentColor" /> {(cycleStep !== 0 || timeLeft !== 4) ? "Resume Practice" : "Begin Practice"}
                     </>
                   )}
                 </button>

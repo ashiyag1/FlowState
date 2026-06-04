@@ -192,9 +192,7 @@ export default function WisdomPage() {
 const pageStyle = (dark) => ({
   minHeight: '100vh',
   paddingTop: '4.75rem',
-  background: dark
-    ? 'linear-gradient(175deg,#120c04 0%,#1a1208 40%,#221a0e 100%)'
-    : 'linear-gradient(175deg,#FEFCF5 0%,#FDF6E3 40%,#F5EDD8 100%)',
+  backgroundColor: dark ? '#1a1208' : '#FDF6E3',
   backgroundImage: dark
     ? `linear-gradient(175deg,rgba(18,12,4,0.7) 0%,rgba(26,18,8,0.6) 40%,rgba(34,26,14,0.7) 100%), url(${wisdomBg})`
     : `url(${wisdomBg}), linear-gradient(175deg,rgba(254,252,245,0.8) 0%,rgba(253,246,227,0.75) 40%,rgba(245,237,216,0.8) 100%)`,

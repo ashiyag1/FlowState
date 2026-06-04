@@ -66,10 +66,10 @@ export default function WaterWidget() {
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-gold uppercase tracking-wider font-bold">Goal: {waterGoal}ml</span>
           <div className="flex bg-white/5 border border-gold/20 rounded-md">
-            <button onClick={() => setWaterGoal(Math.max(500, waterGoal - 500))} className="p-0.5 hover:bg-[#57B8D6]/20 transition-all text-[#57B8D6]">
+            <button aria-label="Decrease water goal" onClick={() => setWaterGoal(Math.max(500, waterGoal - 100))} className="p-0.5 hover:bg-[#57B8D6]/20 transition-all text-[#57B8D6]">
               <Minus size={10} />
             </button>
-            <button onClick={() => setWaterGoal(Math.min(5000, waterGoal + 500))} className="p-0.5 border-l border-gold/20 hover:bg-[#57B8D6]/20 transition-all text-[#57B8D6]">
+            <button aria-label="Increase water goal" onClick={() => setWaterGoal(Math.min(5000, waterGoal + 100))} className="p-0.5 border-l border-gold/20 hover:bg-[#57B8D6]/20 transition-all text-[#57B8D6]">
               <Plus size={10} />
             </button>
           </div>
@@ -107,36 +107,54 @@ export default function WaterWidget() {
                 strokeLinecap="round"
               />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-ink dark:text-ivory">
+            <div 
+              role="progressbar" 
+              aria-valuenow={waterPct} 
+              aria-valuemin="0" 
+              aria-valuemax="100" 
+              className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-ink dark:text-ivory"
+            >
               {waterPct}%
             </div>
           </div>
 
-          <div className="flex-1 flex justify-between items-center pr-2">
-            <div>
-              <div className="font-display text-lg font-bold text-[#8B6914] dark:text-[#ffeab8] leading-tight">
-                {total} ml
+          <div className="flex-1 flex flex-col justify-center pr-2 gap-1.5">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="font-display text-lg font-bold text-[#8B6914] dark:text-[#ffeab8] leading-tight">
+                  {total} ml
+                </div>
+                <div className="text-[10px] text-ink-soft/60 dark:text-ivory/60">
+                  of {waterGoal}ml goal
+                </div>
               </div>
-              <div className="text-[10px] text-ink-soft/60 dark:text-ivory/60">
-                of {waterGoal}ml goal
-              </div>
-            </div>
-            
-            {waterStreak > 0 && (
-              <div 
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-sm"
-                style={{
-                  backgroundColor: dark ? 'rgba(87, 184, 214, 0.15)' : 'rgba(87, 184, 214, 0.08)',
-                  borderColor: dark ? 'rgba(87, 184, 214, 0.3)' : 'rgba(87, 184, 214, 0.25)',
-                }}
-              >
-                <span className="text-[11px]">💧</span>
-                <span 
-                  className="text-[9px] font-bold uppercase tracking-wider whitespace-nowrap"
-                  style={{ color: dark ? '#a5f3fc' : '#1e748f' }}
+              
+              {waterStreak > 0 ? (
+                <div 
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-sm"
+                  style={{
+                    backgroundColor: dark ? 'rgba(87, 184, 214, 0.15)' : 'rgba(87, 184, 214, 0.08)',
+                    borderColor: dark ? 'rgba(87, 184, 214, 0.3)' : 'rgba(87, 184, 214, 0.25)',
+                  }}
                 >
-                  {waterStreak} day streak
-                </span>
+                  <span className="text-[11px]">💧</span>
+                  <span 
+                    className="text-[9px] font-bold uppercase tracking-wider whitespace-nowrap"
+                    style={{ color: dark ? '#a5f3fc' : '#1e748f' }}
+                  >
+                    {waterStreak} day streak
+                  </span>
+                </div>
+              ) : (
+                <div className="text-[9px] font-bold uppercase tracking-wider text-[#57B8D6] opacity-70">
+                  Start your streak!
+                </div>
+              )}
+            </div>
+
+            {waterPct >= 100 && (
+              <div className="text-[9px] font-bold text-[#34d399] uppercase tracking-wider bg-[#34d399]/10 px-2 py-1 rounded w-fit">
+                Goal Reached! 🌟
               </div>
             )}
           </div>
@@ -147,6 +165,7 @@ export default function WaterWidget() {
           {BOTTLES.map(b => (
             <motion.button 
               key={b.ml}
+              aria-label={`Add ${b.ml}ml (${b.label})`}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleAddWater(b.ml, b.label)}
               className="flex flex-col items-center justify-center rounded-xl py-1.5 px-1 transition-all duration-200"
@@ -166,16 +185,20 @@ export default function WaterWidget() {
         {/* Custom Input */}
         <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 border border-gold/10 rounded-xl p-1 pl-2">
           <span className="text-xs">💧</span>
+          <label htmlFor="custom-water" className="sr-only">Custom water amount</label>
           <input 
+            id="custom-water"
             type="number" 
-            placeholder="Custom amount (ml)..." 
+            placeholder="Custom (use - to undo)..." 
             value={customMl} 
             onChange={(e) => setCustomMl(e.target.value)}
             className="bg-transparent border-none outline-none text-[10px] text-ink dark:text-ivory w-full px-1"
           />
           <button 
+            aria-label="Add custom water amount"
             onClick={() => {
-              if(customMl && !isNaN(customMl) && Number(customMl) > 0) {
+              if(customMl && !isNaN(customMl) && Number(customMl) !== 0) {
+                // allow negative to undo
                 handleAddWater(Number(customMl), 'Custom')
                 setCustomMl('')
               }

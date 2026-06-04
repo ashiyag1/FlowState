@@ -78,11 +78,9 @@ const Habits      = lazy(() => import('./pages/Habits'))
 const Journal     = lazy(() => import('./pages/Journal'))
 const WisdomPage  = lazy(() => import('./pages/WisdomPage'))
 const Heritage    = lazy(() => import('./pages/Heritage'))
-const Community   = lazy(() => import('./pages/Community'))
 const Login       = lazy(() => import('./pages/Login'))
 const AIAssistant = lazy(() => import('./components/system/AIAssistant'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const Resources   = lazy(() => import('./pages/Resources'))
 
 
@@ -114,10 +112,8 @@ function AppContent() {
           <Route path="/journal" element={<Journal />} />
           <Route path="/quotes"  element={<WisdomPage />} />
           <Route path="/heritage" element={<Heritage />} />
-          <Route path="/community" element={<Community />} />
           <Route path="/login"   element={<Login />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin"   element={<AdminDashboard />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="*"        element={<Home />} />
         </Routes>

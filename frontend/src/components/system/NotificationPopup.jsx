@@ -11,6 +11,11 @@ export function NotificationProvider({ children }) {
 
   const show = useCallback((msg, type) => {
     setItem({ msg, type, exiting: false })
+    // auto dismiss
+    setTimeout(() => {
+      setItem(prev => prev ? { ...prev, exiting: true } : null)
+      setTimeout(() => setItem(null), 250)
+    }, 4000)
   }, [])
 
   const hide = useCallback(() => {
@@ -23,45 +28,28 @@ export function NotificationProvider({ children }) {
       {children}
       {item && (
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 999999,
+          position: 'fixed', bottom: '100px', left: '50%', transform: 'translateX(-50%)', zIndex: 999999,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.45)',
-          backdropFilter: 'blur(4px)',
-          animation: item.exiting ? 'nf-out 0.25s ease forwards' : 'nf-in 0.25s ease forwards',
+          pointerEvents: 'none',
         }}>
           <div style={{
             position: 'relative',
             background: '#fdf6e3',
+            pointerEvents: 'auto',
             border: '1px solid rgba(200,151,58,0.3)',
-            borderRadius: 24,
-            padding: '32px 36px',
-            width: 'min(420px, calc(100vw - 40px))',
-            boxShadow: '0 24px 64px rgba(26,15,0,0.3)',
+            borderRadius: 16,
+            padding: '16px 20px',
+            width: 'max-content',
+            maxWidth: 'calc(100vw - 40px)',
+            boxShadow: '0 12px 32px rgba(26,15,0,0.15)',
             animation: item.exiting ? 'nf-scale-out 0.25s ease forwards' : 'nf-scale-in 0.35s cubic-bezier(0.34,1.3,0.64,1) forwards',
           }}>
-            <button
-              onClick={hide}
-              style={{
-                position: 'absolute', top: 12, right: 14,
-                width: 30, height: 30, borderRadius: '50%',
-                border: 'none', background: 'transparent',
-                color: '#5c3d1e', fontSize: 16, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={e => { e.target.style.background = 'rgba(200,151,58,0.15)'; e.target.style.color = '#1a0f00' }}
-              onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = '#5c3d1e' }}
-              aria-label="Close"
-            >&#10005;</button>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, paddingRight: 8 }}>
-              <span style={{ fontSize: 28, flexShrink: 0, lineHeight: 1.2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18, flexShrink: 0, lineHeight: 1 }}>
                 {item.type === 'success' ? '✓' : item.type === 'error' ? '✕' : item.type === 'info' ? '✦' : '💧'}
               </span>
               <div>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#c8973a' }}>
-                  {item.type === 'success' ? 'Success' : item.type === 'error' ? 'Error' : item.type === 'info' ? 'Info' : 'FlowState'}
-                </p>
-                <p style={{ margin: '8px 0 0', fontSize: 15, fontWeight: 600, color: '#1a0f00', lineHeight: 1.5 }}>{item.msg}</p>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#1a0f00', lineHeight: 1.3 }}>{item.msg}</p>
               </div>
             </div>
           </div>
