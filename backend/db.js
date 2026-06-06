@@ -53,14 +53,6 @@ export {
   dbGetMoodTrends
 } from './db/journalRepository.js'
 
-// Re-export Community Repository methods
-export {
-  dbGetAllUsers,
-  dbGetCommunityFeed,
-  dbGetIntentions,
-  dbAddIntention
-} from './db/communityRepository.js'
-
 // Re-export Badge Repository methods
 export {
   dbGetBadges,

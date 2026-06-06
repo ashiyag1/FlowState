@@ -4,36 +4,25 @@ import { useAuth } from './AuthContext'
 
 const WellnessContext = createContext(null)
 
-function useLocalState(key, initial) {
-  const prefixedKey = 'fwa_' + key
-  const [state, setRaw] = useState(() => Store.get(prefixedKey, initial))
-  const setState = useCallback((val) => {
-    setRaw(prev => {
-      const next = typeof val === 'function' ? val(prev) : val
-      Store.set(prefixedKey, next)
-      return next
-    })
-  }, [prefixedKey])
-  return [state, setState]
-}
+// Removed useLocalState since data now lives entirely in React state and syncs to backend
 
 export function WellnessProvider({ children }) {
   const { token, isAuthenticated, adjustPoints, setUser } = useAuth()
   const td = getToday()
 
   // ── WATER ──────────────────────────────────────
-  const [waterGoal, setWaterGoal] = useLocalState('water_goal', 2500)
-  const [waterLog,  setWaterLog]  = useLocalState('water_log',  {})
+  const [waterGoal, setWaterGoal] = useState(2500)
+  const [waterLog,  setWaterLog]  = useState({})
 
   // ── HABITS ─────────────────────────────────────
-  const [habits,    setHabits]    = useLocalState('habits_list', [])
-  const [habitDone, setHabitDone] = useLocalState('habit_done',  {})
+  const [habits,    setHabits]    = useState([])
+  const [habitDone, setHabitDone] = useState({})
 
   // ── DAILY TASKS ────────────────────────────────
-  const [dailyTasks, setDailyTasks] = useLocalState('daily_tasks', {})
+  const [dailyTasks, setDailyTasks] = useState({})
 
   // ── JOURNAL ────────────────────────────────────
-  const [journal, setJournal] = useLocalState('journal_entries', [])
+  const [journal, setJournal] = useState([])
 
   // ── DATA SYNC EFFECT ───────────────────────────
   useEffect(() => {
@@ -58,93 +47,8 @@ export function WellnessProvider({ children }) {
         // Handle habits
         if (habitsRes.ok) {
           const habitsData = await habitsRes.json()
-          const serverHabits = habitsData.habits || []
-          
-          if (serverHabits.length > 0) {
-            setHabits(serverHabits)
-            setHabitDone(habitsData.habitDone || {})
-          } else {
-            const localHabits = Store.get('fwa_habits_list', [])
-            const localHabitDone = Store.get('fwa_habit_done', {})
-            
-            if (localHabits.length > 0) {
-              // BUG D FIX: Track whether sync succeeded before clearing local habits
-              console.log('[Wellness Sync] Syncing guest habits to backend...', localHabits)
-              const idMap = {}
-              let syncFailed = false
-              for (const h of localHabits) {
-                try {
-                  const res = await fetch('/api/v1/habits', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({
-                      name: h.name,
-                      icon: h.icon,
-                      color: h.color,
-                      cycleLength: h.cycleLength || 7,
-                      relaxDay: h.relaxDay || 'None',
-                      streakFreezes: h.streakFreezes ?? 3
-                    })
-                  })
-                  if (res.ok) {
-                    const saved = await res.json()
-                    idMap[h.id] = saved.id
-                  } else {
-                    syncFailed = true
-                  }
-                } catch (err) {
-                  console.error('Failed to sync guest habit to server:', err)
-                  syncFailed = true
-                }
-              }
-
-              // Only proceed with clearing local state if ALL syncs succeeded
-              if (!syncFailed) {
-                // Rewrite habitDone keys and sync to server
-                const updatedHabitDone = { ...localHabitDone }
-                for (const dateKey of Object.keys(updatedHabitDone)) {
-                  const dayDone = { ...updatedHabitDone[dateKey] }
-                  let changed = false
-                  for (const tempId of Object.keys(dayDone)) {
-                    if (idMap[tempId]) {
-                      const time = dayDone[tempId]
-                      const serverId = idMap[tempId]
-                      delete dayDone[tempId]
-                      dayDone[serverId] = time
-                      changed = true
-                      try {
-                        await fetch('/api/v1/habits', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                          body: JSON.stringify({ toggle: true, habitId: serverId, date: dateKey, time })
-                        })
-                      } catch (err) {
-                        console.error('Failed to sync completion to server:', err)
-                      }
-                    }
-                  }
-                  if (changed) updatedHabitDone[dateKey] = dayDone
-                }
-
-                setHabitDone(updatedHabitDone)
-                Store.set('fwa_habit_done', updatedHabitDone)
-
-                // Re-fetch habits from server to get correct server-generated IDs
-                const refetchRes = await fetch('/api/v1/habits', {
-                  headers: { 'Authorization': `Bearer ${token}` }
-                })
-                if (refetchRes.ok) {
-                  const refetchData = await refetchRes.json()
-                  setHabits(refetchData.habits || [])
-                }
-              } else {
-                // Sync partially failed — keep local habits in place, do not wipe them
-                console.warn('[Wellness Sync] Some habits failed to sync. Keeping local habits.')
-              }
-            }
-            // BUG D FIX: If both server AND local are empty, do NOT call setHabits([]) —
-            // just leave state as is (it was already initialized from localStorage)
-          }
+          setHabits(habitsData.habits || [])
+          setHabitDone(habitsData.habitDone || {})
         }
 
         // Handle journal
@@ -160,20 +64,18 @@ export function WellnessProvider({ children }) {
     fetchBackendData()
   }, [isAuthenticated, token, setWaterGoal, setWaterLog, setHabits, setHabitDone, setJournal])
 
-  // BUG 15 FIX: Only restore from localStorage once when user logs OUT (not on every render where !isAuthenticated)
-  // Track previous auth state to detect actual logout transitions
+  // Reset state on logout
   const prevAuthRef = useRef(isAuthenticated)
   useEffect(() => {
     const wasAuthenticated = prevAuthRef.current
     prevAuthRef.current = isAuthenticated
-    // Only restore from localStorage when user actually transitions from logged-in to logged-out
     if (wasAuthenticated && !isAuthenticated) {
-      setWaterGoal(Store.get('fwa_water_goal', 2500))
-      setWaterLog(Store.get('fwa_water_log', {}))
-      setHabits(Store.get('fwa_habits_list', []))
-      setHabitDone(Store.get('fwa_habit_done', {}))
-      setDailyTasks(Store.get('fwa_daily_tasks', {}))
-      setJournal(Store.get('fwa_journal_entries', []))
+      setWaterGoal(2500)
+      setWaterLog({})
+      setHabits([])
+      setHabitDone({})
+      setDailyTasks({})
+      setJournal([])
     }
   }, [isAuthenticated, setWaterGoal, setWaterLog, setHabits, setHabitDone, setDailyTasks, setJournal])
 

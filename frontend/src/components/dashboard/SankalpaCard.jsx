@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSoundEffects } from '../../hooks/useSoundEffects'
 import { useTheme } from '../../context/ThemeContext'
 import { useAchievements } from '../../context/AchievementsContext'
+import { useAuth } from '../../context/AuthContext'
 
 /* ─────────────────────────────────────────────────────────────
    DHOOP BURNER (INCENSE BURNER) SVG COMPONENT
@@ -225,6 +226,7 @@ export default function SankalpaCard() {
     return localISOTime.split('T')[0];
   }
 
+  const { user, updateProfile } = useAuth()
   const [sankalpa, setSankalpa] = useState(null)
   const [inputVal, setInputVal] = useState('')
   const [isCompleted, setCompleted] = useState(false)
@@ -234,41 +236,23 @@ export default function SankalpaCard() {
   const [isEditing, setIsEditing] = useState(false)
   const [editVal, setEditVal] = useState('')
 
-  // Load state from localstorage
+  // Load state from user profile (DB backed)
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('daily_sankalpa')
-      if (raw) {
-        const { text, isCompleted: done, dateSet } = JSON.parse(raw)
-        if (dateSet === getTodayDate()) {
-          setSankalpa(text)
-          setCompleted(done)
-        } else {
-          localStorage.removeItem('daily_sankalpa')
-        }
+    if (user?.dailySankalpa) {
+      const { text, isCompleted: done, dateSet } = user.dailySankalpa
+      if (dateSet === getTodayDate()) {
+        setSankalpa(text || null)
+        setCompleted(!!done)
+      } else {
+        setSankalpa(null)
+        setCompleted(false)
       }
-    } catch {
-      localStorage.removeItem('daily_sankalpa')
+    } else {
+      setSankalpa(null)
+      setCompleted(false)
     }
     setMounted(true)
-  }, [])
-
-  // Persist state changes
-  useEffect(() => {
-    if (!mounted) return
-    if (sankalpa) {
-      localStorage.setItem(
-        'daily_sankalpa',
-        JSON.stringify({
-          text: sankalpa,
-          isCompleted,
-          dateSet: getTodayDate(),
-        })
-      )
-    } else {
-      localStorage.removeItem('daily_sankalpa')
-    }
-  }, [sankalpa, isCompleted, mounted])
+  }, [user])
 
   // Stop smoke after 5 seconds
   useEffect(() => {
@@ -292,19 +276,44 @@ export default function SankalpaCard() {
     return () => clearTimeout(timer)
   }, [showPetals])
 
-  const handleCommit = () => {
+  const handleCommit = async () => {
     if (!inputVal.trim()) return
-    setSankalpa(inputVal.trim())
+    const text = inputVal.trim()
+    const dateSet = getTodayDate()
+    setSankalpa(text)
+    setCompleted(false)
+    setShowSmoke(true)
     trackEvent('sankalpa_set')
     setInputVal('')
-    setShowSmoke(true)
+    if (user) {
+      try {
+        await updateProfile({
+          dailySankalpa: { text, isCompleted: false, dateSet }
+        })
+      } catch (err) {
+        console.error('Failed to save daily committed sankalpa:', err)
+      }
+    }
   }
 
-  const handleFulfill = () => {
+  const handleFulfill = async () => {
     playHabitSound()
     setCompleted(true)
     setShowPetals(true)
     trackEvent('sankalpa_completed')
+    if (user) {
+      try {
+        await updateProfile({
+          dailySankalpa: {
+            text: sankalpa,
+            isCompleted: true,
+            dateSet: getTodayDate()
+          }
+        })
+      } catch (err) {
+        console.error('Failed to save daily fulfilled sankalpa:', err)
+      }
+    }
   }
 
   const handleEdit = () => {
@@ -312,12 +321,22 @@ export default function SankalpaCard() {
     setIsEditing(true)
   }
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editVal.trim()) return
-    setSankalpa(editVal.trim())
+    const text = editVal.trim()
+    setSankalpa(text)
     setCompleted(false)
     setIsEditing(false)
     setEditVal('')
+    if (user) {
+      try {
+        await updateProfile({
+          dailySankalpa: { text, isCompleted: false, dateSet: getTodayDate() }
+        })
+      } catch (err) {
+        console.error('Failed to edit daily committed sankalpa:', err)
+      }
+    }
   }
 
   const handleCancelEdit = () => {
@@ -325,7 +344,7 @@ export default function SankalpaCard() {
     setEditVal('')
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to remove today's sankalpa?")) return;
     setSankalpa(null)
     setCompleted(false)
@@ -334,7 +353,15 @@ export default function SankalpaCard() {
     setEditVal('')
     setShowSmoke(false)
     setShowPetals(false)
-    localStorage.removeItem('daily_sankalpa')
+    if (user) {
+      try {
+        await updateProfile({
+          dailySankalpa: { text: '', isCompleted: false, dateSet: '' }
+        })
+      } catch (err) {
+        console.error('Failed to delete daily committed sankalpa:', err)
+      }
+    }
   }
 
   // Define Rose Petal shower coordinates

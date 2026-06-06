@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Volume2, Music } from 'lucide-react'
+import { AMBIENT_SOUNDS } from '../../config/constants'
 
 export function SoundSanctuaryPanel({
   soundPanelOpen,
@@ -23,11 +24,7 @@ export function SoundSanctuaryPanel({
             <div className="flex items-center gap-1.5 border-b border-gold/15 pb-2 mb-1 font-display font-semibold">
               <Music size={12} className="text-gold" /> Sound Sanctuary
             </div>
-            {[
-              { preset: 'sitarBgm', label: '🪕 Sitar & Drone' },
-              { preset: 'flute', label: '🎵 Bansuri Flute' },
-              { preset: 'meditation', label: '🔔 Temple Bells' },
-            ].map((sound) => {
+            {AMBIENT_SOUNDS.map((sound) => {
               const isPlaying = activeSound === sound.preset && !isMuted
               return (
                 <button
@@ -39,7 +36,7 @@ export function SoundSanctuaryPanel({
                       : 'bg-white/[0.03] border-transparent hover:bg-white/5'
                   }`}
                 >
-                  {sound.label} {isPlaying && '✦'}
+                  {sound.icon} {sound.label} {isPlaying && '✦'}
                 </button>
               )
             })}

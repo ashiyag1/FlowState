@@ -114,9 +114,13 @@ export default function AIAssistant() {
       .map(m => ({ role: m.role, content: m.text }))
 
     try {
+      const token = localStorage.getItem('fwa_auth_token')
+      const headers = { 'Content-Type': 'application/json' }
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      
       const res = await fetch('/api/v1/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ 
           message: text,
           conversationHistory: historyForApi

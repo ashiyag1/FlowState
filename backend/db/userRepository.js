@@ -30,6 +30,9 @@ export async function dbCreateUser(name, email, passwordHash) {
       xp: 0,
       pranaPoints: 0,
       preferences: { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      activeSankalpa: 'calm',
+      dailySankalpa: { text: '', isCompleted: false, dateSet: '' },
+      wisdom: {},
       stats: { sankalpaDates: [], breathingDates: [], wisdomDates: [], booksOpened: [], sunriseDates: [], midnightJournalDates: [], pagesRead: [] }
     }
     db.users.push(newUser)
@@ -68,6 +71,9 @@ export async function dbFindUserById(id) {
       xp: user.xp || 0,
       pranaPoints: user.pranaPoints || 0,
       preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      activeSankalpa: user.activeSankalpa || 'calm',
+      dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+      wisdom: user.wisdom || {},
       stats: {
         sankalpaDates: user.stats?.sankalpaDates || [],
         breathingDates: user.stats?.breathingDates || [],
@@ -88,6 +94,9 @@ export async function dbUpdateUserProfile(userId, updates) {
   if (updates.bio !== undefined) allowed.bio = updates.bio
   if (updates.location !== undefined) allowed.location = updates.location
   if (updates.preferences !== undefined) allowed.preferences = updates.preferences
+  if (updates.wisdom !== undefined) allowed.wisdom = updates.wisdom
+  if (updates.activeSankalpa !== undefined) allowed.activeSankalpa = updates.activeSankalpa
+  if (updates.dailySankalpa !== undefined) allowed.dailySankalpa = updates.dailySankalpa
 
   if (getIsMongo()) {
     const user = await User.findByIdAndUpdate(userId, { $set: allowed }, { new: true })
@@ -101,6 +110,9 @@ export async function dbUpdateUserProfile(userId, updates) {
       location: user.location || '',
       joinedAt: user.joinedAt,
       preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      wisdom: user.wisdom || {},
+      activeSankalpa: user.activeSankalpa || 'calm',
+      dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
       xp: user.xp || 0,
       pranaPoints: user.pranaPoints || 0
     }
@@ -119,6 +131,9 @@ export async function dbUpdateUserProfile(userId, updates) {
       location: user.location || '',
       joinedAt: user.joinedAt || new Date().toISOString(),
       preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      wisdom: user.wisdom || {},
+      activeSankalpa: user.activeSankalpa || 'calm',
+      dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
       xp: user.xp || 0,
       pranaPoints: user.pranaPoints || 0
     }

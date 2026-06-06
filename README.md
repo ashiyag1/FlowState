@@ -1,13 +1,14 @@
 # 🌸 Tarang‑FlowState — Wellness & Mindfulness Dashboard
 
-Tarang-FlowState is a mindful wellness application designed to help users track hydration, build positive habits, journal their thoughts, absorb ancient wisdom, and connect with a supportive community. It is wrapped in a warm, glassmorphism design with a rich Indian-spiritual aesthetic.
+Tarang-FlowState is a mindful wellness application designed to help users track hydration, build positive habits, journal their thoughts, and absorb ancient wisdom. It is wrapped in a warm, glassmorphism design with a rich Indian-spiritual aesthetic.
 
 ---
 
 ## ✨ Features
 
-- **🧘 Mindful Tracking**:
+- **🧘 Mindful Tracking & Intentions**:
   - **Water Intake**: Daily goal rings, progress tracking, and hydration logs.
+  - **Daily Sankalpa (Intention) Generator**: An AI-powered engine (Llama-3.3-70B / Gemini) that processes your current state of mind (e.g., placement stress, screen burnout) to generate a custom daily intention, friendly senior-buddy style advice, personalized grounding rituals, and matching ancient wisdom quotes.
   - **Habits & Rituals**: Streak tracking, completion calendar, and integrations with the traditional Hindu calendar.
   - **Emotional Journaling**: Daily mood tracking (7 emotional presets), mood trend heatmaps, and consistency streaks.
 - **📜 Wisdom Library**:
@@ -17,9 +18,6 @@ Tarang-FlowState is a mindful wellness application designed to help users track 
 - **🗺️ Indian Heritage Portal**:
   - Interactive map highlighting **13 Indian scholars** and their contributions to science, astronomy, and mathematics.
   - Narration support for reading pages.
-- **👥 Satsang Community**:
-  - A public daily intentions board and wellness activity feed.
-  - Prana (Karma) point system tracking user XP based on mindfulness activities.
 - **🤖 Sahayak AI Assistant**:
   - A floating, context-aware AI wellness companion.
   - Utilizes **Groq SDK (Llama-3.3-70B)** as the primary engine with **Google Gemini** as a smart fallback.
@@ -52,6 +50,9 @@ This project implements rigorous security and performance standards:
 - **🏋️ Upgraded Hashing & Session Cryptography**:
   - Swapped `bcryptjs` for native `bcrypt` to speed up password hashing by **20x** and mitigate server Denial of Service (DoS) CPU starvation.
   - Transitioned token handling to `jose` for modern, lightweight, edge-compatible JWT session management.
+- **⚙️ Custom React Hooks & State Decoupling**:
+  - Decoupled complex sadhana session timing and audio panel state machines out of the main dashboard (`Home.jsx`) into lightweight custom hooks (`useSadhanaTimer` and `useSoundSanctuary`).
+  - Centralized layout stylesheets and sound preset models into a single config module (`constants.js`) to eliminate hardcoded redundancies across the codebase.
 
 ---
 
@@ -78,12 +79,14 @@ tarang-flowstate/
 │   ├── db.js              # Database router (MongoDB Mongoose OR JSON file DB)
 │   ├── db.json            # Local JSON database storage file
 │   ├── middleware/        # JWT Authentication, Rate limiters, Sanitizers
-│   ├── routes/            # Versioned API routes (auth, profile, journal, etc.)
+│   ├── routes/            # Versioned API routes (auth, profile, journal, sankalpa, etc.)
 │   ├── models/            # Mongoose Schema Definitions
 │   └── services/          # Achievement and Badge evaluation engine
 ├── frontend/
 │   ├── public/            # Static assets and PWA files
 │   └── src/
+│       ├── config/        # Styling and soundscape presets constants
+│       ├── hooks/         # Custom state hooks (timer, sound sanctuary, etc.)
 │       ├── components/    # Reusable modular UI components
 │       ├── context/       # State management (Auth, Theme, Wellness, etc.)
 │       ├── pages/         # Route views (Dashboard, Wisdom, Heritage, etc.)

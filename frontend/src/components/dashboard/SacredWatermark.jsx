@@ -1,7 +1,21 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 
-export function SacredWatermark({ dark, isNight, particles }) {
+export function SacredWatermark({ dark, isNight }) {
+  const particles = useMemo(() =>
+    Array.from({ length: 20 }, (_, i) => ({
+      x: 5 + (i * 8.3) % 90,
+      y: 10 + (i * 12.3 + 7) % 80,
+      delay: i * 0.45,
+      duration: 8 + (i % 5) * 2.2,
+      char: i % 4 === 0 ? '*' : i % 4 === 1 ? '.' : i % 4 === 2 ? 'o' : '+',
+      color: isNight
+        ? (i % 3 === 0 ? '#99a8c8' : i % 3 === 1 ? '#c9b080' : '#887cb8')
+        : (i % 3 === 0 ? '#c9a84c' : i % 3 === 1 ? '#e87722' : '#d4607a'),
+      fontSize: 8 + (i % 3) * 3,
+    })), [isNight]
+  )
+
   return (
     <>
       {/* Drifting Sacred Sparkles */}

@@ -13,8 +13,20 @@ const UserSchema = new mongoose.Schema({
   preferences: {
     theme: { type: String, default: 'light' },
     soundEnabled: { type: Boolean, default: true },
-    notificationsEnabled: { type: Boolean, default: true }
+    notificationsEnabled: { type: Boolean, default: true },
+    lastRitualDate: { type: String, default: '' },
+    wisdomJarCount: { type: Number, default: 0 },
+    wisdomJarDate: { type: String, default: '' },
+    hasReadLetter: { type: Boolean, default: false },
+    onboardingCompleted: { type: Boolean, default: false }
   },
+  activeSankalpa: { type: mongoose.Schema.Types.Mixed, default: 'calm' },
+  dailySankalpa: {
+    text: { type: String, default: '' },
+    isCompleted: { type: Boolean, default: false },
+    dateSet: { type: String, default: '' }
+  },
+  wisdom: { type: mongoose.Schema.Types.Mixed, default: {} },
   stats: {
     sankalpaDates: { type: [String], default: [] },
     breathingDates: { type: [String], default: [] },

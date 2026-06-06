@@ -84,24 +84,34 @@ export default function OnboardingWizardModal({ open, onClose, dark, onComplete 
         >
           {/* Progress Header */}
           <div className="flex items-center justify-between mb-6 border-b pb-4 border-gold/10">
-            <span
-              className="text-[10px] uppercase tracking-[0.2em] font-semibold"
-              style={{ color: '#c8a96e' }}
-            >
-              Step {step} of 4
-            </span>
-            <div className="flex gap-1.5">
-              {[1, 2, 3, 4].map((s) => (
-                <div
-                  key={s}
-                  className="h-1.5 rounded-full transition-all duration-300"
-                  style={{
-                    width: s === step ? '20px' : '6px',
-                    background: s <= step ? '#e8622a' : (dark ? 'rgba(201,168,76,0.2)' : 'rgba(201,168,76,0.4)'),
-                  }}
-                />
-              ))}
+            <div className="flex flex-col gap-1">
+              <span
+                className="text-[10px] uppercase tracking-[0.2em] font-semibold"
+                style={{ color: '#c8a96e' }}
+              >
+                Step {step} of 4
+              </span>
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4].map((s) => (
+                  <div
+                    key={s}
+                    className="h-1.5 rounded-full transition-all duration-300"
+                    style={{
+                      width: s === step ? '20px' : '6px',
+                      background: s <= step ? '#e8622a' : (dark ? 'rgba(201,168,76,0.2)' : 'rgba(201,168,76,0.4)'),
+                    }}
+                  />
+                ))}
+              </div>
             </div>
+            
+            <button 
+              onClick={handleFinish}
+              className="text-[10px] uppercase tracking-wider font-semibold opacity-60 hover:opacity-100 transition-opacity"
+              style={{ color: dark ? '#f7eed7' : '#1c1208' }}
+            >
+              Skip Intro ➔
+            </button>
           </div>
 
           {/* Step Content */}

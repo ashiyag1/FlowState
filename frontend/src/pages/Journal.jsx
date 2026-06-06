@@ -96,10 +96,8 @@ export default function Journal() {
   useEffect(() => {
     let interval = null
     if (isBreathing) {
-      if (breathState === 'idle') {
-        setBreathState('inhale')
-        setBreathTimer(4)
-      }
+      setBreathState(curr => curr === 'idle' ? 'inhale' : curr)
+      setBreathTimer(curr => curr === 4 ? 4 : curr)
       interval = setInterval(() => {
         setBreathTimer((prev) => {
           if (prev <= 1) {
@@ -120,10 +118,12 @@ export default function Journal() {
     } else {
       setBreathState('idle')
       setBreathTimer(4)
-      clearInterval(interval)
+      if (interval) clearInterval(interval)
     }
-    return () => clearInterval(interval)
-  }, [isBreathing, breathState])
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [isBreathing])
 
   // Stop sound loops on exit
   useEffect(() => {

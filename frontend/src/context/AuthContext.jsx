@@ -35,7 +35,13 @@ export function AuthProvider({ children }) {
           setIsAuthenticated(true)
         } else if (res.status === 401) {
           // Only sign out on 401 — token is genuinely invalid or expired
-          localStorage.removeItem('fwa_auth_token')
+          const keysToRemove = [
+            'fwa_auth_token', 'fwa_guest_name', 'fwa_mockup_sankalpa',
+            'fwa_mockup_ritual_done', 'fwa_onboarding_completed', 'fwa_wisdom_read',
+            'wisdom_saved', 'wisdom_saved_pages', 'wisdom_page_notes', 
+            'wisdom_streak_log', 'wisdom_opened_books', 'wisdom_book_progress'
+          ]
+          keysToRemove.forEach(k => localStorage.removeItem(k))
           setToken(null)
           setUser(null)
           setIsAuthenticated(false)
@@ -73,8 +79,16 @@ export function AuthProvider({ children }) {
         throw new Error(data.error || 'Login failed')
       }
 
+      // Clear guest session data so it doesn't bleed back when they log out later
+      const keysToRemove = [
+        'fwa_guest_name', 'fwa_mockup_sankalpa', 'fwa_mockup_ritual_done', 
+        'fwa_onboarding_completed', 'fwa_wisdom_read', 'wisdom_saved', 
+        'wisdom_saved_pages', 'wisdom_page_notes', 'wisdom_streak_log', 
+        'wisdom_opened_books', 'wisdom_book_progress'
+      ]
+      keysToRemove.forEach(k => localStorage.removeItem(k))
+
       localStorage.setItem('fwa_auth_token', data.token)
-      if (data.user?.name) localStorage.setItem('fwa_guest_name', data.user.name.split(' ')[0])
       setToken(data.token)
       setUser(data.user)
       setIsAuthenticated(true)
@@ -102,8 +116,16 @@ export function AuthProvider({ children }) {
         throw new Error(data.error || 'Signup failed')
       }
 
+      // Clear guest session data
+      const keysToRemove = [
+        'fwa_guest_name', 'fwa_mockup_sankalpa', 'fwa_mockup_ritual_done', 
+        'fwa_onboarding_completed', 'fwa_wisdom_read', 'wisdom_saved', 
+        'wisdom_saved_pages', 'wisdom_page_notes', 'wisdom_streak_log', 
+        'wisdom_opened_books', 'wisdom_book_progress'
+      ]
+      keysToRemove.forEach(k => localStorage.removeItem(k))
+
       localStorage.setItem('fwa_auth_token', data.token)
-      if (data.user?.name) localStorage.setItem('fwa_guest_name', data.user.name.split(' ')[0])
       setToken(data.token)
       setUser(data.user)
       setIsAuthenticated(true)
@@ -126,8 +148,15 @@ export function AuthProvider({ children }) {
 
   // Logout handler
   const logout = useCallback(() => {
-    localStorage.removeItem('fwa_auth_token')
-    localStorage.removeItem('fwa_guest_name')
+    // Clear auth and all legacy/guest data to prevent data bleed
+    const keysToRemove = [
+      'fwa_auth_token', 'fwa_guest_name', 'fwa_mockup_sankalpa',
+      'fwa_mockup_ritual_done', 'fwa_onboarding_completed', 'fwa_wisdom_read',
+      'wisdom_saved', 'wisdom_saved_pages', 'wisdom_page_notes', 
+      'wisdom_streak_log', 'wisdom_opened_books', 'wisdom_book_progress'
+    ]
+    keysToRemove.forEach(k => localStorage.removeItem(k))
+    
     setToken(null)
     setUser(null)
     setIsAuthenticated(false)

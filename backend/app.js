@@ -8,9 +8,9 @@ import waterRoutes from './routes/water.js'
 import habitsRoutes from './routes/habits.js'
 import journalRoutes from './routes/journal.js'
 import chatRoutes from './routes/chat.js'
-import communityRoutes from './routes/community.js'
 import profileRoutes from './routes/profile.js'
 import badgesRoutes from './routes/badges.js'
+import sankalpaRoutes from './routes/sankalpa.js'
 
 const app = express()
 
@@ -98,6 +98,7 @@ const aiChatMinutelyLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.headers.authorization || req.ip,
   message: { error: 'Too many queries to Sahayak. Please pause, breathe, and try again in a minute.' },
 })
 
@@ -107,6 +108,7 @@ const aiChatHourlyLimiter = rateLimit({
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.headers.authorization || req.ip,
   message: { error: 'You have reached your hourly limit for AI guidance. Rest, and return in an hour — Sahayak will be here.' },
 })
 
@@ -126,9 +128,9 @@ app.use('/api/v1/water', waterRoutes)
 app.use('/api/v1/habits', habitsRoutes)
 app.use('/api/v1/journal', journalRoutes)
 app.use('/api/v1/chat', aiChatMinutelyLimiter, aiChatHourlyLimiter, chatRoutes)
-app.use('/api/v1/community', communityRoutes)
 app.use('/api/v1/profile', profileRoutes)
 app.use('/api/v1/badges', badgesRoutes)
+app.use('/api/v1/sankalpa', aiChatMinutelyLimiter, aiChatHourlyLimiter, sankalpaRoutes)
 
 // ── 404 FALLBACK ──────────────────────────────────────────────────────────────
 app.use('/api/v1/*', (req, res) => {

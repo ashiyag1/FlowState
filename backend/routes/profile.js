@@ -16,16 +16,26 @@ const router = express.Router()
 // All routes require authentication
 router.use(authMiddleware)
 
-// PUT / — Update profile info (name, bio, location, preferences)
+// PUT / — Update profile info (name, bio, location, preferences, activeSankalpa, dailySankalpa)
 router.put('/', async (req, res) => {
   try {
-    const { name, bio, location, preferences } = req.body
+    const { name, bio, location, preferences, activeSankalpa, dailySankalpa } = req.body
     const updates = {}
     
     if (name !== undefined) updates.name = escapeHTML(ensureString(name).trim())
     if (bio !== undefined) updates.bio = escapeHTML(ensureString(bio).trim())
     if (location !== undefined) updates.location = escapeHTML(ensureString(location).trim())
     if (preferences !== undefined) updates.preferences = sanitizeNoSql(preferences)
+    if (activeSankalpa !== undefined) {
+      if (typeof activeSankalpa === 'string') {
+        updates.activeSankalpa = escapeHTML(ensureString(activeSankalpa).trim())
+      } else {
+        updates.activeSankalpa = sanitizeNoSql(activeSankalpa)
+      }
+    }
+    if (dailySankalpa !== undefined) {
+      updates.dailySankalpa = sanitizeNoSql(dailySankalpa)
+    }
 
     const user = await dbUpdateUserProfile(req.userId, updates)
     return res.status(200).json({ user })

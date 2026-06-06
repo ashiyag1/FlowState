@@ -49,7 +49,7 @@ export function ActiveSadhanaPlayer({
             ACTIVE PRACTICE: {activePractice.rname}
           </span>
           <div style={{
-            fontSize: '48px', fontFamily: 'monospace', fontWeight: 700, color: dark ? '#ffeab8' : '#1c1208'
+            fontSize: '48px', fontFamily: 'monospace', fontWeight: 700, color: dark ? '#ffeab8' : '#1c1208', fontVariantNumeric: 'tabular-nums'
           }}>
             {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')}
           </div>

@@ -2,14 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles, Volume2 } from 'lucide-react'
 import LotusFlower from '../../icons/LotusFlower'
-
-const AMBIENT_SOUNDS = [
-  { preset: 'sitarBgm', label: 'Sitar BGM', icon: '🪕' },
-  { preset: 'flute', label: 'Bansuri Flute', icon: '🎵' },
-  { preset: 'meditation', label: 'Temple Bells', icon: '🔔' },
-  { preset: 'omSound', label: 'Om Chant', icon: '🕉️' },
-  { preset: 'rain', label: 'Forest Rain', icon: '🌧️' }
-]
+import { AMBIENT_SOUNDS } from '../../config/constants'
 
 export function JournalRitualsPanel({
   isBreathing,

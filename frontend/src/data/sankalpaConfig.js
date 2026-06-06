@@ -1,3 +1,5 @@
+import { getHinduDetails } from '../utils/hinduCalendar.js'
+
 export const SANKALPAS = {
   calm: {
     msg: 'Calm chosen · breathing space and rest shape your day',
@@ -124,6 +126,134 @@ export const SANKALPAS = {
       { wis: '"Contentment (Santosha) brings supreme joy and is the source of ultimate happiness."', src: 'Patanjali Yoga Sutras', ref: '— on contentment' },
       { wis: '"Let us be grateful to the earth that carries us, the water that sustains us, and the air that lets us breathe."', src: 'Rig Veda', ref: '— on appreciating abundance' }
     ]
+  },
+  jyoti: {
+    key: 'jyoti',
+    label: 'Jyoti (Clarity)',
+    emoji: '🕯️',
+    msg: 'Jyoti chosen · illumination, expansion, and positive action guide your waxing cycle.',
+    suggestedRituals: [
+      {
+        name: 'Trataka Flame Focus',
+        time: '3',
+        desc: 'Stare at a single point or flame for 1 minute without blinking, then visualize it internally to build deep focus.'
+      }
+    ],
+    wisdomOptions: [
+      { wis: '"Lead me from darkness to light, from the unreal to the real."', src: 'Upanishads', ref: '— on seeking illumination' }
+    ]
+  },
+  sadhana: {
+    key: 'sadhana',
+    label: 'Sadhana (Devotion)',
+    emoji: '🕉️',
+    msg: 'Sadhana chosen · structured daily devotion during the waxing moon.',
+    suggestedRituals: [
+      {
+        name: 'Mantra Meditation',
+        time: '3',
+        desc: 'Silently repeat a sound that centers you (like Om or a positive word) 27 times, coordinating it gently with your breath.'
+      }
+    ],
+    wisdomOptions: [
+      { wis: '"Constant practice and detachment lead to the mastery of the mind."', src: 'Patanjali Yoga Sutras', ref: '— on discipline' }
+    ]
+  },
+  visrama: {
+    key: 'visrama',
+    label: 'Visrama (Release)',
+    emoji: '🍃',
+    msg: 'Visrama chosen · gentle rest, release, and editing of mental clutter in the waning cycle.',
+    suggestedRituals: [
+      {
+        name: 'Body Scan Savasana',
+        time: '3',
+        desc: 'Lie down or sit back. Move your attention slowly from your toes to the crown of your head, releasing tension.'
+      }
+    ],
+    wisdomOptions: [
+      { wis: '"By letting go, it all gets done. The world is won by those who let it go."', src: 'Ancient Wisdom', ref: '— on peaceful release' }
+    ]
+  },
+  pratyahara: {
+    key: 'pratyahara',
+    label: 'Pratyahara (Inward)',
+    emoji: '🕊️',
+    msg: 'Pratyahara chosen · turning attention inward and quieting external noise.',
+    suggestedRituals: [
+      {
+        name: 'Digital Detox Minute',
+        time: '5',
+        desc: 'Turn off all screens and put away all digital inputs. Spend 5 minutes listening to the quiet of your immediate environment.'
+      }
+    ],
+    wisdomOptions: [
+      { wis: '"When the senses are withdrawn from external objects, the mind rests in its source."', src: 'Upanishads', ref: '— on inner peace' }
+    ]
+  },
+  purna: {
+    key: 'purna',
+    label: 'Purna (Abundance)',
+    emoji: '🌕',
+    msg: 'Purna chosen · peak lunar energy, celebration, and gratitude for abundance.',
+    suggestedRituals: [
+      {
+        name: 'Gratitude Reflection',
+        time: '2',
+        desc: 'List three blessings in your life. Visualize them clearly and allow warmth to fill your heart.'
+      }
+    ],
+    wisdomOptions: [
+      { wis: '"This is whole, that is whole; from the whole, the whole arises. Take the whole from the whole, the whole remains."', src: 'Isha Upanishad', ref: '— on abundance' }
+    ]
+  },
+  shunya: {
+    key: 'shunya',
+    label: 'Shunya (Reset)',
+    emoji: '🌑',
+    msg: 'Shunya chosen · cosmic reboot, silence, and letting go of all baggage.',
+    suggestedRituals: [
+      {
+        name: 'Zero-pressure Breath',
+        time: '3',
+        desc: 'Sit quietly. Empty your mind of all goals or plans. Simply follow the natural flow of breath without attempting to control it.'
+      }
+    ],
+    wisdomOptions: [
+      { wis: '"In the center of the storm, there is a space of pure stillness and void. Rest there."', src: 'Vigyan Bhairav Tantra', ref: '— on pure awareness' }
+    ]
+  }
+}
+
+export function getLunarSankalpaSuggestions(date = new Date()) {
+  const details = getHinduDetails(date)
+  const { tithiNum, paksha, tithiName } = details
+  const isShukla = paksha.includes('Shukla')
+  
+  if (tithiNum === 15) {
+    if (isShukla) {
+      return {
+        suggestions: [SANKALPAS.purna, SANKALPAS.sadhana],
+        context: `${tithiName} (${paksha})`
+      }
+    } else {
+      return {
+        suggestions: [SANKALPAS.shunya, SANKALPAS.visrama],
+        context: `${tithiName} (${paksha})`
+      }
+    }
+  }
+  
+  if (isShukla) {
+    return {
+      suggestions: [SANKALPAS.jyoti, SANKALPAS.sadhana],
+      context: `${tithiName} (${paksha})`
+    }
+  } else {
+    return {
+      suggestions: [SANKALPAS.visrama, SANKALPAS.pratyahara],
+      context: `${tithiName} (${paksha})`
+    }
   }
 }
 

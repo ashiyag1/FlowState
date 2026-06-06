@@ -20,6 +20,7 @@ export function setIsMongo(val) {
 }
 
 let jsonDbInitialized = false
+let connectionPromise = null
 
 export async function connectDB() {
   // Lazy env detection
@@ -29,34 +30,40 @@ export async function connectDB() {
   }
   if (IS_MONGO) {
     if (mongoose.connection.readyState >= 1) return
-    try {
-      await mongoose.connect(MONGODB_URI)
-      console.log('MongoDB connected successfully')
-      
-// 🚀 Optimization: Only run badge sync if the badges are not yet seeded
-      const badgeCount = await Badge.countDocuments()
-      if (badgeCount !== DEFAULT_BADGES.length) {
-        console.log('Seeding/updating default badges in MongoDB...')
-        await Promise.all(
-          DEFAULT_BADGES.map(badge =>
-            Badge.findOneAndUpdate(
-              { badgeId: badge.badgeId },
-              { $set: badge },
-              { upsert: true }
+    if (connectionPromise) {
+      await connectionPromise
+      return
+    }
+    connectionPromise = (async () => {
+      try {
+        await mongoose.connect(MONGODB_URI)
+        console.log('MongoDB connected successfully')
+        
+        // 🚀 Optimization: Only run badge sync if the badges are not yet seeded
+        const badgeCount = await Badge.countDocuments()
+        if (badgeCount !== DEFAULT_BADGES.length) {
+          console.log('Seeding/updating default badges in MongoDB...')
+          await Promise.all(
+            DEFAULT_BADGES.map(badge =>
+              Badge.findOneAndUpdate(
+                { badgeId: badge.badgeId },
+                { $set: badge },
+                { upsert: true }
+              )
             )
           )
-        )
-        console.log('Default badges synchronized successfully')
-      } else {
-        console.log('Badges already synchronized, skipping sync query')
+          console.log('Default badges synchronized successfully')
+        } else {
+          console.log('Badges already synchronized, skipping sync query')
+        }
+      } catch (err) {
+        console.error('MongoDB connection error — falling back to JSON file database:', err)
+        IS_MONGO = false
       }
-
-      console.log('Default badges synchronized in MongoDB')
-    } catch (err) {
-      console.error('MongoDB connection error — falling back to JSON file database:', err)
-      IS_MONGO = false
-      // fall through to JSON file mode below
-    }
+    })()
+    
+    await connectionPromise
+    if (IS_MONGO) return
   }
   if (!IS_MONGO) {
     // JSON-based local DB — only initialize once per server process
