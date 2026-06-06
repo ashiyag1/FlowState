@@ -155,7 +155,10 @@ export async function dbUpdateUserAvatar(userId, avatar) {
       joinedAt: user.joinedAt,
       preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
       xp: user.xp || 0,
-      pranaPoints: user.pranaPoints || 0
+      pranaPoints: user.pranaPoints || 0,
+      activeSankalpa: user.activeSankalpa || 'calm',
+      dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+      wisdom: user.wisdom || {}
     }
   } else {
     const db = await readJsonDB()
@@ -173,7 +176,10 @@ export async function dbUpdateUserAvatar(userId, avatar) {
       joinedAt: user.joinedAt || new Date().toISOString(),
       preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
       xp: user.xp || 0,
-      pranaPoints: user.pranaPoints || 0
+      pranaPoints: user.pranaPoints || 0,
+      activeSankalpa: user.activeSankalpa || 'calm',
+      dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+      wisdom: user.wisdom || {}
     }
   }
 }
@@ -237,7 +243,10 @@ export async function dbAdjustUserPoints(userId, xpDiff, pranaDiff = 0) {
       joinedAt: user.joinedAt,
       xp: user.xp || 0,
       pranaPoints: user.pranaPoints || 0,
-      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true }
+      preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      activeSankalpa: user.activeSankalpa || 'calm',
+      dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+      wisdom: user.wisdom || {}
     }
   } else {
     const db = await readJsonDB()
@@ -258,6 +267,9 @@ export async function dbAdjustUserPoints(userId, xpDiff, pranaDiff = 0) {
       xp: user.xp,
       pranaPoints: user.pranaPoints,
       preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
+      activeSankalpa: user.activeSankalpa || 'calm',
+      dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+      wisdom: user.wisdom || {},
       stats: user.stats || {}
     }
   }

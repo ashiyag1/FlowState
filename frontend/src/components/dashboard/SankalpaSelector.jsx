@@ -10,7 +10,8 @@ export function SankalpaSelector({
   onTogglePanel,
   onSelectSankalpa,
   onGenerateSankalpa,
-  isAuthenticated
+  isAuthenticated,
+  isReflectionTime
 }) {
   const [moodText, setMoodText] = React.useState('')
   const [loading, setLoading] = React.useState(false)
@@ -83,23 +84,39 @@ export function SankalpaSelector({
           <span style={{ color: '#c8a96e', fontFamily: 'sans-serif', fontWeight: 600 }}>
             SANKALPA · <span style={{ color: dark ? '#ffeab8' : '#3d2600' }}>{currentSankalpa.emoji} {currentSankalpa.label}</span>
           </span>
-          <button
-            onClick={onTogglePanel}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#e8622a',
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: 'sans-serif',
+          {isReflectionTime ? (
+            <span style={{
+              color: '#c8a96e',
+              fontWeight: 600,
               fontSize: '11px',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              outline: 'none'
-            }}
-          >
-            {sankalpaPanelOpen ? 'close' : 'Change / Ask AI ✨'}
-          </button>
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              userSelect: 'none'
+            }}>
+              🔒 Locked
+            </span>
+          ) : (
+            <button
+              onClick={onTogglePanel}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#e8622a',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: 'sans-serif',
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                outline: 'none'
+              }}
+            >
+              {sankalpaPanelOpen ? 'close' : 'Change / Ask AI ✨'}
+            </button>
+          )}
         </div>
         <p style={{
           fontSize: '11px',
@@ -111,27 +128,34 @@ export function SankalpaSelector({
           maxWidth: '440px',
           lineHeight: 1.4
         }}>
-          Current focus: <strong>"{currentSankalpa.msg}"</strong>. {!sankalpaPanelOpen && (
-            <span
-              onClick={onTogglePanel}
-              style={{
-                color: '#e8622a',
-                cursor: 'pointer',
-                fontWeight: 700,
-                marginLeft: '6px',
-                textDecoration: 'underline',
-                display: 'inline-block'
-              }}
-            >
-              Ask AI to personalize ✨
+          Current focus: <strong>"{currentSankalpa.msg}"</strong>.
+          {isReflectionTime ? (
+            <span style={{ display: 'block', marginTop: '4px', color: '#c8a96e', fontWeight: 500 }}>
+              At this quiet hour, we reflect on our day, relax our mind, and let go of all search for change. 🪔
             </span>
+          ) : (
+            !sankalpaPanelOpen && (
+              <span
+                onClick={onTogglePanel}
+                style={{
+                  color: '#e8622a',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  marginLeft: '6px',
+                  textDecoration: 'underline',
+                  display: 'inline-block'
+                }}
+              >
+                Ask AI to personalize ✨
+              </span>
+            )
           )}
         </p>
       </div>
 
       {/* Expandable selection tray */}
       <AnimatePresence>
-        {sankalpaPanelOpen && (
+        {sankalpaPanelOpen && !isReflectionTime && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}

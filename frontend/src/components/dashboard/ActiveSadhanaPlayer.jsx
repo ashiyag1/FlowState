@@ -5,6 +5,7 @@ export function ActiveSadhanaPlayer({
   activePractice,
   timerSeconds,
   viewMode,
+  isReflectionTime,
   todayRitual,
   userName,
   onStartPractice,
@@ -38,7 +39,7 @@ export function ActiveSadhanaPlayer({
   return (
     <div style={{ borderRadius: '24px', padding: '24px', ...glassCardStyle }}>
       <div style={secLabelStyle}>
-        <span>{viewMode === 'morning' ? "Suggested Sadhana" : "Evening Reflection"}</span>
+        <span>{!isReflectionTime ? "Suggested Sadhana" : "Evening Reflection"}</span>
         <div style={{ flex: 1, height: '0.5px', background: 'rgba(200,169,110,0.2)' }} />
       </div>
 
@@ -71,7 +72,7 @@ export function ActiveSadhanaPlayer({
       ) : (
         /* Static suggested view */
         <div>
-          {viewMode === 'morning' ? (
+          {!isReflectionTime ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
               <div style={{ flex: 1, minWidth: '200px' }}>
                 <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 600, margin: 0 }}>

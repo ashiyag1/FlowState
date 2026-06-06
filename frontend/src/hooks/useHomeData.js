@@ -145,6 +145,12 @@ export function useHomeData() {
     return (h >= 5 && h < 17) ? 'morning' : 'evening'
   })
 
+  // Reflection time & Sankalpa locking (8 PM to 5 AM)
+  const isReflectionTime = useMemo(() => {
+    const h = new Date().getHours()
+    return h >= 20 || h < 5
+  }, [])
+
   // Track user session active days in local storage for re-entry checks
   useEffect(() => {
     const todayStr = new Date().toISOString().slice(0, 10)
@@ -383,6 +389,7 @@ export function useHomeData() {
     setShowLevelUp,
     viewMode,
     setViewMode,
+    isReflectionTime,
     reflection,
     isNight,
     todayStr,

@@ -45,30 +45,12 @@ export const CONCEPT_STORIES = [
     ]
   },
   {
-    title: "India Was Making Pure Zinc 500 Years Before Europe Cracked the Formula",
-    source: "Zawar Mines, Rajasthan, 12th Century CE",
-    tag: "lost metallurgy",
-    paragraphs: [
-      "Zinc is tricky to produce. It boils at 907°C — right when it's being smelted — so it vaporizes before it can be collected. Europe couldn't figure this out until the 18th century. India had it figured in the 12th century — at the Zawar mines in Rajasthan.",
-      "They built vertical retort furnaces that condensed zinc vapor into liquid metal. The process was so efficient and so complex that when the site was rediscovered, modern engineers were baffled by its sophistication. Ancient metallurgists were running industrial chemistry 800 years ahead of the curve."
-    ]
-  },
-  {
     title: "The Way You Write Numbers Changed the World — and It Came From Here",
     source: "Ancient Indian Mathematics, 5th Century CE",
     tag: "decimal system",
     paragraphs: [
       "The number 365 means three hundreds, six tens, and five ones. This feels so natural you probably never think about it. But someone had to invent the idea that a digit's value depends on where it sits. That breakthrough — the decimal place-value system — was developed in India.",
       "Without it, there is no accounting, no engineering, no modern science, no computers. The Romans had number systems so clunky they needed specialists just to do multiplication. India's system was so elegant it spread across the world and became universal. You use it every second of every day."
-    ]
-  },
-  {
-    title: "Ancient Indians Had Names for Numbers Up to 10^53. Why? Because They Could.",
-    source: "Vedic Mathematics, Circa 1000 BCE",
-    tag: "cosmic numbers",
-    paragraphs: [
-      "Most ancient cultures stopped naming numbers at a few thousand. Rome had 'mille' (thousand) and 'deciens' (ten thousand) — then they ran out of words. Ancient India had names for numbers up to 10^53 — a 1 followed by 53 zeros. They called it asankhyeya: 'the countless.'",
-      "They needed these numbers for cosmology — they measured time in cycles of 4.32 billion years called Kalpas. They calculated the speed of light. The age of the universe. They thought in cosmic scales because they understood that the universe itself thinks in cosmic scales."
     ]
   }
 ]
@@ -223,6 +205,56 @@ export const CURIOSITY_STORIES = [
       "When Jews fled persecution 2,000 years ago, India welcomed them. They still live here peacefully. When the first Christians arrived with Thomas, India gave them space. When Parsees escaped religious genocide in Persia, India said: stay. When Tibetans fled China, India opened its borders. When Sri Lankans, Burmese, and Bangladeshis fled war, India didn't turn them away.",
       "There is no other country on Earth that can tell this story. India has been absorbing the world's refugees for millennia — not because it had to, but because its culture never learned to say no. The guest is God. Atithi Devo Bhava. That's not just a saying. It's the quietest, most beautiful revolution in human history."
     ]
+  },
+  {
+    title: "The Board Game Was a Karma Check Before the British Stripped Its Soul",
+    source: "Gyan Chauper (Snakes & Ladders)",
+    tag: "pajama hijack",
+    group: "pop-culture",
+    paragraphs: [
+      "Snakes and Ladders was invented in ancient India as 'Gyan Chauper' (The Game of Knowledge). The ladders represented virtues (like charity and faith) and the snakes represented vices (like anger and theft). Reaching 100 meant achieving Moksha (liberation).",
+      "The British stole the game in 1892, stripped out all the karma and spiritual concepts, and turned it into a basic children's toy. Classic vibe kill."
+    ]
+  },
+  {
+    title: "Bungalows Are Just Bengal-Style Cottages with a Fancy Accent",
+    source: "Bungalow Etymology",
+    tag: "pajama hijack",
+    group: "colonial-hangover",
+    paragraphs: [
+      "Rich people dream of owning a 'bungalow.' But the word is just a British mispronunciation of the Hindi/Bengali word 'Bangla' (meaning 'belonging to Bengal').",
+      "British colonizers saw the local thatched, single-story cottages with wide verandas in Bengal, realized they were perfect for the hot climate, copied the architecture, and called them 'bungalows.'"
+    ]
+  },
+  {
+    title: "The Word 'Juggernaut' Comes from a Massive Rolling Chariot in Odisha",
+    source: "Jagannath Rath Yatra",
+    tag: "champi to shampoo",
+    group: "pop-culture",
+    paragraphs: [
+      "In pop culture, a 'juggernaut' is an unstoppable, destructive force. But the word is just a British mispronunciation of 'Jagannath' (a form of Vishnu).",
+      "In the 14th century, European travelers saw the massive, 45-foot-tall temple chariots being pulled by thousands of devotees in Puri. Stunned by the unstoppable rolling giants, they added 'juggernaut' to the English dictionary."
+    ]
+  },
+  {
+    title: "French High Fashion Was Obsessed with Indian Bug Repellent",
+    source: "Patchouli Origins",
+    tag: "global soft power",
+    group: "pop-culture",
+    paragraphs: [
+      "In the 19th century, French high society was obsessed with the exotic, earthy scent of imported Kashmiri shawls, which they called 'Patchouli' (from the Tamil 'Pachai-ilai'). French perfumers made millions selling this signature scent.",
+      "But the smell wasn't a perfume—Indian weavers just stuffed dried patchouli leaves into the packing crates as a natural moth repellent. French luxury was literally just wearing Indian bug spray."
+    ]
+  },
+  {
+    title: "India Was Coloring the World Blue Long Before Levi's",
+    source: "Indigo Dye History",
+    tag: "global soft power",
+    group: "flexes",
+    paragraphs: [
+      "Indigo dye is named after India ('Indikon' in Greek, meaning 'from India'). It was a highly prized luxury product produced in India using complex fermentation. European traders bought it like gold because it was the only natural dye that gave a permanent rich blue.",
+      "They literally called it 'Blue Gold.' Your favorite blue jeans are colored using a dye India spent 2,000 years perfecting."
+    ]
   }
 ]
 
@@ -280,16 +312,16 @@ export const SCHOLARS = [
   },
   {
     id: 4, name: 'Charaka', period: 'circa 300 BCE',
-    title: 'He believed healing begins with balance, not medicine.',
-    desc: 'Charaka saw health as harmony — between body, mind, and nature. He mapped the human body from the inside out, and reminded us that true medicine treats the person, not the symptom.',
+    title: 'Health is a Vibe Check, Not Just Pills',
+    desc: 'Charaka believed true healing starts with mental and environmental balance, not just popping medicine. True wellness is a complete vibe check.',
     img: charakaPortrait,
     field: 'medicine', color: '#4a7c59',
     story: {
-      title: "Charaka: The Physician Who Saw Health as Harmony",
+      title: "Charaka: Healing Starts With a Vibe Check",
       source: "Charaka Samhita, circa 300 BCE",
       paragraphs: [
-        "Long before medicine became prescriptions and lab reports, Charaka understood that health is balance — between body, mind, and nature. He mapped the human body like a continent, describing the heart as a central hub connected to ten channels carrying energy and consciousness.",
-        "He wrote an oath for physicians — centuries before Hippocrates — demanding they treat the poor for free, keep confidentiality, and serve with absolute dedication. Charaka didn't just practice medicine. He defined what it means to care for another human being. Long before it was a profession, he knew healing was an act of love."
+        "In 300 BCE, he mapped the human body and wrote a physician's oath centuries before Hippocrates, demanding that doctors treat the poor for free.",
+        "He understood that the body and mind are deeply connected long before modern therapy existed."
       ]
     }
   },
@@ -340,16 +372,16 @@ export const SCHOLARS = [
   },
   {
     id: 8, name: 'Madhava', period: '1340 – 1425 CE',
-    title: 'He saw infinity — and made it calculate.',
-    desc: 'On the shores of Kerala, Madhava discovered infinite series 300 years before Newton. He understood that some patterns never end — and used that infinity to find π with astonishing precision.',
+    title: 'He Solved Calculus 300 Years Before Newton, On Palm Leaves',
+    desc: 'On the shores of Kerala, Madhava discovered infinite series three centuries before Europe. He chased infinity on palm leaves and won.',
     img: madhavaPortrait,
     field: 'mathematics', color: '#b8924a',
     story: {
-      title: "Madhava of Sangamagrama: The Man Who Calculated With Infinity",
+      title: "Madhava of Sangamagrama: Chasing Infinity on Palm Leaves",
       source: "Kerala School of Mathematics, circa 1400 CE",
       paragraphs: [
-        "On the coast of Kerala, in the 14th century, Madhava discovered infinite series for sine, cosine, and tangent — formulas that add up forever but converge to exact values. This is the heart of calculus, and Madhava reached it 300 years before Europe.",
-        "He used these series to calculate π to 11 decimal places — a world record that stood for centuries. His work was preserved on palm-leaf manuscripts by his students. Three centuries later, Newton and Leibniz would independently rediscover what Madhava had already mapped. One person, on a coast, chasing infinity — and winning. While the world waited for calculus, Madhava was already there, alone with his palm leaves, having conversations with the infinite."
+        "He calculated pi to 11 decimal places using nothing but palm leaves, laying down the foundation for calculus when Europe was still in the dark ages.",
+        "Newton and Leibniz got the historical glory, but Madhava was solving the mysteries of the infinite centuries earlier. The ultimate math flex."
       ]
     }
   },
@@ -385,16 +417,16 @@ export const SCHOLARS = [
   },
   {
     id: 11, name: 'Kanada', period: 'circa 600 BCE',
-    title: 'He saw the invisible — atoms, force, and motion.',
-    desc: '2,600 years ago, Kanada declared that matter is made of tiny, indestructible particles. He called them paramanu. He was naming atoms before telescopes or microscopes — using nothing but logic.',
+    title: 'Mapping Atoms in 600 BCE? Certified Jaw-Drop.',
+    desc: '2,600 years before microscopes, Kanada declared that matter is made of indestructible particles called paramanu. He mapped the quantum world using pure logic, zero equipment.',
     img: kanadaPortrait,
     field: 'mathematics', color: '#4a7c59',
     story: {
-      title: "Kanada: The Philosopher Who Saw Atoms With Pure Reason",
+      title: "Kanada: The 600 BCE Philosopher Who Mapped Atoms Using Only His Mind",
       source: "Vaisheshika Sutra, circa 600 BCE",
       paragraphs: [
-        "2,600 years ago, before microscopes or particle accelerators, Kanada asked: what is the world made of? His answer: Paramanu — tiny, indestructible particles that combine to form everything. He was describing atoms through pure logic, without a single instrument.",
-        "He wrote that atoms are eternal, that they pair and triplet into molecules, that heat and light cause chemical change. It took the world 2,000 years and a particle accelerator to confirm what Kanada reasoned with nothing but his mind. Sometimes the greatest instrument of discovery isn't a microscope. It's a sharp brain and the courage to ask: what is this really made of?"
+        "A sage named Kanada deduced that everything in the universe is made of tiny, indestructible particles that pair up to form molecules.",
+        "It took Western science two millennia and a billion-dollar particle collider to confirm what Kanada deduced while sitting in a forest. That's a certified jaw-drop moment."
       ]
     }
   },

@@ -63,7 +63,10 @@ router.post('/signup', async (req, res) => {
         joinedAt: user.joinedAt || new Date().toISOString(),
         preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
         xp: user.xp || 0,
-        pranaPoints: user.pranaPoints || 0
+        pranaPoints: user.pranaPoints || 0,
+        activeSankalpa: user.activeSankalpa || 'calm',
+        dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+        wisdom: user.wisdom || {}
       }
     })
   } catch (err) {
@@ -113,7 +116,10 @@ router.post('/login', async (req, res) => {
         joinedAt: user.joinedAt || new Date().toISOString(),
         preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
         xp: user.xp || 0,
-        pranaPoints: user.pranaPoints || 0
+        pranaPoints: user.pranaPoints || 0,
+        activeSankalpa: user.activeSankalpa || 'calm',
+        dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+        wisdom: user.wisdom || {}
       }
     })
   } catch (err) {
@@ -143,7 +149,10 @@ router.get('/me', authMiddleware, async (req, res) => {
         joinedAt: user.joinedAt || new Date().toISOString(),
         preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
         xp: user.xp || 0,
-        pranaPoints: user.pranaPoints || 0
+        pranaPoints: user.pranaPoints || 0,
+        activeSankalpa: user.activeSankalpa || 'calm',
+        dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+        wisdom: user.wisdom || {}
       }
     })
   } catch (err) {
@@ -201,7 +210,10 @@ router.post('/google', async (req, res) => {
         joinedAt: user.joinedAt || new Date().toISOString(),
         preferences: user.preferences || { theme: 'light', soundEnabled: true, notificationsEnabled: true },
         xp: user.xp || 0,
-        pranaPoints: user.pranaPoints || 0
+        pranaPoints: user.pranaPoints || 0,
+        activeSankalpa: user.activeSankalpa || 'calm',
+        dailySankalpa: user.dailySankalpa || { text: '', isCompleted: false, dateSet: '' },
+        wisdom: user.wisdom || {}
       }
     })
   } catch (err) {

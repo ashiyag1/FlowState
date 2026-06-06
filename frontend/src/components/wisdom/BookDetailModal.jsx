@@ -83,9 +83,11 @@ export default function BookDetailModal({ book, onClose, initialPage = 0 }) {
   useEffect(() => {
     if (!trackedOpenRef.current) {
       trackedOpenRef.current = true
-      trackEvent('book_opened', { bookId: book.id })
+      trackEventRef.current('book_opened', { bookId: book.id })
+      trackEventRef.current('wisdom_read')
+      markStreakTodayRef.current()
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [book.id])
 
   // Update book progress on page changes
   useEffect(() => {

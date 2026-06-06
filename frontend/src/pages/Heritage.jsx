@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { Play, Pause } from 'lucide-react'
@@ -16,6 +16,7 @@ function Heritage() {
   const { startWisdomAmbience, stopWisdomAmbience } = useSoundEffects()
   const [isPlayingSound, setIsPlayingSound] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
+  const lastExpandedIdRef = useRef(null)
 
   // Flatten all stories into a single feed array, interleaved
   const FEED = useMemo(() => {
@@ -85,15 +86,24 @@ function Heritage() {
     return () => stopWisdomAmbience()
   }, [stopWisdomAmbience])
 
-  // Scroll expanded story to top when opened to keep viewport focus
+  // Scroll expanded story to top when opened, and restore snap alignment when collapsed
   useEffect(() => {
     if (expandedId) {
+      lastExpandedIdRef.current = expandedId
       const el = document.getElementById(expandedId)
       if (el) {
         requestAnimationFrame(() => {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         })
       }
+    } else if (lastExpandedIdRef.current) {
+      const el = document.getElementById(lastExpandedIdRef.current)
+      if (el) {
+        requestAnimationFrame(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        })
+      }
+      lastExpandedIdRef.current = null
     }
   }, [expandedId])
 
@@ -121,6 +131,7 @@ function Heritage() {
         overflowY: 'scroll',
         scrollSnapType: expandedId ? 'none' : 'y mandatory',
         scrollBehavior: 'smooth',
+        WebkitOverflowScrolling: 'touch',
       }} className="hide-scrollbar">
         {FEED.map((item, index) => (
           <HeritageSnapCard

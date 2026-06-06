@@ -55,6 +55,7 @@ export default function Home() {
     showLevelUp,
     setShowLevelUp,
     viewMode,
+    isReflectionTime,
     reflection,
     isNight,
     waterGoalMet,
@@ -114,6 +115,7 @@ export default function Home() {
               onSelectSankalpa={handleSetSankalpa}
               onGenerateSankalpa={handleGenerateSankalpa}
               isAuthenticated={!!user}
+              isReflectionTime={isReflectionTime}
             />
 
             {/* Primary Action — Suggested Sadhana/Evening reflection */}
@@ -122,6 +124,7 @@ export default function Home() {
               activePractice={activePractice}
               timerSeconds={timerSeconds}
               viewMode={viewMode}
+              isReflectionTime={isReflectionTime}
               todayRitual={todayRitual}
               userName={userName}
               onStartPractice={handleBeginActivePractice}

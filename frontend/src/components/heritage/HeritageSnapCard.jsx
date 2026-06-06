@@ -16,19 +16,27 @@ export function HeritageSnapCard({
       minHeight: '100vh',
       width: '100%',
       scrollSnapAlign: isExpanded ? 'none' : 'start',
+      scrollSnapStop: isExpanded ? 'unset' : 'always',
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-end',
+      overflow: 'hidden'
     }}>
       {/* Background Image */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: 'url(' + item.image + ')',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        filter: item.type === 'scholar' ? 'brightness(0.7) contrast(1.1)' : 'brightness(0.3) saturate(1.2)'
-      }}>
+      <motion.div
+        initial={{ scale: 1.08, opacity: 0.8 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: false, amount: 0.1 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(' + item.image + ')',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: item.type === 'scholar' ? 'brightness(0.7) contrast(1.1)' : 'brightness(0.3) saturate(1.2)'
+        }}
+      >
         {/* Lazy-load off-screen images to avoid loading all 16 portraits at once */}
         <img
           src={item.image}
@@ -37,7 +45,7 @@ export function HeritageSnapCard({
           decoding="async"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0 }}
         />
-      </div>
+      </motion.div>
       
       {/* Gradient Overlay for Text Readability */}
       <div style={{
@@ -57,10 +65,10 @@ export function HeritageSnapCard({
         width: '100%'
       }}>
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-20%' }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: false, amount: 0.15 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
         >
           <div style={{
             display: 'inline-block',
