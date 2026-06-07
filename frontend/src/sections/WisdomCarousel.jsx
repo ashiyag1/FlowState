@@ -74,26 +74,34 @@ export function QuoteScroll({ sankalpa }) {
     { wis: 'Set your heart upon your work, but never on its reward.', src: 'Bhagavad Gita', ref: '— action' }
   ]
 
+  const getOptions = () => {
+    if (sankalpa && Array.isArray(sankalpa.wisdomOptions) && sankalpa.wisdomOptions.length > 0) {
+      return sankalpa.wisdomOptions
+    }
+    return DEFAULT_QUOTES
+  }
+
   const [quoteIdx, setQuoteIdx] = useState(() => {
     const d = new Date()
     const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
-    const options = sankalpa?.wisdomOptions || DEFAULT_QUOTES
+    const options = getOptions()
     return seed % options.length
   })
 
   useEffect(() => {
     const d = new Date()
     const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate()
-    const options = sankalpa?.wisdomOptions || DEFAULT_QUOTES
+    const options = getOptions()
     setQuoteIdx(seed % options.length)
   }, [sankalpa])
 
   const handleRefresh = () => {
-    const options = sankalpa?.wisdomOptions || DEFAULT_QUOTES
+    const options = getOptions()
     setQuoteIdx((prev) => (prev + 1) % options.length)
   }
 
-  const quote = (sankalpa?.wisdomOptions || DEFAULT_QUOTES)[quoteIdx]
+  const options = getOptions()
+  const quote = options[quoteIdx] || options[0] || DEFAULT_QUOTES[0]
 
   const displayQuote = quote.wis
   const accentColor = '#D4A84B'
