@@ -11,6 +11,9 @@ export function useSoundSanctuary() {
       stopWisdomAmbience()
       setActiveSound(null)
     } else {
+      if (isMuted) {
+        toggleMute()
+      }
       startWisdomAmbience(preset)
       setActiveSound(preset)
     }

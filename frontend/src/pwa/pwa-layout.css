@@ -1,0 +1,554 @@
+/* PWA Mobile Layout Overrides and Custom Styles */
+
+:root {
+  --pwa-brand-red: #e8622a;
+  --pwa-brand-red-dark: #b82d45;
+  --pwa-nav-height: 65px;
+  --pwa-safe-bottom: calc(var(--pwa-nav-height) + env(safe-area-inset-bottom, 0px));
+}
+
+/* ── PWA SPLASH SCREEN ── */
+.pwa-splash-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #120904;
+}
+
+.pwa-splash-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: center center;
+}
+
+.pwa-splash-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 9, 4, 0.45) 0%,
+    rgba(18, 9, 4, 0.2) 40%,
+    rgba(18, 9, 4, 0.75) 100%
+  );
+  z-index: 1;
+}
+
+.pwa-splash-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.pwa-splash-title {
+  font-family: 'Playfair Display', 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  font-weight: 500;
+  color: #fffaf0;
+  line-height: 1.15;
+  margin: 0 0 12px 0;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.7), 0 0 40px rgba(232, 98, 42, 0.3);
+  letter-spacing: -0.01em;
+}
+
+.pwa-splash-sub {
+  font-family: 'Lora', 'Lexend', sans-serif;
+  font-size: clamp(0.85rem, 3.5vw, 1.1rem);
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(255, 250, 240, 0.85);
+  margin: 0;
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* ── CURVED BOTTOM NAVBAR ── */
+.pwa-navbar-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--pwa-safe-bottom);
+  z-index: 999;
+  pointer-events: none;
+}
+
+.pwa-navbar-svg-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--pwa-safe-bottom);
+  filter: drop-shadow(0 -8px 24px rgba(0, 0, 0, 0.15));
+  pointer-events: auto;
+}
+
+.pwa-navbar-items {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom, 0px);
+  height: var(--pwa-nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.pwa-nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pwa-nav-tab.active {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+.pwa-nav-tab-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Floating Action Center Button */
+.pwa-fab-container {
+  position: absolute;
+  bottom: calc(var(--pwa-safe-bottom) - 48px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.pwa-fab {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pwa-brand-red), var(--pwa-brand-red-dark));
+  border: 4px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(232, 98, 42, 0.45);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pwa-fab:active {
+  transform: scale(0.9) rotate(90deg);
+  box-shadow: 0 4px 10px rgba(232, 98, 42, 0.3);
+}
+
+.dark .pwa-fab {
+  border-color: #1a1510;
+}
+
+/* ── QUICK ACTIONS DRAWER ── */
+.pwa-actions-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+.pwa-actions-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fbf6ee;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  border: 1px solid rgba(200, 169, 110, 0.25);
+  box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.18);
+  padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dark .pwa-actions-sheet {
+  background: #18110b;
+  border-color: rgba(200, 169, 110, 0.15);
+}
+
+.pwa-actions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pwa-actions-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  color: #8A6E4E;
+  margin: 0;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.dark .pwa-actions-title {
+  color: #ffeab8;
+}
+
+.pwa-actions-close {
+  background: none;
+  border: none;
+  color: #8A6E4E;
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.pwa-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.pwa-action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dark .pwa-action-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(200, 169, 110, 0.1);
+}
+
+.pwa-action-item:active {
+  transform: scale(0.96);
+  background: rgba(200, 169, 110, 0.1);
+}
+
+.pwa-action-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.pwa-action-label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: #5c3b17;
+  text-align: center;
+}
+
+.dark .pwa-action-label {
+  color: #e8d9b5;
+}
+
+/* ── RESPONSIVE MOBILE SPACING OVERRIDES ── */
+@media (max-width: 767px) {
+  /* Offset page contents so they are not covered by bottom navbar */
+  .min-h-screen {
+    padding-bottom: var(--pwa-safe-bottom) !important;
+  }
+  .fs-hero-section {
+    display: none !important;
+  }
+
+  /* Productivity app bento layout styling */
+  .dashboard-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    padding: 1.25rem 1rem calc(var(--pwa-safe-bottom) + 24px) !important;
+    gap: 12px !important;
+  }
+
+  .mobile-dashboard-header,
+  .daily-pillars-card,
+  .sankalpa-quote-unified-card,
+  .active-sadhana-card,
+  .mobile-flame-chakra-container {
+    grid-column: span 2 !important;
+  }
+
+  /* Conditional widths for Heritage / Founder cards based on state */
+  .heritage-card-wrapper:not(.full-width),
+  .founder-letter-wrapper:not(.is-read) {
+    grid-column: span 1 !important;
+  }
+
+  .heritage-card-wrapper.full-width {
+    grid-column: span 2 !important;
+    display: block !important;
+  }
+
+  .founder-letter-wrapper.is-read {
+    grid-column: span 2 !important;
+    display: flex !important;
+    justify-content: center !important;
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Modernize the skeuomorphic wisdom scroll on mobile to look like a premium app card */
+  .fs-scroll-rod {
+    display: none !important;
+  }
+  
+  .fs-wisdom-scroll {
+    min-height: auto !important;
+    padding: 24px 20px 20px 20px !important;
+    border-radius: 24px !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid rgba(200, 169, 110, 0.2) !important;
+    background: rgba(255, 252, 243, 0.9) !important;
+    color: #5c3d1e !important;
+  }
+  
+  .dark .fs-wisdom-scroll {
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(200, 169, 110, 0.14) !important;
+    background: rgba(20, 14, 6, 0.94) !important;
+    color: #ffeab8 !important;
+  }
+  
+  .fs-wisdom-scroll::before {
+    display: none !important;
+  }
+
+  .fs-quote-content blockquote {
+    font-size: 17px !important;
+    line-height: 1.5 !important;
+    margin-bottom: 12px !important;
+    color: inherit !important;
+    font-family: 'Playfair Display', serif !important;
+  }
+
+  .fs-quote-author {
+    font-size: 10px !important;
+    letter-spacing: 0.1em !important;
+    color: #c8a96e !important;
+    margin-top: 4px !important;
+  }
+
+  .fs-quote-source {
+    font-size: 10px !important;
+    color: rgba(92, 61, 30, 0.6) !important;
+  }
+
+  .dark .fs-quote-source {
+    color: rgba(255, 234, 184, 0.6) !important;
+  }
+
+  .fs-quote-refresh {
+    top: 14px !important;
+    right: 14px !important;
+    background: rgba(200, 169, 110, 0.08) !important;
+    border: 1px solid rgba(200, 169, 110, 0.25) !important;
+    color: #c8a96e !important;
+  }
+
+  .dark .fs-quote-refresh {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(200, 169, 110, 0.2) !important;
+    color: #c8a96e !important;
+  }
+
+  .fs-quote-mark {
+    font-size: 36px !important;
+    margin-bottom: 0px !important;
+    color: #c8a96e !important;
+  }
+
+  /* Compact card styling for native app look */
+  .daily-pillars-card,
+  .active-sadhana-card,
+  .sankalpa-tray-card {
+    padding: 18px 20px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.03) !important;
+    border-color: rgba(200, 169, 110, 0.2) !important;
+  }
+
+  .dark .daily-pillars-card,
+  .dark .active-sadhana-card,
+  .dark .sankalpa-tray-card {
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45) !important;
+    border-color: rgba(200, 169, 110, 0.14) !important;
+    background: rgba(20, 14, 6, 0.94) !important;
+  }
+
+  /* Compact list sections */
+  #wisdom-scroll-section {
+    gap: 10px !important;
+  }
+
+  /* Hide duplicate panels on mobile homepage dashboard container */
+  .dashboard-container .daily-pillars-card,
+  .dashboard-container .active-sadhana-card,
+  .dashboard-container .heritage-card-wrapper,
+  .dashboard-container .founder-letter-wrapper {
+    display: none !important;
+  }
+
+  /* Hide website footer globally on mobile to maintain clean native-app feel */
+  .immersive-footer {
+    display: none !important;
+  }
+
+  /* Streak Tooltip Hover States */
+  .flame-chakra-wrapper .streak-tooltip {
+    opacity: 0 !important;
+    transform: translateY(10px) !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease !important;
+  }
+
+  .flame-chakra-wrapper:hover .streak-tooltip {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  /* Hide the header and line inside the daily quote card to keep it clean */
+  .dashboard-container #wisdom-scroll-section > div:first-of-type {
+    display: none !important;
+  }
+
+  /* Unified Sankalpa and Wisdom Quote Card styling */
+  .sankalpa-quote-unified-card {
+    grid-column: span 2 !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+    background: rgba(255, 252, 243, 0.94) !important;
+    border: 1px solid rgba(200, 169, 110, 0.35) !important;
+    box-shadow: 0 16px 35px rgba(139, 105, 20, 0.08) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+
+  .dark .sankalpa-quote-unified-card {
+    background: rgba(20, 13, 6, 0.82) !important;
+    border: 1px solid rgba(200, 169, 110, 0.22) !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* Make inner components transparent and remove borders/shadows */
+  .sankalpa-selector-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 14px 16px 10px 16px !important;
+  }
+
+  .sankalpa-selector-container h3 {
+    display: none !important; /* Hide emoji/title on mobile for compactness */
+  }
+
+  .sankalpa-reflection-warning {
+    display: none !important; /* Hide reflection warning on mobile for compactness */
+  }
+
+  .sankalpa-selector-container::after {
+    display: none !important;
+  }
+
+  .fs-wisdom-scroll {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 12px 16px 14px 16px !important;
+    border-top: 1px dashed rgba(200, 169, 110, 0.25) !important;
+  }
+
+  .dark .fs-wisdom-scroll {
+    border-top: 1px dashed rgba(200, 169, 110, 0.18) !important;
+  }
+
+  /* Sound Sanctuary Selector Panel Mobile overrides */
+  .sound-sanctuary-panel-container > button {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 84px !important;
+    right: 84px !important;
+    left: auto !important;
+    z-index: 999 !important;
+  }
+
+  .sound-sanctuary-panel-container {
+    position: fixed !important;
+    bottom: 144px !important;
+    right: 84px !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: 9999 !important;
+  }
+
+  /* Edge-to-edge header card expansion and compact padding overrides */
+  .mobile-dashboard-header {
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    margin-top: -20px !important;
+    border-radius: 0 0 24px 24px !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    width: calc(100% + 32px) !important;
+    height: 115px !important;
+  }
+
+  .mobile-flame-chakra-container {
+    padding: 10px 0 !important;
+  }
+}

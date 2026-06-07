@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { ThemeProvider }   from './context/ThemeContext'
 import { AuthProvider, useAuth }    from './context/AuthContext'
 import { WellnessProvider } from './context/WellnessContext'
@@ -14,11 +14,14 @@ import BadgeToast from './components/achievements/BadgeToast'
 import RetentionNudge from './components/system/RetentionNudge'
 import PwaInstallBanner from './components/system/PwaInstallBanner'
 import { motion } from 'framer-motion'
+import PwaSplash from './pwa/PwaSplash'
+import PwaNavbar from './pwa/PwaNavbar'
 import './styles/globals.css'
 import './styles/animations.css'
 import './styles/dashboard.css'
 import './styles/cards.css'
 import './styles/wisdom.css'
+import './pwa/pwa-layout.css'
 
 /* Atmospheric fade-in loading state with a breathing golden lotus symbol */
 function PageLoader() {
@@ -92,12 +95,27 @@ function ScrollReset() {
 
 function AppContent() {
   const { loading } = useAuth()
+  const [showPwaSplash, setShowPwaSplash] = useState(() => {
+    const isMobileOrPwa = window.innerWidth < 768 || window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    return isMobileOrPwa && sessionStorage.getItem('pwa_splash_shown') !== 'true';
+  })
   
   if (loading) {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <PageLoader />
       </div>
+    )
+  }
+
+  if (showPwaSplash) {
+    return (
+      <PwaSplash
+        onComplete={() => {
+          sessionStorage.setItem('pwa_splash_shown', 'true')
+          setShowPwaSplash(false)
+        }}
+      />
     )
   }
 
@@ -119,6 +137,7 @@ function AppContent() {
         </Routes>
       </Suspense>
       <Suspense fallback={null}><AIAssistant /></Suspense>
+      <PwaNavbar />
       <BadgeModal />
       <BadgeGallery />
       <BadgeToast />

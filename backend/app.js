@@ -1,3 +1,4 @@
+import './loadEnv.js'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
@@ -43,7 +44,13 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
     if (!origin) return callback(null, true)
-    if (allowedOrigins.includes(origin) || isPrivateIP(origin)) return callback(null, true)
+    if (
+      allowedOrigins.includes(origin) ||
+      isPrivateIP(origin) ||
+      /\.vercel\.app$/.test(origin) // Allow Vercel preview deployments dynamically
+    ) {
+      return callback(null, true)
+    }
     callback(new Error(`CORS blocked: origin "${origin}" is not allowed`))
   },
   credentials: true,
@@ -99,6 +106,7 @@ const aiChatMinutelyLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => req.headers.authorization || req.ip,
+  validate: { keyGeneratorIpFallback: false },
   message: { error: 'Too many queries to Sahayak. Please pause, breathe, and try again in a minute.' },
 })
 
@@ -109,6 +117,7 @@ const aiChatHourlyLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => req.headers.authorization || req.ip,
+  validate: { keyGeneratorIpFallback: false },
   message: { error: 'You have reached your hourly limit for AI guidance. Rest, and return in an hour — Sahayak will be here.' },
 })
 

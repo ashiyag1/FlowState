@@ -8,10 +8,13 @@ export function ActiveSadhanaPlayer({
   isReflectionTime,
   todayRitual,
   userName,
+  selectedSankalpa,
   onStartPractice,
   onCompletePractice,
   onCancelPractice,
-  onNavigateJournal
+  onNavigateJournal,
+  onOpenSankalpaPanel,
+  hideReflection = false
 }) {
   const glassCardStyle = {
     background: dark ? 'rgba(20, 13, 6, 0.8)' : 'rgba(255, 252, 243, 0.9)',
@@ -36,10 +39,12 @@ export function ActiveSadhanaPlayer({
     opacity: 0.95
   }
 
+  const showReflection = isReflectionTime && !hideReflection;
+
   return (
-    <div style={{ borderRadius: '24px', padding: '24px', ...glassCardStyle }}>
+    <div className="active-sadhana-card" style={{ borderRadius: '24px', padding: '24px', ...glassCardStyle }}>
       <div style={secLabelStyle}>
-        <span>{!isReflectionTime ? "Suggested Sadhana" : "Evening Reflection"}</span>
+        <span>{!showReflection ? "Suggested Sadhana" : "Evening Reflection"}</span>
         <div style={{ flex: 1, height: '0.5px', background: 'rgba(200,169,110,0.2)' }} />
       </div>
 
@@ -72,27 +77,48 @@ export function ActiveSadhanaPlayer({
       ) : (
         /* Static suggested view */
         <div>
-          {!isReflectionTime ? (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-              <div style={{ flex: 1, minWidth: '200px' }}>
+          {!showReflection ? (
+            selectedSankalpa === 'unset' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center', padding: '10px 0' }}>
                 <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 600, margin: 0 }}>
-                  {todayRitual?.name || "Morning Ritual"}
+                  Begin Your Day with Intention
                 </h3>
-                <p style={{ fontSize: '13px', color: dark ? 'rgba(245,230,200,0.7)' : '#5c4322', margin: '4px 0 0', fontFamily: 'sans-serif' }}>
-                  {todayRitual?.desc || "Take a moment for yourself."}
+                <p style={{ fontSize: '13.5px', color: dark ? 'rgba(245,230,200,0.75)' : '#5c4322', margin: '4px 0 12px', fontFamily: 'sans-serif', maxWidth: '420px', lineHeight: 1.5 }}>
+                  Today is a fresh slate. Select or generate a daily Sankalpa above to reveal your suggested morning sadhana.
                 </p>
+                <button
+                  onClick={onOpenSankalpaPanel}
+                  style={{
+                    padding: '10px 22px', borderRadius: '99px', background: 'linear-gradient(135deg, #e8622a, #c8a96e)',
+                    border: 'none', color: '#fff', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif',
+                    boxShadow: '0 4px 15px rgba(232,98,42,0.25)', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.04em'
+                  }}
+                >
+                  Set Daily Sankalpa ✨
+                </button>
               </div>
-              <button
-                onClick={onStartPractice}
-                style={{
-                  padding: '10px 20px', borderRadius: '99px', background: 'linear-gradient(135deg, #c8a96e, #ffe9a6)',
-                  border: 'none', color: '#1c1208', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif',
-                  boxShadow: '0 4px 15px rgba(200,169,110,0.3)'
-                }}
-              >
-                Start {todayRitual.time}m Practice
-              </button>
-            </div>
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '22px', color: dark ? '#ffeab8' : '#3d2600', fontWeight: 600, margin: 0 }}>
+                    {todayRitual?.name || "Morning Ritual"}
+                  </h3>
+                  <p style={{ fontSize: '13px', color: dark ? 'rgba(245,230,200,0.7)' : '#5c4322', margin: '4px 0 0', fontFamily: 'sans-serif' }}>
+                    {todayRitual?.desc || "Take a moment for yourself."}
+                  </p>
+                </div>
+                <button
+                  onClick={onStartPractice}
+                  style={{
+                    padding: '10px 20px', borderRadius: '99px', background: 'linear-gradient(135deg, #c8a96e, #ffe9a6)',
+                    border: 'none', color: '#1c1208', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif',
+                    boxShadow: '0 4px 15px rgba(200,169,110,0.3)'
+                  }}
+                >
+                  Start {todayRitual.time}m Practice
+                </button>
+              </div>
+            )
           ) : (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
               <div>

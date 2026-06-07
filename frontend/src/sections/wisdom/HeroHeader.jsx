@@ -1,4 +1,6 @@
 import { useTheme } from '../../context/ThemeContext'
+import { useSoundEffects } from '../../hooks/useSoundEffects'
+import NotificationsButton from '../../components/system/NotificationsButton'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 
@@ -15,6 +17,7 @@ const WORD_WIDTH = '240px'
 
 export default function HeroHeader({ searchQuery, setSearchQuery }) {
   const { dark } = useTheme()
+  const { isMuted, toggleMute, startWisdomAmbience } = useSoundEffects()
   const [wordIdx, setWordIdx] = useState(0)
 
   useEffect(() => {
@@ -32,22 +35,63 @@ export default function HeroHeader({ searchQuery, setSearchQuery }) {
       <div aria-hidden className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
 
       {/* ── Label row ─────────────────────────────── */}
-      <div className="flex items-center gap-3 mb-5">
-        <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-saffron flex items-center gap-2">
-          <span className="w-8 h-px bg-saffron/50" />
-          Ancient Archives
-        </p>
-        <span
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-bold uppercase tracking-wider"
-          style={{
-            background:   dark ? 'rgba(201,147,58,0.08)' : 'rgba(201,147,58,0.06)',
-            borderColor:  dark ? 'rgba(201,147,58,0.2)'  : 'rgba(201,147,58,0.18)',
-            color:        dark ? '#C9933A' : '#8B5E2F',
-          }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          12 scriptures
-        </span>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-saffron flex items-center gap-2">
+            <span className="w-8 h-px bg-saffron/50" />
+            Ancient Archives
+          </p>
+          <span
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-bold uppercase tracking-wider"
+            style={{
+              background:   dark ? 'rgba(201,147,58,0.08)' : 'rgba(201,147,58,0.06)',
+              borderColor:  dark ? 'rgba(201,147,58,0.2)'  : 'rgba(201,147,58,0.18)',
+              color:        dark ? '#C9933A' : '#8B5E2F',
+            }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            12 scriptures
+          </span>
+        </div>
+
+        {/* Global Sound & Notification Buttons */}
+        <div className="flex items-center gap-2 relative z-10">
+          {/* Speaker mute control button */}
+          <button
+            onClick={() => {
+              if (isMuted) {
+                startWisdomAmbience('sitarBgm')
+                toggleMute()
+              } else {
+                toggleMute()
+              }
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              background: isMuted ? 'rgba(185, 28, 28, 0.15)' : 'rgba(255, 255, 255, 0.92)',
+              border: '1px solid rgba(200, 169, 110, 0.45)',
+              color: isMuted ? '#b91c1c' : '#8b5a12',
+              cursor: 'pointer',
+              outline: 'none',
+              transition: 'all 0.2s ease',
+            }}
+            title="Toggle ambient sounds mute"
+          >
+            {isMuted ? (
+              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+            ) : (
+              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            )}
+          </button>
+
+          {/* Notifications Button */}
+          <NotificationsButton />
+        </div>
       </div>
 
       {/* ── Two-column hero row ────────────────────── */}

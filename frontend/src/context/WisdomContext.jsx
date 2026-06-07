@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
-import { Store, today as getToday } from '../utils'
+import { Store, today as getToday, toLocalISO } from '../utils'
 import { useAuth } from './AuthContext'
 
 const WisdomContext = createContext(null)
@@ -175,7 +175,7 @@ export function WisdomProvider({ children }) {
     for (let i = mondayOffset; i >= 0; i--) {
       const d = new Date(td)
       d.setDate(d.getDate() - i)
-      const iso = d.toISOString().slice(0, 10)
+      const iso = toLocalISO(d)
       result.push({
         label: dayLabels[d.getDay()],
         done: !!streakLog[iso],
@@ -198,7 +198,7 @@ export function WisdomProvider({ children }) {
     let count = 0
     const d = new Date()
     for (let i = 0; i < 365; i++) {
-      const iso = d.toISOString().slice(0, 10)
+      const iso = toLocalISO(d)
       if (streakLog[iso]) { count++; d.setDate(d.getDate() - 1) }
       else { if (i === 0) { d.setDate(d.getDate() - 1); continue } break }
     }

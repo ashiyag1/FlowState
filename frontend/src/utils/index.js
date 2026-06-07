@@ -12,7 +12,8 @@ export const Store = {
 }
 
 // ── DATES ─────────────────────────────────────
-export const today = () => new Date().toISOString().slice(0, 10)
+export const toLocalISO = (d = new Date()) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+export const today = () => toLocalISO()
 
 export const fmtDate = (iso) => {
   const d = new Date(iso + 'T00:00:00')
@@ -26,7 +27,7 @@ export const fmtTime = () => {
 
 export const getLast7Days = () => Array.from({ length: 7 }, (_, i) => {
   const d = new Date(); d.setDate(d.getDate() - (6 - i))
-  return d.toISOString().slice(0, 10)
+  return toLocalISO(d)
 })
 
 // ── WISDOM QUOTES ─────────────────────────────

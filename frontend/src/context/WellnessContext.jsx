@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { Store, today as getToday, uid } from '../utils'
+import { Store, today as getToday, toLocalISO, uid } from '../utils'
 import { useAuth } from './AuthContext'
 
 const WellnessContext = createContext(null)
@@ -272,7 +272,7 @@ export function WellnessProvider({ children }) {
       let streak = 0
       let freezesRemaining = habit.streakFreezes ?? 3
       const relaxDay = habit.relaxDay
-      const todayStr = new Date().toISOString().slice(0, 10)
+      const todayStr = toLocalISO()
       const parts = todayStr.split('-')
       const d = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])))
 
@@ -300,7 +300,7 @@ export function WellnessProvider({ children }) {
 
   const waterStreak = useMemo(() => {
     let streak = 0
-    const todayStr = new Date().toISOString().slice(0, 10)
+    const todayStr = toLocalISO()
     const parts = todayStr.split('-')
     const d = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])))
 
@@ -320,8 +320,51 @@ export function WellnessProvider({ children }) {
         break
       }
     }
-    return streak
   }, [waterLog, waterGoal])
+
+  const journalStreak = useMemo(() => {
+    let streak = 0
+    const todayStr = toLocalISO()
+    const parts = todayStr.split('-')
+    const d = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])))
+
+    const entryDates = new Set(journal.map(e => e.date))
+
+    for (let i = 0; i < 365; i++) {
+      const iso = d.toISOString().slice(0, 10)
+      if (entryDates.has(iso)) {
+        streak++
+        d.setUTCDate(d.getUTCDate() - 1)
+      } else {
+        if (i === 0) {
+          d.setUTCDate(d.getUTCDate() - 1)
+          continue
+        }
+        break
+      }
+    }
+    return streak
+  }, [journal])
+
+  const wisdomStreak = useMemo(() => {
+    const match = habits.find(h => {
+      const nameLower = h.name.toLowerCase()
+      return nameLower.includes('read') || 
+             nameLower.includes('wisdom') || 
+             nameLower.includes('book') || 
+             nameLower.includes('chanakya') || 
+             nameLower.includes('gita') || 
+             nameLower.includes('neeti') || 
+             nameLower.includes('studies')
+    })
+    if (match) {
+      return streakCache[match.id] ?? 0
+    }
+    // Fallback: check localStorage for today's wisdomRead
+    const todayKey = toLocalISO()
+    const localWisdomRead = localStorage.getItem('fwa_wisdom_read') === todayKey
+    return localWisdomRead ? 1 : 0
+  }, [habits, streakCache, habitDone])
 
 
   const todayHabitDone = habitDone[td] || {}
@@ -501,7 +544,7 @@ export function WellnessProvider({ children }) {
       
       const challengeId = getWeekChallengeId()
       // BUG G FIX: Use ISO date string everywhere, not toDateString()
-      const todayIso = new Date().toISOString().slice(0, 10)
+      const todayIso = toLocalISO()
       
       let currentProgress = 0
       let targetProgress = 1
@@ -566,7 +609,10 @@ export function WellnessProvider({ children }) {
       // water
       waterGoal, setWaterGoal: updateWaterGoal,
       waterLog, todayEntries, todayTotal,
-      addWater, removeWater, clearWaterToday, getWaterStreak: () => waterStreak,
+      addWater, removeWater, clearWaterToday, 
+      getWaterStreak: () => waterStreak,
+      getJournalStreak: () => journalStreak,
+      getWisdomStreak: () => wisdomStreak,
       // habits
       habits, addHabit, deleteHabit,
       habitDone, todayHabitDone, toggleHabit, getStreak,

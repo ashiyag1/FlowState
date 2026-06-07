@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../../context/ThemeContext'
 import { checkChallengeCompletionToday, getChallengeTodayProgress } from '../../utils/wisdomTracking'
+import { toLocalISO } from '../../utils'
 
 // Monday-first order to match weekIsoDates (index 0=Mon … 6=Sun)
 const DAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'Sa', 'Su']
@@ -62,19 +63,16 @@ function getWeekChallenge() {
   return WEEKLY_CHALLENGES[weekNum % WEEKLY_CHALLENGES.length]
 }
 
-// Returns the ISO date string (YYYY-MM-DD) for each day of the current
-// Mon-Sun week. Index 0 = Monday, index 6 = Sunday.
 function getCurrentWeekIsoDates() {
   const today = new Date()
   const dayOfWeek = today.getDay() // 0=Sun … 6=Sat
   const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1
   const monday = new Date(today)
   monday.setDate(today.getDate() - mondayOffset)
-  monday.setHours(0, 0, 0, 0)
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
-    return d.toISOString().slice(0, 10)
+    return toLocalISO(d)
   })
 }
 
@@ -110,7 +108,7 @@ export default function WeeklyChallenge() {
   const challenge = getWeekChallenge()
 
   const weekIsoDates = getCurrentWeekIsoDates() // [mon, tue, wed, thu, fri, sat, sun]
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = toLocalISO()
 
   const [justDone, setJustDone] = useState(false)
   const [todayProgress, setTodayProgress] = useState(() => getChallengeTodayProgress(challenge.id))

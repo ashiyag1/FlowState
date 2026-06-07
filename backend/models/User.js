@@ -18,7 +18,8 @@ const UserSchema = new mongoose.Schema({
     wisdomJarCount: { type: Number, default: 0 },
     wisdomJarDate: { type: String, default: '' },
     hasReadLetter: { type: Boolean, default: false },
-    onboardingCompleted: { type: Boolean, default: false }
+    onboardingCompleted: { type: Boolean, default: false },
+    sankalpaDate: { type: String, default: '' }
   },
   activeSankalpa: { type: mongoose.Schema.Types.Mixed, default: 'calm' },
   dailySankalpa: {

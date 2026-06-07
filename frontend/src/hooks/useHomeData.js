@@ -9,6 +9,7 @@ import { useSoundSanctuary } from './useSoundSanctuary'
 import { useSadhanaTimer } from './useSadhanaTimer'
 import { useNotif } from '../components/system/NotificationPopup'
 import { getEmotionalReflection } from '../utils/emotionalMemory'
+import { toLocalISO } from '../utils'
 import { SANKALPAS, getTodayRitual } from '../data/sankalpaConfig'
 import { DASHBOARD_CONTAINER_STYLE, SEC_LABEL_STYLE, getGlassCardStyle } from '../config/constants'
 import homeBg from '../assets/home_bg.webp'
@@ -41,23 +42,22 @@ export function useHomeData() {
   } = useSadhanaTimer()
 
   const [userName, setUserName] = useState(() => {
-    return user?.name?.split(' ')[0] || localStorage.getItem('fwa_guest_name') || 'Seeker'
+    return user?.name || 'Seeker'
   })
   const navigate = useNavigate()
   const notif = useNotif()
 
   useEffect(() => {
     if (user?.name) {
-      setUserName(user.name.split(' ')[0])
+      setUserName(user.name)
     } else {
-      setUserName(localStorage.getItem('fwa_guest_name') || 'Seeker')
+      setUserName('Seeker')
     }
   }, [user])
 
   const [letterOpen, setLetterOpen] = useState(false)
   const [hasReadLetter, setHasReadLetter] = useState(false)
   const [sankalpaPanelOpen, setSankalpaPanelOpen] = useState(false)
-  const [onboardingOpen, setOnboardingOpen] = useState(true)
   const [wisdomRead, setWisdomRead] = useState(false)
   const [selectedSankalpa, setSelectedSankalpa] = useState('calm')
   const [jarFading, setJarFading] = useState(false)
@@ -69,20 +69,44 @@ export function useHomeData() {
   useEffect(() => {
     if (user) {
       setHasReadLetter(user.preferences?.hasReadLetter || false)
-      setOnboardingOpen(!user.preferences?.onboardingCompleted)
       
-      const todayKey = new Date().toISOString().slice(0, 10)
+      const todayKey = toLocalISO()
       setWisdomRead(user.preferences?.wisdomJarDate === todayKey)
-      setSelectedSankalpa(user.activeSankalpa || 'calm')
+      
+      const storedDate = user.preferences?.sankalpaDate
+      if (storedDate !== todayKey) {
+        setSelectedSankalpa('unset')
+        updateProfile({
+          activeSankalpa: 'unset',
+          preferences: { ...user.preferences, sankalpaDate: todayKey }
+        }).catch(err => console.error('Failed to reset daily sankalpa:', err))
+      } else {
+        setSelectedSankalpa(user.activeSankalpa || 'calm')
+      }
     } else if (!user) {
       // Guest mode
       setHasReadLetter(localStorage.getItem('fwa_mockup_letter_read') === 'true')
-      const ob = localStorage.getItem('fwa_onboarding_completed')
-      setOnboardingOpen(!ob || ob !== 'true')
       
-      const todayKey = new Date().toISOString().slice(0, 10)
+      const todayKey = toLocalISO()
       setWisdomRead(localStorage.getItem('fwa_wisdom_read') === todayKey)
-      setSelectedSankalpa('calm')
+      
+      const storedDate = localStorage.getItem('fwa_sankalpa_date')
+      if (storedDate !== todayKey) {
+        localStorage.setItem('fwa_active_sankalpa', 'unset')
+        localStorage.setItem('fwa_sankalpa_date', todayKey)
+        setSelectedSankalpa('unset')
+      } else {
+        const localVal = localStorage.getItem('fwa_active_sankalpa') || 'calm'
+        if (localVal.startsWith('{')) {
+          try {
+            setSelectedSankalpa(JSON.parse(localVal))
+          } catch(e) {
+            setSelectedSankalpa(localVal)
+          }
+        } else {
+          setSelectedSankalpa(localVal)
+        }
+      }
     }
   }, [user])
 
@@ -100,35 +124,25 @@ export function useHomeData() {
     }
   }, [user, adjustPoints, playHydrationSound])
 
-  const handleOnboardingComplete = async ({ name, sankalpa }) => {
-    if (user) {
-      try {
-        await updateProfile({ name, activeSankalpa: sankalpa, preferences: { ...user.preferences, onboardingCompleted: true } })
-      } catch (err) { console.error(err) }
-    } else {
-      localStorage.setItem('fwa_guest_name', name)
-      localStorage.setItem('fwa_onboarding_completed', 'true')
-    }
-    setUserName(name)
-    setSelectedSankalpa(sankalpa)
-    setOnboardingOpen(false)
-    const label = (typeof sankalpa === 'object' ? sankalpa.label : SANKALPAS[sankalpa]?.label) || 'Calm'
-    notif(`Welcome Seeker! Intention set to ${label} 🪷`, 'success')
-  }
-
   const clearTestStates = () => {
     if (user) {
-      updateProfile({ preferences: { ...user.preferences, lastRitualDate: '', onboardingCompleted: false } })
+      updateProfile({ preferences: { ...user.preferences, lastRitualDate: '' } })
     } else {
       localStorage.removeItem('fwa_mockup_ritual_done')
-      localStorage.removeItem('fwa_onboarding_completed')
     }
     setRitualDone(false)
-    setOnboardingOpen(true)
     notif('Test states cleared')
   }
 
   const currentSankalpa = useMemo(() => {
+    if (selectedSankalpa === 'unset') {
+      return {
+        key: 'unset',
+        label: 'Set Intention',
+        emoji: '🪷',
+        msg: 'Please set your daily intention below to begin your alignment.'
+      }
+    }
     if (selectedSankalpa && typeof selectedSankalpa === 'object') {
       return selectedSankalpa
     }
@@ -136,8 +150,11 @@ export function useHomeData() {
   }, [selectedSankalpa])
 
   const todayRitual = useMemo(() => {
+    if (selectedSankalpa === 'unset') {
+      return { name: 'Select Intention', time: '0', desc: 'Sadhana will be unlocked once you choose today\'s focus.' }
+    }
     return getTodayRitual(currentSankalpa) || { name: 'Sadhana Practice', time: '5', desc: 'Align with your Sankalpa for today through breath.' }
-  }, [currentSankalpa])
+  }, [currentSankalpa, selectedSankalpa])
 
   // Dynamic ViewMode (Morning / Evening) togglable for preview, synced with actual hour
   const [viewMode, setViewMode] = useState(() => {
@@ -153,7 +170,7 @@ export function useHomeData() {
 
   // Track user session active days in local storage for re-entry checks
   useEffect(() => {
-    const todayStr = new Date().toISOString().slice(0, 10)
+    const todayStr = toLocalISO()
     const lastVisited = localStorage.getItem('fwa_last_visited')
     if (lastVisited && lastVisited !== todayStr) {
       localStorage.setItem('fwa_prev_visited', lastVisited)
@@ -166,7 +183,7 @@ export function useHomeData() {
   const isNight = reflection.tod === 'night'
 
   // Today's habits completion
-  const todayStr = new Date().toISOString().slice(0, 10)
+  const todayStr = toLocalISO()
   const waterGoalMet = todayTotal >= waterGoal
 
   // Actual habit streak (from actual habits logic)
@@ -194,15 +211,21 @@ export function useHomeData() {
   }, [waterLog, todayEntries])
 
   const handleSetSankalpa = async (key) => {
+    const todayKey = toLocalISO()
     setSelectedSankalpa(key)
     setRitualDone(false)
     if (user) {
       try {
-        await updateProfile({ activeSankalpa: key, preferences: { ...user.preferences, lastRitualDate: '' } })
+        await updateProfile({
+          activeSankalpa: key,
+          preferences: { ...user.preferences, lastRitualDate: '', sankalpaDate: todayKey }
+        })
       } catch (err) {
         console.error('Failed to sync sankalpa to profile:', err)
       }
     } else {
+      localStorage.setItem('fwa_active_sankalpa', key)
+      localStorage.setItem('fwa_sankalpa_date', todayKey)
       localStorage.removeItem('fwa_mockup_ritual_done')
     }
     setSankalpaPanelOpen(false)
@@ -210,6 +233,7 @@ export function useHomeData() {
 
   const handleGenerateSankalpa = async (moodInput) => {
     if (!moodInput?.trim()) return
+    const todayKey = toLocalISO()
     try {
       const res = await fetch('/api/v1/sankalpa/generate', {
         method: 'POST',
@@ -227,8 +251,13 @@ export function useHomeData() {
         setSelectedSankalpa(data.sankalpa)
         setRitualDone(false)
         if (user) {
-          await updateProfile({ activeSankalpa: data.sankalpa, preferences: { ...user.preferences, lastRitualDate: '' } })
+          await updateProfile({
+            activeSankalpa: data.sankalpa,
+            preferences: { ...user.preferences, lastRitualDate: '', sankalpaDate: todayKey }
+          })
         } else {
+          localStorage.setItem('fwa_active_sankalpa', JSON.stringify(data.sankalpa))
+          localStorage.setItem('fwa_sankalpa_date', todayKey)
           localStorage.removeItem('fwa_mockup_ritual_done')
         }
         setSankalpaPanelOpen(false)
@@ -244,13 +273,13 @@ export function useHomeData() {
         } else {
           localStorage.removeItem('fwa_mockup_ritual_done')
         }
-        notif('Failed to undo sadhana.', 'error')
+        notif('Failed to generate Sankalpa.', 'error')
       }
     }
   }
 
   const handleReadWisdom = () => {
-    const todayKey = new Date().toISOString().slice(0, 10)
+    const todayKey = toLocalISO()
     setJarFading(true)
     setTimeout(() => {
       setWisdomRead(true)
@@ -375,8 +404,6 @@ export function useHomeData() {
     setHasReadLetter,
     sankalpaPanelOpen,
     setSankalpaPanelOpen,
-    onboardingOpen,
-    setOnboardingOpen,
     wisdomRead,
     setWisdomRead,
     selectedSankalpa,
@@ -399,7 +426,6 @@ export function useHomeData() {
     lastDrinkMl,
     currentSankalpa,
     todayRitual,
-    handleOnboardingComplete,
     clearTestStates,
     handleSetSankalpa,
     handleGenerateSankalpa,

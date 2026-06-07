@@ -1,6 +1,7 @@
 export default function TopBorder() {
   return (
     <div
+      className="fs-hero-section"
       style={{
         height: '40px',
         background: 'linear-gradient(to bottom, rgba(22, 14, 6, 0.4) 0%, transparent 100%)',

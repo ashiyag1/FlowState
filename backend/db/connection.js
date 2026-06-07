@@ -36,7 +36,11 @@ export async function connectDB() {
     }
     connectionPromise = (async () => {
       try {
-        await mongoose.connect(MONGODB_URI)
+        await mongoose.connect(MONGODB_URI, {
+          maxPoolSize: 1, // Minimize TLS handshake overhead in serverless
+          serverSelectionTimeoutMS: 5000, // Timeout connection attempts faster
+          socketTimeoutMS: 45000, // Close inactive sockets
+        })
         console.log('MongoDB connected successfully')
         
         // 🚀 Optimization: Only run badge sync if the badges are not yet seeded
@@ -57,7 +61,11 @@ export async function connectDB() {
           console.log('Badges already synchronized, skipping sync query')
         }
       } catch (err) {
-        console.error('MongoDB connection error — falling back to JSON file database:', err)
+        console.error('MongoDB connection error:', err)
+        if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+          // Do not fall back to local JSON on Vercel/production since the filesystem is read-only
+          throw err
+        }
         IS_MONGO = false
       }
     })()

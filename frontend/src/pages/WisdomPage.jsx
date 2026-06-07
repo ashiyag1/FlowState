@@ -4,6 +4,8 @@ import { useWisdom } from '../context/WisdomContext'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useAchievements } from '../context/AchievementsContext'
+import { useHomeData } from '../hooks/useHomeData'
+import WisdomScrollSection from '../components/dashboard/WisdomScrollSection'
 import wisdomBg from '../assets/pages/wisdom_bg.webp'
 import HeroHeader from '../sections/wisdom/HeroHeader'
 import TopicFilterBar from '../sections/wisdom/TopicFilterBar'
@@ -12,7 +14,6 @@ import LifeIssuesGrid from '../sections/wisdom/LifeIssuesGrid'
 import WeeklyChallenge from '../sections/wisdom/WeeklyChallenge'
 import Sidebar from '../sections/wisdom/SideBar'
 import BookDetailModal from '../components/wisdom/BookDetailModal.jsx'
-import WisdomAmbientSound from '../components/wisdom/WisdomAmbientSound.jsx'
 import WisdomSparkles from '../components/wisdom/WisdomSparkles.jsx'
 import {
   FILTER_TOPICS, TOPIC_BOOKS, LIFE_ISSUES,
@@ -66,30 +67,37 @@ function WisdomContent() {
   const { openBook, getBookProgress } = useWisdom()
   const [bookInitialPage, setBookInitialPage] = useState(0)
 
+  const {
+    currentSankalpa,
+    wisdomRead,
+    handleReadWisdom,
+    secLabelStyle
+  } = useHomeData()
+
   const filteredBooks = TOPIC_BOOKS.filter(book => {
     // BUG 16 FIX: Match against book.topics array first, then fall back to title/scripture text
     const matchesTopic = activeTopic === 'All' || 
       (Array.isArray(book.topics) && book.topics.some(t => t.toLowerCase() === activeTopic.toLowerCase())) ||
-      book.title.toLowerCase().includes(activeTopic.toLowerCase()) ||
+      (book.title && book.title.toLowerCase().includes(activeTopic.toLowerCase())) ||
       (book.scripture && book.scripture.toLowerCase().includes(activeTopic.toLowerCase()))
     const matchesSearch = !searchQuery ||
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.scripture.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (book.title && book.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (book.scripture && book.scripture.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (book.subtitle && book.subtitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (book.pages && book.pages.some(p =>
-        p.heading.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.text.toLowerCase().includes(searchQuery.toLowerCase())
+        (p.heading && p.heading.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (p.text && p.text.toLowerCase().includes(searchQuery.toLowerCase()))
       ))
     return matchesTopic && matchesSearch
   })
 
   const filteredIssues = LIFE_ISSUES.filter(issue =>
     !searchQuery ||
-    issue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    issue.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    issue.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    issue.approach.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (issue.steps && issue.steps.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())))
+    (issue.title && issue.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (issue.summary && issue.summary.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (issue.tag && issue.tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (issue.approach && issue.approach.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (issue.steps && issue.steps.some(s => s && s.toLowerCase().includes(searchQuery.toLowerCase())))
   )
 
   const handleBookOpen = (book, page) => {
@@ -106,13 +114,13 @@ function WisdomContent() {
       <div style={overlayStyle(dark)} aria-hidden />
       <MandalaWatermark dark={dark} />
       <WisdomSparkles />
-      <WisdomAmbientSound />
-
       {/* ═══ MAIN SCROLLABLE CONTENT ═══ */}
       <div style={containerStyle}>
 
         {/* ── HERO HEADER ───────────────────── */}
         <HeroHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+
+
 
         {/* ── WEEKLY CHALLENGE — prominent card ─ */}
         <WeeklyChallenge />

@@ -35,6 +35,9 @@ export default function AIAssistant() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [isFirstLoad, setIsFirstLoad] = useState(true)
+  const [showLabel, setShowLabel] = useState(() => {
+    return localStorage.getItem('fwa_sakha_label_dismissed') !== 'true'
+  })
   const listRef = useRef(null)
 
   // Persist messages to localStorage whenever they change
@@ -158,12 +161,27 @@ export default function AIAssistant() {
         .chat-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .chat-scrollbar::-webkit-scrollbar-thumb { background: rgba(212,168,42,0.25); border-radius: 99px; }
         .sahayak-fab { bottom: 20px; }
+        .sahayak-fab-label { bottom: 80px; }
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
         }
+        @keyframes sahayak-pulse {
+          0% { transform: scale(0.9); opacity: 0.8; }
+          50% { transform: scale(1.1); opacity: 1; }
+          100% { transform: scale(0.9); opacity: 0.8; }
+        }
+        .sahayak-pulse-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #e8622a;
+          display: inline-block;
+          animation: sahayak-pulse 2s infinite ease-in-out;
+        }
         @media (max-width: 768px) {
           .sahayak-fab { bottom: 84px; }
+          .sahayak-fab-label { bottom: 144px; }
         }
       `}</style>
 
@@ -338,6 +356,77 @@ export default function AIAssistant() {
         )}
       </AnimatePresence>
 
+      {/* Sakha floating label above the FAB */}
+      {!open && showLabel && (
+        <div 
+          className="sahayak-fab-label"
+          style={{
+            position: 'fixed',
+            right: '20px',
+            background: 'rgba(253, 246, 227, 0.98)',
+            border: '1.5px solid rgba(212, 168, 42, 0.4)',
+            borderRadius: '16px',
+            padding: '8px 32px 8px 14px',
+            color: '#8b5a12',
+            fontSize: '11px',
+            fontWeight: 700,
+            fontFamily: "'Lexend', sans-serif",
+            letterSpacing: '0.02em',
+            boxShadow: '0 6px 20px rgba(139,105,20,0.15)',
+            zIndex: 998,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            pointerEvents: 'auto',
+          }}
+        >
+          <span className="sahayak-pulse-dot" />
+          <span>I am your Sakha 🪷</span>
+          
+          {/* Close button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLabel(false);
+              localStorage.setItem('fwa_sakha_label_dismissed', 'true');
+            }}
+            style={{
+              position: 'absolute',
+              right: '6px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              border: 'none',
+              background: 'transparent',
+              color: 'rgba(139, 115, 85, 0.6)',
+              cursor: 'pointer',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              outline: 'none',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            ✕
+          </button>
+          
+          {/* Tooltip arrow pointing down */}
+          <div style={{
+            position: 'absolute',
+            bottom: '-6px',
+            right: '20px',
+            width: 0,
+            height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '6px solid rgba(212, 168, 42, 0.4)',
+          }} />
+        </div>
+      )}
+
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.92 }}
@@ -346,8 +435,8 @@ export default function AIAssistant() {
           position: 'fixed', right: 20, zIndex: 999,
           width: 52, height: 52, borderRadius: '50%',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: '1px solid rgba(212,168,42,0.25)',
-          background: 'linear-gradient(135deg, rgba(212,168,42,0.15), rgba(232,199,122,0.08))',
+          border: '1px solid rgba(212, 168, 42, 0.25)',
+          background: 'linear-gradient(135deg, rgba(212, 168, 42, 0.15), rgba(232,199,122,0.08))',
           backdropFilter: 'blur(16px)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 0 40px rgba(212,168,42,0.06)',
           cursor: 'pointer', color: '#c4911e',

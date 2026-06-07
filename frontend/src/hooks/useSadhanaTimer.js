@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useSoundEffects } from './useSoundEffects'
 import { useAchievements } from '../context/AchievementsContext'
 import { useNotif } from '../components/system/NotificationPopup'
+import { toLocalISO } from '../utils'
 
 export function useSadhanaTimer() {
   const { user, updateProfile, adjustPoints } = useAuth()
@@ -17,7 +18,7 @@ export function useSadhanaTimer() {
 
   // Sync state from user profile or guest storage on mount or user change
   useEffect(() => {
-    const todayKey = new Date().toISOString().slice(0, 10)
+    const todayKey = toLocalISO()
     if (user) {
       setRitualDone(user.preferences?.lastRitualDate === todayKey)
     } else {
@@ -48,7 +49,7 @@ export function useSadhanaTimer() {
   }, [timerActive])
 
   const completePractice = async () => {
-    const todayKey = new Date().toISOString().slice(0, 10)
+    const todayKey = toLocalISO()
     setRitualDone(true)
     if (user) {
       try {
@@ -82,7 +83,7 @@ export function useSadhanaTimer() {
   }
 
   const togglePractice = async (checked) => {
-    const todayKey = new Date().toISOString().slice(0, 10)
+    const todayKey = toLocalISO()
     setRitualDone(checked)
     if (checked) {
       if (user) {

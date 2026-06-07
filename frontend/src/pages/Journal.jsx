@@ -10,6 +10,7 @@ import { useTheme } from '../context/ThemeContext'
 import { useWellness } from '../context/WellnessContext'
 import { useAuth } from '../context/AuthContext'
 import { useSoundEffects } from '../hooks/useSoundEffects'
+import NotificationsButton from '../components/system/NotificationsButton'
 import { useNavigate } from 'react-router-dom'
 import { useAchievements } from '../context/AchievementsContext'
 import { getHinduDetails } from '../utils/hinduCalendar'
@@ -74,7 +75,7 @@ export default function Journal() {
   const { journal: entries, addEntry: addWellnessEntry, deleteEntry: deleteWellnessEntry, habitDone } = useWellness()
   const { trackEvent } = useAchievements()
   const reflection = useMemo(() => getEmotionalReflection(entries, habitDone), [entries, habitDone])
-  const { startWisdomAmbience, stopWisdomAmbience, isMuted } = useSoundEffects()
+  const { startWisdomAmbience, stopWisdomAmbience, isMuted, toggleMute } = useSoundEffects()
 
   const [text, setText] = useState('')
   const [mood, setMood] = useState('')
@@ -254,6 +255,53 @@ export default function Journal() {
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 pt-12 pb-32">
         
+        {/* Top Utility Bar with Sound & Notification Toggle */}
+        <div className="flex items-center justify-between mb-2 px-1">
+          <div className="flex items-center gap-2">
+            <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-saffron flex items-center gap-2">
+              <span className="w-8 h-px bg-saffron/50" />
+              Chintan Journal
+            </p>
+          </div>
+          <div className="flex items-center gap-2 relative z-20">
+            {/* Global Sound Mute Button */}
+            <button
+              onClick={() => {
+                if (isMuted) {
+                  startWisdomAmbience(activePreset || 'sitarBgm')
+                  toggleMute()
+                } else {
+                  toggleMute()
+                }
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                background: isMuted ? 'rgba(185, 28, 28, 0.15)' : 'rgba(255, 255, 255, 0.92)',
+                border: '1px solid rgba(200, 169, 110, 0.45)',
+                color: isMuted ? '#b91c1c' : '#8b5a12',
+                cursor: 'pointer',
+                outline: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              title="Toggle PWA ambient sounds"
+            >
+              {isMuted ? (
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              )}
+            </button>
+
+            {/* Notifications Button */}
+            <NotificationsButton />
+          </div>
+        </div>
+
         {/* ── THE BOOK CONTAINER (100% Mockup-Accurate) ── */}
         <div className="relative mt-4 notebook-container">
           

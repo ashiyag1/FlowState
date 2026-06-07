@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
+import { toLocalISO } from '../../utils'
 
 const MESSAGES = [
   "Your journal missed you 🪷",
@@ -16,7 +17,7 @@ export default function RetentionNudge() {
   const [msg, setMsg] = useState('')
 
   useEffect(() => {
-    const todayStr = new Date().toISOString().slice(0, 10)
+    const todayStr = toLocalISO()
     const lastVisited = localStorage.getItem('fwa_last_visited')
     const nudgeShownToday = localStorage.getItem('fwa_nudge_shown') === todayStr
 

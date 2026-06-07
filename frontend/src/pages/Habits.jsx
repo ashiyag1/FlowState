@@ -13,6 +13,8 @@ import habitsBg from '../assets/pages/habits_bg.webp'
 import { getHinduDetails } from '../utils/hinduCalendar'
 import { today as getToday } from '../utils'
 import { useNotif } from '../components/system/NotificationPopup'
+import { useHomeData } from '../hooks/useHomeData'
+import ActiveSadhanaPlayer from '../components/dashboard/ActiveSadhanaPlayer'
 
 // Extracted Subcomponents
 import ActiveSadhanasCard from '../components/tracker/Habits/ActiveSadhanasCard'
@@ -28,6 +30,20 @@ export default function Habits() {
   const { dark } = useTheme()
   const notif = useNotif()
 
+  const {
+    activePractice,
+    timerSeconds,
+    viewMode,
+    isReflectionTime,
+    todayRitual,
+    userName,
+    selectedSankalpa,
+    handleBeginActivePractice,
+    handleCompleteActivePractice,
+    cancelPractice,
+    setSankalpaPanelOpen
+  } = useHomeData()
+
   const [calDate, setCalDate] = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(new Date().getDate())
   const [currentInsightIdx, setCurrentInsightIdx] = useState(0)
@@ -38,6 +54,8 @@ export default function Habits() {
 
   const calYear = calDate.getFullYear()
   const calMonth = calDate.getMonth()
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+  const clampedSelectedDay = Math.min(selectedDay, daysInMonth)
   
   const isoForDay = (d) =>
     `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
@@ -46,7 +64,7 @@ export default function Habits() {
   const allDoneToday = habits.length > 0 && doneCount === habits.length
 
   // Selected Day Calculations
-  const selectedIso = isoForDay(selectedDay)
+  const selectedIso = isoForDay(clampedSelectedDay)
   const selectedHindu = getHinduDetails(selectedIso)
   const selectedDayDone = habitDone[selectedIso] || {}
   const selectedDoneCount = habits.filter(h => selectedDayDone[h.id]).length
@@ -154,6 +172,27 @@ export default function Habits() {
           
           {/* LEFT PANEL: ACTIONS */}
           <div className="flex flex-col gap-5 w-full">
+            
+            {/* Suggested Sadhana Player (Mobile only) */}
+            <div className="md:hidden">
+              <ActiveSadhanaPlayer
+                dark={dark}
+                activePractice={activePractice}
+                timerSeconds={timerSeconds}
+                viewMode={viewMode}
+                isReflectionTime={isReflectionTime}
+                todayRitual={todayRitual}
+                userName={userName}
+                selectedSankalpa={selectedSankalpa}
+                onStartPractice={handleBeginActivePractice}
+                onCompletePractice={handleCompleteActivePractice}
+                onCancelPractice={cancelPractice}
+                onNavigateJournal={() => navigate('/journal')}
+                onOpenSankalpaPanel={() => setSankalpaPanelOpen(true)}
+                hideReflection={true}
+              />
+            </div>
+
             <ActiveSadhanasCard
               dark={dark}
               habits={habits}
@@ -202,10 +241,16 @@ export default function Habits() {
               selectedIso={selectedIso}
               selectedHindu={selectedHindu}
               calDate={calDate}
-              selectedDay={selectedDay}
+              selectedDay={clampedSelectedDay}
               habits={habits}
               habitDone={habitDone}
-              onSetCalDate={setCalDate}
+              onSetCalDate={(newDate) => {
+                setCalDate(newDate)
+                const newYear = newDate.getFullYear()
+                const newMonth = newDate.getMonth()
+                const maxDays = new Date(newYear, newMonth + 1, 0).getDate()
+                setSelectedDay(prev => Math.min(prev, maxDays))
+              }}
               onSetSelectedDay={setSelectedDay}
             />
 

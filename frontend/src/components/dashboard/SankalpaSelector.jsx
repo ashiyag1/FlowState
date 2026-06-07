@@ -67,72 +67,202 @@ export function SankalpaSelector({
         .fs-loading-pulse {
           animation: fs-pulse 2s ease-in-out infinite;
         }
+        .sankalpa-selector-container::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 24px;
+          padding: 1px;
+          background: linear-gradient(135deg, rgba(200, 169, 110, 0.4), rgba(232, 98, 42, 0.15), rgba(200, 169, 110, 0.4));
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+        }
       `}</style>
 
-      {/* Collapsible Sankalpa badge panel */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '-12px', gap: '8px' }}>
+      {/* Collapsible Sankalpa Card */}
+      <div className="sankalpa-selector-container" style={{
+        ...glassCardStyle,
+        borderRadius: '24px',
+        padding: '24px 24px 20px 24px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        boxShadow: dark 
+          ? '0 20px 50px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.06)' 
+          : '0 20px 40px rgba(139,105,20,0.08), inset 0 1px 2px rgba(255,255,255,0.6)',
+        border: selectedSankalpa === 'unset' ? '1.5px solid rgba(232, 98, 42, 0.45)' : 'none',
+        animation: selectedSankalpa === 'unset' ? 'fs-loading-pulse 2s ease-in-out infinite' : 'none',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Saffron-Gold Top Highlight Bar */}
         <div style={{
-          ...glassCardStyle,
-          borderRadius: '99px',
-          padding: '8px 18px',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '10px',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-          fontSize: '12px'
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '4px',
+          background: 'linear-gradient(90deg, #c9933a, #e8622a, #d4607a)'
+        }} />
+
+        {/* Large Classical Devanagari Watermark */}
+        <div style={{
+          position: 'absolute',
+          right: '10px',
+          top: '25px',
+          fontFamily: "'Noto Serif Devanagari', serif",
+          fontSize: '72px',
+          fontWeight: 800,
+          color: dark ? 'rgba(200, 169, 110, 0.035)' : 'rgba(200, 169, 110, 0.055)',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          lineHeight: 1,
+          transform: 'rotate(-5deg)'
         }}>
-          <span style={{ color: '#c8a96e', fontFamily: 'sans-serif', fontWeight: 600 }}>
-            SANKALPA · <span style={{ color: dark ? '#ffeab8' : '#3d2600' }}>{currentSankalpa.emoji} {currentSankalpa.label}</span>
+          सङ्कल्प
+        </div>
+
+        {/* Subtle spinning Mandala background watermark */}
+        <svg
+          style={{
+            position: 'absolute',
+            right: '-20px',
+            bottom: '-20px',
+            width: '140px',
+            height: '140px',
+            opacity: dark ? 0.05 : 0.07,
+            pointerEvents: 'none',
+            color: '#c8a96e',
+            animation: 'fs-spin 35s linear infinite'
+          }}
+          viewBox="0 0 100 100"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="0.6"
+        >
+          <circle cx="50" cy="50" r="46" />
+          <circle cx="50" cy="50" r="36" />
+          <circle cx="50" cy="50" r="26" />
+          <circle cx="50" cy="50" r="16" />
+          {Array.from({ length: 12 }).map((_, idx) => {
+            const angle = (idx * 360) / 12
+            return (
+              <g key={idx} transform={`rotate(${angle} 50 50)`}>
+                <path d="M50 4 C46 22, 54 22, 50 4" />
+                <path d="M50 14 C48 26, 52 26, 50 14" />
+              </g>
+            )
+          })}
+        </svg>
+
+        {/* Header Row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+          <span style={{
+            fontFamily: "'Noto Serif Devanagari', 'Cinzel', serif",
+            fontSize: '12px',
+            color: '#c8a96e',
+            letterSpacing: '0.08em',
+            fontWeight: 700,
+            textTransform: 'uppercase'
+          }}>
+            सङ्कल्प · Daily Intention
           </span>
           {isReflectionTime ? (
             <span style={{
+              background: dark ? 'rgba(200, 169, 110, 0.12)' : 'rgba(200, 169, 110, 0.08)',
+              border: '1px solid rgba(200, 169, 110, 0.35)',
+              borderRadius: '20px',
+              padding: '3px 10px',
               color: '#c8a96e',
-              fontWeight: 600,
-              fontSize: '11px',
+              fontWeight: 700,
+              fontSize: '9px',
               textTransform: 'uppercase',
-              letterSpacing: '0.05em',
+              letterSpacing: '0.08em',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '4px',
+              boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.05)',
               userSelect: 'none'
             }}>
-              🔒 Locked
+              <span>🔒</span>
+              <span>Locked</span>
             </span>
           ) : (
             <button
               onClick={onTogglePanel}
               style={{
-                background: 'transparent',
-                border: 'none',
+                background: 'rgba(232, 98, 42, 0.08)',
+                border: '1px solid rgba(232, 98, 42, 0.25)',
+                borderRadius: '20px',
+                padding: '4px 12px',
                 color: '#e8622a',
                 fontWeight: 700,
                 cursor: 'pointer',
-                fontFamily: 'sans-serif',
-                fontSize: '11px',
+                fontFamily: "'Lexend', sans-serif",
+                fontSize: '10px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
-                outline: 'none'
+                outline: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(232, 98, 42, 0.15)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(232, 98, 42, 0.08)'
               }}
             >
-              {sankalpaPanelOpen ? 'close' : 'Change / Ask AI ✨'}
+              {sankalpaPanelOpen ? 'Close' : 'Change / Ask AI ✨'}
             </button>
           )}
         </div>
-        <p style={{
-          fontSize: '11px',
-          color: dark ? 'rgba(245,230,200,0.6)' : 'rgba(45,31,14,0.6)',
-          fontStyle: 'italic',
-          margin: 0,
-          textAlign: 'center',
-          fontFamily: 'sans-serif',
-          maxWidth: '440px',
-          lineHeight: 1.4
-        }}>
-          Current focus: <strong>"{currentSankalpa.msg}"</strong>.
+
+        {/* Divider */}
+        <div style={{ height: '1px', background: 'linear-gradient(90deg, rgba(200,169,110,0), rgba(200,169,110,0.25) 20%, rgba(200,169,110,0.25) 80%, rgba(200,169,110,0))', position: 'relative', zIndex: 1 }} />
+
+        {/* Main Content Area */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', position: 'relative', zIndex: 1 }}>
+          <h3 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: '24px',
+            fontWeight: 700,
+            color: dark ? '#ffeab8' : '#3d2600',
+            margin: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            letterSpacing: '-0.01em'
+          }}>
+            <span style={{ fontSize: '26px', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.1))' }}>{currentSankalpa.emoji}</span>
+            <span>{currentSankalpa.label}</span>
+          </h3>
+          <p style={{
+            fontSize: '13.5px',
+            color: dark ? 'rgba(245,230,200,0.85)' : '#5c4322',
+            margin: 0,
+            fontFamily: "'Lexend', sans-serif",
+            fontWeight: 350,
+            lineHeight: 1.55,
+          }}>
+            <span className="hidden md:inline">Current focus: </span><strong style={{ fontWeight: 500, color: dark ? '#ffffff' : '#2D1F0E' }}>"{currentSankalpa.msg}"</strong>
+          </p>
           {isReflectionTime ? (
-            <span style={{ display: 'block', marginTop: '4px', color: '#c8a96e', fontWeight: 500 }}>
-              At this quiet hour, we reflect on our day, relax our mind, and let go of all search for change. 🪔
-            </span>
+            <p className="sankalpa-reflection-warning" style={{
+              fontSize: '12px',
+              color: '#c8a96e',
+              margin: '6px 0 0 0',
+              fontFamily: "'Lexend', sans-serif",
+              fontWeight: 500,
+              lineHeight: 1.45,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span>🪔</span>
+              <span>At this quiet hour, we reflect on our day, relax our mind, and let go of all search for change.</span>
+            </p>
           ) : (
             !sankalpaPanelOpen && (
               <span
@@ -140,17 +270,24 @@ export function SankalpaSelector({
                 style={{
                   color: '#e8622a',
                   cursor: 'pointer',
-                  fontWeight: 700,
-                  marginLeft: '6px',
+                  fontWeight: 600,
+                  fontSize: '12px',
                   textDecoration: 'underline',
-                  display: 'inline-block'
+                  fontFamily: "'Lexend', sans-serif",
+                  marginTop: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'opacity 0.2s ease'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
-                Ask AI to personalize ✨
+                Ask AI to personalize intention ✨
               </span>
             )
           )}
-        </p>
+        </div>
       </div>
 
       {/* Expandable selection tray */}
@@ -162,7 +299,7 @@ export function SankalpaSelector({
             exit={{ height: 0, opacity: 0 }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{
+            <div className="sankalpa-tray-card" style={{
               ...glassCardStyle,
               borderRadius: '24px',
               padding: '20px',
