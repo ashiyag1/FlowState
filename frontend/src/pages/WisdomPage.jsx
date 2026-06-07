@@ -8,6 +8,7 @@ import { useHomeData } from '../hooks/useHomeData'
 import WisdomScrollSection from '../components/dashboard/WisdomScrollSection'
 import wisdomBg from '../assets/pages/wisdom_bg.webp'
 import HeroHeader from '../sections/wisdom/HeroHeader'
+import WisdomAmbientSound from '../components/wisdom/WisdomAmbientSound'
 import TopicFilterBar from '../sections/wisdom/TopicFilterBar'
 import ExploreByTopic from '../sections/wisdom/ExploreByTopic'
 import LifeIssuesGrid from '../sections/wisdom/LifeIssuesGrid'
@@ -166,6 +167,7 @@ function WisdomContent() {
           onClose={() => setSelectedBook(null)}
         />
       )}
+      <WisdomAmbientSound />
     </div>
   )
 }

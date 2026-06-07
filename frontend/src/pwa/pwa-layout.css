@@ -551,4 +551,19 @@
   .mobile-flame-chakra-container {
     padding: 10px 0 !important;
   }
+
+  .wisdom-ambient-sound-container {
+    bottom: calc(var(--pwa-safe-bottom) + 16px) !important;
+    right: 16px !important;
+  }
 }
+
+/* Hide mobile/PWA specific components on desktop views */
+@media (min-width: 768px) {
+  .mobile-dashboard-header,
+  .mobile-flame-chakra-container,
+  .pwa-navbar-container {
+    display: none !important;
+  }
+}
+

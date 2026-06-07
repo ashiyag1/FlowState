@@ -404,6 +404,23 @@ export default function Home() {
                 isReflectionTime={isReflectionTime}
               />
 
+              {/* Primary Action — Suggested Sadhana/Evening reflection */}
+              <ActiveSadhanaPlayer
+                dark={dark}
+                activePractice={activePractice}
+                timerSeconds={timerSeconds}
+                viewMode={viewMode}
+                isReflectionTime={isReflectionTime}
+                todayRitual={todayRitual}
+                userName={userName}
+                selectedSankalpa={selectedSankalpa}
+                onStartPractice={handleBeginActivePractice}
+                onCompletePractice={handleCompleteActivePractice}
+                onCancelPractice={cancelPractice}
+                onNavigateJournal={() => navigate('/journal')}
+                onOpenSankalpaPanel={() => setSankalpaPanelOpen(true)}
+              />
+
               {/* Wisdom card scroll */}
               <div className="wisdom-scroll-wrapper">
                 <WisdomScrollSection
@@ -671,22 +688,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Primary Action — Suggested Sadhana/Evening reflection */}
-            <ActiveSadhanaPlayer
-              dark={dark}
-              activePractice={activePractice}
-              timerSeconds={timerSeconds}
-              viewMode={viewMode}
-              isReflectionTime={isReflectionTime}
-              todayRitual={todayRitual}
-              userName={userName}
-              selectedSankalpa={selectedSankalpa}
-              onStartPractice={handleBeginActivePractice}
-              onCompletePractice={handleCompleteActivePractice}
-              onCancelPractice={cancelPractice}
-              onNavigateJournal={() => navigate('/journal')}
-              onOpenSankalpaPanel={() => setSankalpaPanelOpen(true)}
-            />
 
             {/* 2-column grid for Heritage + Community */}
             <div className={`heritage-card-wrapper ${hasReadLetter ? 'full-width' : ''}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>

@@ -41,7 +41,7 @@ export default function WisdomAmbientSound() {
   const currentPreset = AMBIENCE_PRESETS[preset]
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-2.5">
+    <div className="wisdom-ambient-sound-container fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-2.5">
       {/* Main control pill */}
       <motion.div 
         layout 

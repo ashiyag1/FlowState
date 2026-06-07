@@ -263,7 +263,7 @@ export default function Journal() {
               Chintan Journal
             </p>
           </div>
-          <div className="flex items-center gap-2 relative z-20">
+          <div className="flex md:hidden items-center gap-2 relative z-20">
             {/* Global Sound Mute Button */}
             <button
               onClick={() => {

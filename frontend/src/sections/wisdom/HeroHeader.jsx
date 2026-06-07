@@ -55,7 +55,7 @@ export default function HeroHeader({ searchQuery, setSearchQuery }) {
         </div>
 
         {/* Global Sound & Notification Buttons */}
-        <div className="flex items-center gap-2 relative z-10">
+        <div className="flex md:hidden items-center gap-2 relative z-10">
           {/* Speaker mute control button */}
           <button
             onClick={() => {
