@@ -395,3 +395,14 @@ body {
     margin-right: 8px;
   }
 }
+
+/* ── Gyaan (Wisdom) page responsive grid ── */
+@media (min-width: 768px) {
+  .wisdom-columns-grid {
+    grid-template-columns: minmax(0, 1fr) 256px !important;
+  }
+  .wisdom-sidebar-sticky {
+    position: sticky;
+    top: 5.5rem;
+  }
+}

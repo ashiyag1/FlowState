@@ -121,8 +121,6 @@ function WisdomContent() {
         {/* ── HERO HEADER ───────────────────── */}
         <HeroHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-
-
         {/* ── WEEKLY CHALLENGE — prominent card ─ */}
         <WeeklyChallenge />
 
@@ -130,7 +128,8 @@ function WisdomContent() {
         <TopicFilterBar topics={FILTER_TOPICS} active={activeTopic} onChange={setActiveTopic} />
 
         {/* ── MAIN CONTENT + SIDEBAR ────────── */}
-        <div style={columnsStyle} className="wisdom-columns-grid">
+        {/* Desktop: 2-col grid. Mobile: single column (sidebar moves below) */}
+        <div className="wisdom-columns-grid" style={columnsStyle}>
 
           {/* LEFT: main feed */}
           <main style={mainStyle}>
@@ -147,12 +146,17 @@ function WisdomContent() {
               <EmptyState emoji="🌿" msg="No life guides match your search." />
             )}
 
+            {/* Mobile: sidebar below main content */}
+            <div className="block md:hidden mt-6">
+              <Sidebar onBookOpen={handleBookOpen} />
+            </div>
+
             {/* Bottom spacer */}
-            <div style={{ height: '3rem' }} />
+            <div style={{ height: '5rem' }} />
           </main>
 
-          {/* RIGHT: sticky sidebar */}
-          <aside style={sidebarStyle} className="wisdom-sidebar-sticky">
+          {/* RIGHT: sticky sidebar — desktop only */}
+          <aside style={sidebarStyle} className="wisdom-sidebar-sticky hidden md:block">
             <Sidebar onBookOpen={handleBookOpen} />
           </aside>
 
@@ -189,7 +193,8 @@ export default function WisdomPage() {
 
 const pageStyle = (dark) => ({
   minHeight: '100vh',
-  paddingTop: '4.75rem',
+  paddingTop: 'clamp(4rem, 8vw, 4.75rem)',
+  paddingBottom: '5rem', // clearance for mobile bottom navbar
   backgroundColor: dark ? '#1a1208' : '#FDF6E3',
   backgroundImage: dark
     ? `linear-gradient(175deg,rgba(18,12,4,0.7) 0%,rgba(26,18,8,0.6) 40%,rgba(34,26,14,0.7) 100%), url(${wisdomBg})`
@@ -212,16 +217,15 @@ const containerStyle = {
   maxWidth: '1240px',
   width: '100%',
   margin: '0 auto',
-  // Horizontal padding + vertical top/bottom padding
-  padding: '1.75rem 1.5rem 0',
+  padding: '1.25rem 1rem 0',
   position: 'relative',
   zIndex: 1,
 }
 
 const columnsStyle = {
   display: 'grid',
-  // 3fr main + 256px sidebar. On small screens the @media override in index.css handles stacking.
-  gridTemplateColumns: 'minmax(0,1fr) 256px',
+  // On mobile: single column. On md+: main + 256px sidebar.
+  gridTemplateColumns: '1fr',
   gap: '1.75rem',
   alignItems: 'start',
   marginTop: '0.5rem',

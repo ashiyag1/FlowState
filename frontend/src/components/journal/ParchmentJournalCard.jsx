@@ -52,7 +52,7 @@ export function ParchmentJournalCard({
   }
 
   return (
-    <div className="flex-1 p-6 md:p-8 bg-[#fbf6ee] dark:bg-[#1f1913] shadow-[inset_8px_0_16px_rgba(0,0,0,0.06)] flex flex-col justify-between relative min-h-[460px]">
+    <div className="flex-1 p-4 md:p-8 bg-[#fbf6ee] dark:bg-[#1f1913] shadow-[inset_8px_0_16px_rgba(0,0,0,0.06)] flex flex-col justify-between relative">
       
       {/* Inner Parchment glow container */}
       <motion.div
@@ -124,7 +124,7 @@ export function ParchmentJournalCard({
           onChange={e => { setText(e.target.value); autoResize() }}
           placeholder="Let your thoughts stream gently onto these pages..."
           maxLength={1000}
-          className="w-full flex-1 min-h-[220px] bg-transparent text-ink dark:text-ivory text-xs md:text-sm font-body leading-loose placeholder:text-gold/25 placeholder:italic resize-none focus:outline-none parchment-lines"
+          className="w-full flex-1 min-h-[160px] md:min-h-[220px] bg-transparent text-ink dark:text-ivory text-xs md:text-sm font-body leading-loose placeholder:text-gold/25 placeholder:italic resize-none focus:outline-none parchment-lines"
         />
         
         {text && (

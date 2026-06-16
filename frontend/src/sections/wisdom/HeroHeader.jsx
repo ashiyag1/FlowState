@@ -35,8 +35,8 @@ export default function HeroHeader({ searchQuery, setSearchQuery }) {
       <div aria-hidden className="absolute top-0 left-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
 
       {/* ── Label row ─────────────────────────────── */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-start sm:items-center justify-between gap-3 mb-3 md:mb-5">
+        <div className="flex flex-wrap items-center gap-3">
           <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-saffron flex items-center gap-2">
             <span className="w-8 h-px bg-saffron/50" />
             Ancient Archives
@@ -105,7 +105,7 @@ export default function HeroHeader({ searchQuery, setSearchQuery }) {
           */}
           <div
             className="mb-3"
-            style={{ height: 'clamp(52px, 7vw, 80px)' }}
+            style={{ height: 'clamp(40px, 7vw, 80px)' }}
           >
             <AnimatePresence mode="wait">
               <motion.span
@@ -118,7 +118,7 @@ export default function HeroHeader({ searchQuery, setSearchQuery }) {
                 style={{
                   fontFamily: "'Playfair Display', 'Noto Serif Devanagari', serif",
                   fontStyle: 'italic',
-                  fontSize: 'clamp(42px, 7vw, 80px)',
+                  fontSize: 'clamp(32px, 7vw, 80px)',
                   fontWeight: 700,
                 }}
               >

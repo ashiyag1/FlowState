@@ -253,7 +253,7 @@ export default function Journal() {
         <div className="absolute inset-0 bg-black/50 dark:bg-black/60" />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 pt-12 pb-32">
+      <div className="relative z-10 max-w-5xl mx-auto px-3 md:px-4 pt-16 md:pt-12 pb-36 md:pb-32">
         
         {/* Top Utility Bar with Sound & Notification Toggle */}
         <div className="flex items-center justify-between mb-2 px-1">
@@ -316,17 +316,38 @@ export default function Journal() {
             <LotusFlower size={12} />
           </div>
 
+          {/* Mobile-only compact info strip */}
+          <div className="md:hidden mb-3 flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <span className="text-base">{timeDetails.icon}</span>
+              <div>
+                <p className="text-[11px] font-semibold text-gold-lt tracking-wide uppercase font-display">
+                  {timeDetails.label} Reflection
+                </p>
+                <p className="text-[9px] text-ivory/50 font-mono">{formattedDate}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1 text-[10px] bg-gold/15 text-gold-lt font-bold px-2.5 py-1 rounded-full border border-gold/20">
+                ✨ {cycles || 0} nights
+              </span>
+              <span className="text-[10px] text-ivory/50">{todayHindu.moonSymbol}</span>
+            </div>
+          </div>
+
           {/* Book Spine Center Highlight (Embossed Shadows) */}
-          <div className="notebook-body relative rounded-2xl bg-gradient-to-r from-[#2d1e0f] to-[#1a1208] p-1 border border-gold/30 shadow-2xl flex flex-col md:flex-row overflow-hidden">
+          <div className="notebook-body relative rounded-xl md:rounded-2xl bg-gradient-to-r from-[#2d1e0f] to-[#1a1208] p-0.5 md:p-1 border border-gold/30 shadow-2xl flex flex-col md:flex-row overflow-hidden">
             
-            {/* LEFT PAGE */}
-            <JournalLeftPageInfo
-              timeDetails={timeDetails}
-              formattedDate={formattedDate}
-              cycles={cycles}
-              todayHindu={todayHindu}
-              entries={entries}
-            />
+            {/* LEFT PAGE — desktop only */}
+            <div className="hidden md:flex">
+              <JournalLeftPageInfo
+                timeDetails={timeDetails}
+                formattedDate={formattedDate}
+                cycles={cycles}
+                todayHindu={todayHindu}
+                entries={entries}
+              />
+            </div>
 
             {/* SPINE SEPARATOR GUTTER FOR DESKTOP */}
             <div className="hidden md:block w-[12px] bg-gradient-to-r from-black/20 via-[#1f140a] to-black/20 shadow-inner shrink-0" />
@@ -380,7 +401,7 @@ export default function Journal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-12"
+          className="mt-8 md:mt-12"
         >
           <div className="flex items-center gap-4 mb-5">
             <h2 className="font-display text-lg text-ivory flex items-center gap-2">
@@ -433,7 +454,7 @@ export default function Journal() {
                             </div>
                           </div>
                           
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => setExpanded(isExpanded ? null : e.id)}
                               className="p-1 rounded-full hover:bg-white/10 text-ivory/50 hover:text-gold transition-all"

@@ -68,7 +68,7 @@ export default function TopicFilterBar({ topics, active, onChange }) {
       The outer div must NOT have overflow:hidden — that clips the shadow on pills.
       We only apply overflow-x:auto on the inner scroll track.
     */
-    <div style={{ marginBottom: '1rem', marginTop: '0.5rem' }}>
+    <div className="-mx-4 md:mx-0" style={{ marginBottom: '1rem', marginTop: '0.5rem' }}>
       {/* Fade masks at edges to hint at scrollability */}
       <div style={{ position: 'relative' }}>
         <AnimatePresence>
@@ -78,7 +78,7 @@ export default function TopicFilterBar({ topics, active, onChange }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -5 }}
               onClick={() => scrollRef.current?.scrollBy({ left: -200, behavior: 'smooth' })}
-              className="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center border cursor-pointer"
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full hidden md:flex items-center justify-center border cursor-pointer"
               style={{
                 background: dark ? 'rgba(25, 18, 10, 0.9)' : 'rgba(255, 255, 255, 0.95)',
                 borderColor: dark ? 'rgba(201, 168, 76, 0.35)' : 'rgba(201, 168, 76, 0.25)',
@@ -98,7 +98,7 @@ export default function TopicFilterBar({ topics, active, onChange }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 5 }}
               onClick={() => scrollRef.current?.scrollBy({ left: 200, behavior: 'smooth' })}
-              className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full flex items-center justify-center border cursor-pointer"
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full hidden md:flex items-center justify-center border cursor-pointer"
               style={{
                 background: dark ? 'rgba(25, 18, 10, 0.9)' : 'rgba(255, 255, 255, 0.95)',
                 borderColor: dark ? 'rgba(201, 168, 76, 0.35)' : 'rgba(201, 168, 76, 0.25)',
@@ -113,12 +113,14 @@ export default function TopicFilterBar({ topics, active, onChange }) {
 
         <div
           ref={scrollRef}
+          className="px-4 md:px-7"
           style={{
             display: 'flex',
             gap: '8px',
             overflowX: 'auto',
             overflowY: 'visible',
-            padding: '4px 28px 8px', // Added horizontal padding for scrollbar arrow clearance
+            paddingTop: '4px',
+            paddingBottom: '8px',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             WebkitOverflowScrolling: 'touch',

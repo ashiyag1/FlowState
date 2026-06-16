@@ -91,6 +91,7 @@ export default function Home() {
 
   const { dark: themeDark, toggle: toggleTheme } = useTheme()
   const pranaPoints = user?.pranaPoints || 0
+  const [mobileTooltipOpen, setMobileTooltipOpen] = React.useState(false)
 
   // Prana Tiers Configuration for Home Header (makes it brighter and dynamically colored)
   const pranaTier = React.useMemo(() => {
@@ -160,8 +161,10 @@ export default function Home() {
 
   return (
     <>
-      <HeroSection viewMode={viewMode} reflection={reflection} />
-      <TopBorder />
+      <div className="hidden md:block">
+        <HeroSection viewMode={viewMode} reflection={reflection} />
+        <TopBorder />
+      </div>
       <PageLayout>
         <main style={{ position: 'relative', background: dynamicBackgroundStyle, minHeight: '100vh' }}>
 
@@ -172,7 +175,7 @@ export default function Home() {
           <div className="dashboard-container" style={containerStyle}>
             
             {/* MOBILE PRODUCTIVITY DASHBOARD HEADER */}
-            <div className="mobile-dashboard-header md:hidden" style={{
+            <div className="mobile-dashboard-header md:hidden flex items-center" style={{
               position: 'relative',
               borderRadius: '0 0 24px 24px',
               overflow: 'hidden',
@@ -181,9 +184,7 @@ export default function Home() {
               boxShadow: themeDark ? '0 12px 32px rgba(0, 0, 0, 0.5)' : '0 12px 32px rgba(139, 105, 20, 0.12)',
               borderBottom: themeDark ? '1px solid rgba(200, 169, 110, 0.25)' : '1px solid rgba(200, 169, 110, 0.35)',
               background: themeDark ? pranaTier.cardBgDark : pranaTier.cardBgLight,
-              height: '115px',
-              display: 'flex',
-              alignItems: 'center',
+              minHeight: '115px',
               transition: 'background 0.3s ease',
             }}>
               {/* Authentic photographic India heritage background */}
@@ -210,9 +211,9 @@ export default function Home() {
                 transition: 'background 0.3s ease',
               }} />
               
-              <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '12px' }}>
                 {/* Greeting text */}
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
                     fontSize: '10px',
                     color: themeDark ? '#ffeab8' : '#8b5e2f',
@@ -234,7 +235,10 @@ export default function Home() {
                       margin: '3px 0 0 0',
                       textShadow: themeDark ? '0 2px 6px rgba(0,0,0,0.6)' : '0 1px 4px rgba(255,255,255,0.4)',
                       cursor: 'pointer',
-                      transition: 'color 0.2s'
+                      transition: 'color 0.2s',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.color = '#ffeab8'}
                     onMouseLeave={(e) => e.currentTarget.style.color = themeDark ? '#fffaf0' : '#3c2005'}
@@ -243,36 +247,64 @@ export default function Home() {
                     {userName || 'Seeker'}
                   </h1>
                   
-                  {/* Archetype badge (Displaying Prana Tier) */}
-                  <div 
-                    onClick={() => navigate('/profile')}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      background: themeDark ? 'rgba(200, 169, 110, 0.25)' : 'rgba(200, 169, 110, 0.15)',
-                      border: themeDark ? '0.5px solid rgba(200, 169, 110, 0.45)' : '0.5px solid rgba(200, 169, 110, 0.35)',
-                      borderRadius: '99px',
-                      padding: '3px 8px',
-                      fontSize: '9px',
-                      color: themeDark ? '#ffeab8' : '#6b4c12',
-                      marginTop: '8px',
-                      fontFamily: "'Lexend', sans-serif",
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = themeDark ? 'rgba(200, 169, 110, 0.4)' : 'rgba(200, 169, 110, 0.25)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = themeDark ? 'rgba(200, 169, 110, 0.25)' : 'rgba(200, 169, 110, 0.15)'}
-                    title="Click to view profile"
-                  >
-                    <span>🪷</span>
-                    <span>{pranaTier.title}</span>
-                  </div>
+                  {/* Archetype badge (Displaying Prana Tier) or Login Button */}
+                  {user ? (
+                    <div 
+                      onClick={() => navigate('/profile')}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        background: themeDark ? 'rgba(200, 169, 110, 0.25)' : 'rgba(200, 169, 110, 0.15)',
+                        border: themeDark ? '0.5px solid rgba(200, 169, 110, 0.45)' : '0.5px solid rgba(200, 169, 110, 0.35)',
+                        borderRadius: '99px',
+                        padding: '3px 8px',
+                        fontSize: '9px',
+                        color: themeDark ? '#ffeab8' : '#6b4c12',
+                        marginTop: '8px',
+                        fontFamily: "'Lexend', sans-serif",
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = themeDark ? 'rgba(200, 169, 110, 0.4)' : 'rgba(200, 169, 110, 0.25)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = themeDark ? 'rgba(200, 169, 110, 0.25)' : 'rgba(200, 169, 110, 0.15)'}
+                      title="Click to view profile"
+                    >
+                      <span>🪷</span>
+                      <span>{pranaTier.title}</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => navigate('/login')}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: themeDark ? 'rgba(212,168,42,0.15)' : 'rgba(212,168,42,0.1)',
+                        border: themeDark ? '1px solid rgba(212,168,42,0.45)' : '1px solid rgba(212,168,42,0.35)',
+                        borderRadius: '99px',
+                        padding: '4px 12px',
+                        fontSize: '10px',
+                        color: themeDark ? '#ffeab8' : '#8a5a12',
+                        marginTop: '8px',
+                        fontFamily: "'Lexend', sans-serif",
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        outline: 'none'
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                      Sign In
+                    </button>
+                  )}
                 </div>
                 
                 {/* Stats Pills and Sound Button */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <div style={{
                       display: 'flex',
@@ -374,24 +406,26 @@ export default function Home() {
               </div>
             </div>
 
-            {/* DAILY FLAME — Streak + Progress Tracker */}
-            <DailyPillars
-              dark={dark}
-              habitStreak={habitStreak}
-              ritualDone={ritualDone}
-              waterGoalMet={waterGoalMet}
-              journalToday={journalToday}
-              wisdomRead={wisdomRead}
-              todayTotal={todayTotal}
-              waterGoal={waterGoal}
-              onChange={handleTogglePractice}
-              onLogWater={handleLogWater}
-              onToggleJournal={handleToggleJournal}
-              onToggleWisdom={handleToggleWisdom}
-            />
+            {/* DAILY FLAME — Streak + Progress Tracker (Desktop only) */}
+            <div className="hidden md:block">
+              <DailyPillars
+                dark={dark}
+                habitStreak={habitStreak}
+                ritualDone={ritualDone}
+                waterGoalMet={waterGoalMet}
+                journalToday={journalToday}
+                wisdomRead={wisdomRead}
+                todayTotal={todayTotal}
+                waterGoal={waterGoal}
+                onChange={handleTogglePractice}
+                onLogWater={handleLogWater}
+                onToggleJournal={handleToggleJournal}
+                onToggleWisdom={handleToggleWisdom}
+              />
+            </div>
 
             {/* Unified Sankalpa and Quote Card */}
-            <div className="sankalpa-quote-unified-card">
+            <div className="sankalpa-quote-unified-card flex flex-col gap-4">
               <SankalpaSelector
                 dark={dark}
                 selectedSankalpa={selectedSankalpa}
@@ -404,22 +438,24 @@ export default function Home() {
                 isReflectionTime={isReflectionTime}
               />
 
-              {/* Primary Action — Suggested Sadhana/Evening reflection */}
-              <ActiveSadhanaPlayer
-                dark={dark}
-                activePractice={activePractice}
-                timerSeconds={timerSeconds}
-                viewMode={viewMode}
-                isReflectionTime={isReflectionTime}
-                todayRitual={todayRitual}
-                userName={userName}
-                selectedSankalpa={selectedSankalpa}
-                onStartPractice={handleBeginActivePractice}
-                onCompletePractice={handleCompleteActivePractice}
-                onCancelPractice={cancelPractice}
-                onNavigateJournal={() => navigate('/journal')}
-                onOpenSankalpaPanel={() => setSankalpaPanelOpen(true)}
-              />
+              {/* Primary Action — Suggested Sadhana/Evening reflection (Desktop only) */}
+              <div className="hidden md:block">
+                <ActiveSadhanaPlayer
+                  dark={dark}
+                  activePractice={activePractice}
+                  timerSeconds={timerSeconds}
+                  viewMode={viewMode}
+                  isReflectionTime={isReflectionTime}
+                  todayRitual={todayRitual}
+                  userName={userName}
+                  selectedSankalpa={selectedSankalpa}
+                  onStartPractice={handleBeginActivePractice}
+                  onCompletePractice={handleCompleteActivePractice}
+                  onCancelPractice={cancelPractice}
+                  onNavigateJournal={() => navigate('/journal')}
+                  onOpenSankalpaPanel={() => setSankalpaPanelOpen(true)}
+                />
+              </div>
 
               {/* Wisdom card scroll */}
               <div className="wisdom-scroll-wrapper">
@@ -433,11 +469,7 @@ export default function Home() {
             </div>
 
             {/* DAILY FLAME PROGRESS CHAKRA (Mobile only) */}
-            <div className="mobile-flame-chakra-container md:hidden" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
+            <div className="mobile-flame-chakra-container md:hidden flex flex-col items-center justify-center" style={{
               padding: '28px 0',
               position: 'relative'
             }}>
@@ -452,6 +484,7 @@ export default function Home() {
                   justifyContent: 'center',
                   cursor: 'pointer'
                 }}
+                onClick={() => setMobileTooltipOpen(prev => !prev)}
               >
                 {/* SVG circular progress ring */}
                 <svg width="180" height="180" viewBox="0 0 180 180" style={{ transform: 'rotate(-90deg)', filter: 'drop-shadow(0 4px 12px rgba(200, 169, 110, 0.25))' }}>
@@ -649,7 +682,9 @@ export default function Home() {
                   zIndex: 20,
                   boxShadow: dark ? '0 12px 32px rgba(0,0,0,0.55)' : '0 12px 28px rgba(139,105,20,0.12)',
                   minWidth: '154px',
-                  transition: 'opacity 0.25s ease, transform 0.25s ease',
+                  opacity: mobileTooltipOpen ? 1 : 0,
+                  visibility: mobileTooltipOpen ? 'visible' : 'hidden',
+                  transition: 'opacity 0.25s ease, transform 0.25s ease, visibility 0.25s',
                   pointerEvents: 'none',
                   display: 'flex',
                   flexDirection: 'column',
@@ -689,22 +724,24 @@ export default function Home() {
             </div>
 
 
-            {/* 2-column grid for Heritage + Community */}
-            <div className={`heritage-card-wrapper ${hasReadLetter ? 'full-width' : ''}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-              <HeritageCard dark={dark} glassCardStyle={glassCardStyle} />
-            </div>
+            {/* 2-column grid for Heritage + Community (Desktop only) */}
+            <div className="hidden md:flex md:flex-col md:gap-4">
+              <div className={`heritage-card-wrapper ${hasReadLetter ? 'full-width' : ''}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                <HeritageCard dark={dark} glassCardStyle={glassCardStyle} />
+              </div>
 
-            {/* Founder vision letter card */}
-            <div className={`founder-letter-wrapper ${hasReadLetter ? 'is-read' : ''}`}>
-              <FounderLetterCard
-                hasReadLetter={hasReadLetter}
-                setHasReadLetter={setHasReadLetter}
-                setLetterOpen={setLetterOpen}
-                user={user}
-                updateProfile={updateProfile}
-                dark={dark}
-                glassCardStyle={glassCardStyle}
-              />
+              {/* Founder vision letter card */}
+              <div className={`founder-letter-wrapper ${hasReadLetter ? 'is-read' : ''}`}>
+                <FounderLetterCard
+                  hasReadLetter={hasReadLetter}
+                  setHasReadLetter={setHasReadLetter}
+                  setLetterOpen={setLetterOpen}
+                  user={user}
+                  updateProfile={updateProfile}
+                  dark={dark}
+                  glassCardStyle={glassCardStyle}
+                />
+              </div>
             </div>
 
           </div>

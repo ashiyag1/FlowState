@@ -1,4 +1,5 @@
 import { jwtVerify } from 'jose'
+import { dbFindUserById } from '../db.js'
 
 export default async function authMiddleware(req, res, next) {
   const JWT_SECRET = process.env.JWT_SECRET
@@ -20,6 +21,11 @@ export default async function authMiddleware(req, res, next) {
 
     if (!payload || !payload.userId) {
       return res.status(401).json({ error: 'Unauthorized: Invalid token payload' })
+    }
+
+    const user = await dbFindUserById(payload.userId)
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized: User not found' })
     }
 
     req.userId = payload.userId

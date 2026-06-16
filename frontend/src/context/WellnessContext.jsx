@@ -7,7 +7,7 @@ const WellnessContext = createContext(null)
 // Removed useLocalState since data now lives entirely in React state and syncs to backend
 
 export function WellnessProvider({ children }) {
-  const { token, isAuthenticated, adjustPoints, setUser } = useAuth()
+  const { token, isAuthenticated, adjustPoints, setUser, user } = useAuth()
   const td = getToday()
 
   // ── WATER ──────────────────────────────────────
@@ -320,6 +320,7 @@ export function WellnessProvider({ children }) {
         break
       }
     }
+    return streak
   }, [waterLog, waterGoal])
 
   const journalStreak = useMemo(() => {
@@ -550,8 +551,9 @@ export function WellnessProvider({ children }) {
       let targetProgress = 1
       
       if (challengeId === 'lotus_jar_5') {
-        const storedDate = localStorage.getItem('wisdom_jar_date')
-        currentProgress = storedDate === todayIso ? parseInt(localStorage.getItem('wisdom_jar_count') || '0', 10) : 0
+        const storedDate = user ? user.preferences?.wisdomJarDate : localStorage.getItem('wisdom_jar_date')
+        const storedCount = user ? (user.preferences?.wisdomJarCount || 0) : parseInt(localStorage.getItem('wisdom_jar_count') || '0', 10)
+        currentProgress = storedDate === todayIso ? storedCount : 0
         targetProgress = 5
       } else {
         const raw = localStorage.getItem('wisdom_pages_read_today')

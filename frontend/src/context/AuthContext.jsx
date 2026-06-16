@@ -45,8 +45,29 @@ export function AuthProvider({ children }) {
           setToken(null)
           setUser(null)
           setIsAuthenticated(false)
+        } else if (res.status === 404) {
+          // Check if it's genuinely 'User not found' error
+          let data = {}
+          try {
+            data = await res.json()
+          } catch (e) {}
+          
+          if (data.error === 'User not found') {
+            const keysToRemove = [
+              'fwa_auth_token', 'fwa_guest_name', 'fwa_mockup_sankalpa',
+              'fwa_mockup_ritual_done', 'fwa_onboarding_completed', 'fwa_wisdom_read',
+              'wisdom_saved', 'wisdom_saved_pages', 'wisdom_page_notes', 
+              'wisdom_streak_log', 'wisdom_opened_books', 'wisdom_book_progress'
+            ]
+            keysToRemove.forEach(k => localStorage.removeItem(k))
+            setToken(null)
+            setUser(null)
+            setIsAuthenticated(false)
+          } else {
+            console.warn('Auth check returned status 404 (not user not found) — keeping session alive')
+          }
         } else {
-          // Any other error (404, 500, network issues, server restart) — 
+          // Any other error (500, network issues, server restart) — 
           // keep the token, stay logged in, retry will happen on next navigation
           console.warn('Auth check returned status', res.status, '— keeping session alive')
           // If we have a stored token, trust it and keep user logged in
@@ -174,13 +195,16 @@ export function AuthProvider({ children }) {
         body: JSON.stringify(data)
       })
       const result = await res.json()
-      if (!res.ok) throw new Error(result.error || 'Update failed')
+      if (!res.ok) {
+        if (res.status === 401) logout()
+        throw new Error(result.error || 'Update failed')
+      }
       setUser(prev => ({ ...prev, ...result.user }))
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message }
     }
-  }, [token])
+  }, [token, logout])
 
   // Update avatar
   const updateAvatar = useCallback(async (base64) => {
@@ -194,13 +218,16 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ avatar: base64 })
       })
       const result = await res.json()
-      if (!res.ok) throw new Error(result.error || 'Avatar update failed')
+      if (!res.ok) {
+        if (res.status === 401) logout()
+        throw new Error(result.error || 'Avatar update failed')
+      }
       setUser(prev => ({ ...prev, avatar: result.user?.avatar || base64 }))
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message }
     }
-  }, [token])
+  }, [token, logout])
 
   // Change password
   const changePassword = useCallback(async (currentPassword, newPassword) => {
@@ -214,12 +241,15 @@ export function AuthProvider({ children }) {
         body: JSON.stringify({ currentPassword, newPassword })
       })
       const result = await res.json()
-      if (!res.ok) throw new Error(result.error || 'Password change failed')
+      if (!res.ok) {
+        if (res.status === 401) logout()
+        throw new Error(result.error || 'Password change failed')
+      }
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message }
     }
-  }, [token])
+  }, [token, logout])
 
   // Delete account
   const deleteAccount = useCallback(async () => {
@@ -231,6 +261,7 @@ export function AuthProvider({ children }) {
         }
       })
       if (!res.ok) {
+        if (res.status === 401) logout()
         const result = await res.json()
         throw new Error(result.error || 'Delete failed')
       }
@@ -259,11 +290,13 @@ export function AuthProvider({ children }) {
           setUser(prev => ({ ...prev, ...result.user }))
           return { success: true, user: result.user }
         }
+      } else if (res.status === 401) {
+        logout()
       }
     } catch (err) {
       console.error('Failed to adjust points:', err)
     }
-  }, [isAuthenticated, token])
+  }, [isAuthenticated, token, logout])
 
   return (
     <AuthContext.Provider value={{

@@ -158,7 +158,7 @@ export function SankalpaSelector({
         </svg>
 
         {/* Header Row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
           <span style={{
             fontFamily: "'Noto Serif Devanagari', 'Cinzel', serif",
             fontSize: '12px',

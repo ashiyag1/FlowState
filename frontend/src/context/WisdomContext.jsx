@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext'
 const WisdomContext = createContext(null)
 
 export function WisdomProvider({ children }) {
-  const { user, isAuthenticated, token } = useAuth()
+  const { user, isAuthenticated, token, logout } = useAuth()
 
   const [userName, setUserNameRaw] = useState('Seeker')
   const [userSub, setUserSubRaw] = useState('Keep growing')
@@ -80,14 +80,17 @@ export function WisdomProvider({ children }) {
   const syncWisdomToServer = useCallback(async (fullWisdomObj) => {
     if (isAuthenticated && token) {
       try {
-        await fetch('/api/v1/profile', {
+        const res = await fetch('/api/v1/profile', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ wisdom: fullWisdomObj })
         })
+        if (res.status === 401 && logout) {
+          logout()
+        }
       } catch (e) { console.error('Wisdom sync failed', e) }
     }
-  }, [isAuthenticated, token])
+  }, [isAuthenticated, token, logout])
 
   // Custom setter factories
   const createSetter = (stateKey, storageKey, setRaw) => {

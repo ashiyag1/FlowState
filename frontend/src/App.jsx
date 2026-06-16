@@ -8,6 +8,7 @@ import { WisdomProvider } from './context/WisdomContext'
 import { SoundEffectsProvider } from './context/SoundEffectsContext'
 import { NotificationProvider } from './components/system/NotificationPopup'
 import Navbar  from './components/ui/Navbar'
+import MobileNavbar from './components/ui/MobileNavbar'
 import BadgeModal from './components/achievements/BadgeModal'
 import BadgeGallery from './components/achievements/BadgeGallery'
 import BadgeToast from './components/achievements/BadgeToast'
@@ -118,6 +119,7 @@ function AppContent() {
         </Routes>
       </Suspense>
       <Suspense fallback={null}><AIAssistant /></Suspense>
+      <MobileNavbar />
       <BadgeModal />
       <BadgeGallery />
       <BadgeToast />

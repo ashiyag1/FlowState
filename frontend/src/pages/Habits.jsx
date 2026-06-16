@@ -13,8 +13,6 @@ import habitsBg from '../assets/pages/habits_bg.webp'
 import { getHinduDetails } from '../utils/hinduCalendar'
 import { today as getToday } from '../utils'
 import { useNotif } from '../components/system/NotificationPopup'
-import { useHomeData } from '../hooks/useHomeData'
-import ActiveSadhanaPlayer from '../components/dashboard/ActiveSadhanaPlayer'
 
 // Extracted Subcomponents
 import ActiveSadhanasCard from '../components/tracker/Habits/ActiveSadhanasCard'
@@ -29,20 +27,6 @@ export default function Habits() {
   const { playHabitSound } = useSoundEffects()
   const { dark } = useTheme()
   const notif = useNotif()
-
-  const {
-    activePractice,
-    timerSeconds,
-    viewMode,
-    isReflectionTime,
-    todayRitual,
-    userName,
-    selectedSankalpa,
-    handleBeginActivePractice,
-    handleCompleteActivePractice,
-    cancelPractice,
-    setSankalpaPanelOpen
-  } = useHomeData()
 
   const [calDate, setCalDate] = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(new Date().getDate())
@@ -111,7 +95,9 @@ export default function Habits() {
       }} />
 
       <div style={{
-        position: 'relative', zIndex: 1, maxWidth: '1650px', width: '96%', margin: '0 auto', padding: '4.5rem 1.2rem 4rem'
+        position: 'relative', zIndex: 1,
+        maxWidth: '1650px', width: '96%', margin: '0 auto',
+        padding: 'clamp(4rem, 8vw, 4.5rem) 1rem 2rem'
       }}>
         
         {/* HERO TITLE */}
@@ -138,7 +124,8 @@ export default function Habits() {
             ✦ RHYTHMS OF STILLNESS ✦
           </p>
           <h1 style={{
-            fontFamily: "'Playfair Display', serif", fontSize: '2.5rem',
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 'clamp(1.6rem, 5vw, 2.5rem)',
             fontWeight: 400, color: dark ? '#f0e6d0' : '#2D1F0E', lineHeight: 1.1, margin: '0'
           }}>
             Daily Rhythm &amp; Rituals
@@ -173,25 +160,6 @@ export default function Habits() {
           {/* LEFT PANEL: ACTIONS */}
           <div className="flex flex-col gap-5 w-full">
             
-            {/* Suggested Sadhana Player (Mobile only) */}
-            <div className="md:hidden">
-              <ActiveSadhanaPlayer
-                dark={dark}
-                activePractice={activePractice}
-                timerSeconds={timerSeconds}
-                viewMode={viewMode}
-                isReflectionTime={isReflectionTime}
-                todayRitual={todayRitual}
-                userName={userName}
-                selectedSankalpa={selectedSankalpa}
-                onStartPractice={handleBeginActivePractice}
-                onCompletePractice={handleCompleteActivePractice}
-                onCancelPractice={cancelPractice}
-                onNavigateJournal={() => navigate('/journal')}
-                onOpenSankalpaPanel={() => setSankalpaPanelOpen(true)}
-                hideReflection={true}
-              />
-            </div>
 
             <ActiveSadhanasCard
               dark={dark}
@@ -232,8 +200,8 @@ export default function Habits() {
             </motion.div>
           </div>
 
-          {/* RIGHT PANEL: CONTEXT ONLY */}
-          <div className="flex flex-col gap-5 w-full lg:max-w-[320px] lg:ml-auto">
+          {/* RIGHT PANEL: CONTEXT ONLY (Desktop only) */}
+          <div className="hidden lg:flex flex-col gap-5 w-full lg:max-w-[320px] lg:ml-auto">
             
             {/* LUNAR CALENDAR DATE PICKER & STATS */}
             <LunarCalendarCard

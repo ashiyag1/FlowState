@@ -129,9 +129,9 @@ function CompactIssueCard({ issue, dark, index, onClick }) {
           {issue.title}
         </h3>
 
-        {/* CTA — appears on hover */}
+        {/* CTA — always visible on mobile, hover-reveal on desktop */}
         <div
-          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-250"
+          className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-250"
           style={{ transform: 'translateY(2px)' }}
         >
           <span className="text-[9px] font-bold" style={{ color: issue.color }}>

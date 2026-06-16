@@ -109,6 +109,23 @@ function Heritage() {
 
   return (
     <div style={{ height: '100dvh', width: '100vw', background: dark ? '#050301' : '#1a1005', overflow: 'hidden' }}>
+      <style>{`
+        .heritage-snap-scroll {
+          height: 100dvh;
+          overflow-y: scroll;
+          scroll-snap-type: y mandatory;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .heritage-snap-scroll::-webkit-scrollbar { display: none; }
+        @media (max-width: 767px) {
+          .heritage-snap-scroll {
+            height: calc(100dvh - 62px);
+          }
+        }
+      `}</style>
       
       {/* Absolute top navbar area overlay */}
       <div style={{
@@ -125,14 +142,10 @@ function Heritage() {
         </button>
       </div>
 
-      {/* Snap Scroll Container */}
-      <div style={{
-        height: '100dvh',
-        overflowY: 'scroll',
-        scrollSnapType: expandedId ? 'none' : 'y mandatory',
-        scrollBehavior: 'smooth',
-        WebkitOverflowScrolling: 'touch',
-      }} className="hide-scrollbar">
+      <div
+        className="heritage-snap-scroll"
+        style={{ scrollSnapType: expandedId ? 'none' : 'y mandatory' }}
+      >
         {FEED.map((item, index) => (
           <HeritageSnapCard
             key={item.id}
@@ -144,16 +157,7 @@ function Heritage() {
         ))}
       </div>
       
-      {/* Hide scrollbar styles */}
-      <style>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
+
     </div>
   )
 }

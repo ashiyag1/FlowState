@@ -155,20 +155,22 @@ export async function dbToggleHabit(userId, date, habitId, time) {
     if (!doc) doc = new HabitDone({ userId, done: {} })
     
     if (!doc.done.has(date)) {
-      doc.done.set(date, new Map())
+      doc.done.set(date, {})
     }
-    const dayMap = doc.done.get(date)
-    if (hasVal(dayMap, habitId)) {
-      deleteVal(dayMap, habitId)
+    const dayMap = doc.done.get(date) || {}
+    let dayObj = typeof dayMap.entries === 'function' ? Object.fromEntries(dayMap.entries()) : { ...dayMap }
+    
+    if (dayObj[habitId]) {
+      delete dayObj[habitId]
       isDoneNow = false
     } else {
-      setVal(dayMap, habitId, time)
+      dayObj[habitId] = time
       isDoneNow = true
     }
-    if (getSize(dayMap) === 0) {
+    if (Object.keys(dayObj).length === 0) {
       doc.done.delete(date)
     } else {
-      doc.done.set(date, dayMap)
+      doc.done.set(date, dayObj)
     }
     doc.markModified('done')
     await doc.save()

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSoundEffects } from '../../hooks/useSoundEffects'
 import { useTheme } from '../../context/ThemeContext'
+import { useAuth } from '../../context/AuthContext'
 
 const INSIGHTS = [
   { text: "Arise, awake, and stop not till the goal is reached.", author: "Swami Vivekananda" },
@@ -44,31 +45,47 @@ function getLocalIsoDate() {
   return `${year}-${month}-${day}`
 }
 
-function getStoredJar() {
-  try {
-    const today = getLocalIsoDate()
-    const storedDate = localStorage.getItem(STORAGE_DATE_KEY)
-    if (storedDate !== today) {
-      localStorage.setItem(STORAGE_DATE_KEY, today)
-      localStorage.setItem(STORAGE_KEY, '0')
-      localStorage.setItem(STORAGE_ITEMS_KEY, '[]')
+function getStoredJar(user) {
+  const today = getLocalIsoDate()
+  if (user) {
+    if (user.preferences?.wisdomJarDate !== today) {
       return { count: 0, items: [] }
     }
-    const count = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
-    const items = JSON.parse(localStorage.getItem(STORAGE_ITEMS_KEY) || '[]')
-    return { count, items }
-  } catch { return { count: 0, items: [] } }
+    return { 
+      count: user.preferences?.wisdomJarCount || 0, 
+      items: user.wisdom?.jarItems || [] 
+    }
+  } else {
+    try {
+      const storedDate = localStorage.getItem(STORAGE_DATE_KEY)
+      if (storedDate !== today) {
+        localStorage.setItem(STORAGE_DATE_KEY, today)
+        localStorage.setItem(STORAGE_KEY, '0')
+        localStorage.setItem(STORAGE_ITEMS_KEY, '[]')
+        return { count: 0, items: [] }
+      }
+      const count = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10)
+      const items = JSON.parse(localStorage.getItem(STORAGE_ITEMS_KEY) || '[]')
+      return { count, items }
+    } catch { return { count: 0, items: [] } }
+  }
 }
 
 export default function LotusOracle() {
   const { playHabitSound } = useSoundEffects()
   const { dark } = useTheme()
+  const { user, updateProfile } = useAuth()
   const [isBloomed, setIsBloomed] = useState(false)
   const [quote, setQuote] = useState(null)
   
-  const [jarData] = useState(() => getStoredJar())
-  const [jarCount, setJarCount] = useState(jarData.count)
-  const [collected, setCollected] = useState(jarData.items)
+  const [jarCount, setJarCount] = useState(0)
+  const [collected, setCollected] = useState([])
+  
+  useEffect(() => {
+    const jarData = getStoredJar(user)
+    setJarCount(jarData.count)
+    setCollected(jarData.items)
+  }, [user])
   
   const [showFlyAnim, setShowFlyAnim] = useState(false)
   const [toast, setToast] = useState(null)
@@ -92,11 +109,20 @@ export default function LotusOracle() {
     setJarCount(newCount)
     setCollected(newCollected)
     
-    try {
-      localStorage.setItem(STORAGE_KEY, String(newCount))
-      localStorage.setItem(STORAGE_ITEMS_KEY, JSON.stringify(newCollected))
-      window.dispatchEvent(new Event('wisdom_progress_updated'))
-    } catch {}
+    if (user) {
+      updateProfile({
+        preferences: { ...user.preferences, wisdomJarCount: newCount, wisdomJarDate: getLocalIsoDate() },
+        wisdom: { ...user.wisdom, jarItems: newCollected }
+      }).then(() => {
+        window.dispatchEvent(new Event('wisdom_progress_updated'))
+      }).catch(err => console.error('Failed to sync Lotus Jar:', err))
+    } else {
+      try {
+        localStorage.setItem(STORAGE_KEY, String(newCount))
+        localStorage.setItem(STORAGE_ITEMS_KEY, JSON.stringify(newCollected))
+        window.dispatchEvent(new Event('wisdom_progress_updated'))
+      } catch {}
+    }
 
     // Fly-to-jar animation
     setShowFlyAnim(true)
