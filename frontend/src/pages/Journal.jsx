@@ -288,7 +288,7 @@ export default function Journal() {
                 outline: 'none',
                 transition: 'all 0.2s ease',
               }}
-              title="Toggle PWA ambient sounds"
+              title="Toggle ambient sounds"
             >
               {isMuted ? (
                 <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>

@@ -83,7 +83,7 @@ tarang-flowstate/
 │   ├── models/            # Mongoose Schema Definitions
 │   └── services/          # Achievement and Badge evaluation engine
 ├── frontend/
-│   ├── public/            # Static assets and PWA files
+│   ├── public/            # Static assets
 │   └── src/
 │       ├── config/        # Styling and soundscape presets constants
 │       ├── hooks/         # Custom state hooks (timer, sound sanctuary, etc.)

@@ -86,7 +86,7 @@ export default function Login() {
     }
   }
 
-  // Parse redirect token if returning from a redirect oauth flow (for PWAs)
+  // Parse redirect token if returning from a redirect oauth flow
   useEffect(() => {
     const hash = window.location.hash
     if (hash) {
@@ -127,16 +127,6 @@ export default function Login() {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
     if (!clientId) {
       notif('Google Client ID not configured — add VITE_GOOGLE_CLIENT_ID to frontend .env', 'error')
-      return
-    }
-
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
-
-    if (isStandalone) {
-      // Use OAuth Redirect Flow inside standalone apps since popup windows (window.open) are blocked
-      const redirectUri = encodeURIComponent(window.location.origin + '/login')
-      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=email%20profile%20openid`
-      window.location.href = oauthUrl
       return
     }
 

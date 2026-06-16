@@ -34,16 +34,14 @@ function msUntil(hour, minute) {
 }
 
 async function sendNotif({ title, body, tag }) {
-  if (!('serviceWorker' in navigator)) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
   try {
-    const reg = await navigator.serviceWorker.ready;
-    reg.showNotification(title, {
+    new Notification(title, {
       body,
       icon:     '/favicon.ico',
       badge:    '/favicon.ico',
       tag,
-      renotify: true,
-      vibrate:  [200, 100, 200],
     });
   } catch (_) {}
 }
@@ -56,11 +54,10 @@ export function usePushNotifications() {
   const [supported,  setSupported]  = useState(false);
   const [schedule,   setSchedule]   = useState(loadSchedule);
 
-  // Check support + register SW
+  // Check support
   useEffect(() => {
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+    if (!('Notification' in window)) return;
     setSupported(true);
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
   }, []);
 
   // Re-schedule whenever permission or schedule changes

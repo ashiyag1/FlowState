@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { User as UserIcon, Download, LogOut } from 'lucide-react'
+import { User as UserIcon, LogOut } from 'lucide-react'
 
 /* ── Avatar component (shared between desktop & mobile) ── */
 export function ProfileAvatar({ user, size = 30, onClick, style = {} }) {
@@ -121,32 +121,6 @@ export function ProfileDropdown({
             color: dark ? '#e8d5a8' : '#5c3d1e',
           }}>
             View Profile
-          </span>
-        </motion.div>
-
-        {/* Install PWA Button */}
-        <motion.div
-          whileHover={{ backgroundColor: dark ? 'rgba(87, 184, 214, 0.1)' : 'rgba(87, 184, 214, 0.08)' }}
-          onClick={() => {
-            onClose()
-            alert("To install: Open browser menu (or share sheet on iOS) and tap 'Add to Home Screen'.")
-          }}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 10px', borderRadius: 10,
-            cursor: 'pointer', transition: 'background 0.15s',
-            borderBottom: '1px solid rgba(212,168,42,0.1)'
-          }}
-        >
-          <Download size={13} style={{ color: '#57B8D6', flexShrink: 0 }} />
-          <span style={{
-            fontFamily: "'Cinzel', serif",
-            fontSize: '0.7rem',
-            fontWeight: 500,
-            letterSpacing: '0.06em',
-            color: '#57B8D6',
-          }}>
-            Install App
           </span>
         </motion.div>
 
