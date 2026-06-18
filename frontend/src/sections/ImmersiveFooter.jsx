@@ -9,6 +9,7 @@ export default function ImmersiveFooter() {
     <footer className="immersive-footer">
       <style>{`
         .immersive-footer {
+          display: none;
           padding: 2rem 1.5rem 6rem;
           position: relative;
           text-align: center;
@@ -112,6 +113,7 @@ export default function ImmersiveFooter() {
 
         @media (min-width: 768px) {
           .immersive-footer {
+            display: block;
             padding: 2.5rem 1.5rem 2rem;
           }
         }

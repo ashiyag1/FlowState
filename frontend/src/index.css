@@ -190,19 +190,19 @@ body {
 
 .journal-glass {
   border: 1px solid rgba(201, 168, 76, 0.3) !important;
-  background: rgba(45, 30, 15, 0.75) !important;
-  box-shadow: 0 16px 48px rgba(45, 30, 15, 0.15) !important;
+  background: rgba(253, 246, 236, 0.85) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.05) !important;
   @apply rounded-3xl backdrop-blur-xl;
 }
 
 .dark .journal-glass {
-  background: rgba(22, 14, 6, 0.95) !important;
+  background: rgba(20, 20, 22, 0.95) !important;
   border-color: rgba(201, 168, 76, 0.28) !important;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
 }
 
 .journal-glass-card {
-  background: rgba(45, 30, 15, 0.65) !important;
+  background: rgba(253, 246, 236, 0.75) !important;
   border: 1px solid rgba(201, 168, 76, 0.2) !important;
   @apply rounded-3xl backdrop-blur-md shadow-soft transition-all duration-300;
 }
@@ -213,8 +213,8 @@ body {
 }
 
 .journal-glass-card:hover {
-  background: rgba(60, 40, 20, 0.8) !important;
-  border-color: rgba(201, 168, 76, 0.35) !important;
+  background: rgba(253, 246, 236, 0.95) !important;
+  border-color: rgba(201, 168, 76, 0.4) !important;
 }
 
 .dark .journal-glass-card:hover {

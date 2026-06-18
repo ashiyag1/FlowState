@@ -71,7 +71,11 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
       const d = new Date()
       d.setDate(d.getDate() - i)
       const ds = getLocalYYYYMMDD(d)
-      sevenDayMoods.push({ date: ds, mood: dayMoods[ds] || null })
+      sevenDayMoods.push({
+        date: ds,
+        mood: dayMoods[ds] || null,
+        hasEntry: !!heatmap[ds]
+      })
     }
 
     const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null
@@ -125,10 +129,10 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
         className="mt-8 flex flex-col gap-5 text-center p-8 journal-glass border border-gold/20"
       >
         <div className="text-gold mb-2 text-2xl">🌱</div>
-        <h3 className="font-display text-sm text-ivory font-semibold mb-1">
+        <h3 className="font-display text-sm text-[#3d2e1a] dark:text-ivory font-semibold mb-1">
           Your Journey Begins
         </h3>
-        <p className="text-[11px] text-ivory/60 font-light max-w-sm mx-auto">
+        <p className="text-[11px] text-[#5c3b17]/80 dark:text-ivory/60 font-light max-w-sm mx-auto">
           Write your first entry to start tracking your emotional patterns and discover your soul archetype.
         </p>
       </motion.div>
@@ -149,11 +153,11 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
         {/* 📊 7-Day Mood Pulse */}
         <div className="journal-glass p-5 border border-gold/20 relative flex flex-col justify-between min-h-[220px]">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display text-sm text-ivory flex items-center gap-2 font-semibold">
+            <h3 className="font-display text-sm text-[#3d2e1a] dark:text-ivory flex items-center gap-2 font-semibold">
               📊 7-Day Mood Pulse
             </h3>
             {clientMoodTrends.topMood && (
-              <span className="text-[9px] text-gold-lt/60 uppercase tracking-wider font-bold">
+              <span className="text-[9px] text-[#5c3b17]/70 dark:text-gold-lt/60 uppercase tracking-wider font-bold">
                 Most felt: {clientMoodTrends.topMood}
               </span>
             )}
@@ -161,14 +165,15 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
           
           <div className="flex items-end justify-between gap-1 h-24 px-2 relative">
             {days.map((d, i) => {
-              const color = d.mood ? (MOOD_COLORS[d.mood] || '#c9933a') : 'rgba(255, 255, 255, 0.08)'
-              const gradient = d.mood ? MOOD_GRADIENTS[d.mood] : 'rgba(255, 255, 255, 0.08)'
-              const height = d.mood ? Math.max(30, 45 + (Object.keys(MOOD_COLORS).indexOf(d.mood) * 8)) : 12
+              const hasMood = !!d.mood
+              const color = hasMood ? (MOOD_COLORS[d.mood] || '#c9933a') : (d.hasEntry ? '#c9933a' : 'rgba(255, 255, 255, 0.08)')
+              const gradient = hasMood ? MOOD_GRADIENTS[d.mood] : (d.hasEntry ? 'linear-gradient(180deg, rgba(201, 147, 58, 0.25), rgba(201, 147, 58, 0.05))' : 'rgba(255, 255, 255, 0.08)')
+              const height = hasMood ? Math.max(30, 45 + (Object.keys(MOOD_COLORS).indexOf(d.mood) * 8)) : (d.hasEntry ? 24 : 12)
               
               const [year, month, day] = d.date.split('-').map(Number)
               const dateObj = new Date(year, month - 1, day)
               const label = dayLabels[dateObj.getDay()]
-              const emoji = d.mood ? MOOD_EMOJIS[d.mood] : '🧘'
+              const emoji = hasMood ? MOOD_EMOJIS[d.mood] : (d.hasEntry ? '🧘' : '')
               const dateLabel = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
               
               return (
@@ -181,8 +186,10 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
                     const x = rect.left - containerRect.left + (rect.width / 2)
                     setHoveredDay({
                       x,
+                      index: i,
                       dateLabel,
                       mood: d.mood,
+                      hasEntry: d.hasEntry,
                       emoji,
                       color
                     })
@@ -199,11 +206,11 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
                       borderRadius: '999px', 
                       width: '12px', 
                       minHeight: 12,
-                      boxShadow: d.mood ? `0 0 12px ${color}40` : 'none',
+                      boxShadow: hasMood ? `0 0 12px ${color}40` : (d.hasEntry ? '0 0 8px rgba(201, 147, 58, 0.2)' : 'none'),
                     }}
                   />
-                  <span className="text-[8px] text-ivory/40 font-mono mt-1">{label}</span>
-                  {d.mood && (
+                  <span className="text-[8px] text-[#5c3b17]/60 dark:text-ivory/40 font-mono mt-1">{label}</span>
+                  {hasMood && (
                     <motion.span 
                       animate={{ scale: [1, 1.1, 1] }} 
                       transition={{ duration: 3, repeat: Infinity }}
@@ -220,14 +227,13 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
             <AnimatePresence>
               {hoveredDay && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  initial={{ opacity: 0, y: 10, scale: 0.95, translateX: (hoveredDay.index <= 1) ? '0%' : (hoveredDay.index >= 5) ? '-100%' : '-50%' }}
+                  animate={{ opacity: 1, y: 0, scale: 1, translateX: (hoveredDay.index <= 1) ? '0%' : (hoveredDay.index >= 5) ? '-100%' : '-50%' }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95, translateX: (hoveredDay.index <= 1) ? '0%' : (hoveredDay.index >= 5) ? '-100%' : '-50%' }}
                   style={{
                     position: 'absolute',
                     bottom: '85px',
                     left: hoveredDay.x,
-                    transform: 'translateX(-50%)',
                     zIndex: 50,
                     padding: '8px 12px',
                     borderRadius: '12px',
@@ -255,9 +261,9 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
         {/* 🗓️ 28-Day Mood Map */}
         <div className="journal-glass p-5 border border-gold/20 relative flex flex-col justify-between min-h-[220px]">
           <div>
-            <h3 className="font-display text-sm text-ivory font-semibold mb-4 flex items-center gap-2">
+            <h3 className="font-display text-sm text-[#3d2e1a] dark:text-ivory font-semibold mb-4 flex items-center gap-2">
               🗓️ 28-Day Mood Map
-              <span className="text-[9px] text-ivory/40 font-sans font-normal normal-case">hover for details</span>
+              <span className="text-[9px] text-[#5c3b17]/60 dark:text-ivory/40 font-sans font-normal normal-case">hover for details</span>
             </h3>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 5, position: 'relative' }}>
@@ -284,7 +290,7 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
                 return (
                   <motion.div
                     key={i}
-                    whileHover={{ scale: 1.4, zIndex: 10 }}
+                    whileHover={c.count > 0 ? { scale: 1.25, zIndex: 10 } : {}}
                     onMouseEnter={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect()
                       const containerRect = e.currentTarget.parentElement.getBoundingClientRect()
@@ -293,10 +299,11 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
                       setHoveredCell({
                         x,
                         y,
+                        colIndex: i % 7,
                         dateLabel,
-                        mood: hasMoods ? c.allMoods.join(' & ') : null,
+                        mood: hasMoods ? c.allMoods.join(' & ') : (c.count > 0 ? 'Quiet Reflection' : null),
                         count: c.count,
-                        emoji,
+                        emoji: hasMoods ? emoji : '🧘',
                         color
                       })
                     }}
@@ -313,14 +320,26 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
                     }}
                   >
                     {c.count > 0 && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        width: '30%', height: '30%',
-                        background: '#fff',
-                        borderRadius: '50%',
-                        filter: 'blur(1px)'
-                      }} />
+                      c.mood ? (
+                        <div style={{
+                          position: 'absolute',
+                          top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                          fontSize: '11px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          pointerEvents: 'none',
+                        }}>
+                          {emoji}
+                        </div>
+                      ) : (
+                        <div style={{
+                          position: 'absolute',
+                          top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                          width: '35%', height: '35%',
+                          background: 'radial-gradient(circle, #ffffff 20%, #c9a84c 100%)',
+                          borderRadius: '50%',
+                          boxShadow: '0 0 6px rgba(201, 168, 76, 0.8)',
+                        }} />
+                      )
                     )}
                   </motion.div>
                 )
@@ -330,14 +349,13 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
               <AnimatePresence>
                 {hoveredCell && (
                   <motion.div
-                    initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                    animate={{ opacity: 1, y: -45, scale: 1 }}
-                    exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                    initial={{ opacity: 0, y: -5, scale: 0.95, translateX: (hoveredCell.colIndex <= 1) ? '0%' : (hoveredCell.colIndex >= 5) ? '-100%' : '-50%' }}
+                    animate={{ opacity: 1, y: -45, scale: 1, translateX: (hoveredCell.colIndex <= 1) ? '0%' : (hoveredCell.colIndex >= 5) ? '-100%' : '-50%' }}
+                    exit={{ opacity: 0, y: -5, scale: 0.95, translateX: (hoveredCell.colIndex <= 1) ? '0%' : (hoveredCell.colIndex >= 5) ? '-100%' : '-50%' }}
                     style={{
                       position: 'absolute',
                       top: hoveredCell.y,
                       left: hoveredCell.x,
-                      transform: 'translateX(-50%)',
                       zIndex: 50,
                       padding: '6px 10px',
                       borderRadius: '10px',
@@ -371,7 +389,7 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
             {Object.entries(MOOD_COLORS).map(([mName, color]) => (
               <div key={mName} className="flex items-center gap-1">
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: color, opacity: 0.8 }} />
-                <span className="text-[8px] text-ivory/50">{mName}</span>
+                <span className="text-[8px] text-[#5c3b17]/70 dark:text-ivory/50">{mName}</span>
               </div>
             ))}
           </div>
@@ -386,10 +404,10 @@ export function JournalAnalyticsPanel({ entries = [], cycles = 0 }) {
             <p className="text-[9px] text-gold/60 uppercase tracking-widest font-bold font-sans mb-1.5">
               Emotional Pattern · {clientMoodTrends.topMood} Soul
             </p>
-            <p className="text-xs text-ivory/80 font-serif italic leading-relaxed">
+            <p className="text-xs text-[#3d2e1a]/90 dark:text-ivory/80 font-serif italic leading-relaxed">
               "{insight}"
             </p>
-            <p className="text-[9px] text-ivory/40 mt-2 font-mono">
+            <p className="text-[9px] text-[#5c3b17]/60 dark:text-ivory/40 mt-2 font-mono">
               Based on {clientMoodTrends.totalEntries} journal entries
             </p>
           </div>

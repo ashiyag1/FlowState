@@ -17,7 +17,7 @@ export function ActiveSadhanaPlayer({
   hideReflection = false
 }) {
   const glassCardStyle = {
-    background: dark ? 'rgba(20, 13, 6, 0.8)' : 'rgba(255, 252, 243, 0.9)',
+    background: dark ? 'rgba(22, 22, 25, 0.8)' : 'rgba(255, 252, 243, 0.9)',
     border: dark ? '1px solid rgba(200, 169, 110, 0.22)' : '1px solid rgba(200, 169, 110, 0.35)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
@@ -108,14 +108,14 @@ export function ActiveSadhanaPlayer({
                   </p>
                 </div>
                 <button
-                  onClick={onStartPractice}
+                  onClick={() => onStartPractice(todayRitual?.name || 'Morning Ritual', todayRitual?.time || '5')}
                   style={{
                     padding: '10px 20px', borderRadius: '99px', background: 'linear-gradient(135deg, #c8a96e, #ffe9a6)',
                     border: 'none', color: '#1c1208', fontWeight: 700, cursor: 'pointer', fontFamily: 'sans-serif',
                     boxShadow: '0 4px 15px rgba(200,169,110,0.3)'
                   }}
                 >
-                  Start {todayRitual.time}m Practice
+                  Begin {todayRitual?.time || '5'}m Practice
                 </button>
               </div>
             )

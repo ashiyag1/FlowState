@@ -19,7 +19,22 @@ export function WellnessProvider({ children }) {
   const [habitDone, setHabitDone] = useState({})
 
   // ── DAILY TASKS ────────────────────────────────
-  const [dailyTasks, setDailyTasks] = useState({})
+  const [dailyTasks, setDailyTasks] = useState(() => {
+    try {
+      const raw = localStorage.getItem('fwa_daily_tasks')
+      if (!raw) return {}
+      const parsed = JSON.parse(raw)
+      // Prune all date keys older than today — each day starts fresh
+      const todayKey = new Date().toISOString().slice(0, 10)
+      const pruned = {}
+      Object.keys(parsed).forEach(dateKey => {
+        if (dateKey >= todayKey) pruned[dateKey] = parsed[dateKey]
+      })
+      // Write the pruned version back so old data is cleaned up
+      try { localStorage.setItem('fwa_daily_tasks', JSON.stringify(pruned)) } catch {}
+      return pruned
+    } catch { return {} }
+  })
 
   // ── JOURNAL ────────────────────────────────────
   const [journal, setJournal] = useState([])
@@ -374,7 +389,9 @@ export function WellnessProvider({ children }) {
   const addDailyTask = useCallback((dateKey, task) => {
     setDailyTasks(prev => {
       const dayTasks = prev[dateKey] || []
-      return { ...prev, [dateKey]: [...dayTasks, { ...task, id: uid(), done: false, subtasks: [] }] }
+      const next = { ...prev, [dateKey]: [...dayTasks, { ...task, id: uid(), done: false, subtasks: [] }] }
+      try { localStorage.setItem('fwa_daily_tasks', JSON.stringify(next)) } catch {}
+      return next
     })
   }, [setDailyTasks])
 
@@ -386,10 +403,12 @@ export function WellnessProvider({ children }) {
     const isDoneNow = !task.done
     setDailyTasks(prev => {
       const currentTasks = prev[dateKey] || []
-      return {
+      const next = {
         ...prev,
         [dateKey]: currentTasks.map(t => t.id === taskId ? { ...t, done: isDoneNow } : t)
       }
+      try { localStorage.setItem('fwa_daily_tasks', JSON.stringify(next)) } catch {}
+      return next
     })
     adjustPoints(isDoneNow ? 10 : -10, 0)
   }, [dailyTasks, setDailyTasks, adjustPoints])
@@ -401,10 +420,12 @@ export function WellnessProvider({ children }) {
 
     setDailyTasks(prev => {
       const currentTasks = prev[dateKey] || []
-      return {
+      const next = {
         ...prev,
         [dateKey]: currentTasks.filter(t => t.id !== taskId)
       }
+      try { localStorage.setItem('fwa_daily_tasks', JSON.stringify(next)) } catch {}
+      return next
     })
     if (task.done) {
       adjustPoints(-10, 0)
@@ -512,6 +533,25 @@ export function WellnessProvider({ children }) {
       }
     }
   }, [isAuthenticated, token, setJournal, adjustPoints, journal])
+
+  const updateEntry = useCallback(async (id, changes) => {
+    setJournal(prev => prev.map(e => e.id === id ? { ...e, ...changes } : e))
+
+    if (isAuthenticated && token) {
+      try {
+        await fetch('/api/v1/journal', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ id, ...changes })
+        })
+      } catch (err) {
+        console.error('Failed to sync journal entry update:', err)
+      }
+    }
+  }, [isAuthenticated, token, setJournal])
 
   // ── AUTO-CHECK RITUAL FOR WISDOM CHALLENGE ──────────────────────────
   const habitsRef = useRef(habits)
@@ -622,7 +662,7 @@ export function WellnessProvider({ children }) {
       dailyTasks, addDailyTask, toggleDailyTask, deleteDailyTask,
       addSubtask, toggleSubtask, deleteSubtask,
       // journal
-      journal, addEntry, deleteEntry,
+      journal, addEntry, deleteEntry, updateEntry,
     }}>
       {children}
     </WellnessContext.Provider>

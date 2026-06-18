@@ -82,6 +82,9 @@ const Login       = lazy(() => import('./pages/Login'))
 const AIAssistant = lazy(() => import('./components/system/AIAssistant'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const Resources   = lazy(() => import('./pages/Resources'))
+const PastPages   = lazy(() => import('./pages/PastPages'))
+const MoodPage    = lazy(() => import('./pages/MoodPage'))
+const DiaryPage   = lazy(() => import('./pages/DiaryPage'))
 
 
 function ScrollReset() {
@@ -115,6 +118,8 @@ function AppContent() {
           <Route path="/login"   element={<Login />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/resources" element={<Resources />} />
+          <Route path="/mood"      element={<MoodPage />} />
+          <Route path="/past-pages" element={<PastPages />} />
           <Route path="*"        element={<Home />} />
         </Routes>
       </Suspense>

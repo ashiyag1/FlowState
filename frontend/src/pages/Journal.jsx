@@ -1,9 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Trash2, ChevronDown, ChevronUp,
-  Heart, Waves, Sun, Moon, Flower2, Cloud, Sparkles
-} from 'lucide-react'
+import { Heart, Waves, Sun, Moon, Flower2, Cloud, Sparkles } from 'lucide-react'
 import { today, fmtDate, uid } from '../utils'
 import { useNotif } from '../components/system/NotificationPopup'
 import { useTheme } from '../context/ThemeContext'
@@ -23,7 +20,6 @@ import journalBg from '../assets/pages/journal_bg.webp'
 import JournalLeftPageInfo from '../components/journal/JournalLeftPageInfo'
 import ParchmentJournalCard from '../components/journal/ParchmentJournalCard'
 import JournalRitualsPanel from '../components/journal/JournalRitualsPanel'
-import JournalAnalyticsPanel from '../components/journal/JournalAnalyticsPanel'
 
 const MOODS = [
   { label: 'Grateful',  moodIcon: Heart,   bg: 'bg-rose-100/70 hover:bg-rose-200/80 dark:bg-rose-950/20 dark:hover:bg-rose-900/30',   text: 'text-rose-700 dark:text-rose-300',   glow: 'rgba(244,114,182,0.12)',  tint: '#f472b6' },
@@ -79,7 +75,6 @@ export default function Journal() {
 
   const [text, setText] = useState('')
   const [mood, setMood] = useState('')
-  const [expanded, setExpanded] = useState(null)
   const [inkSplash, setInkSplash] = useState(false)
   const [activePreset, setActivePreset] = useState(null)
   const [xpToast, setXpToast] = useState(null)
@@ -166,21 +161,6 @@ export default function Journal() {
     notif('Reflections sealed & saved ✦', 'success')
   }
 
-  const deleteEntry = (id) => {
-    if (!isAuthenticated) {
-      navigate('/login')
-      return
-    }
-    deleteWellnessEntry(id)
-    notif('Entry removed', 'default')
-  }
-
-  const grouped = entries.reduce((acc, e) => {
-    const k = e.date || td
-    if (!acc[k]) acc[k] = []
-    acc[k].push(e)
-    return acc
-  }, {})
 
   const cycles = useMemo(() => {
     const dateSet = new Set(entries.map(e => e.date))
@@ -390,105 +370,60 @@ export default function Journal() {
           isMuted={isMuted}
         />
 
-        {/* ── MOOD ANALYTICS SECTION ── */}
-        <JournalAnalyticsPanel
-          entries={entries}
-          cycles={cycles}
-        />
-
-        {/* ── PAST JOURNAL ENTRIES LIST ── */}
+        {/* ── EXPLORE YOUR MOOD CARD ── */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-8 md:mt-12"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-8 cursor-pointer group"
+          onClick={() => navigate('/mood')}
         >
-          <div className="flex items-center gap-4 mb-5">
-            <h2 className="font-display text-lg text-ivory flex items-center gap-2">
-              📖 Past Pages of your Journal
-            </h2>
-            <div className="flex-1 h-px bg-gradient-to-r from-gold/30 to-transparent" />
+          <div className="journal-glass p-6 border border-gold/20 hover:border-gold/45 transition-all duration-300 rounded-3xl shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-gold/5 via-transparent to-transparent">
+            <div className="flex items-center gap-4 text-center sm:text-left">
+              <div className="w-12 h-12 rounded-2xl bg-gold/15 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
+                📊
+              </div>
+              <div>
+                <h3 className="font-display text-sm text-[#3d2e1a] dark:text-ivory font-semibold mb-1 group-hover:text-gold transition-colors">
+                  Explore Your Mood Insights
+                </h3>
+                <p className="text-[11px] text-[#5c3b17]/80 dark:text-ivory/60 font-light">
+                  View your 7-day mood pulse, 28-day mood map, and emotional pattern insights.
+                </p>
+              </div>
+            </div>
+            <button className="px-5 py-2 rounded-full border border-gold/30 hover:border-gold text-xs font-semibold text-gold bg-transparent transition-all group-hover:bg-gold/10 whitespace-nowrap cursor-pointer">
+              View Analytics &rarr;
+            </button>
           </div>
+        </motion.div>
 
-          {!hasEntries ? (
-            <div className="text-center py-10 journal-glass border border-gold/15">
-              <LotusFlower size={36} className="text-gold/25 mx-auto mb-2" />
-              <p className="text-xs text-ivory/60 italic">Your sacred journal is waiting for its first page.</p>
+        {/* ── DIARY ARCHIVES / PAST PAGES CARD ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="mt-6 cursor-pointer group"
+          onClick={() => navigate('/past-pages')}
+        >
+          <div className="journal-glass p-6 border border-gold/20 hover:border-gold/45 transition-all duration-300 rounded-3xl shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-saffron/5 via-transparent to-transparent">
+            <div className="flex items-center gap-4 text-center sm:text-left">
+              <div className="w-12 h-12 rounded-2xl bg-saffron/15 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
+                📖
+              </div>
+              <div>
+                <h3 className="font-display text-sm text-[#3d2e1a] dark:text-ivory font-semibold mb-1 group-hover:text-gold transition-colors">
+                  Read Your Diary Archives
+                </h3>
+                <p className="text-[11px] text-[#5c3b17]/80 dark:text-ivory/60 font-light">
+                  Browse all your past journal entries on authentic lined parchment pages.
+                </p>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <AnimatePresence>
-                {Object.entries(grouped).map(([date, dayEntries]) =>
-                  dayEntries.map((e) => {
-                    const moodObj = MOODS.find(m => m.label === e.mood)
-                    const isExpanded = expanded === e.id
-                    const preview = e.text.length > 120 ? e.text.slice(0, 120) + '…' : e.text
-                    const Icon = moodObj?.moodIcon
-
-                    return (
-                      <motion.div
-                        key={e.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.96 }}
-                        layout
-                        className="group journal-glass-card p-4 relative overflow-hidden border-l-[3px]"
-                        style={{
-                          borderLeftColor: moodObj ? moodObj.tint : 'rgba(201,168,76,0.35)',
-                        }}
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="flex items-center gap-2">
-                            {Icon && (
-                              <span className={`w-5 h-5 rounded-full ${moodObj.bg} ${moodObj.text} flex items-center justify-center text-[9px] shrink-0`}>
-                                <Icon size={10} />
-                              </span>
-                            )}
-                            <div>
-                              <span className="text-[10px] font-semibold text-gold-lt tracking-wide uppercase">
-                                {date === td ? 'Today' : fmtDate(date)}
-                              </span>
-                              <span className="text-[9px] text-ivory/40 ml-2 font-mono">
-                                {e.time || ''}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => setExpanded(isExpanded ? null : e.id)}
-                              className="p-1 rounded-full hover:bg-white/10 text-ivory/50 hover:text-gold transition-all"
-                            >
-                              {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-                            </button>
-                            <button
-                              onClick={() => deleteEntry(e.id)}
-                              className="p-1 rounded-full hover:bg-white/10 text-ivory/50 hover:text-rose-400 transition-all"
-                            >
-                              <Trash2 size={11} />
-                            </button>
-                          </div>
-                        </div>
-
-                        <p className="text-xs text-ivory/85 leading-relaxed font-light whitespace-pre-wrap font-mono">
-                          {isExpanded ? e.text : preview}
-                        </p>
-                        
-                        {e.text.length > 120 && (
-                          <button
-                            onClick={() => setExpanded(isExpanded ? null : e.id)}
-                            className="text-[9px] text-gold hover:underline mt-2 font-semibold opacity-70 hover:opacity-100"
-                          >
-                            {isExpanded ? 'Show less' : 'Read full page'}
-                          </button>
-                        )}
-                      </motion.div>
-                    )
-                  })
-                )}
-              </AnimatePresence>
-            </div>
-          )}
+            <button className="px-5 py-2 rounded-full border border-gold/30 hover:border-gold text-xs font-semibold text-gold bg-transparent transition-all group-hover:bg-gold/10 whitespace-nowrap cursor-pointer">
+              Open Diary &rarr;
+            </button>
+          </div>
         </motion.div>
 
       </div>

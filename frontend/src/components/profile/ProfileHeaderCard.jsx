@@ -244,6 +244,30 @@ export function ProfileHeaderCard({
             className={`${inputBase} resize-none`}
             style={{ fontFamily: "'Lora', serif", fontStyle: 'italic', lineHeight: 1.7 }}
           />
+          {bioVal !== (user?.bio || '') && (
+            <button
+              onClick={handleBioSave}
+              style={{
+                marginTop: '8px',
+                padding: '7px 18px',
+                borderRadius: '99px',
+                background: 'linear-gradient(135deg, #c8a96e, #e8b96a)',
+                border: 'none',
+                color: '#1c1208',
+                fontWeight: 700,
+                fontSize: '12px',
+                fontFamily: "'Cinzel', serif",
+                letterSpacing: '0.06em',
+                cursor: 'pointer',
+                boxShadow: '0 3px 12px rgba(200,169,110,0.3)',
+                transition: 'all 0.2s ease',
+                display: 'block',
+                marginLeft: 'auto',
+              }}
+            >
+              Save Bio ✦
+            </button>
+          )}
         </div>
       </div>
     </div>

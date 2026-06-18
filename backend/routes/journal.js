@@ -1,5 +1,5 @@
 import express from 'express'
-import { dbGetJournal, dbAddJournalEntry, dbDeleteJournalEntry, dbGetMoodTrends } from '../db.js'
+import { dbGetJournal, dbAddJournalEntry, dbDeleteJournalEntry, dbUpdateJournalEntry, dbGetMoodTrends } from '../db.js'
 import authMiddleware from '../middleware/auth.js'
 import { ensureString, escapeHTML } from '../utils/security.js'
 
@@ -54,6 +54,28 @@ router.post('/', async (req, res) => {
   } catch (err) {
     console.error('POST journal route error:', err)
     return res.status(500).json({ error: 'Failed to save journal entry' })
+  }
+})
+
+// PATCH journal entry (edit text/mood)
+router.patch('/', async (req, res) => {
+  try {
+    let { id, text, mood } = req.body
+    id = ensureString(id).trim()
+    if (!id) return res.status(400).json({ error: 'id is required' })
+    const changes = {}
+    if (text !== undefined) {
+      const sanitized = escapeHTML(ensureString(text).trim())
+      if (sanitized.length > 50000) return res.status(400).json({ error: 'Entry too long (max 50,000 characters)' })
+      changes.text = sanitized
+    }
+    if (mood !== undefined) changes.mood = escapeHTML(ensureString(mood).trim())
+    if (Object.keys(changes).length === 0) return res.status(400).json({ error: 'No changes provided' })
+    await dbUpdateJournalEntry(req.userId, id, changes)
+    return res.status(200).json({ success: true })
+  } catch (err) {
+    console.error('PATCH journal route error:', err)
+    return res.status(500).json({ error: 'Failed to update journal entry' })
   }
 })
 

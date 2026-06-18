@@ -63,6 +63,19 @@ export async function dbDeleteJournalEntry(userId, entryId) {
   }
 }
 
+export async function dbUpdateJournalEntry(userId, entryId, changes) {
+  await connectDB()
+  if (getIsMongo()) {
+    await JournalEntry.updateOne({ userId, id: entryId }, { $set: changes })
+  } else {
+    const db = await readJsonDB()
+    db.journalEntries = db.journalEntries.map(e =>
+      (e.userId === userId && e.id === entryId) ? { ...e, ...changes } : e
+    )
+    await writeJsonDB(db)
+  }
+}
+
 export async function dbGetMoodTrends(userId) {
   await connectDB()
   let entries = []

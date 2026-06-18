@@ -20,10 +20,10 @@ export function JournalRitualsPanel({
       <div className="journal-glass p-5 border border-gold/25 flex flex-col justify-between">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="font-display text-sm text-ivory flex items-center gap-2 font-semibold">
+            <h3 className="font-display text-sm text-[#3d2e1a] dark:text-ivory flex items-center gap-2 font-semibold">
               <Sparkles size={14} className="text-gold" /> Pranayama Unwind
             </h3>
-            <p className="text-[10px] text-ivory/50 font-light">
+            <p className="text-[10px] text-[#5c3b17]/80 dark:text-ivory/50 font-light">
               A dynamic box breathing practice to slow circadian rhythms.
             </p>
           </div>
@@ -39,7 +39,7 @@ export function JournalRitualsPanel({
           </button>
         </div>
 
-        <div className="h-28 flex items-center justify-center rounded-xl bg-black/20 border border-white/5">
+        <div className="h-28 flex items-center justify-center rounded-xl bg-black/5 dark:bg-black/20 border border-black/5 dark:border-white/5">
           {isBreathing ? (
             <div className="text-center">
               <motion.div
@@ -54,7 +54,7 @@ export function JournalRitualsPanel({
               >
                 <LotusFlower size={16} className="text-gold" />
               </motion.div>
-              <p className="text-xs font-display text-ivory mt-2 tracking-wider font-semibold">
+              <p className="text-xs font-display text-[#3d2e1a] dark:text-ivory mt-2 tracking-wider font-semibold">
                 {breathState === 'inhale' && 'Inhale (Puraka)'}
                 {breathState === 'holdIn' && 'Hold (Antar Kumbhaka)'}
                 {breathState === 'exhale' && 'Exhale (Rechaka)'}
@@ -63,7 +63,7 @@ export function JournalRitualsPanel({
               <p className="text-[9px] text-gold-lt/60 mt-0.5 font-mono">{breathTimer} seconds</p>
             </div>
           ) : (
-            <p className="text-xs text-ivory/40 italic px-6 text-center font-light leading-relaxed">
+            <p className="text-xs text-[#5c3b17]/80 dark:text-ivory/40 italic px-6 text-center font-light leading-relaxed">
               "Exhaling releases toxins. Holding balances pressure. Inhaling draws raw Prana."
             </p>
           )}
@@ -73,10 +73,10 @@ export function JournalRitualsPanel({
       {/* SACRED SOUNDS */}
       <div className="journal-glass p-5 border border-gold/25">
         <div className="mb-3">
-          <h3 className="font-display text-sm text-ivory flex items-center gap-2 font-semibold">
+          <h3 className="font-display text-sm text-[#3d2e1a] dark:text-ivory flex items-center gap-2 font-semibold">
             <Volume2 size={15} className="text-gold" /> Sacred Ambience
           </h3>
-          <p className="text-[10px] text-ivory/50 font-light">
+          <p className="text-[10px] text-[#5c3b17]/80 dark:text-ivory/50 font-light">
             Listen to comforting acoustic vibrations.
           </p>
         </div>
@@ -91,7 +91,7 @@ export function JournalRitualsPanel({
                 className={`flex items-center gap-2 p-2 rounded-xl text-left border transition-all text-[11px] ${
                   isPlaying
                     ? 'bg-gold/20 border-gold text-ivory font-bold'
-                    : 'bg-white/[0.03] border-white/5 text-ivory/70 hover:bg-white/5'
+                    : 'bg-black/5 dark:bg-white/[0.03] border-black/5 dark:border-white/5 text-[#5c3b17]/80 dark:text-ivory/70 hover:bg-black/10 dark:hover:bg-white/5'
                 }`}
               >
                 <span>{sound.icon}</span>

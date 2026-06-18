@@ -33,7 +33,7 @@ export const SEC_LABEL_STYLE = {
 
 export function getGlassCardStyle(dark) {
   return {
-    background: dark ? 'rgba(20, 13, 6, 0.8)' : 'rgba(255, 252, 243, 0.9)',
+    background: dark ? 'rgba(22, 22, 25, 0.8)' : 'rgba(255, 252, 243, 0.9)',
     border: dark ? '1px solid rgba(200, 169, 110, 0.22)' : '1px solid rgba(200, 169, 110, 0.35)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',

@@ -137,11 +137,11 @@ export default function Navbar() {
 
   const glassBg = dark
     ? 'rgba(16, 10, 4, 0.68)'
-    : 'rgba(253, 246, 227, 0.6)'
+    : 'rgba(255, 246, 220, 0.65)'
 
   const glassBorder = dark
     ? 'rgba(212, 168, 42, 0.14)'
-    : 'rgba(212, 168, 42, 0.16)'
+    : 'rgba(212, 168, 42, 0.3)'
 
   const glassShadow = scrolled
     ? '0 12px 48px rgba(0,0,0,0.25), 0 0 80px rgba(212,168,42,0.05), inset 0 1px 0 rgba(255,255,255,0.12)'

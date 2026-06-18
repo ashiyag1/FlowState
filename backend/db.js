@@ -50,6 +50,7 @@ export {
   dbGetJournal,
   dbAddJournalEntry,
   dbDeleteJournalEntry,
+  dbUpdateJournalEntry,
   dbGetMoodTrends
 } from './db/journalRepository.js'
 

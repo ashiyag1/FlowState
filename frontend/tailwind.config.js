@@ -20,7 +20,7 @@ export default {
         royal:   { DEFAULT: '#1B4FA8', mid: '#2E69D6', lt: '#6FA3F0', pale: '#EAF0FB' },
         emerald: { DEFAULT: '#1A7A4E', mid: '#2DA06A', lt: '#6DC49A', pale: '#E8F7EF' },
         ivory:   { DEFAULT: '#FBF6EE', dark: '#F2E9D8', darker: '#E5D9C0' },
-        ink:     { DEFAULT: '#1C1208', soft: '#3D2E1A' },
+        ink:     { DEFAULT: '#0F0F11', soft: '#222225' },
         ocean:   { DEFAULT: '#0C447C', lt: '#3a8ab5', pale: '#c8e0f0', dark: '#082a4a' },
         sand:    { DEFAULT: '#c9a87c', lt: '#e0c9a0', pale: '#f0e0c8', dark: '#8a6a40' },
         mist:    { DEFAULT: '#b8c8d8', dark: '#708090' },

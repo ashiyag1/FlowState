@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-export function NavItem({ to, label }) {
+export function NavItem({ to, label, sub }) {
   return (
     <div style={{ position: 'relative' }}>
       <NavLink to={to} end={to === '/'} style={{ textDecoration: 'none' }}
@@ -23,6 +23,12 @@ export function NavItem({ to, label }) {
             style={{ fontFamily:"'Cinzel',serif" }}>
             {label}
           </span>
+          {sub && (
+            <span className="relative z-10 leading-tight"
+              style={{ fontFamily:"'Lora',serif", fontStyle:'italic', fontSize:'0.62rem', opacity: 0.85, marginTop: '1px' }}>
+              {sub}
+            </span>
+          )}
         </>)}
       </NavLink>
     </div>

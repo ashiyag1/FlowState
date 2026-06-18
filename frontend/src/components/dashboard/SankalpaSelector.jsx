@@ -18,7 +18,7 @@ export function SankalpaSelector({
   const [showClassic, setShowClassic] = React.useState(false)
 
   const glassCardStyle = {
-    background: dark ? 'rgba(20, 13, 6, 0.82)' : 'rgba(255, 252, 243, 0.94)',
+    background: dark ? 'rgba(22, 22, 25, 0.82)' : 'rgba(255, 252, 243, 0.94)',
     border: dark ? '1px solid rgba(200, 169, 110, 0.25)' : '1px solid rgba(200, 169, 110, 0.4)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',

@@ -74,9 +74,12 @@ export function JournalLeftPageInfo({
         
         <MoonIllustration phasePercent={todayHindu.phasePercent} />
 
-        <h4 className="font-display text-xs font-bold text-ink dark:text-ivory">
-          {todayHindu.paksha.split(' ')[0]} Phase ({todayHindu.moonSymbol})
+        <h4 className="font-display text-xs font-bold text-ink dark:text-ivory mb-1">
+          {todayHindu.tithiName} ({todayHindu.moonSymbol})
         </h4>
+        <p className="text-[10px] text-[#8a5a2b] dark:text-gold-lt font-semibold">
+          {todayHindu.paksha.split(' ')[0]} Phase
+        </p>
         
         <div className="w-12 h-[1px] bg-gold/30 mx-auto my-2" />
         

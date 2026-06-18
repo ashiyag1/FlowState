@@ -50,7 +50,7 @@ export default function BadgeGallery() {
           className="relative w-full max-w-4xl h-[85vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden pointer-events-auto"
           style={{
             background: dark
-              ? 'rgba(20, 13, 6, 0.92)'
+              ? 'rgba(22, 22, 25, 0.94)'
               : 'rgba(253, 248, 235, 0.94)',
             borderColor: 'rgba(201, 147, 58, 0.3)',
             boxShadow: dark

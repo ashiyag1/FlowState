@@ -108,7 +108,8 @@ export function useHomeData() {
         }
       }
     }
-  }, [user])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, user?.preferences?.wisdomJarDate])
 
   // Seeker Level Up (XP threshold) check & rewards
   useEffect(() => {

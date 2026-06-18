@@ -41,7 +41,9 @@ export default function WisdomAmbientSound() {
   const currentPreset = AMBIENCE_PRESETS[preset]
 
   return (
-    <div className="wisdom-ambient-sound-container fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-2.5">
+    <div className="wisdom-ambient-sound-container fixed z-[9999] flex flex-col items-end gap-2.5"
+      style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)', right: '1rem' }}
+    >
       {/* Main control pill */}
       <motion.div 
         layout 
@@ -107,7 +109,7 @@ export default function WisdomAmbientSound() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="w-56 rounded-2xl p-2.5 bg-white/95 dark:bg-[#150f09]/96 backdrop-blur-xl border border-gold/25 shadow-xl flex flex-col gap-1.5"
+            className="w-56 rounded-2xl p-2.5 bg-white/95 dark:bg-[#150f09]/95 backdrop-blur-xl border border-gold/25 shadow-xl flex flex-col gap-1.5"
           >
             <div className="flex items-center gap-1.5 px-2 pb-2 border-b border-gold/10">
               <Music size={11} className="text-gold" />
