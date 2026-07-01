@@ -78,6 +78,8 @@ router.post('/signup', async (req, res) => {
 // Login Route
 router.post('/login', async (req, res) => {
   try {
+    //console.log('incoming request ki body:', req.body) Debugging line
+
     let { email, password } = req.body
 
     email = ensureString(email).trim().toLowerCase()
@@ -89,12 +91,12 @@ router.post('/login', async (req, res) => {
 
     const user = await dbFindUserByEmail(email)
     if (!user) {
-      return res.status(400).json({ error: 'Invalid email or password' })
+      return res.status(404).json({ error: 'Account not found. Please sign up first.', code: 'EMAIL_NOT_FOUND' })
     }
 
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid email or password' })
+      return res.status(400).json({ error: 'Incorrect password. Please try again.' })
     }
 
     const userId = user._id ? user._id.toString() : user.id

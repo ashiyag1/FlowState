@@ -108,8 +108,14 @@ export default function Login() {
         notif('Welcome back ✦', 'success')
         navigate('/')
       } else {
-        notif(res.error || 'Login failed', 'error')
-        setLoading(false)
+        if (res.code === 'EMAIL_NOT_FOUND') {
+          notif("This email is not registered yet. We've switched you to 'Create Account' mode!", 'info')
+          setMode('signup')
+          setLoading(false)
+        } else {
+          notif(res.error || 'Login failed', 'error')
+          setLoading(false)
+        }
       }
     } else {
       const res = await signup(form.name, form.email, form.password)

@@ -20,7 +20,7 @@ app.set('trust proxy', 1)
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
 // Read allowed origins from .env — never use a wildcard in production.
-// Add your Vercel/production URL to ALLOWED_ORIGINS in backend/.env
+
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
   .split(',')
   .map(o => o.trim())

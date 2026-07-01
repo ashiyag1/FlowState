@@ -97,7 +97,7 @@ export function AuthProvider({ children }) {
 
       const data = await res.json()
       if (!res.ok) {
-        throw new Error(data.error || 'Login failed')
+        return { success: false, error: data.error || 'Login failed', code: data.code }
       }
 
       // Clear guest session data so it doesn't bleed back when they log out later
@@ -121,7 +121,6 @@ export function AuthProvider({ children }) {
       setLoading(false)
     }
   }, [])
-
   // Signup handler
   const signup = useCallback(async (name, email, password) => {
     setLoading(true)
