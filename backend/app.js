@@ -19,7 +19,7 @@ const app = express()
 app.set('trust proxy', 1)
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
-// Read allowed origins from .env — never use a wildcard in production.
+// Read allowed origins from .env 
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
   .split(',')

@@ -31,7 +31,12 @@ export default async function authMiddleware(req, res, next) {
     req.userId = payload.userId
     next()
   } catch (err) {
-    console.error('Authentication middleware error:', err)
+    if (err.code === 'ERR_JWT_EXPIRED') {
+      // Don't log a full stack trace for normal token expirations
+      console.warn(`[Auth Middleware] JWT expired for token. Client needs to re-authenticate.`)
+    } else {
+      console.error('Authentication middleware error:', err)
+    }
     return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' })
   }
 }
