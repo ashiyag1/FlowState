@@ -252,27 +252,40 @@ export const chat = async (req, res) => {
     // Try AI providers first — fallback keywords only used when AI is unavailable
     if (groqKey || geminiKey) {
       try {
-        let reply
+        let reply = null;
+        let aiError = null;
+
         if (groqKey) {
-          const groq = new Groq({ apiKey: groqKey })
-          reply = await tryGroq(groq, message, conversationHistory)
-        } else {
-          const genAI = new GoogleGenerativeAI(geminiKey)
-          const models = ['gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash']
-          let lastError = null
+          try {
+            const groq = new Groq({ apiKey: groqKey });
+            reply = await tryGroq(groq, message, conversationHistory);
+          } catch (err) {
+            console.error('Groq failed:', err.message);
+            aiError = err;
+          }
+        }
+
+        if (!reply && geminiKey) {
+          const genAI = new GoogleGenerativeAI(geminiKey);
+          const models = ['gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-flash-latest', 'gemini-2.5-flash'];
           for (const modelName of models) {
             try {
-              reply = await tryGemini(genAI, modelName, message, conversationHistory)
-              break
+              reply = await tryGemini(genAI, modelName, message, conversationHistory);
+              if (reply) break;
             } catch (err) {
-              lastError = err
-              if (!isQuotaError(err)) throw err
+              console.error(`Gemini model ${modelName} failed:`, err.message);
+              aiError = err;
+              if (isQuotaError(err)) break;
             }
           }
-          if (!reply) throw lastError || new Error('All Gemini models failed')
         }
-        const { text, suggestions } = parseSuggestions(reply)
-        return res.status(200).json({ reply: text, suggestions })
+
+        if (reply) {
+          const { text, suggestions } = parseSuggestions(reply);
+          return res.status(200).json({ reply: text, suggestions });
+        } else {
+          throw aiError || new Error('All AI providers failed');
+        }
       } catch (err) {
         if (!isQuotaError(err)) throw err
         // quota error — fall through to local fallbacks
