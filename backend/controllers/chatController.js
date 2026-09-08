@@ -209,7 +209,7 @@ async function tryGroq(groq, message, conversationHistory = []) {
     { role: 'user', content: message },
   ]
   const completion = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'qwen/qwen3.8-27b',
     messages,
     max_tokens: 300,
   })
